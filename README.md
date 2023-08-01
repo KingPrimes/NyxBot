@@ -1,6 +1,6 @@
 <div align="center">
-
-![](.github/image/index.png)
+ 
+<img src=".github/image/index.png" width="50%">
 
 # NYXBot
 
