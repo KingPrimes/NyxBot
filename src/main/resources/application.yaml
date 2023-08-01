@@ -1,3 +1,6 @@
+test:
+  isTest: false
+
 spring:
   security:
     user:
@@ -6,7 +9,9 @@ spring:
       roles:
         - user
         - admin
-
   mvc:
-    static-path-pattern: /static
+    static-path-pattern: /static/**
 
+shiro:
+  ws-config:
+    ws-url: /nyx
