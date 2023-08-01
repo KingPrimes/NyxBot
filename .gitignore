@@ -32,6 +32,8 @@ build/
 .vscode/
 
 
-###
-test**
-logs**
+### 忽略测试文件
+test
+### 忽略Log文件
+logs
+*.log
