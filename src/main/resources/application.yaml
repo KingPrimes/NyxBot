@@ -12,6 +12,11 @@ spring:
   mvc:
     static-path-pattern: /static/**
 
+  # 国际化信息
+  messages:
+   basename: i18n/messages
+
+# OneSdk WebSocked链接地址
 shiro:
   ws-config:
     ws-url: /nyx
