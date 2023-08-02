@@ -12,6 +12,8 @@ spring:
   mvc:
     static-path-pattern: /static/**
 
+server:
+  port: 8081
 shiro:
   ws-config:
     ws-url: /nyx
