@@ -38,3 +38,4 @@ test
 ### 忽略Log文件
 logs
 *.log
+/data/H2.mv.db
