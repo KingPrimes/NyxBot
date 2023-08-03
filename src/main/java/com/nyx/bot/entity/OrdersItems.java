@@ -1,9 +1,6 @@
 package com.nyx.bot.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 /**
@@ -16,6 +13,8 @@ import lombok.Data;
 public class OrdersItems {
 
     @Id
+    //自增
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(length = 50)
     String orderId;
