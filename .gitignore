@@ -31,7 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-data
+./data
 
 ### 忽略测试文件
 test
