@@ -1,6 +1,15 @@
 test:
   isTest: false
 
+async:
+  executor:
+    thread:
+      core_pool_size: 5
+      max_pool_size: 5
+      queue_capacity: 80
+      name:
+        prefix: async-
+
 spring:
   security:
     user:
@@ -25,9 +34,14 @@ spring:
     hibernate:
       ddl-auto: update
 
+  #缓存设置
+  cache:
+    type: cache2k
+
   # 国际化信息
   messages:
-   basename: i18n/messages
+    basename: i18n/messages
+
 
 # OneSdk WebSocked链接地址
 shiro:
