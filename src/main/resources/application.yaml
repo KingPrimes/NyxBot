@@ -11,6 +11,19 @@ spring:
         - admin
   mvc:
     static-path-pattern: /static/**
+  #数据源配置
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    url: jdbc:h2:file:./data/H2
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
 
   # 国际化信息
   messages:
