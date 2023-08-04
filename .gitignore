@@ -1,4 +1,5 @@
 target/
+.mvn
 .mvn/**
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -30,10 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
-
+./data
 
 ### 忽略测试文件
 test
 ### 忽略Log文件
 logs
 *.log
+/data/H2.mv.db

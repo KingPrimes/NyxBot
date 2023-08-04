@@ -1,6 +1,15 @@
 test:
   isTest: false
 
+async:
+  executor:
+    thread:
+      core_pool_size: 5
+      max_pool_size: 5
+      queue_capacity: 80
+      name:
+        prefix: async-
+
 spring:
   security:
     user:
@@ -11,6 +20,23 @@ spring:
         - admin
   mvc:
     static-path-pattern: /static/**
+  #数据源配置
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    url: jdbc:h2:file:./data/H2
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  #缓存设置
+  cache:
+    type: cache2k
 
 server:
   port: 8081

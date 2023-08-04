@@ -646,65 +646,31 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils{
         return stars;
     }
 
-    /**
-     * 判断字符串是否为URL
-     *
-     * @param urls 需要判断的String类型url
-     * @return true:是URL；false:不是URL
-     */
-    public static boolean isHttpUrl(String urls) {
-        boolean distro = false;
-        String regex = "((https|http)?://)";//设置正则表达式
 
-        Pattern pat = Pattern.compile(regex.trim());//对比
-        Matcher mat = pat.matcher(urls.trim());
-        while (mat.find()) {
-            distro = true;
-        }
-        return distro;
-    }
-
-    /**
-     * 判断是否是数字
-     *
-     * @param str 字符串
-     * @return true 是数字 反之
-     */
-    public static boolean isNumberAndDouble(String str) {
-        //是否整数
-        Pattern num = Pattern.compile("^\\d+$|-\\d+$");
-        //小数
-        Pattern dou = Pattern.compile("\\d+\\.\\d+$|-\\d+\\.\\d+$");
-
-        return num.matcher(str).matches()
-                || dou.matcher(str).matches();
-    }
-
-    /**
-     * 判断是否是整数
-     *
-     * @param str 字符串
-     * @return true 整数 反之
-     */
-    public static boolean isNumber(String str) {
-        //是否整数
-        Pattern num = Pattern.compile("^\\d+$|-\\d+$");
-        return num.matcher(str).matches();
-    }
-
-    /**
-     * 判断是否是字母
-     *
-     * @param str 字符串
-     * @return true 是字母 反之
-     */
-    public static boolean isAlpha(String str) {
-        return str != null && str.matches("[a-zA-z]+");
-    }
 
     /**
      * 整数到中文大写
      *
+     * @param src 整数参数
+     * @return 中文大写
+     */
+    public static String int2CapsChineseNum(int src) {
+        final String[] num = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
+        final String[] unit = {"", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟"};
+        StringBuilder dst = new StringBuilder();
+        int count = 0;
+        while (src > 0) {
+            dst.insert(0, (num[src % 10] + unit[count]));
+            src = src / 10;
+            count++;
+        }
+        return dst.toString().replaceAll("零[仟佰拾]", "零").replaceAll("零+万", "万")
+                .replaceAll("零+亿", "亿").replaceAll("亿万", "亿零")
+                .replaceAll("零+", "零").replaceAll("零$", "");
+    }
+
+    /**
+     * 整数到中文大写
      * @param src 整数参数
      * @return 中文大写
      */
@@ -714,49 +680,13 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils{
         StringBuilder dst = new StringBuilder();
         int count = 0;
         while (src > 0) {
-            dst.insert(0, (num[src % 10] + unit[count]));
+            dst.insert(0, (num[(src % 10)] + unit[count]));
             src = src / 10;
             count++;
         }
         return dst.toString().replaceAll("零[千百十]", "零").replaceAll("零+万", "万")
                 .replaceAll("零+亿", "亿").replaceAll("亿万", "亿零")
                 .replaceAll("零+", "零").replaceAll("零$", "");
-    }
-
-    /**
-     * 正则表达式字符串替换
-     *
-     * @param str       字符串
-     * @param regex     正则表达式
-     * @param newString 新的替换字符串
-     * @return 返回替换后的字符串
-     */
-    public static String regReplace(String str, String regex, String newString) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(str);
-        return m.replaceAll(newString);
-    }
-
-    /**
-     * 全局匹配正则表达式
-     *
-     * @param str   字符串
-     * @param regex 正则表达式
-     * @return
-     */
-    public static boolean regexG(String str, String regex) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(str);
-        while (m.find()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean regex(String str, String regex) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(str);
-        return m.matches();
     }
 
     /**

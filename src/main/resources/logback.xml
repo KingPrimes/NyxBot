@@ -4,7 +4,7 @@
     <!-- 日志存放路径 -->
     <property name="log.path" value="./logs"/>
     <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss}  %-5level ${PID:- }  [%thread]  %-40.40logger{39} : %msg%n"/>
+    <property name="log.pattern" value="%-5level %d{yyyy-MM-dd HH:mm:ss} [%thread - ${PID:- }]  %-40.40logger{39} : %msg%n"/>
 
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
