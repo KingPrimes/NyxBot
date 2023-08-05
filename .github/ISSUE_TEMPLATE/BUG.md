@@ -1,7 +1,7 @@
 ---
-name: "[BUG]"
+name: "BUG 提交"
 about: Create a report to help us improve
-title: ''
+title: '[BUG]'
 labels: bug
 assignees: KingPrimes, QiangG77
 
