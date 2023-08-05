@@ -38,8 +38,6 @@ spring:
   cache:
     type: cache2k
 
-server:
-  port: 8081
 shiro:
   ws-config:
     ws-url: /nyx
