@@ -1,8 +1,9 @@
 package com.nyx.bot.utils;
 
+import org.springframework.lang.Nullable;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
@@ -29,7 +30,6 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return new SimpleDateFormat(format).format(date);
     }
 
-
     /**
      * 取两个日期的时间差
      *
@@ -37,7 +37,22 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @param startDate 开始日期
      * @return 动态返回计算结果
      */
-    public static String getDiff(Date endDate, Date startDate) {
+    public static String getDiff(Date endDate, Date startDate){
+        return getDiff(endDate,startDate,true);
+    }
+
+
+    /**
+     * 取两个日期的时间差
+     *
+     * @param endDate   结束日期
+     * @param startDate 开始日期
+     * @param falg      false 返回 yyyy MM dd HH:mm:ss
+     *                  true 返回 yyyy年MM月dd日HH时mm分ss秒
+     * @return 动态返回计算结果
+     */
+    public static String getDiff(Date endDate, Date startDate, @Nullable Boolean falg) {
+        if (falg == null) falg = true;
         long yy = 1000L * 60 * 60 * 24 * 365;
         long mm = 1000L * 60 * 60 * 24 * 30;
         long nd = 1000 * 24 * 60 * 60;
@@ -61,21 +76,40 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
         //根据相差的时间返回不同的格式
         if (years != 0) {
-            return years + "年" + diffSeconds + "月" + days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            if (falg) {
+                return years + "年" + diffSeconds + "月" + days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            }
+            return years + " " + diffSeconds + " " + days + " " + hours + ":" + minutes + ":" + sec;
         }
         if (diffSeconds != 0) {
-            return diffSeconds + "月" + days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            if (falg) {
+                return diffSeconds + "月" + days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            }
+            return diffSeconds + " " + days + " " + hours + ":" + minutes + ":" + sec;
         }
         if (days != 0) {
-            return days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            if (falg) {
+                return days + "日" + hours + "时" + minutes + "分" + sec + "秒";
+            }
+            return days + " " + hours + ":" + minutes + ":" + sec;
         }
         if (hours != 0) {
-            return hours + "时" + minutes + "分" + sec + "秒";
+            if (falg) {
+                return hours + "时" + minutes + "分" + sec + "秒";
+            }
+            return hours + ":" + minutes + ":" + sec;
+
         }
         if (minutes != 0) {
-            return minutes + "分" + sec + "秒";
-        }else  {
-            return sec + "秒";
+            if (falg) {
+                return minutes + "分" + sec + "秒";
+            }
+            return minutes + ":" + sec;
+        } else {
+            if (falg) {
+                return sec + "秒";
+            }
+            return String.valueOf(sec);
         }
     }
 
