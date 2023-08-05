@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(name = "sys_user")
+@Table
 public class SysUser {
 
     @Id
