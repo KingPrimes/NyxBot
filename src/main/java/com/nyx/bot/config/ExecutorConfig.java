@@ -1,5 +1,6 @@
 package com.nyx.bot.config;
 
+import com.nyx.bot.enums.AsyncBeanName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,16 @@ public class ExecutorConfig {
     @Bean(name = "myAsync")
     public Executor asyncServiceExecutor() {
         log.info("start asyncServiceExecutor");
+        return executor(namePrefix);
+    }
+
+    @Bean(name = "scheduledExecutorService")
+    public Executor scheduledExecutorService() {
+        log.info("start scheduledExecutorService");
+        return executor("scheduled-");
+    }
+
+    private Executor executor(String namePrefix){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         //配置核心线程数
         executor.setCorePoolSize(corePoolSize);
