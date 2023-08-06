@@ -18,7 +18,7 @@ public class MissionSubscribe {
     //订阅的群组
     Long subGroup;
     //订阅的用户
-    Long subUser;
+    String subUser;
     //发送消息的Bot
     Long subBotUid;
     //订阅类型
