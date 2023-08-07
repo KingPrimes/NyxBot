@@ -114,6 +114,39 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     /**
+     * 计算两个时间相差的小时
+     *
+     * @param endDate 结束时间
+     * @param nowDate 现在的时间
+     * @return 相差的小时
+     */
+    public static long getDateHour(Date endDate, Date nowDate) {
+        long nd = 1000 * 24 * 60 * 60;
+        long nh = 1000 * 60 * 60;
+        // 获得两个时间的毫秒时间差异
+        long diff = endDate.getTime() - nowDate.getTime();
+        // 计算差多少分钟
+        return diff % nd / nh;
+    }
+
+    /**
+     * 取两个时间相差的分钟
+     *
+     * @param endDate 结束时间
+     * @param nowDate 现在的时间
+     * @return 相差的分钟
+     */
+    public static long getDateMin(Date endDate, Date nowDate) {
+        long nd = 1000 * 24 * 60 * 60;
+        long nh = 1000 * 60 * 60;
+        long nm = 1000 * 60;
+        // 获得两个时间的毫秒时间差异
+        long diff = endDate.getTime() - nowDate.getTime();
+        // 计算差多少分钟
+        return diff % nd % nh / nm;
+    }
+
+    /**
      * 日期型字符串转化为日期 格式
      */
     public static Date parseDate(Object str) {
