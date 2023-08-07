@@ -1,5 +1,5 @@
 test:
-  isTest: false
+  isTest: true
 
 async:
   executor:
@@ -25,14 +25,16 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password: sa
-    url: jdbc:h2:file:./data/H2
+    #设置数据源；MODE=MySQL 可以解析MySQL形式的SQL语句
+    url: jdbc:h2:file:./data/H2;MODE=MySQL
   h2:
     console:
       enabled: true
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
+    open-in-view: false
 
   #缓存设置
   cache:
