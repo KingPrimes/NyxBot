@@ -1,6 +1,7 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.AsyncUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -59,18 +60,15 @@ public class WarframeSocket extends WebSocketListener {
 
     @Override
     public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
-        SocketGlobalStates states = JSONObject.parseObject(text).toJavaObject(SocketGlobalStates.class);
-        if (states != null) {
-            if (!states.getEvent().equals("connected") && states.getEvent().equals("ws:update")) {
-                if (states.getPacket().getLanguage().equals("en") && states.getPacket().getPlatform().equals("pc")) {
-                    AsyncUtils.me().execute(()->{
-                        WarframeSubscribe.isUpdated(states);
-                    });
+        SocketGlobalStates states = JSONObject.parseObject(text,SocketGlobalStates.class,JSONReader.Feature.SupportSmartMatch);
+        if (!states.getEvent().equals("connected") && states.getEvent().equals("ws:update")) {
+            if (states.getPacket().getLanguage().equals("en") && states.getPacket().getPlatform().equals("pc")) {
+                AsyncUtils.me().execute(()->{
+                    WarframeSubscribe.isUpdated(states);
+                });
 
-                }
             }
         }
-        log.info(text);
         super.onMessage(webSocket, text);
     }
 
