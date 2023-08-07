@@ -6,7 +6,7 @@ import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.repo.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.IoUtils;
-import com.nyx.bot.plugin.warframe.WarframeSocket;
+import com.nyx.bot.plugin.warframe.utils.WarframeSocket;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
