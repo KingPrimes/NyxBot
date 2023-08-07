@@ -39,3 +39,4 @@ test
 logs
 *.log
 /data/H2.mv.db
+/data/H2.trace.db
