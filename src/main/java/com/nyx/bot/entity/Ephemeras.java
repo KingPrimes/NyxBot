@@ -19,7 +19,7 @@ public class Ephemeras {
     @Column(length = 50)
     @JsonProperty("id")
     String ephemerasId;
-    @Column(length = 80)
+    @Column(length = 120)
     @JsonProperty("icon")
     String icon;
     @Column(length = 20)
@@ -29,7 +29,7 @@ public class Ephemeras {
     @Column(length = 50)
     String itemName;
     @JsonProperty("animation")
-    @Column(length = 80)
+    @Column(length = 120)
     String animation;
     @JsonProperty("element")
     @Column(length = 20)
@@ -38,7 +38,7 @@ public class Ephemeras {
     @Column(length = 40)
     String urlName;
     @JsonProperty("thumb")
-    @Column(length = 80)
+    @Column(length = 120)
     String thumb;
 
 }

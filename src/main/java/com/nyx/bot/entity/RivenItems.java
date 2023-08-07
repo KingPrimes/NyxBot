@@ -30,7 +30,7 @@ public class RivenItems {
     @Column(length = 50)
     String rivenType;
     @JsonProperty("icon")
-    @Column(length = 80)
+    @Column(length = 120)
     String icon;
     @JsonProperty("icon_format")
     @Column(length = 80)
@@ -41,7 +41,7 @@ public class RivenItems {
     String type;
 
     @JsonProperty("thumb")
-    @Column(length = 80)
+    @Column(length = 120)
     String thumb;
 
     @JsonProperty("mastery_level")

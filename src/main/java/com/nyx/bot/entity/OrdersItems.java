@@ -27,7 +27,7 @@ public class OrdersItems {
     @Column(length = 50)
     String itemName;
     @JsonProperty("thumb")
-    @Column(length = 80)
+    @Column(length = 120)
     String thumb;
     @JsonProperty("vaulted")
     Boolean vaulted;
