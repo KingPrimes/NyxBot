@@ -11,13 +11,7 @@ async:
         prefix: async-
 
 spring:
-  security:
-    user:
-      name: admin
-      password: 123456
-      roles:
-        - user
-        - admin
+
   mvc:
     static-path-pattern: /static/**
   #数据源配置

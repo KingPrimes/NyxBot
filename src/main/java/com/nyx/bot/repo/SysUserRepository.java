@@ -10,4 +10,8 @@ import org.springframework.stereotype.Repository;
  * Jpa 操作数据源 接口
  */
 @Repository
-public interface SysUserRepository extends JpaRepository<SysUser,Long> {}
+public interface SysUserRepository extends JpaRepository<SysUser,Long> {
+
+    SysUser findSysUsersByUserName(String userName);
+
+}

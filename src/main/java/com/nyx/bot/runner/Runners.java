@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -46,7 +47,8 @@ public class Runners {
                 SysUser user = new SysUser();
                 user.setUserId(1L);
                 user.setUserName("admin");
-                user.setPassword("admin123");
+                // {bcrypt} 密码加密方式
+                user.setPassword("{bcrypt}"+new BCryptPasswordEncoder().encode("admin123"));
                 List<SysUser> all = userRepository.findAll();
                 if (all.isEmpty()){
                     SysUser save = userRepository.save(user);
