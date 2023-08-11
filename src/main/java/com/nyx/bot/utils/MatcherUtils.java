@@ -18,6 +18,18 @@ public class MatcherUtils {
     }
 
     /**
+     * 正则判断
+     * @param str 字符串
+     * @param regex 正则表达式
+     * @return 是否符合正则表达式
+     */
+    public static boolean matcherIgnoreCase(String str, String regex) {
+        Pattern p = Pattern.compile("(?i)"+regex);
+        Matcher m = p.matcher(str);
+        return m.find();
+    }
+
+    /**
      * 判断字符串是否为URL
      *
      * @param urls 需要判断的String类型url
