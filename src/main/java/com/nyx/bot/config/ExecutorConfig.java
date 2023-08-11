@@ -33,9 +33,31 @@ public class ExecutorConfig {
 
     @Bean(name = "scheduledExecutorService")
     public Executor scheduledExecutorService() {
-        log.info("start scheduledExecutorService");
+        log.info("start scheduledExecutor");
         return executor("scheduled-");
     }
+
+    @Bean(name = "AnyMessageEvent")
+    public Executor anyMessageEvent() {
+        log.info("start AnyMessageEventExecutor");
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        //配置核心线程数
+        executor.setCorePoolSize(20);
+        //配置最大线程数
+        executor.setMaxPoolSize(50);
+        //配置队列大小
+        executor.setQueueCapacity(120);
+        //配置线程池中的线程的名称前缀
+        executor.setThreadNamePrefix("AnyMessageEvent-");
+
+        // rejection-policy：当pool已经达到max size的时候，如何处理新任务
+        // CALLER_RUNS：不在新线程中执行任务，而是有调用者所在的线程来执行
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        //执行初始化
+        executor.initialize();
+        return executor;
+    }
+
 
     private Executor executor(String namePrefix){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
