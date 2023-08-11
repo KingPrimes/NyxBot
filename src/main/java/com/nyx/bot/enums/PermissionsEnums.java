@@ -3,7 +3,7 @@ package com.nyx.bot.enums;
 /**
  * 权限等级
  */
-public enum Permissions{
+public enum PermissionsEnums {
     //其它用户
     OTHER,
     //普通用户
