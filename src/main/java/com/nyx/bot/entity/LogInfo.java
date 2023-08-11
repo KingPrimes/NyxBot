@@ -2,7 +2,7 @@ package com.nyx.bot.entity;
 
 import com.nyx.bot.enums.BusinessType;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.enums.Permissions;
+import com.nyx.bot.enums.PermissionsEnums;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,7 +24,7 @@ public class LogInfo {
     // 操作指令
     Codes codes;
     // 用户等级
-    Permissions permissions;
+    PermissionsEnums permissions;
     // 操作类型
     BusinessType businessType;
     // 机器人ID

@@ -39,7 +39,12 @@ public class SecurityConfiguration {
                             .requestMatchers(
                                     RequestMatchers.anyOf(
                                             //放行静态资源
-                                            request -> request.getRequestURI().contains("/static")
+                                            request -> request.getRequestURI().matches("/static/.*"),
+                                            request -> request.getRequestURI().matches("/css/.*"),
+                                            request -> request.getRequestURI().matches("/js/.*"),
+                                            request -> request.getRequestURI().matches("/images/.*"),
+                                            //放行验证码
+                                            request -> request.getRequestURI().matches("/captcha/*")
                                     )
                             )
                             .permitAll();
@@ -62,8 +67,11 @@ public class SecurityConfiguration {
                     out.logoutSuccessUrl("/login");
                 })
                 .rememberMe(me ->{
+                    //设置记住我的 name 默认为 remember-me
                     me.rememberMeParameter("remember");
+                    // 设置token
                     me.tokenRepository(repository);
+                    // 设置token存活时常
                     me.tokenValiditySeconds(3600 * 24 * 7);
                 })
                 // 禁用csrf
