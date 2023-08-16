@@ -1,11 +1,21 @@
 package com.nyx.bot.config;
 
+import com.nyx.bot.controller.LoginHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
@@ -14,7 +24,11 @@ import org.springframework.security.web.util.matcher.RequestMatchers;
 import javax.sql.DataSource;
 
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
+
+    private final UserDetailsService userDetailService;
 
     @Value("${shiro.ws-config.ws-url}")
     String shiro;
@@ -23,50 +37,57 @@ public class SecurityConfiguration {
      * 配置持久化Token
      */
     @Bean
-    public PersistentTokenRepository tokenRepository(DataSource dataSource){
+    public PersistentTokenRepository tokenRepository(DataSource dataSource) {
         JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
         repository.setDataSource(dataSource);
         return repository;
     }
 
+    //设置密码加密类型
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     //注册过滤器并配置
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenRepository repository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, PersistentTokenRepository repository) throws Exception {
+        //AntPathRequestMatcher.antMatcher("");
         return http
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .requestMatchers(
-                                    RequestMatchers.anyOf(
-                                            //放行静态资源
-                                            request -> request.getRequestURI().matches("/static/.*"),
-                                            request -> request.getRequestURI().matches("/css/.*"),
-                                            request -> request.getRequestURI().matches("/js/.*"),
-                                            request -> request.getRequestURI().matches("/images/.*"),
-                                            //放行验证码
-                                            request -> request.getRequestURI().matches("/captcha/*")
-                                    )
-                            )
-                            .permitAll();
-                    //其余请求路径都需要权限才可以访问
-                    auth.anyRequest().authenticated();
+                            .requestMatchers(RequestMatchers.anyOf(
+                                    //放行静态资源
+                                    request -> request.getRequestURI().matches("/static/.*?"),
+                                   /* request -> request.getRequestURI().matches("/css/.*?"),
+                                    request -> request.getRequestURI().matches("/js/.*?"),
+                                    request -> request.getRequestURI().matches("/images/.*?"),
+                                    request -> request.getRequestURI().matches("/ico.jpg"),
+                                    request -> request.getRequestURI().matches("/nyx/.*?"),
+                                    request -> request.getRequestURI().matches("/ajax/.*?"),*/
+                                    //放行验证码
+                                    request -> request.getRequestURI().matches("/captcha/image")
+                            )).permitAll()
+                            //其余请求路径都需要权限才可以访问
+                            .anyRequest().authenticated();
                 })
                 //配置登录
                 .formLogin(conf -> {
                     //登录页面
-                    conf.loginPage("/login");
-                    //登录接口
-                    conf.loginProcessingUrl("/login");
-                    //登录成功之后跳转的页面
-                    conf.defaultSuccessUrl("/");
-                    conf.permitAll();
+                    conf
+                            .loginPage("/login")
+                            //登录接口
+                            .loginProcessingUrl("/login").permitAll()
+                            .successHandler(new LoginHandler())
+                            .failureHandler(new LoginHandler());
                 })
                 //配置退出
                 .logout(out -> {
                     out.logoutUrl("/logout");
                     out.logoutSuccessUrl("/login");
                 })
-                .rememberMe(me ->{
+                .rememberMe(me -> {
                     //设置记住我的 name 默认为 remember-me
                     me.rememberMeParameter("remember");
                     // 设置token
@@ -74,8 +95,15 @@ public class SecurityConfiguration {
                     // 设置token存活时常
                     me.tokenValiditySeconds(3600 * 24 * 7);
                 })
+                .passwordManagement(pass->{
+                    pass.changePasswordPage("/password");
+                })
                 // 禁用csrf
                 .csrf(AbstractHttpConfigurer::disable)
+                //跨域设置，仅允许同路径下的 iframe 页面
+                .headers(headers -> {
+                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+                })
                 .build();
     }
 
@@ -93,13 +121,16 @@ public class SecurityConfiguration {
                 ;
     }
 
-
-  /*  @Bean
+    //设置密码加密方式
+    @Bean
     AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailService);
+        daoAuthenticationProvider.setHideUserNotFoundExceptions(false);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         //daoAuthenticationProvider.setUserDetailsService(userService);
         return new ProviderManager(daoAuthenticationProvider);
-    }*/
+    }
 
 }
 
