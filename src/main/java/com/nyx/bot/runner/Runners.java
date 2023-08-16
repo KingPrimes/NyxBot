@@ -48,7 +48,7 @@ public class Runners {
                 user.setUserId(1L);
                 user.setUserName("admin");
                 // {bcrypt} 密码加密方式
-                user.setPassword("{bcrypt}"+new BCryptPasswordEncoder().encode("admin123"));
+                user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
                 List<SysUser> all = userRepository.findAll();
                 if (all.isEmpty()){
                     SysUser save = userRepository.save(user);
