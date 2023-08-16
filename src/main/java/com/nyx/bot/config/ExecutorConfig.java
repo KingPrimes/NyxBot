@@ -31,10 +31,16 @@ public class ExecutorConfig {
         return executor(namePrefix);
     }
 
-    @Bean(name = "scheduledExecutorService")
+    @Bean
     public Executor scheduledExecutorService() {
         log.info("start scheduledExecutor");
         return executor("scheduled-");
+    }
+
+    @Bean
+    public Executor taskExecutor(){
+        log.info("start taskExecutor");
+        return executor("taskExecutor-");
     }
 
     @Bean(name = "AnyMessageEvent")
