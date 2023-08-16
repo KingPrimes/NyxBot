@@ -1,18 +1,68 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8">
-        <title>登录</title>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
+        <title>ZeroKingBot</title>
+        <meta content="ZeroKingBot" name="description">
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}"/>
+        <link href="../static/css/font-awesome.min.css" rel="stylesheet" th:href="@{/static/css/font-awesome.min.css}"/>
+        <link href="../static/css/style.min.css" rel="stylesheet" th:href="@{/static/css/style.min.css}"/>
+        <link href="../static/css/login.min.css" rel="stylesheet" th:href="@{/static/css/login.min.css}"/>
+        <link href="../static/nyx/css/nyx-ui.css" rel="stylesheet" th:href="@{/static/nyx/css/nyx-ui.css}"/>
+        <!-- 360浏览器急速模式 -->
+        <meta content="webkit" name="renderer">
+        <!-- 避免IE使用兼容模式 -->
+        <meta content="IE=edge" http-equiv="X-UA-Compatible">
+        <style type="text/css">label.error {
+            position: inherit;
+        }</style>
+        <script>
+            if (window.top !== window.self) {
+                alert('未登录或登录超时。请重新登录');
+                window.top.location = window.location
+            }
+        </script>
     </head>
-    <body>
-        <form method="post" action="/login">
-            <label>用户名：<input type="text" name="username"/></label>
-            <br/>
-            <label>密码：<input type="password" name="password"/></label>
-          <!--  <input type="text" th:name = "${_csrf.getParameterName()}" th:value = "${_csrf.getToken()}" hidden=""/>-->
-            <br/>
-            <label>记住我：<input type="checkbox" name="remember"/></label>
-            <input type="submit" value="登录"/>
-        </form>
+    <body class="signin">
+        <div class="signinpanel">
+            <div class="row">
+                <div class="col-sm-5">
+                    <center>
+                        <div class="signin-info">
+                            <div class="logopanel m-b">
+                                <h1><img alt="[ ZeroKingBot ]" src="../static/ico.jpg" th:src="@{/static/index.png}"
+                                         width="80%"></h1>
+                            </div>
+                        </div>
+                    </center>
+                </div>
+                <div class="col-sm-5">
+                    <form autocomplete="off" id="signupForm">
+                        <h3 align="center" class="no-margins">登录</h3>
+                        <p align="center" class="m-t-md">欢迎使用 ---- NyxBot</p>
+                        <input class="form-control uname" name="username" placeholder="用户名:admin" type="text"/>
+                        <input class="form-control pword" name="password" placeholder="密码:admin123" type="password"/>
+                        <button class="btn btn-success btn-block" data-loading="正在验证登录，请稍候..." id="btnSubmit">
+                            登录
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            var ctx = [[@{/}]];
+            var captchaType = [[${captchaType}]]; </script>
+        <!--[if lte IE 8]>
+        <script>window.location.href = ctx + 'html/ie.html';</script><![endif]-->
+        <!-- 全局js -->
+        <script src="../static/js/jquery.min.js" th:src="@{/static/js/jquery.min.js}"></script>
+        <script src="../static/ajax/libs/validate/jquery.validate.min.js"
+                th:src="@{/static/ajax/libs/validate/jquery.validate.min.js}"></script>
+        <script src="../static/ajax/libs/layer/layer.min.js" th:src="@{/static/ajax/libs/layer/layer.min.js}"></script>
+        <script src="../static/ajax/libs/blockUI/jquery.blockUI.js"
+                th:src="@{/static/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+        <script src="../static/nyx/js/nyx-ui.js" th:src="@{/static/nyx/js/nyx-ui.js}"></script>
+        <script src="../static/nyx/login.js" th:src="@{/static/nyx/login.js}"></script>
     </body>
 </html>
