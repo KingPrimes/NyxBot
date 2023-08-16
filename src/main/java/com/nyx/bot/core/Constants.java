@@ -108,21 +108,6 @@ public class Constants {
     public static final String JWT_CREATED = "created";
 
     /**
-     * 用户权限
-     */
-    public static final String JWT_AUTHORITIES = "authorities";
-
-    /**
-     * 参数管理 cache key
-     */
-    public static final String SYS_CONFIG_KEY = "sys_config:";
-
-    /**
-     * 字典管理 cache key
-     */
-    public static final String SYS_DICT_KEY = "sys_dict:";
-
-    /**
      * 资源映射路径 前缀
      */
     public static final String RESOURCE_PREFIX = "/profile";
@@ -136,21 +121,6 @@ public class Constants {
      * LDAP 远程方法调用
      */
     public static final String LOOKUP_LDAP = "ldap://";
-    /**
-     * 系统用户授权缓存
-     */
-    public static final String SYS_AUTH_CACHE = "sys-authCache";
-
-    /**
-     * 参数管理 cache name
-     */
-    public static final String SYS_CONFIG_CACHE = "sys-config";
-
-
-    /**
-     * 字典管理 cache name
-     */
-    public static final String SYS_DICT_CACHE = "sys-dict";
 
     /**
      * LDAPS 远程方法调用
