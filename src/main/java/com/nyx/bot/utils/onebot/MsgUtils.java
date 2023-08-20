@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MsgUtils {
+
     /**
      * 从消息中获取被@的QQ账号，只能获取单个
      *
@@ -21,4 +22,7 @@ public class MsgUtils {
         }
         return qq;
     }
+
+
+
 }
