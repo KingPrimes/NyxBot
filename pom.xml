@@ -22,6 +22,11 @@
     <properties>
         <java.version>17</java.version>
         <oneSdk.version>2.0.8</oneSdk.version>
+        <fastJson2.version>2.0.38</fastJson2.version>
+        <kaptcha.version>2.3.3</kaptcha.version>
+        <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
+        <rhino.version>1.7.14</rhino.version>
+        <jsoup.version>1.16.1</jsoup.version>
     </properties>
 
 
@@ -52,6 +57,28 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!--验证码-->
+        <dependency>
+            <groupId>pro.fessional</groupId>
+            <artifactId>kaptcha</artifactId>
+            <version>${kaptcha.version}</version>
+        </dependency>
+
+        <!--热部署-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <!--禁止依赖传递-->
+            <optional>true</optional>
+            <!--只在运行时起作用-->
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
@@ -60,6 +87,7 @@
             <groupId>org.cache2k</groupId>
             <artifactId>cache2k-spring</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>com.h2database</groupId>
@@ -76,6 +104,12 @@
             <groupId>com.mikuac</groupId>
             <artifactId>shiro</artifactId>
             <version>${oneSdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba.fastjson2</groupId>
+                    <artifactId>fastjson2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -87,7 +121,26 @@
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
-            <version>2.0.38</version>
+            <version>${fastJson2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>${rhino.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+        </dependency>
+
+        <!--HTML 渲染图片-->
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-core</artifactId>
+            <version>${xhtmlrenderer.version}</version>
         </dependency>
 
         <dependency>
@@ -98,7 +151,7 @@
     </dependencies>
 
 
-  <!--  <repositories>
+<!--    <repositories>
         <repository>
             <id>public</id>
             <name>aliyun nexus</name>
