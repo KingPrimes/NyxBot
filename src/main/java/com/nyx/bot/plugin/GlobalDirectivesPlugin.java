@@ -4,14 +4,17 @@ import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.CodeUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Shiro
+@Component
 public class GlobalDirectivesPlugin {
 
 
@@ -19,9 +22,8 @@ public class GlobalDirectivesPlugin {
     public void messageDispose(Bot bot, AnyMessageEvent event) {
         AsyncUtils.me().execute(()->{
             async(bot, event);
-        });
+        }, AsyncBeanName.ANYMESSAGEEVENT);
     }
-
 
     //异步执行
     public void async(Bot bot,AnyMessageEvent event){
@@ -30,7 +32,7 @@ public class GlobalDirectivesPlugin {
         Optional.ofNullable(code).ifPresent(codes -> {
             switch (codes) {
                 //帮助菜单
-                case HELP,TYPE_CODE -> HelpCode.help();
+                case HELP,TYPE_CODE -> HelpCode.help(bot,event);
                 //检查版本
                 case CHECK_VERSION -> {}
                 //更新HTML
@@ -120,9 +122,10 @@ public class GlobalDirectivesPlugin {
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> not(bot, event);
                 //订阅处理
-                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot,event,raw.replaceAll(codes.getStr(),""));
+                case WARFRAME_SUBSCRIBE -> {}
             }
         });
+        //WarframeCodes.subscribe(bot,event,raw.replaceAll(codes.getStr(),""));
     }
 
     private static void not(Bot bot,AnyMessageEvent event){
