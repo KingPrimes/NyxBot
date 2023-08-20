@@ -2,12 +2,9 @@ package com.nyx.bot.service;
 
 import com.nyx.bot.entity.SysUser;
 import com.nyx.bot.repo.SysUserRepository;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-    @Resource
+    @Autowired
     SysUserRepository sysUserRepository;
 
     @Override
