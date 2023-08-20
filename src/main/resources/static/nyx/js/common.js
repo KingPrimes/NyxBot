@@ -42,7 +42,7 @@ $(function() {
 	
     // 取消回车自动提交表单
     $(document).on("keypress", ":input:not(textarea):not([type=submit])", function(event) {
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             event.preventDefault();
         }
     });
@@ -164,7 +164,7 @@ $(function() {
         } else {
             $.bttTable.bootstrapTreeTable('collapseAll');
         }
-        expandFlag = expandFlag ? false: true;
+        expandFlag = !expandFlag;
     })
 	
     // 按下ESC按钮关闭弹层
@@ -222,7 +222,7 @@ $(function() {
 var refreshItem = function(){
     var topWindow = $(window.parent.document);
     var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-id');
-    var target = $('.RuoYi_iframe[data-id="' + currentId + '"]', topWindow);
+    var target = $('.Index_iframe[data-id="' + currentId + '"]', topWindow);
     var url = target.attr('src');
     target.attr('src', url).ready();
 }
@@ -235,16 +235,16 @@ var closeItem = function(dataId){
 	    // 根据dataId关闭指定选项卡
 	    $('.menuTab[data-id="' + dataId + '"]', topWindow).remove();
 	    // 移除相应tab对应的内容区
-	    $('.mainContent .RuoYi_iframe[data-id="' + dataId + '"]', topWindow).remove();
+	    $('.mainContent .Index_iframe[data-id="' + dataId + '"]', topWindow).remove();
 	    return;
 	}
 	var panelUrl = window.frameElement.getAttribute('data-panel');
 	$('.page-tabs-content .active i', topWindow).click();
 	if($.common.isNotEmpty(panelUrl)){
 	    $('.menuTab[data-id="' + panelUrl + '"]', topWindow).addClass('active').siblings('.menuTab').removeClass('active');
-	    $('.mainContent .RuoYi_iframe', topWindow).each(function() {
-	        if ($(this).data('id') == panelUrl) {
-	            $(this).show().siblings('.RuoYi_iframe').hide();
+	    $('.mainContent .Index_iframe', topWindow).each(function() {
+	        if ($(this).data('id') === panelUrl) {
+	            $(this).show().siblings('.Index_iframe').hide();
 	            return false;
             }
         });
@@ -256,19 +256,19 @@ function createMenuItem(dataUrl, menuName, isRefresh) {
     var panelUrl = window.frameElement.getAttribute('data-id'),
     dataIndex = $.common.random(1, 100),
     flag = true;
-    if (dataUrl == undefined || $.trim(dataUrl).length == 0) return false;
+    if (dataUrl === undefined || $.trim(dataUrl).length === 0) return false;
     var topWindow = $(window.parent.document);
     // 选项卡菜单已存在
     $('.menuTab', topWindow).each(function() {
-        if ($(this).data('id') == dataUrl) {
+        if ($(this).data('id') === dataUrl) {
             if (!$(this).hasClass('active')) {
                 $(this).addClass('active').siblings('.menuTab').removeClass('active');
                 scrollToTab(this);
                 $('.page-tabs-content').animate({ marginLeft: ""}, "fast");
                 // 显示tab对应的内容区
-                $('.mainContent .RuoYi_iframe', topWindow).each(function() {
-                    if ($(this).data('id') == dataUrl) {
-                        $(this).show().siblings('.RuoYi_iframe').hide();
+                $('.mainContent .Index_iframe', topWindow).each(function() {
+                    if ($(this).data('id') === dataUrl) {
+                        $(this).show().siblings('.Index_iframe').hide();
                         return false;
                     }
                 });
@@ -286,8 +286,8 @@ function createMenuItem(dataUrl, menuName, isRefresh) {
         $('.menuTab', topWindow).removeClass('active');
 
         // 添加选项卡对应的iframe
-        var str1 = '<iframe class="RuoYi_iframe" name="iframe' + dataIndex + '" width="100%" height="100%" src="' + dataUrl + '" frameborder="0" data-id="' + dataUrl + '" data-panel="' + panelUrl + '" seamless></iframe>';
-        $('.mainContent', topWindow).find('iframe.RuoYi_iframe').hide().parents('.mainContent').append(str1);
+        var str1 = '<iframe class="Index_iframe" name="iframe' + dataIndex + '" width="100%" height="100%" src="' + dataUrl + '" frameborder="0" data-id="' + dataUrl + '" data-panel="' + panelUrl + '" seamless></iframe>';
+        $('.mainContent', topWindow).find('iframe.Index_iframe').hide().parents('.mainContent').append(str1);
         
         window.parent.$.modal.loading("数据加载中，请稍候...");
         $('.mainContent iframe:visible', topWindow).on('load', function() {
@@ -305,7 +305,7 @@ function createMenuItem(dataUrl, menuName, isRefresh) {
 function refreshTab() {
 	var topWindow = $(window.parent.document);
 	var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-id');
-	var target = $('.RuoYi_iframe[data-id="' + currentId + '"]', topWindow);
+	var target = $('.Index_iframe[data-id="' + currentId + '"]', topWindow);
     var url = target.attr('src');
 	target.attr('src', url).ready();
 }
@@ -354,27 +354,27 @@ function activeWindow() {
 	if (!currentId) {
 		return window.parent;
 	}
-    return $('.RuoYi_iframe[data-id="' + currentId + '"]', topWindow)[0].contentWindow;
+    return $('.Index_iframe[data-id="' + currentId + '"]', topWindow)[0].contentWindow;
 }
 
 /** 密码规则范围验证 */
 function checkpwd(chrtype, password) {
-    if (chrtype == 1) {
+    if (chrtype === 1) {
         if(!$.common.numValid(password)){
             $.modal.alertWarning("密码只能为0-9数字");
             return false;
         }
-    } else if (chrtype == 2) {
+    } else if (chrtype === 2) {
         if(!$.common.enValid(password)){
             $.modal.alertWarning("密码只能为a-z和A-Z字母");
             return false;
         }
-    } else if (chrtype == 3) {
+    } else if (chrtype === 3) {
         if(!$.common.enNumValid(password)){
             $.modal.alertWarning("密码必须包含字母以及数字");
             return false;
         }
-    } else if (chrtype == 4) {
+    } else if (chrtype === 4) {
         if(!$.common.charValid(password)){
             $.modal.alertWarning("密码必须包含字母、数字、以及特殊符号<font color='red'>~!@#$%^&*()-=_+</font>");
             return false;
@@ -420,16 +420,16 @@ var sub = {
     editRow: function() {
     	var dataColumns = [];
 		for (var columnIndex = 0; columnIndex < table.options.columns.length; columnIndex++) {
-    		if (table.options.columns[columnIndex].visible != false) {
+    		if (table.options.columns[columnIndex].visible !== false) {
     			dataColumns.push(table.options.columns[columnIndex]);
     		}
     	}
-		var params = new Array();
+		var params = [];
 		var data = $("#" + table.options.id).bootstrapTable('getData');
     	var count = data.length;
     	for (var dataIndex = 0; dataIndex < count; dataIndex++) {
     	    var columns = $('#' + table.options.id + ' tr[data-index="' + dataIndex + '"] td');
-    	    var obj = new Object();
+    	    var obj = {};
     	    for (var i = 0; i < columns.length; i++) {
     	        var inputValue = $(columns[i]).find('input');
     	        var selectValue = $(columns[i]).find('select');
@@ -442,7 +442,7 @@ var sub = {
     	        } else if ($.common.isNotEmpty(textareaValue.val())) {
     	            obj[key] = textareaValue.val();
     	        } else {
-    	            if (key == "index" && $.common.isNotEmpty(data[dataIndex].index)) {
+    	            if (key === "index" && $.common.isNotEmpty(data[dataIndex].index)) {
     	                obj[key] = data[dataIndex].index;
     	            } else {
     	                obj[key] = "";
@@ -459,7 +459,7 @@ var sub = {
     	sub.editRow();
     	var subColumn = $.common.isEmpty(column) ? "index" : column;
     	var ids = $.table.selectColumns(subColumn);
-        if (ids.length == 0) {
+        if (ids.length === 0) {
             $.modal.alertWarning("请至少选择一条记录");
             return;
         }
@@ -502,25 +502,25 @@ function loadJs(file, headElem) {
 window.onload = function() {
 	document.getElementsByTagName("body")[0].onkeydown = function() {
 		// 获取事件对象  
-		var elem = event.relatedTarget || event.srcElement || event.target || event.currentTarget;
-		// 判断按键为backSpace键  
-		if (event.keyCode == 8) {
+        const elem = event.relatedTarget || event.srcElement || event.target || event.currentTarget;
+        // 判断按键为backSpace键
+		if (event.keyCode === 8) {
 			// 判断是否需要阻止按下键盘的事件默认传递  
 			var name = elem.nodeName;
 			var className = elem.className;
 			// 屏蔽特定的样式名称
-			if (className.indexOf('note-editable') != -1)
+			if (className.indexOf('note-editable') !== -1)
 			{
 				return true;
 			}
-			if (name != 'INPUT' && name != 'TEXTAREA') {
+			if (name !== 'INPUT' && name !== 'TEXTAREA') {
 				return _stopIt(event);
 			}
 			var type_e = elem.type.toUpperCase();
-			if (name == 'INPUT' && (type_e != 'TEXT' && type_e != 'TEXTAREA' && type_e != 'PASSWORD' && type_e != 'FILE' && type_e != 'SEARCH' && type_e != 'NUMBER' && type_e != 'EMAIL' && type_e != 'URL')) {
+			if (name === 'INPUT' && (type_e !== 'TEXT' && type_e !== 'TEXTAREA' && type_e !== 'PASSWORD' && type_e !=='FILE' && type_e !== 'SEARCH' && type_e !== 'NUMBER' && type_e !== 'EMAIL' && type_e !== 'URL')) {
 				return _stopIt(event);
 			}
-			if (name == 'INPUT' && (elem.readOnly == true || elem.disabled == true)) {
+			if (name === 'INPUT' && (elem.readOnly === true || elem.disabled === true)) {
 				return _stopIt(event);
 			}
 		}

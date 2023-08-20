@@ -48,7 +48,7 @@ $(document).ready(function(){
 		return this.optional(element) || (ip).test(value);
 	},"IP地址格式示例127.0.0.1");
 	jQuery.validator.addMethod("notEqual", function(value, element, param) {
-        return value != param;
+        return value !== param;
     }, $.validator.format("输入值不允许为{0}"));
 	jQuery.validator.addMethod("gt", function(value, element, param) {
         return value > param;
@@ -57,21 +57,13 @@ $(document).ready(function(){
 	jQuery.validator.addMethod("isdiff",function(){
 		var p1=$("#pwdOld").val();
 		var p2=$("#pwdNew").val();
-		if(p1==p2){
-			return false;
-		}else{
-			 return true;
-		}
+		return p1 !== p2;
 		});
 	//校验新密码和确认密码是否相同
 	jQuery.validator.addMethod("issame",function(){
 		var p3=$("#confirm_password").val();
 		var p4=$("#pwdNew").val();
-		if(p3==p4){
-			return true;
-		}else{
-			 return false;
-		}
+		return p3 == p4;
 		});
 	//校验基础信息表单
 	$("#basicInfoForm").validate({

@@ -1,10 +1,10 @@
 $(function () {
     validateKickout();
     validateRule();
-    $('.imgcode').click(function () {
+    /*$('.imgcode').click(function () {
         var url = ctx + "captcha/captchaImage?type=" + captchaType + "&s=" + Math.random();
         $(".imgcode").attr("src", url);
-    });
+    });*/
 });
 
 $.validator.setDefaults({
@@ -25,12 +25,7 @@ function login() {
             "password": password
         },
         success: function (r) {
-            console.log(r);
-            console.log(r.msg);
-            console.log(r.code);
-            console.log(r.code === web_status.SUCCESS);
             if (r.code === web_status.SUCCESS) {
-                console.log("跳转页面");
                 window.location.replace(ctx);
             } else {
                 $('.imgcode').click();

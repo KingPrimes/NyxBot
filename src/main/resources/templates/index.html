@@ -4,17 +4,17 @@
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="webkit" name="renderer">
-        <title>ZeroKingBot</title>
+        <title>NyxBot</title>
         <!-- 避免IE使用兼容模式 -->
         <meta content="IE=edge" http-equiv="X-UA-Compatible">
-        <link rel="shortcut icon" th:href="@{/static/ico.jpg}"/>
-        <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}"/>
-        <link rel="stylesheet" th:href="@{/static/css/jquery.contextMenu.min.css}"/>
-        <link rel="stylesheet" th:href="@{/static/css/font-awesome.min.css}"/>
-        <link rel="stylesheet" th:href="@{/static/css/animate.min.css}"/>
-        <link rel="stylesheet" th:href="@{/static/css/style.min.css}"/>
-        <link rel="stylesheet" th:href="@{/static/css/skins.css}"/>
-        <link rel="stylesheet" th:href="@{/static/nyx/css/nyx-ui.css}"/>
+        <link rel="shortcut icon" th:href="@{/index.png}"/>
+        <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/jquery.contextMenu.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/animate.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/skins.css}"/>
+        <link rel="stylesheet" th:href="@{/nyx/css/nyx-ui.css}"/>
     </head>
     <body class="fixed-sidebar full-height-layout gray-bg" style="overflow: hidden"
           th:classappend="${isMobile} ? 'canvas-menu'">
@@ -33,52 +33,85 @@
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
                         <li class="active">
-                            <a class="menuItem" th:href="@{/}"><i class="fa fa-home"></i> <span
-                                    class="nav-label">首页</span> </a>
+                            <a th:href="@{/}"><i class="fa fa-home"></i> <span
+                                    class="nav-label" i18n="Index">首页</span> </a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-user"></i> <span class="nav-label">日志查看</span><span
+                            <a class="menuItem" th:href="@{/log/info}"><i class="fa fa-user"></i> <span
+                                    class="nav-label" i18n="Log_Viewing">日志查看</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-edit"></i> <span class="nav-label"
+                                                                         i18n="Config">配置</span><span
                                     class="fa arrow"></span></a>
                             <ul class="nav nav-second-level collapse">
                                 <li>
-                                    <a class="menuItem" th:href="@{/log/info}">日常日志</a>
+                                    <a class="menuItem" i18n="Config_Bot" th:href="@{/bot/config}">Bot配置</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" th:href="@{/log/operlog}">操作日志</a>
+                                    <a class="menuItem" i18n="Config_Super_Admin" th:href="@{/bot/admin}">超级管理员</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" th:href="@{/log/login}">登录日志</a>
+                                    <a class="menuItem" i18n="Config_Group_Black" th:href="@{/bot/black}">群黑名单</a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" i18n="Config_Prove_Black" th:href="@{/bot/black}">个人黑名单</a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/bot/chatGPT}">ChatGPT</a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" i18n="Config_Said" th:href="@{/bot/yi}">文心一言</a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" i18n="Config_Image" th:href="@{/bot/image}">绘图</a>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-edit"></i> <span class="nav-label">配置</span><span
+                            <a href="#"><i class="fa fa-user"></i> <span class="nav-label"
+                                                                         i18n="Data_Source">本地数据</span><span
                                     class="fa arrow"></span></a>
                             <ul class="nav nav-second-level collapse">
                                 <li>
-                                    <a class="menuItem"
-                                       th:href="@{/config/warframe/warframe-config}">Warframe指令配置</a>
+                                    <a class="menuItem" i18n="Data_Thesaurus" th:href="@{/data/ai/thesaurus}">Ai词库</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" onclick="botConfig()">Bot配置</a>
+                                    <a class="menuItem" i18n="Data_Heat" th:href="@{/data/ai/heat}">热词</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" th:href="@{/bot/admin}">管理员配置</a>
-                                </li>
-                                <li>
-                                    <a class="menuItem" th:href="@{/bot/black}">黑名单配置</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-user"></i> <span class="nav-label">智障AI</span><span
-                                    class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level collapse">
-                                <li>
-                                    <a class="menuItem" onclick="chatGPTConfig()">ChatGPT</a>
-                                </li>
-                                <li>
-                                    <a class="menuItem" th:href="@{/bot/ai/thesaurus}">词库</a>
+                                    <a href="#"><i class="fa fa-user"></i> <span class="nav-label" i18n="Data_Warframe">Warframe</span><span
+                                            class="fa arrow"></span></a>
+                                    <ul class="nav nav-second-level collapse">
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Alias"
+                                               th:href="@{/data/warframe/alias}">别名</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Ephemeras"
+                                               th:href="@{/data/warframe/ephemeras}">幻纹</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Subscribe"
+                                               th:href="@{/data/warframe/subscribe}">订阅</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Market"
+                                               th:href="@{/data/warframe/market}">Market</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Riven"
+                                               th:href="@{/data/warframe/rivent}">Rivent</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Translation"
+                                               th:href="@{/data/warframe/translation}">翻译</a>
+                                        </li>
+                                        <li>
+                                            <a class="menuItem" i18n="Data_Warframe_Weapons"
+                                               th:href="@{/data/warframe/weapons}">武器</a>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
@@ -100,24 +133,37 @@
                         <ul class="nav navbar-top-links navbar-right welcome-message">
                             <li class="dropdown user-menu">
                                 <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
-                                    <span class="hidden-xs">个人中心</span>
+                                    <span class="hidden-xs" i18n="Language">Language</span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a onclick="resetPwd()">
+                                        <a onclick="language('cn')">
+                                            中文(简体)</a>
+                                    </li>
+                                    <li>
+                                        <a onclick="language('en')">
+                                            English</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-top-links navbar-right welcome-message">
+                            <li class="dropdown user-menu">
+                                <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
+                                    <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a i18n="Reset_Password" onclick="resetPwd()">
                                             <i class="fa fa-key"></i> 修改密码</a>
                                     </li>
                                     <li>
-                                        <a onclick="switchSkin()">
+                                        <a i18n="Switch_Skin" onclick="switchSkin()">
                                             <i class="fa fa-dashboard"></i> 切换主题</a>
-                                    </li>
-                                    <li>
-                                        <a onclick="toggleMenu()">
-                                            <i class="fa fa-toggle-off"></i> 横向菜单</a>
                                     </li>
                                     <li class="divider"></li>
                                     <li>
-                                        <a th:href="@{logout}">
+                                        <a i18n="Logout" th:href="@{logout}">
                                             <i class="fa fa-sign-out"></i> 退出登录</a>
                                     </li>
                                 </ul>
@@ -131,25 +177,27 @@
                     </button>
                     <nav class="page-tabs menuTabs">
                         <div class="page-tabs-content">
-                            <a class="active menuTab" href="javascript:void(0);" th:data-id="@{/system/main}">首页</a>
+                            <a class="active menuTab" href="javascript:void(0);" i18n="Index"
+                               th:data-id="@{/system/main}">首页</a>
                         </div>
                     </nav>
                     <button class="roll-nav roll-right tabRight">
                         <i class="fa fa-forward"></i>
                     </button>
-                    <a class="roll-nav roll-right tabReload" href="javascript:void(0);"><i class="fa fa-refresh"></i> 刷新</a>
+                    <a class="roll-nav roll-right tabReload" href="javascript:void(0);" i18n="Flushed"><i
+                            class="fa fa-refresh"></i> 刷新</a>
                 </div>
 
                 <div class="row mainContent" id="content-main" th:classappend="${mainClass}">
-                    <iframe class="RuoYi_iframe" frameborder="0" height="100%" name="iframe0" seamless
+                    <iframe class="Index_iframe" frameborder="0" height="100%" name="iframe0" seamless
                             th:data-id="@{/system/main}" th:src="@{/system/main}" width="100%"></iframe>
                 </div>
 
                 <div class="footer">
                     <div class="pull-right">
                         <b>
-                            作者: <span style="color: red">KingPrimes</span> <br/>
-                            B站名称:<span style="color: red">老王的冒险之旅</span> <br/>
+                            <span i18n="Author">作者: </span><span style="color: red">KingPrimes</span> <br/>
+                           <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
                             UID:<span style="color: red">16131052</span>
                         </b>
                     </div>
@@ -158,16 +206,18 @@
             <!--右侧部分结束-->
         </div>
         <!-- 全局js -->
-        <script th:src="@{/static/js/jquery.min.js}"></script>
-        <script th:src="@{/static/js/bootstrap.min.js}"></script>
-        <script th:src="@{/static/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
-        <script th:src="@{/static/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
-        <script th:src="@{/static/js/jquery.contextMenu.min.js}"></script>
-        <script th:src="@{/static/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-        <script th:src="@{/static/ajax/libs/layer/layer.min.js}"></script>
-        <script th:src="@{/static/nyx/js/nyx-ui.js}"></script>
-        <script th:src="@{/static/nyx/js/common.js}"></script>
-        <script th:src="@{/static/ajax/libs/fullscreen/jquery.fullscreen.js}"></script>
+        <script th:src="@{/js/jquery.min.js}"></script>
+        <script th:src="@{/js/i18n/jquery.i18n.min.js}"></script>
+        <script th:src="@{/js/bootstrap.min.js}"></script>
+        <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+        <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+        <script th:src="@{/js/jquery.contextMenu.min.js}"></script>
+        <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+        <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+        <script th:src="@{/nyx/js/nyx-ui.js}"></script>
+        <script th:src="@{/nyx/js/common.js}"></script>
+        <script th:src="@{/nyx/index.js}"></script>
+        <script th:src="@{/ajax/libs/fullscreen/jquery.fullscreen.js}"></script>
         <script th:inline="javascript">
             window.history.forward(1);
             const ctx = [[@{/}]];
@@ -219,15 +269,6 @@
                     title: "切换主题",
                     area: ["530px", "386px"],
                     content: [ctx + "system/switchSkin", 'no']
-                })
-            }
-
-            /* 切换菜单 */
-            function toggleMenu() {
-                $.modal.confirm("确认要切换成横向菜单吗？", function () {
-                    $.get(ctx + 'system/menuStyle/topnav', function () {
-                        window.location.reload();
-                    });
                 })
             }
 
