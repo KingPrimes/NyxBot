@@ -1,6 +1,6 @@
 package com.nyx.bot.config;
 
-import com.nyx.bot.controller.LoginHandler;
+import com.nyx.bot.handler.LoginHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.util.matcher.RequestMatchers;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -51,24 +50,21 @@ public class SecurityConfiguration {
 
     //注册过滤器并配置
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, PersistentTokenRepository repository) throws Exception {
-        //AntPathRequestMatcher.antMatcher("");
+    public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenRepository repository) throws Exception {
         return http
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .requestMatchers(RequestMatchers.anyOf(
-                                    //放行静态资源
-                                    request -> request.getRequestURI().matches("/static/.*?"),
-                                   /* request -> request.getRequestURI().matches("/css/.*?"),
-                                    request -> request.getRequestURI().matches("/js/.*?"),
-                                    request -> request.getRequestURI().matches("/images/.*?"),
-                                    request -> request.getRequestURI().matches("/ico.jpg"),
-                                    request -> request.getRequestURI().matches("/nyx/.*?"),
-                                    request -> request.getRequestURI().matches("/ajax/.*?"),*/
-                                    //放行验证码
-                                    request -> request.getRequestURI().matches("/captcha/image")
-                            )).permitAll()
+                            .requestMatchers(
+                                    new AntPathRequestMatcher("/img/**"),
+                                    new AntPathRequestMatcher("/css/**"),
+                                    new AntPathRequestMatcher("/js/**"),
+                                    new AntPathRequestMatcher("/nyx/**"),
+                                    new AntPathRequestMatcher("/ajax/**"),
+                                    new AntPathRequestMatcher("/private/**"),
+                                    new AntPathRequestMatcher("/api/**"),
+                                    new AntPathRequestMatcher(shiro)
+                            ).permitAll()
                             //其余请求路径都需要权限才可以访问
                             .anyRequest().authenticated();
                 })
@@ -95,7 +91,7 @@ public class SecurityConfiguration {
                     // 设置token存活时常
                     me.tokenValiditySeconds(3600 * 24 * 7);
                 })
-                .passwordManagement(pass->{
+                .passwordManagement(pass -> {
                     pass.changePasswordPage("/password");
                 })
                 // 禁用csrf
@@ -107,20 +103,6 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    /**
-     * 配置Security WebSocket链接
-     */
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) ->
-                web.ignoring()
-                        .requestMatchers(request ->
-                                //匹配请求路径，如果请求路径相同则可以访问
-                                request.getRequestURI().equals(shiro)
-                        )
-                ;
-    }
-
     //设置密码加密方式
     @Bean
     AuthenticationManager authenticationManager() {
@@ -128,7 +110,6 @@ public class SecurityConfiguration {
         daoAuthenticationProvider.setUserDetailsService(userDetailService);
         daoAuthenticationProvider.setHideUserNotFoundExceptions(false);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        //daoAuthenticationProvider.setUserDetailsService(userService);
         return new ProviderManager(daoAuthenticationProvider);
     }
 

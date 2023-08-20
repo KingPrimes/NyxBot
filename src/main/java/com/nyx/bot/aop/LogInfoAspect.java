@@ -16,6 +16,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -31,23 +32,23 @@ public class LogInfoAspect {
 
     }
 
-    @Around(value = "@annotation(controllerLog)")
-    public Object doAround(ProceedingJoinPoint pjp, LogInfo controllerLog) {
+    @Around(value = "@annotation(logInfo)")
+    public Object doAround(ProceedingJoinPoint pjp, LogInfo logInfo) {
         Object obj;
         try {
             long starTime = System.currentTimeMillis();
             obj = pjp.proceed();
             runTime = System.currentTimeMillis() - starTime;
-            handleLog(pjp, controllerLog, null, "");
+            handleLog(pjp, logInfo, null, "");
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
         return obj;
     }
 
-    @AfterThrowing(value = "@annotation(controllerLog)", throwing = "e")
-    public void doAfterThrowing(JoinPoint joinPoint, LogInfo controllerLog, Exception e) {
-        handleLog(joinPoint, controllerLog, e, null);
+    @AfterThrowing(value = "@annotation(logInfo)", throwing = "e")
+    public void doAfterThrowing(JoinPoint joinPoint, LogInfo logInfo, Exception e) {
+        handleLog(joinPoint, logInfo, e, null);
     }
 
     protected void handleLog(final JoinPoint joinPoint, LogInfo controllerLog, final Exception e, Object jsonResult) {
@@ -72,6 +73,7 @@ public class LogInfoAspect {
             logInfo.setRunTime(runTime);
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, logInfo, jsonResult);
+            logInfo.setLogTime(new Date());
             // 保存数据库
             AsyncUtils.me().execute(()->{
                 SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
