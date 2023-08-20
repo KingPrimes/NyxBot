@@ -20,6 +20,7 @@ import okhttp3.Headers;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -59,7 +60,12 @@ public class WarframeDataSource {
             if (repository.findAll().size() != ephemeras.size()) {
                 AtomicInteger i = new AtomicInteger();
                 ephemeras.forEach(e -> {
-                    i.addAndGet(repository.addEphemeras(e));
+                    if(repository.findAll().isEmpty()){
+                        i.addAndGet(repository.addEphemeras(e));
+                    }else{
+                        e.setId((long) (repository.queryMaxId() + 1));
+                        i.addAndGet(repository.addEphemeras(e));
+                    }
                 });
                 log.info("共更新Warframe.ephemeras {} 条数据！", i);
             }
@@ -82,8 +88,12 @@ public class WarframeDataSource {
             AtomicInteger x = new AtomicInteger();
             if (aliasR.findAll().size() != records.size()) {
                 records.forEach(a -> {
-                    a.setId(Long.valueOf(aliasR.queryMaxId())+1);
-                    x.addAndGet(aliasR.addAlias(a));
+                    if(aliasR.findAll().isEmpty()){
+                        x.addAndGet(aliasR.addAlias(a));
+                    }else{
+                        a.setId((long) (aliasR.queryMaxId() + 1));
+                        x.addAndGet(aliasR.addAlias(a));
+                    }
                 });
                 log.info("共更新Warframe别名表 {} 条数据！", x);
             }
@@ -100,19 +110,19 @@ public class WarframeDataSource {
                 return;
             }
 
-            List<OrdersItems> items = JSON.parseObject(s.replaceAll("&", "-"))
-                    .getJSONObject("payload")
-                    .getJSONArray("items")
-                    .toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
+            List<OrdersItems> items = JSON.parseObject(s.replaceAll("&", "-")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
 
             OrdersItemsRepository repository = SpringUtils.getBean(OrdersItemsRepository.class);
             if (repository.findAll().size() != items.size()) {
                 AtomicInteger size = new AtomicInteger();
                 items.forEach(i -> {
-                            i.setId(Long.valueOf(repository.queryMaxId())+1);
-                            size.addAndGet(repository.addOrdersItems(i));
-                        }
-                );
+                    if(repository.findAll().isEmpty()){
+                        size.addAndGet(repository.addOrdersItems(i));
+                    }else{
+                        i.setId((long) (repository.queryMaxId() + 1));
+                        size.addAndGet(repository.addOrdersItems(i));
+                    }
+                });
                 log.info("共更新Warframe.Market {} 条数据！", size);
             }
         });
@@ -141,8 +151,12 @@ public class WarframeDataSource {
             AtomicInteger i = new AtomicInteger();
             if (repository.findAll().size() != weapons.size()) {
                 weapons.forEach(w -> {
-                    w.setId(Long.valueOf(repository.queryMaxId())+1);
-                    i.addAndGet(repository.addWeapons(w));
+                    if(repository.findAll().isEmpty()){
+                        i.addAndGet(repository.addWeapons(w));
+                    }else{
+                        w.setId((long) (repository.queryMaxId() + 1));
+                        i.addAndGet(repository.addWeapons(w));
+                    }
                 });
                 log.info("共更新Warframe.Weapons {} 条数据！", i);
             }

@@ -18,8 +18,7 @@ public interface EphemerasRepository extends JpaRepository<Ephemeras,Long> {
     @Query(value = "INSERT IGNORE INTO EPHEMERAS(animation, element, ephemeras_id, icon, icon_format, item_name, thumb, url_name) VALUES (:#{#es.animation},:#{#es.element},:#{#es.ephemerasId},:#{#es.icon},:#{#es.iconFormat},:#{#es.itemName},:#{#es.thumb},:#{#es.urlName})",nativeQuery = true)
     int addEphemeras(@Param("es") Ephemeras ephemeras);
 
-    @Transactional
-    @Modifying
+
     @Query(value = "select max(ID) from EPHEMERAS",nativeQuery = true)
     int queryMaxId();
 }
