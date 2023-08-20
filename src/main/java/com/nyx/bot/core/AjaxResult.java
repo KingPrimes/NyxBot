@@ -1,6 +1,7 @@
 package com.nyx.bot.core;
 
 import com.alibaba.fastjson2.JSON;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.StringUtils;
 
 import java.io.Serial;
@@ -61,7 +62,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 成功消息
      */
     public static AjaxResult success() {
-        return AjaxResult.success("操作成功");
+        return AjaxResult.success(I18nUtils.message("controller.success"));
     }
 
     /**
@@ -70,7 +71,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 成功消息
      */
     public static AjaxResult success(Object data) {
-        return AjaxResult.success("操作成功", data);
+        return AjaxResult.success(I18nUtils.message("controller.success"), data);
     }
 
     /**
@@ -121,7 +122,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return
      */
     public static AjaxResult error() {
-        return AjaxResult.error("操作失败");
+        return AjaxResult.error(I18nUtils.message("controller.error"));
     }
 
     /**

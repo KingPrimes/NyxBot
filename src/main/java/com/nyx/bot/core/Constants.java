@@ -1,5 +1,7 @@
 package com.nyx.bot.core;
 
+import com.nyx.bot.utils.SpringUtils;
+
 public class Constants {
     /**
      * UTF-8 字符集
@@ -126,4 +128,9 @@ public class Constants {
      * LDAPS 远程方法调用
      */
     public static final String LOOKUP_LDAPS = "ldaps:";
+
+    /**
+     * 本地链接
+     */
+    public static final String LOCALHOST = "http://localhost:"+ SpringUtils.getPort()+"/";
 }
