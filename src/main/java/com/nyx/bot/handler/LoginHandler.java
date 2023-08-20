@@ -1,4 +1,4 @@
-package com.nyx.bot.controller;
+package com.nyx.bot.handler;
 
 import com.nyx.bot.core.AjaxResult;
 import jakarta.servlet.FilterChain;
