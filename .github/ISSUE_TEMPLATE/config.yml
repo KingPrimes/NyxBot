@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Wiki
+    url: https://github.com/NYXBots/NyxBot/wiki
+    about: 常见问题的解答，以及详细的介绍
