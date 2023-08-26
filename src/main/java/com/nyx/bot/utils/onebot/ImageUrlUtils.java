@@ -4,7 +4,6 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.OneBotLogInfoData;
-import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.HttpUtils;
