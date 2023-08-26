@@ -17,7 +17,6 @@ import java.util.Optional;
 @Component
 public class GlobalDirectivesPlugin {
 
-
     @AnyMessageHandler
     public void messageDispose(Bot bot, AnyMessageEvent event) {
         AsyncUtils.me().execute(()->{

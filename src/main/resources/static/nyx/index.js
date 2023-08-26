@@ -653,17 +653,6 @@ $(function() {
     });
 });
 
-$("[i18n]").i18n({
-    defaultLang: "cn",
-    filePath: "/i18n/",
-    filePrefix: "i18n_",
-    fileSuffix: "",
-    forever: true,
-    callback: function (){
-
-    }
-})
-
 function language(l){
     $("[i18n]").i18n({
         defaultLang: l

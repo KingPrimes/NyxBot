@@ -160,5 +160,18 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         }
     }
 
+    public static String getDate(){
+        return getDate(new Date(),"yyyy-MM-dd HH:mm:ss");
+    }
+
+
+    public static String getDate(Date date, String format){
+        if(date == null){
+            return "";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(date);
+    }
+
 
 }

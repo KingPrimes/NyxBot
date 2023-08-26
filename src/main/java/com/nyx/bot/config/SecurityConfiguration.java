@@ -32,6 +32,7 @@ public class SecurityConfiguration {
     @Value("${shiro.ws-config.ws-url}")
     String shiro;
 
+
     /**
      * 配置持久化Token
      */
@@ -39,6 +40,7 @@ public class SecurityConfiguration {
     public PersistentTokenRepository tokenRepository(DataSource dataSource) {
         JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
         repository.setDataSource(dataSource);
+        repository.setCreateTableOnStartup(false);
         return repository;
     }
 
@@ -48,14 +50,16 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+
     //注册过滤器并配置
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenRepository repository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,  PersistentTokenRepository tokenRepository) throws Exception {
         return http
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers(
+                                    new AntPathRequestMatcher("/h2-console/**"),
                                     new AntPathRequestMatcher("/img/**"),
                                     new AntPathRequestMatcher("/css/**"),
                                     new AntPathRequestMatcher("/js/**"),
@@ -87,9 +91,12 @@ public class SecurityConfiguration {
                     //设置记住我的 name 默认为 remember-me
                     me.rememberMeParameter("remember");
                     // 设置token
-                    me.tokenRepository(repository);
+                    me.tokenRepository(tokenRepository);
                     // 设置token存活时常
                     me.tokenValiditySeconds(3600 * 24 * 7);
+                    // 只能通过HTTPS请求
+                    me.useSecureCookie(false);
+
                 })
                 .passwordManagement(pass -> {
                     pass.changePasswordPage("/password");
@@ -106,10 +113,15 @@ public class SecurityConfiguration {
     //设置密码加密方式
     @Bean
     AuthenticationManager authenticationManager() {
+        // 创建DaoAuthenticationProvider实例
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        // 设置用户详情服务
         daoAuthenticationProvider.setUserDetailsService(userDetailService);
+        // 设置不抛出用户未找到异常
         daoAuthenticationProvider.setHideUserNotFoundExceptions(false);
+        // 设置密码加密器
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        // 返回认证管理器
         return new ProviderManager(daoAuthenticationProvider);
     }
 

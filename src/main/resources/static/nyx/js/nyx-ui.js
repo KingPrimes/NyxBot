@@ -181,8 +181,8 @@ var table = {
                     table.get(this.id).responseHandler(res);
                 }
                 var thisOptions = table.config[this.id];
-                if (res.code == web_status.SUCCESS) {
-                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination == 'client') {
+                if (res.code === web_status.SUCCESS) {
+                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination === 'client') {
                         return res.rows;
                     } else {
                         if ($.common.isNotEmpty(thisOptions.rememberSelected) && thisOptions.rememberSelected) {
@@ -300,7 +300,7 @@ var table = {
                 var tableParams = $("#" + currentId).bootstrapTable('getOptions');
                 var pageSize = $.common.isNotEmpty(tableParams.pageSize) ? tableParams.pageSize: table.options.pageSize;
                 var pageNumber = $.common.isNotEmpty(tableParams.pageNumber) ? tableParams.pageNumber: table.options.pageNumber;
-                if (table.options.sidePagination == 'client') {
+                if (table.options.sidePagination === 'client') {
                     return index + 1;
                 }
                 return pageSize * (pageNumber - 1) + index + 1;

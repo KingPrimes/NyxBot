@@ -15,9 +15,9 @@ public class PrivateHelpHtmlController {
 
     @GetMapping("/getHelpHtml")
     public String getHtml(Model model){
-        Map<String,Integer> v = new HashMap<>();
+        Map<String,String> v = new HashMap<>();
         for (Codes value : Codes.values()) {
-            v.put(value.getStr(),value.getPermissions().ordinal());
+            v.put(value.getStr(),value.getPermissions().getStr());
         }
         model.addAttribute("codes",v);
         return "html/help";

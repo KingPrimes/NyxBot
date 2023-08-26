@@ -7,10 +7,10 @@
         <title>NyxBot</title>
         <!-- 避免IE使用兼容模式 -->
         <meta content="IE=edge" http-equiv="X-UA-Compatible">
-        <link rel="shortcut icon" th:href="@{/index.png}"/>
+        <link rel="shortcut icon" th:href="@{/img/index.png}"/>
         <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
         <link rel="stylesheet" th:href="@{/css/jquery.contextMenu.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}"/>
+        <link rel="stylesheet" th:href="@{/css/fontawesome.min.css}"/>
         <link rel="stylesheet" th:href="@{/css/animate.min.css}"/>
         <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
         <link rel="stylesheet" th:href="@{/css/skins.css}"/>
@@ -37,7 +37,7 @@
                                     class="nav-label" i18n="Index">首页</span> </a>
                         </li>
                         <li>
-                            <a class="menuItem" th:href="@{/log/info}"><i class="fa fa-user"></i> <span
+                            <a class="menuItem" th:href="@{/log/info}"><i class="fa fa-calendar-alt"></i> <span
                                     class="nav-label" i18n="Log_Viewing">日志查看</span></a>
                         </li>
                         <li>
@@ -46,31 +46,31 @@
                                     class="fa arrow"></span></a>
                             <ul class="nav nav-second-level collapse">
                                 <li>
-                                    <a class="menuItem" i18n="Config_Bot" th:href="@{/bot/config}">Bot配置</a>
+                                    <a class="menuItem" i18n="Config_Bot" th:href="@{/config/bot}">Bot配置</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Super_Admin" th:href="@{/bot/admin}">超级管理员</a>
+                                    <a class="menuItem" i18n="Config_Super_Admin" th:href="@{/config/admin}">超级管理员</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Group_Black" th:href="@{/bot/black}">群黑名单</a>
+                                    <a class="menuItem" i18n="Config_Group_Black" th:href="@{/config/black/group}">群黑名单</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Prove_Black" th:href="@{/bot/black}">个人黑名单</a>
+                                    <a class="menuItem" i18n="Config_Prove_Black" th:href="@{/config/black/prive}">个人黑名单</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/bot/chatGPT}">ChatGPT</a>
+                                    <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/config/chatGPT}">ChatGPT</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Said" th:href="@{/bot/yi}">文心一言</a>
+                                    <a class="menuItem" i18n="Config_Said" th:href="@{/config/yi}">文心一言</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Image" th:href="@{/bot/image}">绘图</a>
+                                    <a class="menuItem" i18n="Config_Image" th:href="@{/config/image}">绘图</a>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-user"></i> <span class="nav-label"
-                                                                         i18n="Data_Source">本地数据</span><span
+                            <a href="#"><i class="fa fa-database"></i> <span class="nav-label"
+                                                                             i18n="Data_Source">本地数据</span><span
                                     class="fa arrow"></span></a>
                             <ul class="nav nav-second-level collapse">
                                 <li>
@@ -80,7 +80,7 @@
                                     <a class="menuItem" i18n="Data_Heat" th:href="@{/data/ai/heat}">热词</a>
                                 </li>
                                 <li>
-                                    <a href="#"><i class="fa fa-user"></i> <span class="nav-label" i18n="Data_Warframe">Warframe</span><span
+                                    <a href="#"><span class="nav-label" i18n="Data_Warframe">Warframe</span><span
                                             class="fa arrow"></span></a>
                                     <ul class="nav nav-second-level collapse">
                                         <li>
@@ -193,11 +193,12 @@
                             th:data-id="@{/system/main}" th:src="@{/system/main}" width="100%"></iframe>
                 </div>
 
+
                 <div class="footer">
                     <div class="pull-right">
                         <b>
                             <span i18n="Author">作者: </span><span style="color: red">KingPrimes</span> <br/>
-                           <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
+                            <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
                             UID:<span style="color: red">16131052</span>
                         </b>
                     </div>

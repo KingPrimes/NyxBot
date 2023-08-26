@@ -2,7 +2,10 @@ package com.nyx.bot.permissions;
 
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.nyx.bot.entity.BotAdmin;
 import com.nyx.bot.enums.PermissionsEnums;
+import com.nyx.bot.repo.BotAdminRepository;
+import com.nyx.bot.utils.SpringUtils;
 
 import java.util.Objects;
 
@@ -16,17 +19,46 @@ public class Permissions {
      * @param event 所有消息类型
      * @return 是否是管理员
      */
-    public static boolean checkPermissions(Bot bot, AnyMessageEvent event, PermissionsEnums ps) {
-        return isAdmin(bot, event) || PermissionsEnums.ADMIN.equals(ps) || PermissionsEnums.SUPER_ADMIN.equals(ps);
+    public static boolean checkPermissions(Bot bot, AnyMessageEvent event) {
+        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
+        if(byAdminUid==null){
+            return false;
+        }
+        PermissionsEnums permissions = byAdminUid.getPermissions();
+        return Objects.requireNonNull(permissions) == PermissionsEnums.ADMIN || isAdmin(bot, event);
     }
 
     /**
      * 判断用户是否是超级管理员
      * @param userId 用户ID
-     * @param ps 权限
      */
-    public static boolean checkSuperAdmin(Long userId, PermissionsEnums ps) {
-        return PermissionsEnums.SUPER_ADMIN.equals(ps);
+    public static boolean checkSuperAdmin(Long userId) {
+        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(userId);
+        if(byAdminUid==null){
+            return false;
+        }
+        PermissionsEnums permissions = byAdminUid.getPermissions();
+        switch (permissions){
+            case SUPER_ADMIN,MANAGE -> {
+                return true;
+            }
+        }
+       return false;
+    }
+
+    /**
+     * 检查用户权限
+     * @return PermissionsEnums
+     */
+    public static PermissionsEnums checkAdmin(Bot bot, AnyMessageEvent event){
+        if(isAdmin(bot, event)){
+            return PermissionsEnums.ADMIN;
+        }
+        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
+        if(byAdminUid==null){
+            return PermissionsEnums.USER;
+        }
+        return byAdminUid.getPermissions();
     }
 
 
@@ -49,20 +81,4 @@ public class Permissions {
         }
         return role.equals("owner") || role.equals("admin");
     }
-
-    /**
-     * 判断机器人是否是管理员
-     *
-     * @param bot     bot
-     * @param groupId groupId
-     * @return true 是管理员或群主
-     */
-    public static boolean isAdmin(Bot bot, long groupId) {
-        String role = Objects.requireNonNull(bot.getGroupMemberInfo(groupId, bot.getSelfId(), true)).getData().getRole();
-        if (role == null || role.isEmpty()) {
-            return false;
-        }
-        return role.equals("owner") || role.equals("admin");
-    }
-
 }

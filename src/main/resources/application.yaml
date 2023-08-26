@@ -1,6 +1,6 @@
 #是否调试模式
 test:
-  isTest: false
+  isTest: true
 
 #线程池
 async:

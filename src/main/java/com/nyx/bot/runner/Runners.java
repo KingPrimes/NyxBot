@@ -1,9 +1,9 @@
 package com.nyx.bot.runner;
 
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.entity.SysUser;
+import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.AsyncBeanName;
-import com.nyx.bot.repo.SysUserRepository;
+import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.IoUtils;
 import com.nyx.bot.plugin.warframe.utils.WarframeSocket;
@@ -31,7 +31,6 @@ public class Runners {
     //程序启动完成启动浏览器
     @Bean
     public ApplicationRunner browser() {
-
         return args -> {
             if (!test) {
                 IoUtils.index();

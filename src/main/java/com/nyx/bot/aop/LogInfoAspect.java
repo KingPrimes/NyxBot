@@ -2,8 +2,9 @@ package com.nyx.bot.aop;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.annotation.LogInfo;
+import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.BusinessStatus;
-import com.nyx.bot.repo.LogInfoRepository;
+import com.nyx.bot.repo.sys.LogInfoRepository;
 import com.nyx.bot.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -55,7 +56,7 @@ public class LogInfoAspect {
         try {
 
             // *========数据库日志=========*//
-            com.nyx.bot.entity.LogInfo logInfo = new com.nyx.bot.entity.LogInfo();
+            com.nyx.bot.entity.sys.LogInfo logInfo = new com.nyx.bot.entity.sys.LogInfo();
             logInfo.setStatus(BusinessStatus.SUCCESS.ordinal());
             // 请求的地址
             logInfo.setUrl(StringUtils.substring(ServletUtils.getRequest().getRequestURI(), 0, 255));
@@ -91,13 +92,13 @@ public class LogInfoAspect {
      * @param log     日志
      * @param logInfo 操作日志
      */
-    public void getControllerMethodDescription(JoinPoint joinPoint, LogInfo log, com.nyx.bot.entity.LogInfo logInfo, Object jsonResult) {
+    public void getControllerMethodDescription(JoinPoint joinPoint, LogInfo log, com.nyx.bot.entity.sys.LogInfo logInfo, Object jsonResult) {
         // 设置action动作
-        logInfo.setBusinessType(log.businessType());
+        logInfo.setBusinessType(log.businessType().getType());
         // 设置标题
         logInfo.setTitle(log.title());
         // 执行的命令
-        logInfo.setCodes(log.codes());
+        logInfo.setCodes(log.codes().getStr());
         // 请求的群组
         logInfo.setGroupUid(logInfo.getGroupUid());
         // 请求的用户
@@ -119,7 +120,7 @@ public class LogInfoAspect {
      *
      * @param logInfo 操作日志
      */
-    private void setRequestValue(JoinPoint joinPoint,  com.nyx.bot.entity.LogInfo logInfo) {
+    private void setRequestValue(JoinPoint joinPoint,  com.nyx.bot.entity.sys.LogInfo logInfo) {
         Map<String, String[]> map = ServletUtils.getRequest().getParameterMap();
         if (StringUtils.isNotEmpty(map)) {
             String params = JSONObject.toJSONString(map);
@@ -138,6 +139,15 @@ public class LogInfoAspect {
                             case "group" -> logInfo.setGroupUid(Long.valueOf(value[i].toString()));
                             case "rawMsg" -> logInfo.setRawMsg(value[i].toString());
                             case "user" -> logInfo.setUserUid(Long.valueOf(value[i].toString()));
+                            case "data" ->{
+                                if(value[i] instanceof OneBotLogInfoData data){
+                                    logInfo.setBotUid(data.getBotUid());
+                                    logInfo.setUserUid(data.getUserUid());
+                                    logInfo.setRawMsg(data.getRawMsg());
+                                    logInfo.setGroupUid(data.getGroupUid());
+                                    logInfo.setPermissions(data.getPermissionsEnums().getStr());
+                                }
+                            }
                             default -> {
                             }
                         }

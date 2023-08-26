@@ -2,6 +2,7 @@ package com.nyx.bot.annotation;
 
 import com.nyx.bot.enums.BusinessType;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.PermissionsEnums;
 
 import java.lang.annotation.*;
 
@@ -27,6 +28,9 @@ public @interface LogInfo {
      * 操作
      */
     BusinessType businessType() default BusinessType.OTHER;
+
+    //用户等级
+    PermissionsEnums permissions() default PermissionsEnums.OTHER;
 
     /**
      * 请求得群组

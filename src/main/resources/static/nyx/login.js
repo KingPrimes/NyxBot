@@ -17,12 +17,14 @@ function login() {
     $.modal.loading($("#btnSubmit").data("loading"));
     var username = $.common.trim($("input[name='username']").val());
     var password = $.common.trim($("input[name='password']").val());
+    var remember = $("input[name='remember']").val();
     $.ajax({
         type: "post",
         url: ctx + "login",
         data: {
             "username": username,
-            "password": password
+            "password": password,
+            "remember": remember
         },
         success: function (r) {
             if (r.code === web_status.SUCCESS) {

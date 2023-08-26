@@ -4,14 +4,14 @@ package com.nyx.bot.data;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.nyx.bot.entity.Alias;
-import com.nyx.bot.entity.Ephemeras;
-import com.nyx.bot.entity.OrdersItems;
-import com.nyx.bot.entity.Weapons;
-import com.nyx.bot.repo.AliasRepository;
-import com.nyx.bot.repo.EphemerasRepository;
-import com.nyx.bot.repo.OrdersItemsRepository;
-import com.nyx.bot.repo.WeaponsRepository;
+import com.nyx.bot.entity.warframe.Alias;
+import com.nyx.bot.entity.warframe.Ephemeras;
+import com.nyx.bot.entity.warframe.OrdersItems;
+import com.nyx.bot.entity.warframe.Weapons;
+import com.nyx.bot.repo.warframe.AliasRepository;
+import com.nyx.bot.repo.warframe.EphemerasRepository;
+import com.nyx.bot.repo.warframe.OrdersItemsRepository;
+import com.nyx.bot.repo.warframe.WeaponsRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.HttpUtils;
 import com.nyx.bot.utils.SpringUtils;
@@ -20,7 +20,6 @@ import okhttp3.Headers;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -110,7 +109,7 @@ public class WarframeDataSource {
                 return;
             }
 
-            List<OrdersItems> items = JSON.parseObject(s.replaceAll("&", "-")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
+            List<OrdersItems> items = JSON.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
 
             OrdersItemsRepository repository = SpringUtils.getBean(OrdersItemsRepository.class);
             if (repository.findAll().size() != items.size()) {
