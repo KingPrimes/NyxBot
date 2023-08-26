@@ -1,6 +1,6 @@
 <div align="center">
  
-<img src=".github/image/index.png" width="35%">
+![index](https://github.com/KingPrimes/NyxBot/assets/50130875/2620c999-4d63-4d68-8df3-38d4457d9957)
 
 # NYXBot
 
