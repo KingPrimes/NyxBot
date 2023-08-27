@@ -3196,6 +3196,7 @@ ul.unstyled, ol.unstyled {
     overflow: hidden;
     padding: 10px 20px;
     margin: 0 -15px;
+    height: 36px;
 }
 
 .footer.fixed_full {

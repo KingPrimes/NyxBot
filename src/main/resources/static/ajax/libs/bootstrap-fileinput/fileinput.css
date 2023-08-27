@@ -148,7 +148,7 @@ input[type=file].file-loading {
     font-size: 13px;
     font-variant: small-caps;
     color: #999;
-    background: transparent url(../img/loading.gif) top left no-repeat;
+    background: transparent url(loading.gif) top left no-repeat;
 }
 
 .file-object {
@@ -479,7 +479,7 @@ input[type=file].file-loading {
 }
 
 .file-thumb-loading {
-    background: transparent url(../img/loading.gif) no-repeat scroll center center content-box !important;
+    background: transparent url(loading.gif) no-repeat scroll center center content-box !important;
 }
 
 .file-drop-zone {
@@ -518,7 +518,7 @@ input[type=file].file-loading {
 }
 
 .file-uploading {
-    background: url(../img/loading-sm.gif) no-repeat center bottom 10px;
+    background: url(loading-sm.gif) no-repeat center bottom 10px;
     opacity: 0.65;
 }
 
@@ -620,7 +620,7 @@ input[type=file].file-loading {
 }
 
 .file-loading[dir=rtl]:before {
-    background: transparent url(../img/loading.gif) top right no-repeat;
+    background: transparent url(loading.gif) top right no-repeat;
     padding-left: 0;
     padding-right: 20px;
 }

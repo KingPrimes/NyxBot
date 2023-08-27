@@ -1,6 +1,6 @@
 /**
  * 通用js方法封装处理
- * Copyright (c) 2019 zkb
+ * Copyright (c) 2019 ruoyi
  */
 
 // 当前table相关信息
@@ -41,6 +41,7 @@ var table = {
                     method: 'post',
                     height: undefined,
                     sidePagination: "server",
+                    undefinedText: '-',
                     sortName: undefined,
                     sortOrder: "asc",
                     pagination: true,
@@ -87,6 +88,7 @@ var table = {
                     cache: false,                                       // 是否使用缓存
                     height: options.height,                             // 表格的高度
                     striped: options.striped,                           // 是否显示行间隔色
+                    undefinedText: options.undefinedText,               // 数据值为空时显示的内容
                     sortable: true,                                     // 是否启用排序
                     sortStable: true,                                   // 设置为 true 将获得稳定的排序
                     sortName: options.sortName,                         // 排序列名称
@@ -94,7 +96,7 @@ var table = {
                     pagination: options.pagination,                     // 是否显示分页（*）
                     paginationLoop: options.paginationLoop,             // 是否启用分页条无限循环的功能
                     pageNumber: 1,                                      // 初始化加载第一页，默认第一页
-                    pageSize: options.pageSize,                         // 每页的记录行数（*） 
+                    pageSize: options.pageSize,                         // 每页的记录行数（*）
                     pageList: options.pageList,                         // 可供选择的每页的行数（*）
                     firstLoad: options.firstLoad,                       // 是否首次请求加载数据，对于数据较大可以配置false
                     escape: options.escape,                             // 转义HTML字符串
@@ -155,7 +157,7 @@ var table = {
             // 获取实例ID，如存在多个返回#id1,#id2 delimeter分隔符
             getOptionsIds: function(separator) {
                 var _separator = $.common.isEmpty(separator) ? "," : separator;
-                var optionsIds = "";  
+                var optionsIds = "";
                 $.each(table.config, function(key, value){
                     optionsIds += "#" + key + _separator;
                 });
@@ -173,7 +175,7 @@ var table = {
                     isAsc:          params.order
                 };
                 var currentId = $.common.isEmpty(table.options.formId) ? $('form').attr('id') : table.options.formId;
-                return $.extend(curParams, $.common.formToJSON(currentId)); 
+                return $.extend(curParams, $.common.formToJSON(currentId));
             },
             // 请求获取数据后处理回调函数
             responseHandler: function(res) {
@@ -181,8 +183,8 @@ var table = {
                     table.get(this.id).responseHandler(res);
                 }
                 var thisOptions = table.config[this.id];
-                if (res.code === web_status.SUCCESS) {
-                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination === 'client') {
+                if (res.code == web_status.SUCCESS) {
+                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination == 'client') {
                         return res.rows;
                     } else {
                         if ($.common.isNotEmpty(thisOptions.rememberSelected) && thisOptions.rememberSelected) {
@@ -300,7 +302,7 @@ var table = {
                 var tableParams = $("#" + currentId).bootstrapTable('getOptions');
                 var pageSize = $.common.isNotEmpty(tableParams.pageSize) ? tableParams.pageSize: table.options.pageSize;
                 var pageNumber = $.common.isNotEmpty(tableParams.pageNumber) ? tableParams.pageNumber: table.options.pageNumber;
-                if (table.options.sidePagination === 'client') {
+                if (table.options.sidePagination == 'client') {
                     return index + 1;
                 }
                 return pageSize * (pageNumber - 1) + index + 1;
@@ -439,12 +441,12 @@ var table = {
                             type: 'POST',
                             success: function (result) {
                                 if (result.code == web_status.SUCCESS) {
-                                	$.modal.close(index);
+                                    $.modal.close(index);
                                     $.modal.closeAll();
                                     $.modal.alertSuccess(result.msg);
                                     $.table.refresh();
                                 } else if (result.code == web_status.WARNING) {
-                                	$.modal.close(index);
+                                    $.modal.close(index);
                                     $.modal.enable();
                                     $.modal.alertWarning(result.msg)
                                 } else {
@@ -454,7 +456,7 @@ var table = {
                                 }
                             },
                             complete: function () {
-                            	layero.find('#file').val('');
+                                layero.find('#file').val('');
                             }
                         });
                     }
@@ -694,9 +696,7 @@ var table = {
                 var tableId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 if (table.options.type == table_type.bootstrapTable) {
                     var params = $("#" + tableId).bootstrapTable('getOptions');
-                    if ($.common.isNotEmpty(pageNumber)) {
-                        params.pageNumber = pageNumber;
-                    }
+                    params.pageNumber = 1;
                     if ($.common.isNotEmpty(pageSize)) {
                         params.pageSize = pageSize;
                     }
@@ -704,14 +704,7 @@ var table = {
                 } else if (table.options.type == table_type.bootstrapTreeTable) {
                     $("#" + tableId).bootstrapTreeTable('refresh', table.options.ajaxParams);
                 }
-                if ($.common.isNotEmpty(startLayDate) && $.common.isNotEmpty(endLayDate)) {
-                    endLayDate.config.min.year = '';
-                    endLayDate.config.min.month = '';
-                    endLayDate.config.min.date = '';
-                    startLayDate.config.max.year = '2099';
-                    startLayDate.config.max.month = '12';
-                    startLayDate.config.max.date = '31';
-                 }
+                resetDate();
             },
             // 获取选中复选框项
             selectCheckeds: function(name) {
@@ -757,9 +750,9 @@ var table = {
             // 消息提示
             msg: function(content, type) {
                 if (type != undefined) {
-                	top.layer.msg(content, { icon: $.modal.icon(type), time: 1000, shift: 5 });
+                    top.layer.msg(content, { icon: $.modal.icon(type), time: 1000, shift: 5 });
                 } else {
-                	top.layer.msg(content);
+                    top.layer.msg(content);
                 }
             },
             // 错误消息
@@ -798,17 +791,17 @@ var table = {
             // 消息提示，重新加载页面
             msgReload: function(msg, type) {
                 top.layer.msg(msg, {
-                    icon: $.modal.icon(type),
-                    time: 500,
-                    shade: [0.1, '#8F8F8F']
-                },
-                function() {
-                    $.modal.reload();
-                });
+                        icon: $.modal.icon(type),
+                        time: 500,
+                        shade: [0.1, '#8F8F8F']
+                    },
+                    function() {
+                        $.modal.reload();
+                    });
             },
             // 消息提示成功并刷新父窗体
             msgSuccessReload: function(msg) {
-            	$.modal.msgReload(msg, modal_status.SUCCESS);
+                $.modal.msgReload(msg, modal_status.SUCCESS);
             },
             // 获取iframe页的DOM
             getChildFrame: function (index) {
@@ -891,9 +884,9 @@ var table = {
             },
             // 弹出层指定参数选项
             openOptions: function (options) {
-                var _url = $.common.isEmpty(options.url) ? "/404.html" : options.url; 
-                var _title = $.common.isEmpty(options.title) ? "系统窗口" : options.title; 
-                var _width = $.common.isEmpty(options.width) ? "800" : options.width; 
+                var _url = $.common.isEmpty(options.url) ? "/404.html" : options.url;
+                var _title = $.common.isEmpty(options.title) ? "系统窗口" : options.title;
+                var _width = $.common.isEmpty(options.width) ? "800" : options.width;
                 var _height = $.common.isEmpty(options.height) ? ($(window).height() - 50) : options.height;
                 var _btn = ['<i class="fa fa-check"></i> 确认', '<i class="fa fa-close"></i> 关闭'];
                 // 如果是移动端，就使用自适应大小弹窗
@@ -1001,12 +994,12 @@ var table = {
             },
             // 禁用按钮
             disable: function() {
-                var doc = window.top == window.parent ? window.document : window.parent.document;
+                var doc = window.top == window.parent ? top.window.document : window.parent.document;
                 $("a[class*=layui-layer-btn]", doc).addClass("layer-disabled");
             },
             // 启用按钮
             enable: function() {
-                var doc = window.top == window.parent ? window.document : window.parent.document;
+                var doc = window.top == window.parent ? top.window.document : window.parent.document;
                 $("a[class*=layui-layer-btn]", doc).removeClass("layer-disabled");
             },
             // 打开遮罩层
@@ -1062,7 +1055,7 @@ var table = {
                     width: width,
                     height: height,
                     url: _url,
-                    skin: 'layui-layer-gray', 
+                    skin: 'layui-layer-gray',
                     btn: ['关闭'],
                     yes: function (index, layero) {
                         $.modal.close(index);
@@ -1160,19 +1153,6 @@ var table = {
                     $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id));
                 }
             },
-            editStr: function(str) {
-                            table.set();
-                            if ($.common.isEmpty(str) && table.options.type == table_type.bootstrapTreeTable) {
-                                if ($.common.isEmpty(row)) {
-                                    $.modal.alertWarning("请至少选择一条记录");
-                                    return;
-                                }
-                                var url = table.options.updateUrl.replace("{id}", str);
-                                $.modal.open("修改" + table.options.modalName, url);
-                            } else {
-                                $.modal.open("修改" + table.options.modalName, $.operate.editUrl(str));
-                            }
-                        },
             // 修改信息，以tab页展现
             editTab: function(id) {
                 table.set();
@@ -1312,7 +1292,7 @@ var table = {
                 if (result.code == web_status.SUCCESS) {
                     var parent = activeWindow();
                     if ($.common.isEmpty(parent.table)) {
-                    	$.modal.msgSuccessReload(result.msg);
+                        $.modal.msgSuccessReload(result.msg);
                     } else if (parent.table.options.type == table_type.bootstrapTable) {
                         $.modal.close();
                         parent.$.modal.msgSuccess(result.msg);
@@ -1337,8 +1317,8 @@ var table = {
                     var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-panel');
                     var topWindow = $('.Index_iframe[data-id="' + currentId + '"]', topWindow)[0];
                     if ($.common.isNotEmpty(topWindow) && $.common.isNotEmpty(currentId)) {
-                    	var $contentWindow = topWindow.contentWindow;
-                    	$contentWindow.$.modal.msgSuccess(result.msg);
+                        var $contentWindow = topWindow.contentWindow;
+                        $contentWindow.$.modal.msgSuccess(result.msg);
                         $contentWindow.$(".layui-layer-padding").removeAttr("style");
                         if ($contentWindow.table.options.type == table_type.bootstrapTable) {
                             $contentWindow.$.table.refresh();
@@ -1360,13 +1340,6 @@ var table = {
         },
         // 校验封装处理
         validate: {
-            // 判断返回标识是否唯一 false 为存在 true 为不存在
-            unique: function (value) {
-                if (value == "0") {
-                    return true;
-                }
-                return false;
-            },
             // 表单验证
             form: function (formId) {
                 var currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
@@ -1576,6 +1549,10 @@ var table = {
             isNotEmpty: function (value) {
                 return !$.common.isEmpty(value);
             },
+            // 如果值是空，则返回指定默认字符串，否则返回字符串本身
+            nullToDefault: function (value, defaultValue) {
+                return $.common.isEmpty(value) ? defaultValue : value;
+            },
             // 空对象转字符串
             nullToStr: function(value) {
                 if ($.common.isEmpty(value)) {
@@ -1633,12 +1610,12 @@ var table = {
                 if (!date) return;
                 if (!format) format = "yyyy-MM-dd";
                 switch (typeof date) {
-                case "string":
-                    date = new Date(date.replace(/-/g, "/"));
-                    break;
-                case "number":
-                    date = new Date(date);
-                    break;
+                    case "string":
+                        date = new Date(date.replace(/-/g, "/"));
+                        break;
+                    case "number":
+                        date = new Date(date);
+                        break;
                 }
                 if (!date instanceof Date) return;
                 var dict = {
@@ -1655,9 +1632,9 @@ var table = {
                     "ss": ("" + (date.getSeconds() + 100)).substr(1)
                 };
                 return format.replace(/(yyyy|MM?|dd?|HH?|ss?|mm?)/g,
-                function() {
-                    return dict[arguments[0]];
-                });
+                    function() {
+                        return dict[arguments[0]];
+                    });
             },
             // 获取节点数据，支持多层级访问
             getItemField: function (item, field) {
@@ -1732,11 +1709,11 @@ var table = {
             },
             // 获取obj对象长度
             getLength: function(obj) {
-                var count = 0;　　
+                var count = 0;
                 for (var i in obj) {
                     if (obj.hasOwnProperty(i)) {
                         count++;
-                    }　　
+                    }
                 }
                 return count;
             },
@@ -1766,7 +1743,6 @@ var table = {
             },
         }
     });
-
 })(jQuery);
 
 function isJson(json) {

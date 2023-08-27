@@ -127,7 +127,7 @@ body.signin {
 .checkbox-custom input[type="checkbox"]:checked +label:after {
     position: absolute;
     display: inline-block;
-    font-family: 'Glyphicons Halflings';
+	font-family: 'Glyphicons Halflings', serif;
     content: "\e013";
     top: 42%;
     left: 3px;

@@ -1733,7 +1733,7 @@
                 '  </div>\n' +
                 '</div>';
             tClose = $h.closeButton('fileinput-remove');
-            tFileIcon = '<i class="bi-file-earmark-arrow-up"></i>';
+            tFileIcon = '<i class="glyphicon glyphicon-file"></i>';
             // noinspection HtmlUnknownAttribute
             tCaption = '<input readonly class="file-caption-name form-control {class}">\n';
             //noinspection HtmlUnknownAttribute
@@ -1750,7 +1750,7 @@
                 '  <div class="modal-content">\n' +
                 '    <div class="modal-header kv-zoom-header">\n' +
                 '      <h6 class="modal-title kv-zoom-title" id="' + tModalLabel + '"><span class="kv-zoom-caption"></span> <span class="kv-zoom-size"></span></h6>\n' +
-                '      <div class="kv-zoom-actions">{rotate}{toggleheader}{fullscreen}{borderless}{close}</div>\n' +
+                '      <div class="kv-zoom-actions">{toggleheader}{fullscreen}{borderless}{close}</div>\n' +
                 '    </div>\n' +
                 '    <div class="floating-buttons"></div>\n' +
                 '    <div class="kv-zoom-body file-zoom-content {zoomFrameClass}"></div>\n' + '{prev} {next}\n' +
@@ -1966,34 +1966,34 @@
                     showDownload: true,
                     showZoom: true,
                     showDrag: true,
-                    showRotate: true,
-                    removeIcon: '<i class="bi-trash"></i>',
+                    showRotate: false,
+                    removeIcon: '<i class="glyphicon glyphicon-trash"></i>',
                     removeClass: defBtnCss1,
                     removeErrorClass: 'btn btn-sm btn-kv btn-danger',
                     removeTitle: 'Remove file',
-                    uploadIcon: '<i class="bi-upload"></i>',
+                    uploadIcon: '<i class="glyphicon glyphicon-upload"></i>',
                     uploadClass: defBtnCss1,
                     uploadTitle: 'Upload file',
-                    uploadRetryIcon: '<i class="bi-cloud-arrow-up-fill"></i>',
+                    uploadRetryIcon: '<i class="glyphicon glyphicon-repeat"></i>',
                     uploadRetryTitle: 'Retry upload',
-                    downloadIcon: '<i class="bi-download"></i>',
+                    downloadIcon: '<i class="glyphicon glyphicon-download"></i>',
                     downloadClass: defBtnCss1,
                     downloadTitle: 'Download file',
-                    rotateIcon: '<i class="bi-arrow-clockwise"></i>',
+                    rotateIcon: '<i class="glyphicon glyphicon-repeat"></i>',
                     rotateClass: defBtnCss1,
                     rotateTitle: 'Rotate 90 deg. clockwise',
-                    zoomIcon: '<i class="bi-zoom-in"></i>',
+                    zoomIcon: '<i class="glyphicon glyphicon-zoom-in"></i>',
                     zoomClass: defBtnCss1,
                     zoomTitle: 'View Details',
-                    dragIcon: '<i class="bi-arrows-move"></i>',
+                    dragIcon: '<i class="glyphicon glyphicon-move"></i>',
                     dragClass: 'text-primary',
                     dragTitle: 'Move / Rearrange',
                     dragSettings: {},
-                    indicatorNew: '<i class="bi-plus-lg text-warning"></i>',
-                    indicatorSuccess: '<i class="bi-check-lg text-success"></i>',
-                    indicatorError: '<i class="bi-exclamation-lg text-danger"></i>',
-                    indicatorLoading: '<i class="bi-hourglass-bottom text-muted"></i>',
-                    indicatorPaused: '<i class="bi-pause-fill text-primary"></i>',
+                    indicatorNew: '<i class="glyphicon glyphicon-plus-sign text-warning"></i>',
+                    indicatorSuccess: '<i class="glyphicon glyphicon-ok-sign text-success"></i>',
+                    indicatorError: '<i class="glyphicon glyphicon-exclamation-sign text-danger"></i>',
+                    indicatorLoading: '<i class="glyphicon glyphicon-hourglass text-muted"></i>',
+                    indicatorPaused: '<i class="glyphicon glyphicon-pause text-primary"></i>',
                     indicatorNewTitle: 'Not uploaded yet',
                     indicatorSuccessTitle: 'Uploaded',
                     indicatorErrorTitle: 'Upload Error',
@@ -4426,7 +4426,8 @@
                     'filename': filename,
                     'typeCss': typeCss,
                     'footer': footer,
-                    'data': zoom && vZoomData ? self.zoomPlaceholder + '{zoomData}' : vData,
+                    'data': vData,
+//                  'data': zoom && vZoomData ? self.zoomPlaceholder + '{zoomData}' : vData,
                     'template': templ || cat,
                     'style': styleAttribs ? 'style="' + styleAttribs + '"' : '',
                     'zoomData': vZoomData ? encodeURIComponent(vZoomData) : ''
@@ -6267,7 +6268,7 @@
         defBtnCss1 = 'btn btn-sm btn-kv ' + $h.defaultButtonCss(), defBtnCss2 = 'btn ' + $h.defaultButtonCss();
 
     $.fn.fileinput.defaults = {
-        language: 'en',
+        language: 'zh',
         bytesToKB: 1024,
         showCaption: true,
         showBrowse: true,
@@ -6324,13 +6325,12 @@
             return $container.html();
         },
         previewZoomButtonIcons: {
-            prev: '<i class="bi-chevron-left"></i>',
-            next: '<i class="bi-chevron-right"></i>',
-            rotate: '<i class="bi-arrow-clockwise"></i>',
-            toggleheader: '<i class="bi-arrows-expand"></i>',
-            fullscreen: '<i class="bi-arrows-fullscreen"></i>',
-            borderless: '<i class="bi-arrows-angle-expand"></i>',
-            close: '<i class="bi-x-lg"></i>'
+            prev: '<i class="glyphicon glyphicon-triangle-left"></i>',
+            next: '<i class="glyphicon glyphicon-triangle-right"></i>',
+            toggleheader: '<i class="glyphicon glyphicon-resize-vertical"></i>',
+            fullscreen: '<i class="glyphicon glyphicon-fullscreen"></i>',
+            borderless: '<i class="glyphicon glyphicon-resize-full"></i>',
+            close: '<i class="glyphicon glyphicon-remove"></i>'
         },
         previewZoomButtonClasses: {
             prev: 'btn btn-default btn-outline-secondary btn-navigate',
@@ -6425,7 +6425,7 @@
         maxTotalFileCount: 0,
         validateInitialCount: false,
         msgValidationErrorClass: 'text-danger',
-        msgValidationErrorIcon: '<i class="bi-exclamation-circle-fill"></i> ',
+        msgValidationErrorIcon: '<i class="glyphicon glyphicon-exclamation-sign"></i> ',
         msgErrorClass: 'file-error-message',
         progressThumbClass: 'progress-bar progress-bar-striped active progress-bar-animated',
         progressClass: 'progress-bar bg-success progress-bar-success progress-bar-striped active progress-bar-animated',
@@ -6562,6 +6562,110 @@
             close: 'Close detailed preview'
         }
     };
+    
+    $.fn.fileinputLocales.zh = {
+    		sizeUnits: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], 
+            bitRateUnits: ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s', 'EB/s', 'ZB/s', 'YB/s'],
+            fileSingle: '文件',
+            filePlural: '个文件',
+            browseLabel: '选择 &hellip;',
+            removeLabel: '移除',
+            removeTitle: '清除选中文件',
+            cancelLabel: '取消',
+            cancelTitle: '取消进行中的上传',
+            pauseLabel: '暂停',
+            pauseTitle: '暂停上传',
+            uploadLabel: '上传',
+            uploadTitle: '上传选中文件',
+            msgNo: '没有',
+            msgNoFilesSelected: '未选择文件',
+            msgPaused: '已暂停',
+            msgCancelled: '取消',
+            msgPlaceholder: '选择 {files} ...',
+            msgZoomModalHeading: '详细预览',
+            msgFileRequired: '必须选择一个文件上传.',
+            msgSizeTooSmall: '文件 "{name}" (<b>{size}</b>) 必须大于限定大小 <b>{minSize}</b>.',
+            msgSizeTooLarge: '文件 "{name}" (<b>{size}</b>) 超过了允许大小 <b>{maxSize}</b>.',
+            msgFilesTooLess: '你必须选择最少 <b>{n}</b> {files} 来上传. ',
+            msgFilesTooMany: '选择的上传文件个数 <b>({n})</b> 超出最大文件的限制个数 <b>{m}</b>.',
+            msgTotalFilesTooMany: '你最多可以上传 <b>{m}</b> 个文件 (当前有<b>{n}</b> 个文件).',
+            msgFileNotFound: '文件 "{name}" 未找到!',
+            msgFileSecured: '安全限制，为了防止读取文件 "{name}".',
+            msgFileNotReadable: '文件 "{name}" 不可读.',
+            msgFilePreviewAborted: '取消 "{name}" 的预览.',
+            msgFilePreviewError: '读取 "{name}" 时出现了一个错误.',
+            msgInvalidFileName: '文件名 "{name}" 包含非法字符.',
+            msgInvalidFileType: '不正确的类型 "{name}". 只支持 "{types}" 类型的文件.',
+            msgInvalidFileExtension: '不正确的文件扩展名 "{name}". 只支持 "{extensions}" 的文件扩展名.',
+            msgFileTypes: {
+                'image': 'image',
+                'html': 'HTML',
+                'text': 'text',
+                'video': 'video',
+                'audio': 'audio',
+                'flash': 'flash',
+                'pdf': 'PDF',
+                'object': 'object'
+            },
+            msgUploadAborted: '该文件上传被中止',
+            msgUploadThreshold: '处理中 &hellip;',
+            msgUploadBegin: '正在初始化 &hellip;',
+            msgUploadEnd: '完成',
+            msgUploadResume: '继续上传 &hellip;',
+            msgUploadEmpty: '无效的文件上传.',
+            msgUploadError: '上传出错',
+            msgDeleteError: '删除出错',
+            msgProgressError: '上传出错',
+            msgValidationError: '验证错误',
+            msgLoading: '加载第 {index} 文件 共 {files} &hellip;',
+            msgProgress: '加载第 {index} 文件 共 {files} - {name} - {percent}% 完成.',
+            msgSelected: '{n} {files} 选中',
+            msgProcessing: '处理中 ...',
+            msgFoldersNotAllowed: '只支持拖拽文件! 跳过 {n} 拖拽的文件夹.',
+            msgImageWidthSmall: '图像文件的"{name}"的宽度必须是至少{size}像素.',
+            msgImageHeightSmall: '图像文件的"{name}"的高度必须至少为{size}像素.',
+            msgImageWidthLarge: '图像文件"{name}"的宽度不能超过{size}像素.',
+            msgImageHeightLarge: '图像文件"{name}"的高度不能超过{size}像素.',
+            msgImageResizeError: '无法获取的图像尺寸调整。',
+            msgImageResizeException: '调整图像大小时发生错误。<pre>{errors}</pre>',
+            msgAjaxError: '{operation} 发生错误. 请重试!',
+            msgAjaxProgressError: '{operation} 失败',
+            msgDuplicateFile: '文件 "{name}",大小 "{size}" 已经被选中.忽略相同的文件.',
+            msgResumableUploadRetriesExceeded:  '文件 <b>{file}</b> 上传失败超过 <b>{max}</b> 次重试 ! 错误详情: <pre>{error}</pre>',
+            msgPendingTime: '{time} 剩余',
+            msgCalculatingTime: '计算剩余时间',
+            ajaxOperations: {
+                deleteThumb: '删除文件',
+                uploadThumb: '上传文件',
+                uploadBatch: '批量上传',
+                uploadExtra: '表单数据上传'
+            },
+            dropZoneTitle: '拖拽文件到这里 &hellip;<br>支持多文件同时上传',
+            dropZoneClickTitle: '<br>(或点击{files}按钮选择文件)',
+            fileActionSettings: {
+                removeTitle: '删除文件',
+                uploadTitle: '上传文件',
+                downloadTitle: '下载文件',
+                uploadRetryTitle: '重试',
+                rotateTitle: '顺时针旋转90度',
+                zoomTitle: '查看详情',
+                dragTitle: '移动 / 重置',
+                indicatorNewTitle: '没有上传',
+                indicatorSuccessTitle: '上传',
+                indicatorErrorTitle: '上传错误',
+                indicatorPausedTitle: '上传已暂停',
+                indicatorLoadingTitle:  '上传 &hellip;'
+            },
+            previewZoomButtonTitles: {
+                prev: '预览上一个文件',
+                next: '预览下一个文件',
+                rotate: '顺时针旋转90度',
+                toggleheader: '缩放',
+                fullscreen: '全屏',
+                borderless: '无边界模式',
+                close: '关闭当前预览'
+            }
+        };
 
     $.fn.fileinput.Constructor = FileInput;
 

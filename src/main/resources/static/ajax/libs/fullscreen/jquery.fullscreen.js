@@ -1,7 +1,7 @@
 /**
  * 基于jQuery FullScreen修改
  * 新增支持IE全屏显示
- * Copyright (c) 2019 zkb
+ * Copyright (c) 2019 ruoyi
  */
 (function(jQuery) {
     
