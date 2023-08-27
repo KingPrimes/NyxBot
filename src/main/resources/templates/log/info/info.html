@@ -10,19 +10,17 @@
                 <div class="select-list">
                     <ul>
                         <li>
-                            <label>指令：</label><select name="codes" th:with="type=${code}">
+                            <label>指令：</label><select name="codes" th:with="type=${code}" class="form-select form-select-sm">
                             <option value="">所有</option>
                             <option th:each="dict : ${type}" th:text="${dict.getStr()}" th:value="${dict.getStr()}"></option>
                             </select>
                         </li>
                         <li>
-                            <label>群组： </label>
-                            <input type="text" placeholder="QQ群"
-                                   name="groupUid"/>
+                            <label>群组： </label><input type="text" placeholder="QQ群" class="form-control"
+                                                        name="groupUid"/>
                         </li>
-
                         <li>
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="searchPre()"><i
+                            <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
                                     class="fa fa-search"></i>&nbsp;搜索</a>
                             <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
                                     class="fa fa-refresh"></i>&nbsp;重置</a>

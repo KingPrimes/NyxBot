@@ -15,6 +15,11 @@
         <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
         <link rel="stylesheet" th:href="@{/css/skins.css}"/>
         <link rel="stylesheet" th:href="@{/nyx/css/nyx-ui.css}"/>
+        <style>
+            embed{
+                width: 15%;
+            }
+        </style>
     </head>
     <body class="fixed-sidebar full-height-layout gray-bg" style="overflow: hidden"
           th:classappend="${isMobile} ? 'canvas-menu'">
@@ -41,30 +46,51 @@
                                     class="nav-label" i18n="Log_Viewing">日志查看</span></a>
                         </li>
                         <li>
+                            <a class="menuItem" th:href="@{/services}"><i class="fa fa-server"></i> <span
+                                    class="nav-label" i18n="Services">服务</span></a>
+                        </li>
+                        <li>
                             <a href="#"><i class="fa fa-edit"></i> <span class="nav-label"
                                                                          i18n="Config">配置</span><span
                                     class="fa arrow"></span></a>
                             <ul class="nav nav-second-level collapse">
                                 <li>
-                                    <a class="menuItem" i18n="Config_Bot" th:href="@{/config/bot}">Bot配置</a>
+                                    <a class="menuItem" i18n="Config_Bot" th:href="@{/config/bot}">
+                                        <i class="fa fa-robot"></i>
+                                        Bot配置</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Super_Admin" th:href="@{/config/admin}">超级管理员</a>
+                                    <a class="menuItem" i18n="Config_Super_Admin"
+                                       th:href="@{/config/admin}">
+                                        <i class="fa fa-user-cog"></i>
+                                        超级管理员</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Group_Black" th:href="@{/config/black/group}">群黑名单</a>
+                                    <a class="menuItem" i18n="Config_Group_Black"
+                                       th:href="@{/config/black/group}">
+                                        <i class="fa fa-users-slash"></i>
+                                        群黑名单</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Prove_Black" th:href="@{/config/black/prive}">个人黑名单</a>
+                                    <a class="menuItem" i18n="Config_Prove_Black"
+                                       th:href="@{/config/black/prive}">
+                                        <i class="fa fa-user-slash"></i>
+                                        个人黑名单</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/config/chatGPT}">ChatGPT</a>
+                                    <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/config/chatGPT}">
+                                        <embed th:src="@{/svg/chat-gpt.svg}">
+                                        ChatGPT</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Said" th:href="@{/config/yi}">文心一言</a>
+                                    <a class="menuItem" i18n="Config_Said" th:href="@{/config/yi}">
+                                        <embed th:src="@{/svg/yiyan.svg}">
+                                        文心一言</a>
                                 </li>
                                 <li>
-                                    <a class="menuItem" i18n="Config_Image" th:href="@{/config/image}">绘图</a>
+                                    <a class="menuItem" i18n="Config_Image" th:href="@{/config/image}">
+                                        <embed th:src="@{/svg/stable-diffusion.svg}"/>
+                                        绘图</a>
                                 </li>
                             </ul>
                         </li>
@@ -80,7 +106,9 @@
                                     <a class="menuItem" i18n="Data_Heat" th:href="@{/data/ai/heat}">热词</a>
                                 </li>
                                 <li>
-                                    <a href="#"><span class="nav-label" i18n="Data_Warframe">Warframe</span><span
+                                    <a href="#">
+                                        <embed th:src="@{/svg/warframe.svg}">
+                                        <span class="nav-label" i18n="Data_Warframe">Warframe</span><span
                                             class="fa arrow"></span></a>
                                     <ul class="nav nav-second-level collapse">
                                         <li>
@@ -146,8 +174,6 @@
                                     </li>
                                 </ul>
                             </li>
-                        </ul>
-                        <ul class="nav navbar-top-links navbar-right welcome-message">
                             <li class="dropdown user-menu">
                                 <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
                                     <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
