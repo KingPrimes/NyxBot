@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class WarframeDataSource {
 
-    static String DataSourceUrl = "https://ghproxy.com/https://raw.githubusercontent.com/NYXBots/DataSource/main/";
+    static String DataSourceUrl = "https://ghproxy.com/https://raw.githubusercontent.com/KingPrimes/DataSource/main/warframe/";
 
     public static void init() {
         log.info("开始插入Warframe数据！");
