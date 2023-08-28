@@ -1,67 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
     <th:block th:insert="~{include :: header('服务')}"/>
+    <style>
+        embed{
+            width: 25%;
+        }
+    </style>
     <body>
         <div class="wrapper wrapper-content animated fadeInRight ibox-content">
             <form class="row">
-                <div class="col-sm-4">
-                    <label class="col-sm-3 control-label" for="bilibili">
-                        <embed th:src="@{/svg/bilibili.svg}" style="width: 25%">
-                        Bilibili:
+                <div class="col-sm-4" th:each="s:${services}">
+                    <label class="col-sm-3 control-label" th:for="${s.getService().name()}">
+                        <embed th:src="@{'/svg/'+${s.getService().name()}+'.svg'}" >
+                        <div th:text="${s.getService().name()}"></div>
                     </label>
                     <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" for="bilibili">
-                            <input id="bilibili" name="bilibili" type="checkbox"> <span></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <label class="col-sm-3 control-label" for="warframe">
-                        <embed th:src="@{/svg/warframe.svg}" style="width: 25%">
-                        Warframe:
-                    </label>
-                    <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" for="warframe">
-                            <input id="warframe" name="warframe" type="checkbox"> <span></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <label class="col-sm-3 control-label" for="chatgpt">
-                        <embed th:src="@{/svg/chat-gpt.svg}" style="width: 25%">
-                        ChatGPT:
-                    </label>
-                    <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" for="chatgpt">
-                            <input id="chatgpt" name="chatgpt" type="checkbox"> <span></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="col-sm-4">
-                    <label class="col-sm-3 control-label" for="epicgames">
-                        <embed th:src="@{/svg/epic-games.svg}" style="width: 25%">
-                        EpicGames:
-                    </label>
-                    <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" for="epicgames">
-                            <input id="epicgames" name="epicgames" type="checkbox"> <span></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <label class="col-sm-3 control-label" for="stable-diffusion">
-                        <embed th:src="@{/svg/stable-diffusion.svg}" style="width: 25%">
-                        StableDiffusion:
-                    </label>
-                    <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" for="stable-diffusion">
-                            <input id="stable-diffusion" name="stable-diffusion" type="checkbox"> <span></span>
+                        <label class="toggle-switch switch-solid" th:for="${s.getService().name()}">
+                            <input th:id="${s.getService().name()}" th:name="${s.getService().name()}" type="checkbox" th:value="${s.getId()}" onclick="check(this)" th:checked="${s.getSwit()}"> <span></span>
                         </label>
                     </div>
                 </div>
             </form>
         </div>
         <th:block th:insert="~{include :: footer}"/>
+        <script>
+            const prefix = ctx + "services";
+            function check(check){
+                $.operate.post(prefix,{"id":check.value,"name":check.name,"check":check.checked})
+            }
+        </script>
     </body>
 </html>
