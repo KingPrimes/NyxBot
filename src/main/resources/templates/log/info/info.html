@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('指令日志列表')}"/>
+    <th:block th:insert="~{include :: header('日志列表')}"/>
     <th:block th:insert="~{include :: bootstrap-select-css}"/>
 <body class="gray-bg">
 <div class="container-div">
@@ -49,7 +49,7 @@
             exportUrl: prefix + "/export",
             queryParams: queryParams,
             sortOrder: "desc",
-            modalName: "日常日志",
+            modalName: "日志",
             escape: true,
             showPageGo: true,
             rememberSelected: true,
