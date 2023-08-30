@@ -31,8 +31,8 @@ public class ServicesController extends BaseController {
         services.setId(id);
         services.setService(ServicesEnums.valueOf(name));
         services.setSwit(check);
-        Services s = repository.save(services);
-        if(s!=null){
+        services = repository.save(services);
+        if (services != null) {
             return success();
         }
         return error();
