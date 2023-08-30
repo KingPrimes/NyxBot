@@ -3,6 +3,7 @@ package com.nyx.bot.core.controller;
 
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.page.TableDataInfo;
+import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.ServletUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -126,8 +127,8 @@ public class BaseController {
     /**
      * 返回错误码消息
      */
-    public AjaxResult error(AjaxResult.Type type, String message) {
-        return new AjaxResult(type, message);
+    public AjaxResult error(HttpCodeEnum code, String message) {
+        return new AjaxResult(code, message);
     }
 
     /**

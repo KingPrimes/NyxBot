@@ -189,7 +189,7 @@ public class HtmlToImage {
      * @return 图片流
      */
     public static ByteArrayOutputStream conver(String url) {
-        String html = HttpUtils.sendGet(url);
+        String html = HttpUtils.sendGet(url).getBody();
         int width = getWidth(html);
         html = outH(html);
         return tmpHtmlToImageByteArray(html, width);

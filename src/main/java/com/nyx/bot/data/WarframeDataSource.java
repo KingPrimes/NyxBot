@@ -4,14 +4,11 @@ package com.nyx.bot.data;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.nyx.bot.entity.warframe.Alias;
-import com.nyx.bot.entity.warframe.Ephemeras;
-import com.nyx.bot.entity.warframe.OrdersItems;
-import com.nyx.bot.entity.warframe.Weapons;
-import com.nyx.bot.repo.warframe.AliasRepository;
-import com.nyx.bot.repo.warframe.EphemerasRepository;
-import com.nyx.bot.repo.warframe.OrdersItemsRepository;
-import com.nyx.bot.repo.warframe.WeaponsRepository;
+import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.entity.warframe.*;
+import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.warframe.*;
+import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.HttpUtils;
 import com.nyx.bot.utils.SpringUtils;
@@ -26,29 +23,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class WarframeDataSource {
 
-    static String DataSourceUrl = "https://ghproxy.com/https://raw.githubusercontent.com/KingPrimes/DataSource/main/warframe/";
-
     public static void init() {
         log.info("开始插入Warframe数据！");
         getAlias();
         getMarket();
         getWeapons();
         getEphemeras();
+        initTranslation();
     }
 
     private static void getEphemeras() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取幻纹信息！");
-            Headers pairs = Headers.of("language", "zh-hans");
-            String s = HttpUtils.sendGet("https://api.warframe.market/v1/lich/ephemeras", "", pairs);
-            if (s.contains("timout") || s.contains("error")) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("赤毒幻纹信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
+            String s = body.getBody();
             List<Ephemeras> ephemeras = JSONObject.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class);
 
-            s = HttpUtils.sendGet("https://api.warframe.market/v1/sister/ephemeras", "", pairs);
-            if (s.contains("timout") || s.contains("error")) {
+            body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("信条幻纹信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
@@ -59,9 +55,9 @@ public class WarframeDataSource {
             if (repository.findAll().size() != ephemeras.size()) {
                 AtomicInteger i = new AtomicInteger();
                 ephemeras.forEach(e -> {
-                    if(repository.findAll().isEmpty()){
+                    if (repository.findAll().isEmpty()) {
                         i.addAndGet(repository.addEphemeras(e));
-                    }else{
+                    } else {
                         e.setId((long) (repository.queryMaxId() + 1));
                         i.addAndGet(repository.addEphemeras(e));
                     }
@@ -71,30 +67,39 @@ public class WarframeDataSource {
         });
     }
 
-    ;
-
     private static void getAlias() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取数据！");
-            String s = HttpUtils.sendGet(DataSourceUrl + "warframe_alias.json");
-            if (s.contains("timout") || s.contains("error")) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "alias.json");
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("别名表初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            JSONObject object = JSON.parseObject(s);
+            JSONObject object = JSON.parseObject(body.getBody(), JSONReader.Feature.SupportSmartMatch);
             List<Alias> records = object.getJSONArray("RECORDS").toJavaList(Alias.class);
             AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
-            AtomicInteger x = new AtomicInteger();
+            // 更新
             if (aliasR.findAll().size() != records.size()) {
-                records.forEach(a -> {
-                    if(aliasR.findAll().isEmpty()){
-                        x.addAndGet(aliasR.addAlias(a));
-                    }else{
-                        a.setId((long) (aliasR.queryMaxId() + 1));
-                        x.addAndGet(aliasR.addAlias(a));
-                    }
-                });
-                log.info("共更新Warframe别名表 {} 条数据！", x);
+                records = aliasR.saveAll(records);
+                log.info("共更新Warframe别名表 {} 条数据！", records.size());
+            }
+        });
+    }
+
+    private static void initTranslation() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始获取翻译数据！");
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "translation.json");
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("翻译表初始化错误！未获取到数据信息！请检查网络！");
+                return;
+            }
+            JSONObject object = JSON.parseObject(body.getBody());
+            List<Translation> records = object.getJSONArray("RECORDS").toJavaList(Translation.class);
+            TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
+            if (t.findAll().size() != records.size()) {
+                records = t.saveAll(records);
+                log.info("共更新Warframe翻译表 {} 条数据！", records.size());
             }
         });
     }
@@ -102,23 +107,22 @@ public class WarframeDataSource {
     private static void getMarket() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取数据！");
-            Headers pairs = Headers.of("language", "zh-hans");
-            String s = HttpUtils.sendGet("https://api.warframe.market/v1/items", "", pairs);
-            if (s.contains("timout") || s.contains("error")) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("Market初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
 
-            List<OrdersItems> items = JSON.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
+            List<OrdersItems> items = JSON.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
 
             OrdersItemsRepository repository = SpringUtils.getBean(OrdersItemsRepository.class);
             if (repository.findAll().size() != items.size()) {
                 AtomicInteger size = new AtomicInteger();
                 items.forEach(i -> {
-                    if(repository.findAll().isEmpty()){
+                    if (repository.findAll().isEmpty()) {
                         size.addAndGet(repository.addOrdersItems(i));
-                    }else{
-                        i.setId((long) (repository.queryMaxId() + 1));
+                    } else {
+                        i.setId(repository.findTopByOrderByIdDesc().getId() + 1);
                         size.addAndGet(repository.addOrdersItems(i));
                     }
                 });
@@ -130,29 +134,28 @@ public class WarframeDataSource {
     private static void getWeapons() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取武器信息！");
-            Headers pairs = Headers.of("language", "zh-hans");
-            String s = HttpUtils.sendGet("https://api.warframe.market/v1/lich/weapons", "", pairs);
-            if (s.contains("timout") || s.contains("error")) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("赤毒武器信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            List<Weapons> weapons = JSONObject.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class);
+            List<Weapons> weapons = JSONObject.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class);
 
 
-            s = HttpUtils.sendGet("https://api.warframe.market/v1/sister/weapons", "", pairs);
-            if (s.contains("timout") || s.contains("error")) {
+            body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("信条武器信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            weapons.addAll(JSONObject.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class));
+            weapons.addAll(JSONObject.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class));
 
             WeaponsRepository repository = SpringUtils.getBean(WeaponsRepository.class);
             AtomicInteger i = new AtomicInteger();
             if (repository.findAll().size() != weapons.size()) {
                 weapons.forEach(w -> {
-                    if(repository.findAll().isEmpty()){
+                    if (repository.findAll().isEmpty()) {
                         i.addAndGet(repository.addWeapons(w));
-                    }else{
+                    } else {
                         w.setId((long) (repository.queryMaxId() + 1));
                         i.addAndGet(repository.addWeapons(w));
                     }

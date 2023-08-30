@@ -4,6 +4,7 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.OneBotLogInfoData;
+import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.HttpUtils;
@@ -33,11 +34,11 @@ public class ImageUrlUtils {
         ;
     }
 
-    public ImageUrlUtils(String url,Bot bot, AnyMessageEvent event,Boolean isGetOrPost){
-        if(isGetOrPost == null){
-            isGetOrPost = true;
+    public ImageUrlUtils(String url, Bot bot, AnyMessageEvent event, Boolean isGet) {
+        if (isGet == null) {
+            isGet = true;
         }
-        if(isGetOrPost){
+        if (isGet) {
             builder
                     .append(Constants.LOCALHOST)
                     .append("api/")
@@ -61,6 +62,13 @@ public class ImageUrlUtils {
         }
     }
 
+    public ImageUrlUtils(String url) {
+        builder
+                .append(Constants.LOCALHOST)
+                .append("api/")
+                .append(url);
+    }
+
     public ImageUrlUtils(){
 
     }
@@ -73,12 +81,12 @@ public class ImageUrlUtils {
         return new ImageUrlUtils(url, bot,event,true).build();
     }
 
-    public static byte[] builderBase64(String url,Bot bot,AnyMessageEvent event){
+    public static HttpUtils.Body builderBase64(String url, Bot bot, AnyMessageEvent event) {
         String build = new ImageUrlUtils(url, bot, event,true).build();
         return HttpUtils.sendGetForFile(build);
     }
 
-    public static byte[] builderBase64Post(String url,Bot bot,AnyMessageEvent event){
+    public static HttpUtils.Body builderBase64Post(String url, Bot bot, AnyMessageEvent event) {
         String build = new ImageUrlUtils(url, bot, event,false).build();
         OneBotLogInfoData oneBotLogInfoData = new OneBotLogInfoData();
         oneBotLogInfoData.setBotUid(bot.getSelfId());
@@ -87,7 +95,16 @@ public class ImageUrlUtils {
         oneBotLogInfoData.setRawMsg(event.getRawMessage());
         oneBotLogInfoData.setTime(DateUtils.getDate());
         oneBotLogInfoData.setPermissionsEnums(Permissions.checkAdmin(bot, event));
-        return HttpUtils.sendPostForFile(build, oneBotLogInfoData.toString());
+        HttpUtils.Body body = HttpUtils.sendPostForFile(build, oneBotLogInfoData.toString());
+        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event, "图片上传失败，请检查网络连接", false);
+        }
+        return body;
+    }
+
+    public static HttpUtils.Body builderBase64Post(String url, OneBotLogInfoData data) {
+        String build = new ImageUrlUtils(url).build();
+        return HttpUtils.sendPostForFile(build, data.toString());
     }
 
     private String build(){

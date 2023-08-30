@@ -1,6 +1,7 @@
 package com.nyx.bot.core;
 
 import com.alibaba.fastjson2.JSON;
+import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.StringUtils;
 
@@ -33,23 +34,23 @@ public class AjaxResult extends HashMap<String,Object> {
     /**
      * 初始化一个新创建的 AjaxResult 对象
      *
-     * @param type 状态类型
+     * @param code 状态类型
      * @param msg  返回内容
      */
-    public AjaxResult(Type type, String msg) {
-        super.put(CODE_TAG, type.value);
+    public AjaxResult(HttpCodeEnum code, String msg) {
+        super.put(CODE_TAG, code.getCode());
         super.put(MSG_TAG, msg);
     }
 
     /**
      * 初始化一个新创建的 AjaxResult 对象
      *
-     * @param type 状态类型
+     * @param code 状态类型
      * @param msg  返回内容
      * @param data 数据对象
      */
-    public AjaxResult(Type type, String msg, Object data) {
-        super.put(CODE_TAG, type.value);
+    public AjaxResult(HttpCodeEnum code, String msg, Object data) {
+        super.put(CODE_TAG, code.getCode());
         super.put(MSG_TAG, msg);
         if (StringUtils.isNotNull(data)) {
             super.put(DATA_TAG, data);
@@ -92,7 +93,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 成功消息
      */
     public static AjaxResult success(String msg, Object data) {
-        return new AjaxResult(Type.SUCCESS, msg, data);
+        return new AjaxResult(HttpCodeEnum.SUCCESS, msg, data);
     }
 
     /**
@@ -113,7 +114,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 警告消息
      */
     public static AjaxResult warn(String msg, Object data) {
-        return new AjaxResult(Type.WARN, msg, data);
+        return new AjaxResult(HttpCodeEnum.WARN, msg, data);
     }
 
     /**
@@ -143,7 +144,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 警告消息
      */
     public static AjaxResult error(String msg, Object data) {
-        return new AjaxResult(Type.ERROR, msg, data);
+        return new AjaxResult(HttpCodeEnum.ERROR, msg, data);
     }
 
     /**
@@ -161,7 +162,7 @@ public class AjaxResult extends HashMap<String,Object> {
      * @return 结果
      */
     public boolean isError() {
-        return Objects.equals(Type.ERROR.value, this.get(CODE_TAG));
+        return Objects.equals(HttpCodeEnum.ERROR, this.get(CODE_TAG));
     }
 
     /**
