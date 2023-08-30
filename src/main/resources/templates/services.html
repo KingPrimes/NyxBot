@@ -10,15 +10,23 @@
         <div class="wrapper wrapper-content animated fadeInRight ibox-content">
             <form class="row">
                 <div class="col-sm-4" th:each="s:${services}">
-                    <label class="col-sm-3 control-label" th:for="${s.getService().name()}">
-                        <embed th:src="@{'/svg/'+${s.getService().name()}+'.svg'}" >
-                        <div th:text="${s.getService().name()}"></div>
-                    </label>
-                    <div class="col-sm-3">
-                        <label class="toggle-switch switch-solid" th:for="${s.getService().name()}">
-                            <input th:id="${s.getService().name()}" th:name="${s.getService().name()}" type="checkbox" th:value="${s.getId()}" onclick="check(this)" th:checked="${s.getSwit()}"> <span></span>
+                    <div style="width: 350px;display: flex;align-items: center;height: 45px;">
+                        <label class="col-sm-3 control-label"
+                               style="display: flex;align-items: center;width: 50%;margin: 0"
+                               th:for="${s.getService().name()}">
+                            <embed th:src="@{'/svg/'+${s.getService().name()}+'.svg'}">
+                            <div style="line-height: normal;" th:text="${s.getService().name()}"></div>
                         </label>
+                        <div class="col-sm-3" style="display: flex;align-items: center;width: 30%">
+                            <label class="toggle-switch switch-solid" style="margin: 0;padding: 0"
+                                   th:for="${s.getService().name()}">
+                                <input onclick="check(this)" th:checked="${s.getSwit()}"
+                                       th:id="${s.getService().name()}" th:name="${s.getService().name()}" th:value="${s.getId()}"
+                                       type="checkbox"> <span></span>
+                            </label>
+                        </div>
                     </div>
+                    <div style="flex: 1"></div>
                 </div>
             </form>
         </div>
