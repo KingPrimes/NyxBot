@@ -12,14 +12,18 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"zhCn", "usEn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"cn", "en"}))
 public class Translation extends BaseEntity {
     @Id
     //自增
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @JsonProperty("zh_cn")
-    String zhCn;
-    @JsonProperty("us_en")
-    String usEn;
+    @JsonProperty("cn")
+    String cn;
+    @JsonProperty("en")
+    String en;
+    @JsonProperty("is_prime")
+    Boolean isPrime;
+    @JsonProperty("is_set")
+    Boolean isSet;
 }

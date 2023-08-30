@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "orders_items", uniqueConstraints = @UniqueConstraint(name = "ordersItems", columnNames = {"itemName", "urlName"}))
+@Table(name = "orders_items", uniqueConstraints = @UniqueConstraint(name = "ordersItems", columnNames = {"itemName", "urlName"}), indexes = @Index(columnList = "orderId"))
 public class OrdersItems extends BaseEntity {
 
     @Id

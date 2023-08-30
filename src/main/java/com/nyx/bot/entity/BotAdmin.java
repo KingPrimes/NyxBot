@@ -2,10 +2,7 @@ package com.nyx.bot.entity;
 
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.PermissionsEnums;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,6 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class BotAdmin extends BaseEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     Long botUid;
     Long adminUid;
