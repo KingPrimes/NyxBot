@@ -2,6 +2,7 @@ package com.nyx.bot.repo.warframe;
 
 import com.nyx.bot.entity.warframe.OrdersItems;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Jpa 操作数据源 接口
  */
 @Repository
-public interface OrdersItemsRepository extends JpaRepository<OrdersItems,Long> {
+public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>, JpaSpecificationExecutor<OrdersItems> {
 
     /**
      * 添加数据
@@ -26,6 +27,8 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems,Long> {
     Integer addOrdersItems(@Param("items") OrdersItems items);
 
 
-    @Query(value = "select max(ID) from ORDERS_ITEMS",nativeQuery = true)
-    Integer queryMaxId();
+    /**
+     * 查询最大ID的数据
+     */
+    OrdersItems findTopByOrderByIdDesc();
 }
