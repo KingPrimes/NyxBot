@@ -4,7 +4,7 @@ import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.repo.impl.sys.LogInfoRepositoryImpl;
+import com.nyx.bot.repo.impl.sys.LogInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class LogInfoController extends BaseController {
 
     @Autowired
-    LogInfoRepositoryImpl repository;
+    LogInfoService repository;
 
     String prefix = "log/info";
 

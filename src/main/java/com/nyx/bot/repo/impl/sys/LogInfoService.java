@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-public class LogInfoRepositoryImpl {
+public class LogInfoService {
     @Autowired
     LogInfoRepository repository;
 
