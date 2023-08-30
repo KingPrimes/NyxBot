@@ -1,5 +1,6 @@
 package com.nyx.bot.config;
 
+import com.nyx.bot.utils.CacheUtils;
 import org.cache2k.extra.spring.SpringCache2kCacheManager;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -21,11 +22,11 @@ public class CachingConfig {
         return new SpringCache2kCacheManager()
                 .addCaches(
                         //配置名称为 warframe-socket-data 的缓存策略， eternal永不过期， entryCapacity 可以有多少个缓存
-                        b->b.name("warframe-socket-data").eternal(true).entryCapacity(1),
+                        b->b.name(CacheUtils.WARFRAME_SOCKET_DATA).eternal(true).entryCapacity(1),
                         //配置名称为 group-captcha 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
-                        b->b.name("group-captcha").expireAfterWrite(30, TimeUnit.SECONDS).entryCapacity(10000),
+                        b->b.name(CacheUtils.GROUP_CAPTCHA).expireAfterWrite(30, TimeUnit.SECONDS).entryCapacity(10000),
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
-                        b->b.name("system").permitNullValues(true).entryCapacity(100));
+                        b->b.name(CacheUtils.SYSTEM).permitNullValues(true).entryCapacity(100));
     }
 
 }
