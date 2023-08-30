@@ -1,5 +1,7 @@
 package com.nyx.bot.utils;
 
+import com.nyx.bot.enums.HttpCodeEnum;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
@@ -23,38 +25,42 @@ public class HttpUtils {
     private static final OkHttpClient client = new OkHttpClient();
 
 
-    public static String sendGet(String url){
-        return  sendGet(url,"");
+    public static Body sendGet(String url) {
+        return sendGet(url, "");
     }
 
-    public static String sendGet(String url, String param){
-        return sendGet(url,param,null);
+    public static Body sendGet(String url, String param) {
+        return sendGet(url, param, null);
+    }
+
+    public static Body sendGet(String url, Headers headers) {
+        return sendGet(url, "", headers);
     }
 
 
     /**
      * Http Get请求
-     * @param url 请求地址
-     * @param param 请求参数
+     *
+     * @param url     请求地址
+     * @param param   请求参数
      * @param headers 请求头
      * @return 返回的文本
      */
-    public static String sendGet(String url, String param, Headers headers) {
+    public static Body sendGet(String url, String param, Headers headers) {
 
         try (Response response = client.newCall(send(url, param, headers)).execute()) {
-
-            AtomicReference<String> tmp = new AtomicReference<>("");
-
+            Body body = new Body();
             Optional.ofNullable(response.body().string()).ifPresentOrElse(r -> {
-                tmp.set(r);
+                body.setBody(r);
+                body.setCode(HttpCodeEnum.SUCCESS);
                 response.close();
-            },()->{
-                tmp.set("timeout");
+            }, () -> {
+                body.setCode(HttpCodeEnum.REQUEST_TIMEOUT);
             });
 
-            return tmp.get();
+            return body;
         } catch (IOException e) {
-            return "error";
+            return new Body(HttpCodeEnum.ERROR);
         }
     }
 
@@ -66,7 +72,7 @@ public class HttpUtils {
             urlNameString = url;
         }
 
-        if(headers == null){
+        if (headers == null) {
             return new Request.Builder()
                     .url(urlNameString)
                     .get()
@@ -84,10 +90,11 @@ public class HttpUtils {
 
     /**
      * 根据URL网址获取文件
+     *
      * @param url - url
      * @return byte[] 文件
      */
-    public static byte[] sendGetForFile(String url) {
+    public static Body sendGetForFile(String url) {
         InputStream inputStream = null;
         Request req = new Request.Builder()
                 .url(url)
@@ -101,10 +108,10 @@ public class HttpUtils {
                 return null;
             }
             inputStream = response.body().byteStream();
-            return inputToByte(inputStream);
+            return new Body(inputToByte(inputStream), HttpCodeEnum.SUCCESS);
         } catch (IOException e) {
             log.error("发起请求出现异常:", e);
-            return null;
+            return new Body(HttpCodeEnum.ERROR);
         } finally {
             try {
                 inputStream.close();
@@ -116,11 +123,12 @@ public class HttpUtils {
 
     /**
      * 发送Post请求 获取文件
-     * @param url - url
+     *
+     * @param url  - url
      * @param json Json格式的请求参数
      * @return byte[] 文件
      */
-    public static byte[] sendPostForFile(String url, String json) {
+    public static Body sendPostForFile(String url, String json) {
         InputStream inputStream = null;
         try {
             RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
@@ -128,24 +136,25 @@ public class HttpUtils {
                     .url(url)
                     .post(requestBody)
                     .build();
-            Response response =  new OkHttpClient().newCall(request).execute() ;
+            Response response = new OkHttpClient().newCall(request).execute();
             if (!response.isSuccessful()) {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
-                return null;
+                return new Body(HttpCodeEnum.ERROR);
             }
             inputStream = response.body().byteStream();
-            return inputToByte(inputStream);
+
+            return new Body(inputToByte(inputStream), HttpCodeEnum.SUCCESS);
 
         } catch (IOException var13) {
             log.error("发起请求出现异常:{}", var13.getMessage());
-            return null;
+            return new Body(HttpCodeEnum.ERROR);
         } finally {
             try {
                 if (inputStream != null) {
                     inputStream.close();
                 }
             } catch (IOException var12) {
-                log.error("【关闭流异常】:{}",var12.getMessage());
+                log.error("【关闭流异常】:{}", var12.getMessage());
             }
 
         }
@@ -167,6 +176,29 @@ public class HttpUtils {
         return swapStream.toByteArray();
     }
 
+    @Data
+    public static class Body {
+        String body;
+        byte[] file;
+        HttpCodeEnum code;
+
+        public Body() {
+        }
+
+        public Body(HttpCodeEnum code) {
+            this.code = code;
+        }
+
+        public Body(String body, HttpCodeEnum code) {
+            this.body = body;
+            this.code = code;
+        }
+
+        public Body(byte[] file, HttpCodeEnum code) {
+            this.file = file;
+            this.code = code;
+        }
 
 
+    }
 }
