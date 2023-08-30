@@ -19,13 +19,6 @@ public class GlobalDirectivesPlugin {
 
     @AnyMessageHandler
     public void messageDispose(Bot bot, AnyMessageEvent event) {
-        AsyncUtils.me().execute(()->{
-            async(bot, event);
-        }, AsyncBeanName.ANYMESSAGEEVENT);
-    }
-
-    //异步执行
-    public void async(Bot bot,AnyMessageEvent event){
         String raw = event.getRawMessage();
         Codes code = CodeUtils.matchInstructions(raw);
         Optional.ofNullable(code).ifPresent(codes -> {
@@ -69,61 +62,67 @@ public class GlobalDirectivesPlugin {
 
                 //Warframe
                 //突击
-                case WARFRAME_ASSAULT_PLUGIN -> {}
+                case WARFRAME_ASSAULT_PLUGIN -> WarframeCodes.assault(bot, event);
                 //执刑官猎杀
-                case WARFRAME_ARSON_HUNT_PLUGIN -> {}
+                case WARFRAME_ARSON_HUNT_PLUGIN -> WarframeCodes.arsonHun(bot, event);
                 //奸商
-                case WARFRAME_VOID_PLUGIN -> {}
+                case WARFRAME_VOID_PLUGIN -> WarframeCodes.aVoid(bot, event);
                 //仲裁
-                case WARFRAME_ARBITRATION_PLUGIN -> {}
+                case WARFRAME_ARBITRATION_PLUGIN -> WarframeCodes.arbitration(bot, event);
                 //钢铁
-                case WARFRAME_STEEL_PATH_PLUGIN -> {}
+                case WARFRAME_STEEL_PATH_PLUGIN -> WarframeCodes.steelPath(bot, event);
                 //每日特惠
-                case WARFRAME_DAILY_DEALS_PLUGIN -> {}
+                case WARFRAME_DAILY_DEALS_PLUGIN -> WarframeCodes.dailyDeals(bot, event);
                 //入侵
-                case WARFRAME_INVASIONS_PLUGIN -> {}
+                case WARFRAME_INVASIONS_PLUGIN -> WarframeCodes.invasions(bot, event);
                 //裂缝
-                case WARFRAME_FISSURES_PLUGIN -> {}
+                case WARFRAME_FISSURES_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
                 //九重天
-                case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> {}
+                case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
                 //钢铁
-                case WARFRAME_FISSURES_PATH_PLUGIN -> {}
+                case WARFRAME_FISSURES_PATH_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
                 //平原
-                case WARFRAME_ALL_CYCLE_PLUGIN -> {}
+                case WARFRAME_ALL_CYCLE_PLUGIN -> WarframeCodes.allCycle(bot, event);
                 //电波
-                case WARFRAME_NIGH_WAVE_PLUGIN -> {}
+                case WARFRAME_NIGH_WAVE_PLUGIN -> WarframeCodes.nighTwave(bot, event);
                 //倾向变动
-                case WARFRAME_RIVEN_DIS_UPDATE_PLUGIN -> {}
+                case WARFRAME_RIVEN_DIS_UPDATE_PLUGIN -> not(bot, event);
                 //翻译
-                case WARFRAME_TRA_PLUGIN ->{}
+                case WARFRAME_TRA_PLUGIN -> not(bot, event);
                 // /WM
-                case WARFRAME_MARKET_ORDERS_PLUGIN -> {}
+                case WARFRAME_MARKET_ORDERS_PLUGIN -> not(bot, event);
                 // /WR
-                case WARFRAME_MARKET_RIVEN_PLUGIN -> {}
+                case WARFRAME_MARKET_RIVEN_PLUGIN -> not(bot, event);
                 // RM
                 case WARFRAME_RIVEN_MARKET_PLUGIN -> not(bot, event);
                 // CD
-                case WARFRAME_CD_PLUGIN -> {}
+                case WARFRAME_CD_PLUGIN -> not(bot, event);
                 // XT
-                case WARFRAME_XT_PLUGIN -> {}
+                case WARFRAME_XT_PLUGIN -> not(bot, event);
                 // /WIKI
-                case WARFRAME_WIKI_PLUGIN -> {}
+                case WARFRAME_WIKI_PLUGIN -> not(bot, event);
                 // 佩兰
-                case WARFRAME_SISTER_PLUGIN -> {}
+                case WARFRAME_SISTER_PLUGIN -> not(bot, event);
                 //金垃圾
-                case WARFRAME_MARKET_GOD_DUMP -> {}
+                case WARFRAME_MARKET_GOD_DUMP -> not(bot, event);
                 //银垃圾
-                case WARFRAME_MARKET_SILVER_DUMP -> {}
+                case WARFRAME_MARKET_SILVER_DUMP -> not(bot, event);
                 //核桃
-                case WARFRAME_RELICS_PLUGIN -> {}
+                case WARFRAME_RELICS_PLUGIN -> not(bot, event);
                 //开核桃
-                case WARFRAME_OPEN_RELICS_PLUGIN -> {}
+                case WARFRAME_OPEN_RELICS_PLUGIN -> not(bot, event);
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> not(bot, event);
                 //订阅处理
-                case WARFRAME_SUBSCRIBE -> {}
+                case WARFRAME_SUBSCRIBE -> not(bot, event);
             }
         });
+    }
+
+    //异步执行
+    public void async(Bot bot, AnyMessageEvent event) {
+
+
         //WarframeCodes.subscribe(bot,event,raw.replaceAll(codes.getStr(),""));
     }
 
