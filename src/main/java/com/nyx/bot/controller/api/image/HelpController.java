@@ -16,17 +16,6 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/api")
 public class HelpController {
-    @LogInfo(title = "Help|帮助",codes = Codes.HELP,businessType = BusinessType.IMAGE)
-    @GetMapping(value = "/help/{bot}/{user}/{group}/{rawMsg}/{time}",produces = MediaType.IMAGE_PNG_VALUE)
-    public void getImage(HttpServletResponse response,@PathVariable long bot, @PathVariable long user, @PathVariable long group, @PathVariable String rawMsg,@PathVariable long time) throws IOException {
-        response.setHeader("content-type","image/png");
-        response.getOutputStream().write(
-                HtmlToImage.conver(
-                        Constants.LOCALHOST+"private/getHelpHtml"
-                ).toByteArray()
-        );
-    }
-
     @LogInfo(title = "Api",codes = Codes.HELP,businessType = BusinessType.IMAGE)
     @PostMapping(value = "/help",produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
@@ -38,5 +27,4 @@ public class HelpController {
                 ).toByteArray()
         );
     }
-
 }
