@@ -4,7 +4,9 @@ import org.springframework.lang.Nullable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
@@ -157,6 +159,44 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             return parseDate(str.toString(), parsePatterns);
         } catch (ParseException e) {
             return null;
+        }
+    }
+
+    /**
+     * 增加时间
+     *
+     * @param old    过去的时间
+     * @param now    当前时间
+     * @param field  要增加的类型 如 天 时 分 秒
+     * @param amount 要增加的时间
+     * @return
+     */
+    public static String getDateWeek(Date old, Date now, int field, int amount) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(old);
+        calendar.add(field, amount);
+        old = calendar.getTime();
+        long nd = 1000 * 24 * 60 * 60;
+        long nh = 1000 * 60 * 60;
+        long nm = 1000 * 60;
+        long ns = 1000;
+        long diff = old.getTime() - now.getTime();
+        // 计算差多少天
+        long day = diff / nd;
+        // 计算差多少小时
+        long hour = diff % nd / nh;
+        // 计算差多少分钟
+        long min = diff % nd % nh / nm;
+        // 计算差多少秒//输出结果
+        long sec = diff % nd % nh % nm / ns;
+        if (day != 0) {
+            return day + "天 " + hour + "小时 " + min + "分钟 " + sec + "秒";
+        } else if (hour != 0) {
+            return hour + "小时 " + min + "分钟 " + sec + "秒";
+        } else if (min != 0) {
+            return min + "分钟 " + sec + "秒";
+        } else {
+            return sec + "秒";
         }
     }
 
