@@ -47,20 +47,18 @@ public class Runners {
     //程序启动完成后初始化Web系统用户
     @Bean
     public ApplicationRunner sysUser() {
-        return args -> {
-            AsyncUtils.me().execute(() -> {
-                SysUser user = new SysUser();
-                user.setUserId(1L);
-                user.setUserName("admin");
-                // {bcrypt} 密码加密方式
-                user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
-                List<SysUser> all = userRepository.findAll();
-                if (all.isEmpty()) {
-                    SysUser save = userRepository.save(user);
-                    log.info("用户不存在！已添加新用户：{}", save);
-                }
-            }, AsyncBeanName.SERVICE);
-        };
+        return args -> AsyncUtils.me().execute(() -> {
+            SysUser user = new SysUser();
+            user.setUserId(1L);
+            user.setUserName("admin");
+            // {bcrypt} 密码加密方式
+            user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
+            List<SysUser> all = userRepository.findAll();
+            if (all.isEmpty()) {
+                SysUser save = userRepository.save(user);
+                log.info("用户不存在！已添加新用户：{}", save);
+            }
+        }, AsyncBeanName.SERVICE);
     }
 
 
@@ -84,6 +82,9 @@ public class Runners {
         };
     }
 
+    /**
+     * 初始化服务
+     */
     @Bean
     public ApplicationRunner service() {
         List<Services> all = repository.findAll();
