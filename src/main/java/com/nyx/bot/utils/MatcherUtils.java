@@ -115,5 +115,35 @@ public class MatcherUtils {
         return m.replaceAll(newString);
     }
 
+    /**
+     * 正则匹配特殊符号
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isSpecialSymbols(String str) {
+        String regex = "[" +
+                "\\!@#$%^&*()_+" +
+                "\\-=\\[\\]{};':\"\\\\|,.<>/?`~" +
+                "]";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(str);
+        while (m.find()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 对于携带特殊字符的字符串进行过滤
+     */
+    public static String isOrderItem(String str) {
+        Pattern p = Pattern.compile("([一-龥]+)\s?\\&\s?([一-龥]+)");
+        Matcher m = p.matcher(str);
+        while (m.find()) {
+            return m.group();
+        }
+        return "";
+    }
 
 }
