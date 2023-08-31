@@ -100,11 +100,11 @@ public class MarketOrders {
          */
         User user;
         /**
-         * 什么平台
+         * 平台
          */
         String platform;
         /**
-         * 什么地区
+         * 地区
          */
         String region;
         /**
@@ -177,6 +177,7 @@ public class MarketOrders {
         //图片地址
         String thumb;
         //url查询名称
+        @JsonProperty("url_name")
         String urlName;
         //标签
         List<String> tags;
@@ -191,8 +192,10 @@ public class MarketOrders {
         @JsonProperty("sub_icon")
         String subIcon;
         //物品id
+        @JsonProperty("id")
         String id;
         //价值多少杜卡币
+        @JsonProperty("ducats")
         Integer ducats;
         //icon来自哪里
         @JsonProperty("icon_format")
@@ -205,6 +208,7 @@ public class MarketOrders {
         @JsonProperty("mod_max_rank")
         Integer modMaxRank;
         //稀有程度
+        @JsonProperty("rarity")
         String rarity;
 
 

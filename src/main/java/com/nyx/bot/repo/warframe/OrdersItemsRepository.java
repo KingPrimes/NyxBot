@@ -59,7 +59,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
      *
      * @param regex 正则表达式
      */
-    @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) regexp upper(replace(:#{#r},' ',''))", nativeQuery = true)
+    @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) regexp upper(replace(:#{#r},' ','')) limit 1", nativeQuery = true)
     OrdersItems findByItemNameRegex(@Param("r") String regex);
 
 }

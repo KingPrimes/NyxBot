@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class HttpUtils {
@@ -198,7 +197,5 @@ public class HttpUtils {
             this.file = file;
             this.code = code;
         }
-
-
     }
 }

@@ -2,7 +2,7 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
     <th:block th:insert="~{include :: header('服务')}"/>
     <style>
-        embed{
+        embed {
             width: 25%;
         }
     </style>
@@ -21,7 +21,8 @@
                             <label class="toggle-switch switch-solid" style="margin: 0;padding: 0"
                                    th:for="${s.getService().name()}">
                                 <input onclick="check(this)" th:checked="${s.getSwit()}"
-                                       th:id="${s.getService().name()}" th:name="${s.getService().name()}" th:value="${s.getId()}"
+                                       th:id="${s.getService().name()}" th:name="${s.getService().name()}"
+                                       th:value="${s.getId()}"
                                        type="checkbox"> <span></span>
                             </label>
                         </div>
@@ -33,8 +34,9 @@
         <th:block th:insert="~{include :: footer}"/>
         <script>
             const prefix = ctx + "services";
-            function check(check){
-                $.operate.post(prefix,{"id":check.value,"name":check.name,"check":check.checked})
+
+            function check(check) {
+                $.operate.post(prefix, {"id": check.value, "name": check.name, "check": check.checked})
             }
         </script>
     </body>

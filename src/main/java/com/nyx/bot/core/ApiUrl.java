@@ -1,6 +1,5 @@
 package com.nyx.bot.core;
 
-import com.nyx.bot.res.MarketOrders;
 import com.nyx.bot.utils.HttpUtils;
 import okhttp3.Headers;
 
