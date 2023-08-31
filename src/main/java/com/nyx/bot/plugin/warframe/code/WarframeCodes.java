@@ -208,7 +208,7 @@ public class WarframeCodes {
         data.setPermissionsEnums(Permissions.checkAdmin(bot, event));
 
         //是否是满级
-        data.setIsMax(true);
+        data.setIsMax(false);
         //是否是购买
         data.setIsBy(false);
         //平台
