@@ -41,14 +41,14 @@ public class WarframeDataSource {
                 return;
             }
             String s = body.getBody();
-            List<Ephemeras> ephemeras = JSONObject.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class);
+            List<Ephemeras> ephemeras = JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
 
             body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("信条幻纹信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            ephemeras.addAll(JSONObject.parseObject(s.replaceAll("&", " ")).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class));
+            ephemeras.addAll(JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch));
 
             EphemerasRepository repository = SpringUtils.getBean(EphemerasRepository.class);
 
@@ -94,7 +94,7 @@ public class WarframeDataSource {
                 log.warn("翻译表初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            JSONObject object = JSON.parseObject(body.getBody());
+            JSONObject object = JSON.parseObject(body.getBody(), JSONReader.Feature.SupportSmartMatch);
             List<Translation> records = object.getJSONArray("RECORDS").toJavaList(Translation.class);
             TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
             if (t.findAll().size() != records.size()) {
@@ -113,7 +113,7 @@ public class WarframeDataSource {
                 return;
             }
 
-            List<OrdersItems> items = JSON.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
+            List<OrdersItems> items = JSON.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
 
             OrdersItemsRepository repository = SpringUtils.getBean(OrdersItemsRepository.class);
             if (repository.findAll().size() != items.size()) {
@@ -139,7 +139,7 @@ public class WarframeDataSource {
                 log.warn("赤毒武器信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            List<Weapons> weapons = JSONObject.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class);
+            List<Weapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
 
 
             body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
@@ -147,7 +147,7 @@ public class WarframeDataSource {
                 log.warn("信条武器信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            weapons.addAll(JSONObject.parseObject(body.getBody().replaceAll("&", " ")).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class));
+            weapons.addAll(JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch));
 
             WeaponsRepository repository = SpringUtils.getBean(WeaponsRepository.class);
             AtomicInteger i = new AtomicInteger();
