@@ -95,10 +95,16 @@ public class MarketUtils {
                 //根据别名模糊查询用户 可能想要查询的物品名称
                 items = itemsRepository.findByItemNameLikeToList(StringUtils.substringBefore(key, String.valueOf(key.charAt(key.length() - 1))));
             }
+
+            if (items.size() > 15) {
+                items = items.subList(0, 15);
+            }
+
             List<String> item = new ArrayList<>();
             for (OrdersItems o : items) {
                 item.add(o.getItemName());
             }
+
             market.setPossibleItems(item);
             return market;
         }
@@ -129,6 +135,7 @@ public class MarketUtils {
         orders.getPayload().setOrders(orders(orders, isBy, isMax));
 
         List<MarketOrders.ItemsInSet> itemsInSets = new ArrayList<>();
+
         orders.getInclude().getItem().getItemsInSet()
                 .stream()
                 .filter(item -> item.getUrlName().equals(key))
@@ -178,15 +185,13 @@ public class MarketUtils {
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy") && Objects.equals(orders.getModRank(), max))
-                        .findFirst()
-                        .ifPresent(list::add);
+                        .forEach(list::add);
             } else {
                 order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy"))
-                        .findFirst()
-                        .ifPresent(list::add);
+                        .forEach(list::add);
             }
         } else {
             if (isMax && flag) {
@@ -194,15 +199,13 @@ public class MarketUtils {
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell") && Objects.equals(orders.getModRank(), max))
-                        .findFirst()
-                        .ifPresent(list::add);
+                        .forEach(list::add);
             } else {
                 order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell"))
-                        .findFirst()
-                        .ifPresent(list::add);
+                        .forEach(list::add);
             }
         }
         return list;
