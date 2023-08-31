@@ -1,5 +1,6 @@
 package com.nyx.bot.plugin.warframe.code;
 
+import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -9,10 +10,17 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.HttpUtils;
+import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
 import com.nyx.bot.utils.onebot.Msg;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class WarframeCodes {
+
+    static List<String> forms = Arrays.asList("PC", "PS4", "XBOX", "SWITCH");
 
 
     /**
@@ -172,6 +180,74 @@ public class WarframeCodes {
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
+        }
+    }
+
+    /**
+     * Market Orders 查询
+     */
+    public static void orders(Bot bot, AnyMessageEvent event, Codes code) {
+        AtomicReference<String> str = new AtomicReference<>(ShiroUtils.unescape(event.getRawMessage()).toUpperCase());
+
+        if (MatcherUtils.isSpecialSymbols(str.get())) {
+            String orderItem = MatcherUtils.isOrderItem(str.get());
+            if (orderItem.isEmpty()) {
+                bot.sendMsg(event, "请输入正确的指令！", false);
+                return;
+            }
+            str.set(orderItem);
+        }
+
+        OneBotLogInfoData data = new OneBotLogInfoData();
+        data.setCodes(code);
+        data.setBotUid(bot.getSelfId());
+        data.setUserUid(event.getUserId());
+        data.setGroupUid(event.getGroupId());
+        data.setRawMsg(event.getRawMessage());
+        data.setTime(DateUtils.getDate());
+        data.setPermissionsEnums(Permissions.checkAdmin(bot, event));
+
+        //是否是满级
+        data.setIsMax(true);
+        //是否是购买
+        data.setIsBy(false);
+        //平台
+        data.setForm("PC");
+
+        if (str.get().contains("满级") || str.get().contains("MAX")) {
+            str.set(str.get().replaceAll("满级", "").replaceAll("MAX", ""));
+            data.setIsMax(true);
+        }
+        if (str.get().contains("购买") || str.get().contains("买家") || str.get().contains("BUY")) {
+            str.set(str.get().replaceAll("购买", "").replaceAll("买家", "").replaceAll("BUY", ""));
+            data.setIsBy(true);
+        }
+
+        if (str.get().contains("出售") || str.get().contains("卖家") || str.get().contains("SELL")) {
+            str.set(str.get().replaceAll("出售", "").replaceAll("卖家", "").replaceAll("SELL", ""));
+            data.setIsBy(false);
+        }
+        //获取平台
+        String finalStr = str.get();
+        forms.forEach(f -> {
+            if (finalStr.contains(f)) {
+                data.setForm(f);
+                str.set(finalStr.replaceAll(f, ""));
+            }
+        });
+
+
+        //关键字
+        data.setKey(str.get().replaceAll(code.getStr(), "").trim());
+
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "getMarketOrdersImage",
+                data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            bot.sendMsg(event, "查询超时！", false);
         }
     }
 
