@@ -1,6 +1,7 @@
 package com.nyx.bot.enums;
 
 public enum ServicesEnums {
+    ICQQ_ONEBOTS,
     GO_CQHTTP,
     BILIBILI,
     WARFRAME,
