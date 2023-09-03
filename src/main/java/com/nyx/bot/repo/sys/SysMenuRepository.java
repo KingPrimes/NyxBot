@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SysMenuRepository extends JpaRepository<SysMenu, Long>, JpaSpecificationExecutor<SysMenu> {
-    SysMenu findByParentId(Long parentId);
 
     SysMenu findByMenuName(String menuName);
 }

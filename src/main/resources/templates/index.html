@@ -42,19 +42,20 @@
                             <a th:href="@{/}"><i class="fa fa-home"></i> <span
                                     class="nav-label" i18n="Index">首页</span> </a>
                         </li>
-                        <li th:each="menu : ${menu}">
-                            <a th:class="@{${!#strings.isEmpty(menu.url) && menu.url != '#'} ? ${menu.target}}"
-                               th:data-refresh="${menu.isRefresh == '0'}"
-                               th:href="@{${#strings.isEmpty(menu.url)} ? |#| : ${menu.url}}">
-                                <i th:class="${menu.icon}" th:if="${#strings.isEmpty(menu.svg)}"></i>
-                                <embed th:if="${!#strings.isEmpty(menu.svg)}" th:src="@{${menu.svg}}">
-                                <span class="nav-label" th:i18n="${menu.i18n}"
-                                      th:text="${menu.menuName}">一级菜单</span>
-                                <span th:class="${#strings.isEmpty(menu.url) || menu.url == '#'} ? 'fa arrow'"></span>
+                        <li th:each="m : ${menu}"
+                            th:if="${#strings.isEmpty(m.url) || m.url == '#' ? !#lists.isEmpty(m.children) : true}">
+                            <a th:class="@{${!#strings.isEmpty(m.url) && m.url != '#'} ? ${m.target}}"
+                               th:data-refresh="${m.isRefresh == '0'}"
+                               th:href="@{${#strings.isEmpty(m.url)} ? |#| : ${m.url}}">
+                                <i th:class="${m.icon}" th:if="${#strings.isEmpty(m.svg)}"></i>
+                                <embed th:if="${!#strings.isEmpty(m.svg)}" th:src="@{${m.svg}}">
+                                <span class="nav-label" th:i18n="${m.i18n}"
+                                      th:text="${m.menuName}">一级菜单</span>
+                                <span th:class="${#strings.isEmpty(m.url) || m.url == '#'} ? 'fa arrow'"></span>
                             </a>
-
                             <ul class="nav nav-second-level collapse">
-                                <li th:each="cmenu : ${menu.children}">
+                                <li th:each="cmenu : ${m.children}"
+                                    th:if="${#strings.isEmpty(cmenu.url) || cmenu.url == '#' ? !#lists.isEmpty(cmenu.children) : true}">
                                     <a th:class="${#strings.isEmpty(cmenu.target)} ? |menuItem| : ${cmenu.target}"
                                        th:data-refresh="${cmenu.isRefresh == '0'}"
                                        th:href="@{${cmenu.url}}"
@@ -107,109 +108,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <!--   <li>
-                               <a class="menuItem" th:href="@{/log/info}"><i class="fa fa-calendar-alt"></i> <span
-                                       class="nav-label" i18n="Log_Viewing">日志查看</span></a>
-                           </li>
-                           <li>
-                               <a class="menuItem" th:href="@{/services}"><i class="fa fa-server"></i> <span
-                                       class="nav-label" i18n="Services">服务</span></a>
-                           </li>
-                           <li>
-                               <a href="#"><i class="fa fa-edit"></i> <span class="nav-label"
-                                                                            i18n="Config">配置</span><span
-                                       class="fa arrow"></span></a>
-                               <ul class="nav nav-second-level collapse">
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Bot" th:href="@{/config/bot}">
-                                           <i class="fa fa-robot"></i>
-                                           Bot配置</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Super_Admin"
-                                          th:href="@{/config/admin}">
-                                           <i class="fa fa-user-cog"></i>
-                                           超级管理员</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Group_Black"
-                                          th:href="@{/config/black/group}">
-                                           <i class="fa fa-users-slash"></i>
-                                           群黑名单</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Prove_Black"
-                                          th:href="@{/config/black/prive}">
-                                           <i class="fa fa-user-slash"></i>
-                                           个人黑名单</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_ChatGPT" th:href="@{/config/chatGPT}">
-                                           <embed th:src="@{/svg/CHAT_GPT.svg}">
-                                           ChatGPT</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Said" th:href="@{/config/yi}">
-                                           <embed th:src="@{/svg/YI_YAN.svg}">
-                                           文心一言</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Config_Image" th:href="@{/config/image}">
-                                           <embed th:src="@{/svg/STABLE_DIFFUSION.svg}"/>
-                                           绘图</a>
-                                   </li>
-                               </ul>
-                           </li>
-                           <li>
-                               <a href="#"><i class="fa fa-database"></i> <span class="nav-label"
-                                                                                i18n="Data_Source">本地数据</span><span
-                                       class="fa arrow"></span></a>
-                               <ul class="nav nav-second-level collapse">
-                                   <li>
-                                       <a class="menuItem" i18n="Data_Thesaurus" th:href="@{/data/ai/thesaurus}">Ai词库</a>
-                                   </li>
-                                   <li>
-                                       <a class="menuItem" i18n="Data_Heat" th:href="@{/data/ai/heat}">热词</a>
-                                   </li>
-                                   <li>
-                                       <a href="#">
-                                           <embed th:src="@{/svg/WARFRAME.svg}">
-                                           <span class="nav-label" i18n="Data_Warframe">Warframe</span><span
-                                               class="fa arrow"></span></a>
-                                       <ul class="nav nav-second-level collapse">
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Alias"
-                                                  th:href="@{/data/warframe/alias}">别名</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Ephemeras"
-                                                  th:href="@{/data/warframe/ephemeras}">幻纹</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Subscribe"
-                                                  th:href="@{/data/warframe/subscribe}">订阅</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Market"
-                                                  th:href="@{/data/warframe/market}">Market</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Riven"
-                                                  th:href="@{/data/warframe/rivent}">Rivent</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Translation"
-                                                  th:href="@{/data/warframe/translation}">翻译</a>
-                                           </li>
-                                           <li>
-                                               <a class="menuItem" i18n="Data_Warframe_Weapons"
-                                                  th:href="@{/data/warframe/weapons}">武器</a>
-                                           </li>
-                                       </ul>
-                                   </li>
-                               </ul>
-                           </li>
-                       --></ul>
+                    </ul>
                 </div>
             </nav>
             <!--左侧导航结束-->

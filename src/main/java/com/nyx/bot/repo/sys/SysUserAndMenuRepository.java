@@ -3,8 +3,10 @@ package com.nyx.bot.repo.sys;
 import com.nyx.bot.entity.sys.SysUserAndMenu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,5 +17,9 @@ public interface SysUserAndMenuRepository extends JpaRepository<SysUserAndMenu, 
     List<SysUserAndMenu> findByUserId(Long userId);
 
     SysUserAndMenu findByMenuId(Long menuId);
+
+    @Transactional
+    @Modifying
+    void deleteByMenuId(Long menuId);
 
 }

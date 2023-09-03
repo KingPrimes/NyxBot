@@ -1,13 +1,18 @@
 package com.nyx.bot.runner;
 
+import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.Services;
+import com.nyx.bot.entity.sys.SysMenu;
 import com.nyx.bot.entity.sys.SysUser;
+import com.nyx.bot.entity.sys.SysUserAndMenu;
 import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.ServicesEnums;
 import com.nyx.bot.plugin.warframe.utils.WarframeSocket;
 import com.nyx.bot.repo.ServicesRepository;
+import com.nyx.bot.repo.sys.SysMenuRepository;
+import com.nyx.bot.repo.sys.SysUserAndMenuRepository;
 import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.IoUtils;
@@ -34,13 +39,24 @@ public class Runners {
     @Resource
     ServicesRepository repository;
 
+    @Resource
+    SysMenuRepository menu;
 
-    //程序启动完成启动浏览器
+    @Resource
+    SysUserAndMenuRepository um;
+
     @Bean
-    public ApplicationRunner browser() {
+    public ApplicationRunner initMenu() {
         return args -> {
-            if (!test) {
-                IoUtils.index();
+            List<SysMenu> ms = menu.findAll();
+            List<SysUserAndMenu> ums = um.findAll();
+            if (ms.isEmpty()) {
+                List<SysMenu> array = JSON.parseArray(Runners.class.getResourceAsStream("/menu/menu")).toJavaList(SysMenu.class);
+                menu.saveAll(array);
+            }
+            if (ums.isEmpty()) {
+                List<SysUserAndMenu> array = JSON.parseArray(Runners.class.getResourceAsStream("/menu/user_and_menu")).toJavaList(SysUserAndMenu.class);
+                um.saveAll(array);
             }
         };
     }
@@ -99,7 +115,18 @@ public class Runners {
                 }
             };
         } else {
-            return  args -> {};
+            return args -> {
+            };
         }
+    }
+
+    //程序启动完成启动浏览器
+    @Bean
+    public ApplicationRunner browser() {
+        return args -> {
+            if (!test) {
+                IoUtils.index();
+            }
+        };
     }
 }

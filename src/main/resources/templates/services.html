@@ -34,9 +34,10 @@
         <th:block th:insert="~{include :: footer}"/>
         <script>
             const prefix = ctx + "services";
-
             function check(check) {
-                $.operate.post(prefix, {"id": check.value, "name": check.name, "check": check.checked})
+                $.operate.post(prefix, {"id": check.value, "name": check.name, "check": check.checked}, function () {
+                    parent.location.reload();
+                })
             }
         </script>
     </body>

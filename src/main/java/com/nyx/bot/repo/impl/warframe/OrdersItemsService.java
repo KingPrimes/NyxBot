@@ -1,7 +1,6 @@
 package com.nyx.bot.repo.impl.warframe;
 
 import com.nyx.bot.entity.warframe.OrdersItems;
-import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
