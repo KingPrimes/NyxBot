@@ -5,11 +5,13 @@ import okhttp3.Headers;
 
 public class ApiUrl {
 
+
     /**
      * 中文
      */
     public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
+    public static final String WARFRAME_SOCKET = "ws://api.warframestat.us/socket";
 
     /**
      * 战甲数据源

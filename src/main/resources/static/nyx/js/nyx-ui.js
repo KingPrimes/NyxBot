@@ -278,7 +278,7 @@ var table = {
                             title: "信息内容",
                             shadeClose: true,
                             btn: ['确认'],
-                            btnclass: ['btn btn-primary'],
+                            btnclass: ['btn btn-primary']
                         });
                     }
                 });
@@ -539,7 +539,7 @@ var table = {
                 }
                 var actions = [];
                 $.each(datas, function(index, dict) {
-                    if (dict.dictValue == ('' + value)) {
+                    if (dict.dictValue === ('' + value)) {
                         var listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
                         actions.push($.common.sprintf("<span class='%s'>%s</span>", listClass, dict.dictLabel));
                         return false;
@@ -773,7 +773,7 @@ var table = {
                     icon: $.modal.icon(type),
                     title: "系统提示",
                     btn: ['确认'],
-                    btnclass: ['btn btn-primary'],
+                    btnclass: ['btn btn-primary']
                 });
             },
             // 错误提示
@@ -1805,7 +1805,7 @@ table_type = {
 
 /** 消息状态码 */
 web_status = {
-    SUCCESS: 0,
+    SUCCESS: 200,
     FAIL: 500,
     WARNING: 301
 };

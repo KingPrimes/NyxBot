@@ -49,7 +49,7 @@ public class BaseController {
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected TableDataInfo getDataTable(List<?> list,Long total) {
         TableDataInfo rspData = new TableDataInfo();
-        rspData.setCode(0);
+        rspData.setCode(200);
         rspData.setRows(list);
         rspData.setTotal(total);
         return rspData;

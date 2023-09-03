@@ -1,5 +1,6 @@
 package com.nyx.bot.runner;
 
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.Services;
 import com.nyx.bot.entity.sys.SysUser;
@@ -77,7 +78,7 @@ public class Runners {
         return args -> {
             if (!test) {
                 //创建WebSocket链接 或许游戏数据
-                WarframeSocket.socket().connectServer("ws://api.warframestat.us/socket");
+                WarframeSocket.socket().connectServer(ApiUrl.WARFRAME_SOCKET);
             }
         };
     }
