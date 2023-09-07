@@ -26,4 +26,10 @@ public class SysUserAndMenu extends BaseEntity {
         this.userId = userId;
         this.menuId = menuId;
     }
+
+    public SysUserAndMenu(Long id, Long userId, Long menuId) {
+        this.id = id;
+        this.userId = userId;
+        this.menuId = menuId;
+    }
 }

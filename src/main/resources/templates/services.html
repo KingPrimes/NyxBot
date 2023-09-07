@@ -35,8 +35,9 @@
         <script>
             const prefix = ctx + "services";
             function check(check) {
-                $.operate.post(prefix, {"id": check.value, "name": check.name, "check": check.checked}, function () {
-                    parent.location.reload();
+                $.operate.post(prefix, {"id": check.value, "name": check.name, "check": check.checked}, function (r) {
+                    if (r.code === web_status.SUCCESS) parent.location.reload();
+                    else check.checked = !check.checked
                 })
             }
         </script>

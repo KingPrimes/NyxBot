@@ -228,9 +228,7 @@ public class SysMenuService {
         ums.forEach(u -> {
             SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
             Optional.ofNullable(byMenuId).ifPresentOrElse(b -> {
-            }, () -> {
-                userMenuRepository.save(u);
-            });
+            }, () -> userMenuRepository.save(u));
         });
     }
 
@@ -238,89 +236,47 @@ public class SysMenuService {
         List<SysUserAndMenu> ums = warframe();
         ums.forEach(u -> {
             SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresent(b -> {
-                userMenuRepository.deleteByMenuId(b.getMenuId());
+            Optional.ofNullable(byMenuId).ifPresent(b ->
+            {
+                b.setUserId(0L);
+                b.setMenuId(0L);
+                userMenuRepository.save(b);
             });
         });
     }
 
     public void openChatGpt() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 8L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresentOrElse(b -> {
-            }, () -> {
-                userMenuRepository.save(u);
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(20L, 1L, 8L));
     }
 
     public void offChatGpt() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 8L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresent(b -> {
-                userMenuRepository.deleteByMenuId(b.getMenuId());
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(20L, 0L, 0L));
     }
 
     public void openStableDiffusion() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 10L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresentOrElse(b -> {
-            }, () -> {
-                userMenuRepository.save(u);
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(19L, 1L, 10L));
     }
 
     public void offStableDiffusion() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 10L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresent(b -> {
-                userMenuRepository.deleteByMenuId(b.getMenuId());
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(19L, 0L, 0L));
     }
 
     public void openYiYan() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 9L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresentOrElse(b -> {
-            }, () -> {
-                userMenuRepository.save(u);
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(18L, 1L, 9L));
     }
 
     public void offYiYan() {
-        List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 9L));
-        ums.forEach(u -> {
-            SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
-            Optional.ofNullable(byMenuId).ifPresent(b -> {
-                userMenuRepository.deleteByMenuId(b.getMenuId());
-            });
-        });
+        userMenuRepository.save(new SysUserAndMenu(18L, 0L, 0L));
     }
 
     private void foundation(boolean isOpen) {
         List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 4L));
-        ums.add(new SysUserAndMenu(1L, 5L));
-        ums.add(new SysUserAndMenu(1L, 6L));
-        ums.add(new SysUserAndMenu(1L, 7L));
-        ums.add(new SysUserAndMenu(1L, 12L));
-        ums.add(new SysUserAndMenu(1L, 13L));
+        ums.add(new SysUserAndMenu(12L, 1L, 4L));
+        ums.add(new SysUserAndMenu(13L, 1L, 5L));
+        ums.add(new SysUserAndMenu(14L, 1L, 6L));
+        ums.add(new SysUserAndMenu(15L, 1L, 7L));
+        ums.add(new SysUserAndMenu(16L, 1L, 12L));
+        ums.add(new SysUserAndMenu(17L, 1L, 13L));
         if (isOpen) {
             ums.forEach(u -> {
                 SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
@@ -334,21 +290,22 @@ public class SysMenuService {
         ums.forEach(u -> {
             SysUserAndMenu byMenuId = userMenuRepository.findByMenuId(u.getMenuId());
             Optional.ofNullable(byMenuId).ifPresent(b -> {
-                userMenuRepository.deleteByMenuId(b.getMenuId());
+                b.setMenuId(0L);
+                b.setUserId(0L);
+                userMenuRepository.save(b);
             });
         });
     }
 
     private List<SysUserAndMenu> warframe() {
         List<SysUserAndMenu> ums = new ArrayList<>();
-        ums.add(new SysUserAndMenu(1L, 14L));
-        ums.add(new SysUserAndMenu(1L, 15L));
-        ums.add(new SysUserAndMenu(1L, 16L));
-        ums.add(new SysUserAndMenu(1L, 17L));
-        ums.add(new SysUserAndMenu(1L, 18L));
-        ums.add(new SysUserAndMenu(1L, 19L));
-        ums.add(new SysUserAndMenu(1L, 20L));
-        ums.add(new SysUserAndMenu(1L, 21L));
+        ums.add(new SysUserAndMenu(5L, 1L, 14L));
+        ums.add(new SysUserAndMenu(6L, 1L, 15L));
+        ums.add(new SysUserAndMenu(7L, 1L, 16L));
+        ums.add(new SysUserAndMenu(8L, 1L, 17L));
+        ums.add(new SysUserAndMenu(9L, 1L, 18L));
+        ums.add(new SysUserAndMenu(10L, 1L, 19L));
+        ums.add(new SysUserAndMenu(11L, 1L, 20L));
         return ums;
     }
 

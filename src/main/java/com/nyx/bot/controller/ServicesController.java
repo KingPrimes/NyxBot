@@ -41,11 +41,19 @@ public class ServicesController extends BaseController {
         ServicesEnums enums = ServicesEnums.valueOf(name);
         switch (enums) {
             case ICQQ_ONEBOTS -> {
+                Boolean swit = repository.findByService(ServicesEnums.GO_CQHTTP).getSwit();
+                if (swit) {
+                    return error("请关闭GO_CQHTTP服务");
+                }
                 if (check) menu.openIcqq();
                 else menu.offIcqq();
             }
 
             case GO_CQHTTP -> {
+                Boolean swit = repository.findByService(ServicesEnums.ICQQ_ONEBOTS).getSwit();
+                if (swit) {
+                    return error("请关闭ICQQ_ONEBOTS服务");
+                }
                 if (check) menu.openGocq();
                 else menu.offGocq();
             }
