@@ -121,7 +121,7 @@ public class BlackService {
      */
     public boolean isBlack(Long groupUid, Long userUid) {
         AtomicBoolean flag = new AtomicBoolean(true);
-        if (groupUid != 0L) {
+        if (groupUid != null && groupUid != 0L) {
             GroupBlack byGroupUid = repository.findByGroupUid(groupUid);
             Optional.ofNullable(byGroupUid).ifPresent(g -> {
                 flag.set(false);
