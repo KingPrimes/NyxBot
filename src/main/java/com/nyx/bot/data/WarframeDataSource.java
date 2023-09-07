@@ -32,7 +32,7 @@ public class WarframeDataSource {
         initTranslation();
     }
 
-    private static void getEphemeras() {
+    public static void getEphemeras() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取幻纹信息！");
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
@@ -58,7 +58,7 @@ public class WarframeDataSource {
                     if (repository.findAll().isEmpty()) {
                         i.addAndGet(repository.addEphemeras(e));
                     } else {
-                        e.setId((long) (repository.queryMaxId() + 1));
+                        e.setEid((long) (repository.queryMaxId() + 1));
                         i.addAndGet(repository.addEphemeras(e));
                     }
                 });
@@ -67,7 +67,7 @@ public class WarframeDataSource {
         });
     }
 
-    private static void getAlias() {
+    public static void getAlias() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取数据！");
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "alias.json");
@@ -86,7 +86,7 @@ public class WarframeDataSource {
         });
     }
 
-    private static void initTranslation() {
+    public static void initTranslation() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取翻译数据！");
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "translation.json");
@@ -104,7 +104,7 @@ public class WarframeDataSource {
         });
     }
 
-    private static void getMarket() {
+    public static void getMarket() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取数据！");
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
@@ -122,7 +122,7 @@ public class WarframeDataSource {
                     if (repository.findAll().isEmpty()) {
                         size.addAndGet(repository.addOrdersItems(i));
                     } else {
-                        i.setId(repository.findTopByOrderByIdDesc().getId() + 1);
+                        i.setOid(repository.findTopByOrderByOidDesc().getOid() + 1);
                         size.addAndGet(repository.addOrdersItems(i));
                     }
                 });
@@ -131,7 +131,7 @@ public class WarframeDataSource {
         });
     }
 
-    private static void getWeapons() {
+    public static void getWeapons() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取武器信息！");
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);

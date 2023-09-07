@@ -18,10 +18,10 @@ public class Ephemeras extends BaseEntity {
     @Id
     //自增
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    Long eid;
     @Column(length = 50)
     @JsonProperty("id")
-    String ephemerasId;
+    String Id;
     @Column(length = 120)
     @JsonProperty("icon")
     String icon;

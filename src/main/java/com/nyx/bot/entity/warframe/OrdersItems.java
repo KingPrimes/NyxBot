@@ -18,7 +18,8 @@ public class OrdersItems extends BaseEntity {
     @Id
     //自增
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @JsonProperty("oid")
+    Long oid;
     @JsonProperty("id")
     @Column(length = 50)
     String orderId;

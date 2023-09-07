@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('别名')}"/>
+    <th:block th:insert="~{include :: header('翻译')}"/>
     <th:block th:insert="~{include :: bootstrap-select-css}"/>
     <body>
         <div class="container-div">
             <div class="row">
                 <div class="col-sm-12 search-collapse">
-                    <form id="alias-form">
+                    <form id="translation-form">
                         <div class="select-list">
                             <ul>
                                 <li>
@@ -41,11 +41,11 @@
         <th:block th:insert="~{include :: footer}"/>
         <th:block th:insert="~{include :: bootstrap-select-js}"/>
         <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/alias"
+            var prefix = ctx + "data/warframe/translation"
             $(function () {
                 var options = {
                     url: prefix + "/list",
-                    modalName: "别名",
+                    modalName: "翻译",
                     sortOrder: "desc",
                     escape: true,
                     showPageGo: true,
@@ -73,7 +73,7 @@
             });
 
             function searchPre() {
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('translation-form', 'bootstrap-table');
             }
 
             function update() {
@@ -82,7 +82,7 @@
 
             function resetPre() {
                 $("#log-form")[0].reset();
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('translation-form', 'bootstrap-table');
             }
         </script>
 

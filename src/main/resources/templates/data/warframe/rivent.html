@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('别名')}"/>
+    <th:block th:insert="~{include :: header('紫卡倾向')}"/>
     <th:block th:insert="~{include :: bootstrap-select-css}"/>
+    <style>
+        a img {
+            width: 50px;
+            display: block;
+        }
+
+        a:hover img {
+            transform: scale(3);
+        }
+    </style>
     <body>
         <div class="container-div">
             <div class="row">
                 <div class="col-sm-12 search-collapse">
-                    <form id="alias-form">
+                    <form id="rivent-form">
                         <div class="select-list">
                             <ul>
                                 <li>
-                                    <label>中文： </label><input class="form-control" name="cn" placeholder="中文"
-                                                                type="text"/>
+                                    <label>物品名称： </label><input class="form-control" name="itemName"
+                                                                    placeholder="itemName"
+                                                                    type="text"/>
                                 </li>
                                 <li>
                                     <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
@@ -26,7 +37,7 @@
                 <div class="container-div">
                     <div class="row">
                         <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add()">
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
                                 <i class="fa fa-angle-up"></i> 更新
                             </a>
                         </div>
@@ -41,11 +52,11 @@
         <th:block th:insert="~{include :: footer}"/>
         <th:block th:insert="~{include :: bootstrap-select-js}"/>
         <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/alias"
+            var prefix = ctx + "data/warframe/rivent"
             $(function () {
                 var options = {
                     url: prefix + "/list",
-                    modalName: "别名",
+                    modalName: "紫卡倾向",
                     sortOrder: "desc",
                     escape: true,
                     showPageGo: true,
@@ -60,12 +71,20 @@
                             title: 'ID'
                         },
                         {
-                            field: 'en',
-                            title: '英文'
+                            field: 'trend_name',
+                            title: '物品名称'
                         },
                         {
-                            field: 'cn',
-                            title: '中文'
+                            field: 'new_num',
+                            title: '新的倾向'
+                        },
+                        {
+                            field: 'old_num',
+                            title: '旧的倾向'
+                        },
+                        {
+                            field: 'type',
+                            title: '武器类型'
                         }
                     ]
                 };
@@ -73,7 +92,7 @@
             });
 
             function searchPre() {
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('rivent-form', 'bootstrap-table');
             }
 
             function update() {
@@ -82,8 +101,9 @@
 
             function resetPre() {
                 $("#log-form")[0].reset();
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('rivent-form', 'bootstrap-table');
             }
+
         </script>
 
     </body>

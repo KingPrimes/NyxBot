@@ -3,6 +3,7 @@ package com.nyx.bot.repo.impl.warframe;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.warframe.TranslationRepository;
 import jakarta.persistence.criteria.Predicate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+@Slf4j
 @Service
 public class TranslationService {
 

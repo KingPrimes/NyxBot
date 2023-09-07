@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('别名')}"/>
+    <th:block th:insert="~{include :: header('幻纹')}"/>
     <th:block th:insert="~{include :: bootstrap-select-css}"/>
+    <style>
+        a img {
+            width: 50px;
+            display: block;
+        }
+
+        a:hover img {
+            transform: scale(3);
+        }
+    </style>
     <body>
         <div class="container-div">
             <div class="row">
                 <div class="col-sm-12 search-collapse">
-                    <form id="alias-form">
+                    <form id="market-form">
                         <div class="select-list">
                             <ul>
                                 <li>
-                                    <label>中文： </label><input class="form-control" name="cn" placeholder="中文"
-                                                                type="text"/>
+                                    <label>物品名称： </label><input class="form-control" name="itemName"
+                                                                    placeholder="itemName"
+                                                                    type="text"/>
                                 </li>
                                 <li>
                                     <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
@@ -26,7 +37,7 @@
                 <div class="container-div">
                     <div class="row">
                         <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add()">
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
                                 <i class="fa fa-angle-up"></i> 更新
                             </a>
                         </div>
@@ -41,11 +52,11 @@
         <th:block th:insert="~{include :: footer}"/>
         <th:block th:insert="~{include :: bootstrap-select-js}"/>
         <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/alias"
+            var prefix = ctx + "data/warframe/market"
             $(function () {
                 var options = {
                     url: prefix + "/list",
-                    modalName: "别名",
+                    modalName: "幻纹",
                     sortOrder: "desc",
                     escape: true,
                     showPageGo: true,
@@ -56,16 +67,21 @@
                             radio: true
                         },
                         {
-                            field: 'id',
+                            field: 'oid',
                             title: 'ID'
                         },
                         {
-                            field: 'en',
-                            title: '英文'
+                            field: 'item_name',
+                            title: '物品名称'
                         },
                         {
-                            field: 'cn',
-                            title: '中文'
+                            field: 'thumb',
+                            title: '图片链接',
+                            formatter: function (value, row, index) {
+                                const actions = [];
+                                actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.thumb + '" alt=""/></a>');
+                                return actions.join('');
+                            }
                         }
                     ]
                 };
@@ -73,7 +89,7 @@
             });
 
             function searchPre() {
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('market-form', 'bootstrap-table');
             }
 
             function update() {
@@ -82,8 +98,9 @@
 
             function resetPre() {
                 $("#log-form")[0].reset();
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('market-form', 'bootstrap-table');
             }
+
         </script>
 
     </body>

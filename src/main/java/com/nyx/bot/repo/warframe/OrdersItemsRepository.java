@@ -33,7 +33,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
     /**
      * 查询最大ID的数据
      */
-    OrdersItems findTopByOrderByIdDesc();
+    OrdersItems findTopByOrderByOidDesc();
 
 
     /**

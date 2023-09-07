@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('别名')}"/>
+    <th:block th:insert="~{include :: header('订阅')}"/>
     <th:block th:insert="~{include :: bootstrap-select-css}"/>
     <body>
         <div class="container-div">
             <div class="row">
                 <div class="col-sm-12 search-collapse">
-                    <form id="alias-form">
+                    <form id="subscribe-form">
                         <div class="select-list">
                             <ul>
                                 <li>
-                                    <label>中文： </label><input class="form-control" name="cn" placeholder="中文"
-                                                                type="text"/>
+                                    <label>Bot： </label><input class="form-control" name="subBotUid"
+                                                               placeholder="BotUid"
+                                                               type="number"/>
+                                </li>
+                                <li>
+                                    <label>User： </label><input class="form-control" name="subUser"
+                                                                placeholder="UserUid"
+                                                                type="number"/>
+                                </li>
+                                <li>
+                                    <label>Group： </label><input class="form-control" name="subGroup"
+                                                                 placeholder="GroupUid"
+                                                                 type="number"/>
                                 </li>
                                 <li>
                                     <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
@@ -25,11 +36,6 @@
                 </div>
                 <div class="container-div">
                     <div class="row">
-                        <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add()">
-                                <i class="fa fa-angle-up"></i> 更新
-                            </a>
-                        </div>
                         <div class="col-sm-12 select-table table-striped">
                             <table id="bootstrap-table"></table>
                         </div>
@@ -41,11 +47,11 @@
         <th:block th:insert="~{include :: footer}"/>
         <th:block th:insert="~{include :: bootstrap-select-js}"/>
         <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/alias"
+            var prefix = ctx + "data/warframe/subscribe"
             $(function () {
                 var options = {
                     url: prefix + "/list",
-                    modalName: "别名",
+                    modalName: "订阅",
                     sortOrder: "desc",
                     escape: true,
                     showPageGo: true,
@@ -60,12 +66,26 @@
                             title: 'ID'
                         },
                         {
-                            field: 'en',
-                            title: '英文'
+                            field: 'subBotUid',
+                            title: 'Bot'
                         },
                         {
-                            field: 'cn',
-                            title: '中文'
+                            field: 'subUser',
+                            title: '订阅用户'
+                        },
+                        {
+                            field: 'subGroup',
+                            title: '订阅群组'
+                        },
+                        {
+                            field: 'subscribe',
+                            title: '订阅类型'/*,
+                            这个怎么才能获取到设置的提示文字啊？
+                            formatter: function (value, row, index) {
+                                const actions = [];
+                                actions.push('<span>${sub.valueOf(row.subscribe)}</span>');
+                                return actions.join('');
+                            }*/
                         }
                     ]
                 };
@@ -73,17 +93,14 @@
             });
 
             function searchPre() {
-                $.table.search('alias-form', 'bootstrap-table');
-            }
-
-            function update() {
-                $.operate.post(prefix + "/update")
+                $.table.search('subscribe-form', 'bootstrap-table');
             }
 
             function resetPre() {
                 $("#log-form")[0].reset();
-                $.table.search('alias-form', 'bootstrap-table');
+                $.table.search('subscribe-form', 'bootstrap-table');
             }
+
         </script>
 
     </body>

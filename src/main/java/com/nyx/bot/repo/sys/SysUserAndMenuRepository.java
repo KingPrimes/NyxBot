@@ -18,8 +18,4 @@ public interface SysUserAndMenuRepository extends JpaRepository<SysUserAndMenu, 
 
     SysUserAndMenu findByMenuId(Long menuId);
 
-    @Transactional
-    @Modifying
-    void deleteByMenuId(Long menuId);
-
 }
