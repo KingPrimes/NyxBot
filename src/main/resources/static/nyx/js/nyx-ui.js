@@ -1,24 +1,21 @@
 /**
  * 通用js方法封装处理
- * Copyright (c) 2019 ruoyi
  */
-
-// 当前table相关信息
-var table = {
+const table = {
     config: {},
     // 当前实例配置
     options: {},
     // 设置实例配置
-    set: function(id) {
+    set: function (id) {
         if ($.common.getLength(table.config) > 1 && $.common.isNotEmpty(event)) {
-            var tableId = $.common.isEmpty(id) ? $(event.currentTarget).parents(".bootstrap-table").find("table.table").attr("id") || $(event.currentTarget).parents(".bootstrap-tree-table").find("table.table").attr("id") : id;
+            const tableId = $.common.isEmpty(id) ? $(event.currentTarget).parents(".bootstrap-table").find("table.table").attr("id") || $(event.currentTarget).parents(".bootstrap-tree-table").find("table.table").attr("id") : id;
             if ($.common.isNotEmpty(tableId)) {
                 table.options = table.get(tableId);
             }
         }
     },
     // 获取实例配置
-    get: function(id) {
+    get: function (id) {
         return table.config[id];
     },
     // 记住选择实例组
@@ -35,7 +32,7 @@ var table = {
         table: {
             // 初始化表格参数
             init: function(options) {
-                var defaults = {
+                const defaults = {
                     id: "bootstrap-table",
                     type: 0, // 0 代表bootstrapTable 1代表bootstrapTreeTable
                     method: 'post',
@@ -76,7 +73,7 @@ var table = {
                     queryParams: $.table.queryParams,
                     rowStyle: undefined
                 };
-                var options = $.extend(defaults, options);
+                options = $.extend(defaults, options);
                 table.options = options;
                 table.config[options.id] = options;
                 $.table.initEvent();
@@ -156,9 +153,9 @@ var table = {
             },
             // 获取实例ID，如存在多个返回#id1,#id2 delimeter分隔符
             getOptionsIds: function(separator) {
-                var _separator = $.common.isEmpty(separator) ? "," : separator;
-                var optionsIds = "";
-                $.each(table.config, function(key, value){
+                const _separator = $.common.isEmpty(separator) ? "," : separator;
+                let optionsIds = "";
+                $.each(table.config, function (key) {
                     optionsIds += "#" + key + _separator;
                 });
                 return optionsIds.substring(0, optionsIds.length - 1);
@@ -166,15 +163,15 @@ var table = {
             // 查询条件
             queryParams: function(params) {
                 table.set();
-                var curParams = {
+                const curParams = {
                     // 传递参数查询参数
-                    pageSize:       params.limit,
-                    pageNum:        params.offset / params.limit + 1,
-                    searchValue:    params.search,
-                    orderByColumn:  params.sort,
-                    isAsc:          params.order
+                    pageSize: params.limit,
+                    pageNum: params.offset / params.limit + 1,
+                    searchValue: params.search,
+                    orderByColumn: params.sort,
+                    isAsc: params.order
                 };
-                var currentId = $.common.isEmpty(table.options.formId) ? $('form').attr('id') : table.options.formId;
+                const currentId = $.common.isEmpty(table.options.formId) ? $('form').attr('id') : table.options.formId;
                 return $.extend(curParams, $.common.formToJSON(currentId));
             },
             // 请求获取数据后处理回调函数
@@ -182,13 +179,13 @@ var table = {
                 if (typeof table.get(this.id).responseHandler == "function") {
                     table.get(this.id).responseHandler(res);
                 }
-                var thisOptions = table.config[this.id];
-                if (res.code == web_status.SUCCESS) {
-                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination == 'client') {
+                const thisOptions = table.config[this.id];
+                if (res.code === web_status.SUCCESS) {
+                    if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination === 'client') {
                         return res.rows;
                     } else {
                         if ($.common.isNotEmpty(thisOptions.rememberSelected) && thisOptions.rememberSelected) {
-                            var column = $.common.isEmpty(thisOptions.uniqueId) ? thisOptions.columns[1].field : thisOptions.uniqueId;
+                            const column = $.common.isEmpty(thisOptions.uniqueId) ? thisOptions.columns[1].field : thisOptions.uniqueId;
                             $.each(res.rows, function(i, row) {
                                 row.state = $.inArray(row[column], table.rememberSelectedIds[thisOptions.id]) !== -1;
                             })
@@ -203,13 +200,13 @@ var table = {
             // 初始化事件
             initEvent: function() {
                 // 实例ID信息
-                var optionsIds = $.table.getOptionsIds();
+                const optionsIds = $.table.getOptionsIds();
                 // 监听事件处理
                 $(optionsIds).on(TABLE_EVENTS, function () {
                     table.set($(this).attr("id"));
                 });
                 // 在表格体渲染完成，并在 DOM 中可见后触发（事件）
-                $(optionsIds).on("post-body.bs.table", function (e, args) {
+                $(optionsIds).on("post-body.bs.table", function () {
                     // 浮动提示框特效
                     $(".table [data-toggle='tooltip']").tooltip();
                     // 气泡弹出框特效
@@ -218,17 +215,17 @@ var table = {
                 // 选中、取消、全部选中、全部取消（事件）
                 $(optionsIds).on("check.bs.table check-all.bs.table uncheck.bs.table uncheck-all.bs.table", function (e, rowsAfter, rowsBefore) {
                     // 复选框分页保留保存选中数组
-                    var rows = $.common.equals("uncheck-all", e.type) ? rowsBefore : rowsAfter;
-                    var rowIds = $.table.affectedRowIds(rows);
+                    const rows = $.common.equals("uncheck-all", e.type) ? rowsBefore : rowsAfter;
+                    const rowIds = $.table.affectedRowIds(rows);
                     if ($.common.isNotEmpty(table.options.rememberSelected) && table.options.rememberSelected) {
                         func = $.inArray(e.type, ['check', 'check-all']) > -1 ? 'union' : 'difference';
-                        var selectedIds = table.rememberSelectedIds[table.options.id];
+                        const selectedIds = table.rememberSelectedIds[table.options.id];
                         if ($.common.isNotEmpty(selectedIds)) {
                             table.rememberSelectedIds[table.options.id] = _[func](selectedIds, rowIds);
                         } else {
                             table.rememberSelectedIds[table.options.id] = _[func]([], rowIds);
                         }
-                        var selectedRows = table.rememberSelecteds[table.options.id];
+                        const selectedRows = table.rememberSelecteds[table.options.id];
                         if ($.common.isNotEmpty(selectedRows)) {
                             table.rememberSelecteds[table.options.id] = _[func](selectedRows, rows);
                         } else {
@@ -238,22 +235,22 @@ var table = {
                 });
                 // 加载成功、选中、取消、全部选中、全部取消（事件）
                 $(optionsIds).on("check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table load-success.bs.table", function () {
-                    var toolbar = table.options.toolbar;
-                    var uniqueId = table.options.uniqueId;
+                    const toolbar = table.options.toolbar;
+                    const uniqueId = table.options.uniqueId;
                     // 工具栏按钮控制
-                    var rows = $.common.isEmpty(uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(uniqueId);
+                    const rows = $.common.isEmpty(uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(uniqueId);
                     // 非多个禁用
                     $('#' + toolbar + ' .multiple').toggleClass('disabled', !rows.length);
                     // 非单个禁用
-                    $('#' + toolbar + ' .single').toggleClass('disabled', rows.length!=1);
+                    $('#' + toolbar + ' .single').toggleClass('disabled', rows.length !== 1);
                 });
                 // 图片预览事件
                 $(optionsIds).off("click").on("click", '.img-circle', function() {
-                    var src = $(this).attr('src');
-                    var target = $(this).data('target');
+                    const src = $(this).attr('src');
+                    const target = $(this).data('target');
                     if ($.common.equals("self", target)) {
-                        var height = $(this).data('height');
-                        var width = $(this).data('width');
+                        const height = $(this).data('height');
+                        const width = $(this).data('width');
                         top.layer.open({
                             title: false,
                             type: 1,
@@ -268,8 +265,8 @@ var table = {
                 });
                 // 单击tooltip事件
                 $(optionsIds).on("click", '.tooltip-show', function() {
-                    var target = $(this).data('target');
-                    var input = $(this).prev();
+                    const target = $(this).data('target');
+                    const input = $(this).prev();
                     if ($.common.equals("copy", target)) {
                         input.select();
                         document.execCommand("copy");
@@ -291,35 +288,35 @@ var table = {
             },
             // 表格销毁
             destroy: function (tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('destroy');
                 delete table.rememberSelectedIds[currentId];
                 delete table.rememberSelecteds[currentId];
             },
             // 序列号生成
             serialNumber: function (index, tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
-                var tableParams = $("#" + currentId).bootstrapTable('getOptions');
-                var pageSize = $.common.isNotEmpty(tableParams.pageSize) ? tableParams.pageSize: table.options.pageSize;
-                var pageNumber = $.common.isNotEmpty(tableParams.pageNumber) ? tableParams.pageNumber: table.options.pageNumber;
-                if (table.options.sidePagination == 'client') {
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const tableParams = $("#" + currentId).bootstrapTable('getOptions');
+                const pageSize = $.common.isNotEmpty(tableParams.pageSize) ? tableParams.pageSize : table.options.pageSize;
+                const pageNumber = $.common.isNotEmpty(tableParams.pageNumber) ? tableParams.pageNumber : table.options.pageNumber;
+                if (table.options.sidePagination === 'client') {
                     return index + 1;
                 }
                 return pageSize * (pageNumber - 1) + index + 1;
             },
             // 列超出指定长度浮动提示 target（copy单击复制文本 open弹窗打开文本）
             tooltip: function (value, length, target) {
-                var _length = $.common.isEmpty(length) ? 20 : length;
-                var _text = "";
-                var _value = $.common.nullToStr(value);
-                var _target = $.common.isEmpty(target) ? 'copy' : target;
+                const _length = $.common.isEmpty(length) ? 20 : length;
+                let _text;
+                let _value = $.common.nullToStr(value);
+                const _target = $.common.isEmpty(target) ? 'copy' : target;
                 if (_value.length > _length) {
                     _text = _value.substr(0, _length) + "...";
-                    _value = _value.replace(/\'/g,"&apos;");
-                    _value = _value.replace(/\"/g,"&quot;");
-                    var actions = [];
+                    _value = _value.replace(/'/g, "&apos;");
+                    _value = _value.replace(/"/g, "&quot;");
+                    const actions = [];
                     actions.push($.common.sprintf('<input style="opacity: 0;position: absolute;width:5px;z-index:-1" type="text" value="%s"/>', _value));
-                    actions.push($.common.sprintf('<a href="###" class="tooltip-show" data-toggle="tooltip" data-target="%s" title="%s">%s</a>', _target, _value, _text));
+                    actions.push($.common.sprintf('<a href="#" class="tooltip-show" data-toggle="tooltip" data-target="%s" title="%s">%s</a>', _target, _value, _text));
                     return actions.join('');
                 } else {
                     _text = _value;
@@ -328,7 +325,7 @@ var table = {
             },
             // 下拉按钮切换
             dropdownToggle: function (value) {
-                var actions = [];
+                const actions = [];
                 actions.push('<div class="btn-group">');
                 actions.push('<button type="button" class="btn btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">');
                 actions.push('<i class="fa fa-cog"></i>&nbsp;<span class="fa fa-chevron-down"></span></button>');
@@ -347,7 +344,7 @@ var table = {
                     height = 'auto';
                 }
                 // blank or self
-                var _target = $.common.isEmpty(target) ? 'self' : target;
+                const _target = $.common.isEmpty(target) ? 'self' : target;
                 if ($.common.isNotEmpty(value)) {
                     return $.common.sprintf("<img class='img-circle img-xs' data-height='%s' data-width='%s' data-target='%s' src='%s'/>", height, width, _target, value);
                 } else {
@@ -358,7 +355,7 @@ var table = {
             search: function(formId, tableId, pageNumber, pageSize) {
                 table.set(tableId);
                 table.options.formId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
-                var params = $.common.isEmpty(tableId) ? $("#" + table.options.id).bootstrapTable('getOptions') : $("#" + tableId).bootstrapTable('getOptions');
+                const params = $.common.isEmpty(tableId) ? $("#" + table.options.id).bootstrapTable('getOptions') : $("#" + tableId).bootstrapTable('getOptions');
                 if ($.common.isNotEmpty(pageNumber)) {
                     params.pageNumber = pageNumber;
                 }
@@ -375,16 +372,16 @@ var table = {
             exportExcel: function(formId) {
                 table.set();
                 $.modal.confirm("确定导出所有" + table.options.modalName + "吗？", function() {
-                    var currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
-                    var params = $("#" + table.options.id).bootstrapTable('getOptions');
-                    var dataParam = $("#" + currentId).serializeArray();
+                    const currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
+                    const params = $("#" + table.options.id).bootstrapTable('getOptions');
+                    const dataParam = $("#" + currentId).serializeArray();
                     dataParam.push({ "name": "orderByColumn", "value": params.sortName });
                     dataParam.push({ "name": "isAsc", "value": params.sortOrder });
                     $.modal.loading("正在导出数据，请稍候...");
                     $.post(table.options.exportUrl, dataParam, function(result) {
-                        if (result.code == web_status.SUCCESS) {
+                        if (result.code === web_status.SUCCESS) {
                             window.location.href = ctx + "common/download?fileName=" + encodeURI(result.msg) + "&delete=" + true;
-                        } else if (result.code == web_status.WARNING) {
+                        } else if (result.code === web_status.WARNING) {
                             $.modal.alertWarning(result.msg)
                         } else {
                             $.modal.alertError(result.msg);
@@ -396,9 +393,9 @@ var table = {
             // 下载模板
             importTemplate: function() {
                 $.get(activeWindow().table.options.importTemplateUrl, function(result) {
-                    if (result.code == web_status.SUCCESS) {
+                    if (result.code === web_status.SUCCESS) {
                         window.location.href = ctx + "common/download?fileName=" + encodeURI(result.msg) + "&delete=" + true;
-                    } else if (result.code == web_status.WARNING) {
+                    } else if (result.code === web_status.WARNING) {
                         $.modal.alertWarning(result.msg)
                     } else {
                         $.modal.alertError(result.msg);
@@ -408,9 +405,9 @@ var table = {
             // 导入数据
             importExcel: function(formId, width, height) {
                 table.set();
-                var currentId = $.common.isEmpty(formId) ? 'importTpl' : formId;
-                var _width = $.common.isEmpty(width) ? "400" : width;
-                var _height = $.common.isEmpty(height) ? "230" : height;
+                const currentId = $.common.isEmpty(formId) ? 'importTpl' : formId;
+                const _width = $.common.isEmpty(width) ? "400" : width;
+                const _height = $.common.isEmpty(height) ? "230" : height;
                 top.layer.open({
                     type: 1,
                     area: [_width + 'px', _height + 'px'],
@@ -424,14 +421,14 @@ var table = {
                     // 弹层外区域关闭
                     shadeClose: true,
                     btn1: function(index, layero){
-                        var file = layero.find('#file').val();
-                        if (file == '' || (!$.common.endWith(file, '.xls') && !$.common.endWith(file, '.xlsx'))){
+                        const file = layero.find('#file').val();
+                        if (file === '' || (!$.common.endWith(file, '.xls') && !$.common.endWith(file, '.xlsx'))) {
                             $.modal.msgWarning("请选择后缀为 “xls”或“xlsx”的文件。");
                             return false;
                         }
-                        var index = top.layer.load(2, {shade: false});
+                        index = top.layer.load(2, {shade: false});
                         $.modal.disable();
-                        var formData = new FormData(layero.find('form')[0]);
+                        const formData = new FormData(layero.find('form')[0]);
                         $.ajax({
                             url: table.options.importUrl,
                             data: formData,
@@ -440,12 +437,12 @@ var table = {
                             processData: false,
                             type: 'POST',
                             success: function (result) {
-                                if (result.code == web_status.SUCCESS) {
+                                if (result.code === web_status.SUCCESS) {
                                     $.modal.close(index);
                                     $.modal.closeAll();
                                     $.modal.alertSuccess(result.msg);
                                     $.table.refresh();
-                                } else if (result.code == web_status.WARNING) {
+                                } else if (result.code === web_status.WARNING) {
                                     $.modal.close(index);
                                     $.modal.enable();
                                     $.modal.alertWarning(result.msg)
@@ -464,8 +461,8 @@ var table = {
             },
             // 刷新表格
             refresh: function(tableId, pageNumber, pageSize, url) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
-                var params = $("#" + currentId).bootstrapTable('getOptions');
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const params = $("#" + currentId).bootstrapTable('getOptions');
                 if ($.common.isEmpty(pageNumber)) {
                     pageNumber = params.pageNumber;
                 }
@@ -484,17 +481,17 @@ var table = {
             },
             // 刷新options配置
             refreshOptions: function(options, tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('refreshOptions', options);
             },
             // 查询表格指定列值 deDuplication（ true去重、false不去重）
             selectColumns: function(column, deDuplication) {
-                var distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
-                var rows = $.map($("#" + table.options.id).bootstrapTable('getSelections'), function (row) {
+                const distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
+                let rows = $.map($("#" + table.options.id).bootstrapTable('getSelections'), function (row) {
                     return $.common.getItemField(row, column);
                 });
                 if ($.common.isNotEmpty(table.options.rememberSelected) && table.options.rememberSelected) {
-                    var selectedRows = table.rememberSelecteds[table.options.id];
+                    const selectedRows = table.rememberSelecteds[table.options.id];
                     if ($.common.isNotEmpty(selectedRows)) {
                         rows = $.map(table.rememberSelecteds[table.options.id], function (row) {
                             return $.common.getItemField(row, column);
@@ -505,8 +502,8 @@ var table = {
             },
             // 获取当前页选中或者取消的行ID
             affectedRowIds: function(rows) {
-                var column = $.common.isEmpty(table.options.uniqueId) ? table.options.columns[1].field : table.options.uniqueId;
-                var rowIds;
+                const column = $.common.isEmpty(table.options.uniqueId) ? table.options.columns[1].field : table.options.uniqueId;
+                let rowIds;
                 if ($.isArray(rows)) {
                     rowIds = $.map(rows, function(row) {
                         return $.common.getItemField(row, column);
@@ -518,12 +515,12 @@ var table = {
             },
             // 查询表格首列值deDuplication（ true去重、false不去重）
             selectFirstColumns: function(deDuplication) {
-                var distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
-                var rows = $.map($("#" + table.options.id).bootstrapTable('getSelections'), function (row) {
+                const distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
+                let rows = $.map($("#" + table.options.id).bootstrapTable('getSelections'), function (row) {
                     return $.common.getItemField(row, table.options.columns[1].field);
                 });
                 if ($.common.isNotEmpty(table.options.rememberSelected) && table.options.rememberSelected) {
-                    var selectedRows = table.rememberSelecteds[table.options.id];
+                    const selectedRows = table.rememberSelecteds[table.options.id];
                     if ($.common.isNotEmpty(selectedRows)) {
                         rows = $.map(selectedRows, function (row) {
                             return $.common.getItemField(row, table.options.columns[1].field);
@@ -537,10 +534,10 @@ var table = {
                 if ($.common.isEmpty(datas) || $.common.isEmpty(value)) {
                     return '';
                 }
-                var actions = [];
+                const actions = [];
                 $.each(datas, function(index, dict) {
                     if (dict.dictValue === ('' + value)) {
-                        var listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
+                        const listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
                         actions.push($.common.sprintf("<span class='%s'>%s</span>", listClass, dict.dictLabel));
                         return false;
                     }
@@ -555,13 +552,13 @@ var table = {
                 if ($.common.isEmpty(datas) || $.common.isEmpty(value)) {
                     return '';
                 }
-                var currentSeparator = $.common.isEmpty(separator) ? "," : separator;
-                var actions = [];
+                const currentSeparator = $.common.isEmpty(separator) ? "," : separator;
+                const actions = [];
                 $.each(value.split(currentSeparator), function(i, val) {
-                    var match = false
+                    let match = false;
                     $.each(datas, function(index, dict) {
-                        if (dict.dictValue == ('' + val)) {
-                            var listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
+                        if (dict.dictValue === ('' + val)) {
+                            const listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
                             actions.push($.common.sprintf("<span class='%s'>%s</span>", listClass, dict.dictLabel));
                             match = true
                             return false;
@@ -575,22 +572,22 @@ var table = {
             },
             // 显示表格指定列
             showColumn: function(column, tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('showColumn', column);
             },
             // 隐藏表格指定列
             hideColumn: function(column, tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('hideColumn', column);
             },
             // 显示所有表格列
             showAllColumns: function(tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('showAllColumns');
             },
             // 隐藏所有表格列
             hideAllColumns: function(tableId) {
-                var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                const currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
                 $("#" + currentId).bootstrapTable('hideAllColumns');
             }
         },
@@ -598,7 +595,7 @@ var table = {
         treeTable: {
             // 初始化表格
             init: function(options) {
-                var defaults = {
+                const defaults = {
                     id: "bootstrap-tree-table",
                     type: 1, // 0 代表bootstrapTable 1代表bootstrapTreeTable
                     height: 0,
@@ -616,7 +613,7 @@ var table = {
                     expandAll: true,
                     expandFirst: true
                 };
-                var options = $.extend(defaults, options);
+                options = $.extend(defaults, options);
                 table.options = options;
                 table.config[options.id] = options;
                 $.table.initEvent();
@@ -650,8 +647,8 @@ var table = {
             },
             // 条件查询
             search: function(formId) {
-                var currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
-                var params = $.common.formToJSON(currentId);
+                const currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
+                const params = $.common.formToJSON(currentId);
                 $.bttTable.bootstrapTreeTable('refresh', $.extend(params, table.options.ajaxParams));
             },
             // 刷新
@@ -660,8 +657,8 @@ var table = {
             },
             // 查询表格树指定列值deDuplication（ true去重、false不去重）
             selectColumns: function(column, deDuplication) {
-                var distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
-                var rows = $.map($.bttTable.bootstrapTreeTable('getSelections'), function (row) {
+                const distinct = $.common.isEmpty(deDuplication) ? true : deDuplication;
+                const rows = $.map($.bttTable.bootstrapTreeTable('getSelections'), function (row) {
                     return $.common.getItemField(row, column);
                 });
                 return distinct ? $.common.uniqueFn(rows) : rows;
@@ -671,7 +668,7 @@ var table = {
                 if (typeof table.options.responseHandler == "function") {
                     table.options.responseHandler(res);
                 }
-                if (res.code != undefined && res.code != web_status.SUCCESS) {
+                if (res.code !== undefined && res.code !== web_status.SUCCESS) {
                     $.modal.alertWarning(res.msg);
                     return [];
                 } else {
@@ -693,24 +690,24 @@ var table = {
                 table.set(tableId);
                 formId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
                 $("#" + formId)[0].reset();
-                var tableId = $.common.isEmpty(tableId) ? table.options.id : tableId;
-                if (table.options.type == table_type.bootstrapTable) {
-                    var params = $("#" + tableId).bootstrapTable('getOptions');
+                tableId = $.common.isEmpty(tableId) ? table.options.id : tableId;
+                if (table.options.type === table_type.bootstrapTable) {
+                    const params = $("#" + tableId).bootstrapTable('getOptions');
                     params.pageNumber = 1;
                     if ($.common.isNotEmpty(pageSize)) {
                         params.pageSize = pageSize;
                     }
                     $("#" + tableId).bootstrapTable('refresh', params);
-                } else if (table.options.type == table_type.bootstrapTreeTable) {
+                } else if (table.options.type === table_type.bootstrapTreeTable) {
                     $("#" + tableId).bootstrapTreeTable('refresh', table.options.ajaxParams);
                 }
                 resetDate();
             },
             // 获取选中复选框项
             selectCheckeds: function(name) {
-                var checkeds = "";
+                let checkeds = "";
                 $('input:checkbox[name="' + name + '"]:checked').each(function(i) {
-                    if (0 == i) {
+                    if (0 === i) {
                         checkeds = $(this).val();
                     } else {
                         checkeds += ("," + $(this).val());
@@ -720,9 +717,9 @@ var table = {
             },
             // 获取选中下拉框项
             selectSelects: function(name) {
-                var selects = "";
+                let selects = "";
                 $('#' + name + ' option:selected').each(function (i) {
-                    if (0 == i) {
+                    if (0 === i) {
                         selects = $(this).val();
                     } else {
                         selects += ("," + $(this).val());
@@ -735,12 +732,12 @@ var table = {
         modal: {
             // 显示图标
             icon: function(type) {
-                var icon = "";
-                if (type == modal_status.WARNING) {
+                let icon = "";
+                if (type === modal_status.WARNING) {
                     icon = 0;
-                } else if (type == modal_status.SUCCESS) {
+                } else if (type === modal_status.SUCCESS) {
                     icon = 1;
-                } else if (type == modal_status.FAIL) {
+                } else if (type === modal_status.FAIL) {
                     icon = 2;
                 } else {
                     icon = 3;
@@ -749,7 +746,7 @@ var table = {
             },
             // 消息提示
             msg: function(content, type) {
-                if (type != undefined) {
+                if (type !== undefined) {
                     top.layer.msg(content, { icon: $.modal.icon(type), time: 1000, shift: 5 });
                 } else {
                     top.layer.msg(content);
@@ -806,7 +803,7 @@ var table = {
             // 获取iframe页的DOM
             getChildFrame: function (index) {
                 if ($.common.isEmpty(index)){
-                    var index = parent.layer.getFrameIndex(window.name);
+                    index = parent.layer.getFrameIndex(window.name);
                     return parent.layer.getChildFrame('body', index);
                 } else {
                     return top.layer.getChildFrame('body', index);
@@ -815,7 +812,7 @@ var table = {
             // 关闭窗体
             close: function (index) {
                 if ($.common.isEmpty(index)){
-                    var index = parent.layer.getFrameIndex(window.name);
+                    index = parent.layer.getFrameIndex(window.name);
                     parent.layer.close(index);
                 } else {
                     top.layer.close(index);
@@ -857,7 +854,7 @@ var table = {
                 }
                 if ($.common.isEmpty(callback)) {
                     callback = function(index, layero) {
-                        var iframeWin = layero.find('iframe')[0];
+                        const iframeWin = layero.find('iframe')[0];
                         iframeWin.contentWindow.submitHandler(index, layero);
                     }
                 }
@@ -884,11 +881,11 @@ var table = {
             },
             // 弹出层指定参数选项
             openOptions: function (options) {
-                var _url = $.common.isEmpty(options.url) ? "/404.html" : options.url;
-                var _title = $.common.isEmpty(options.title) ? "系统窗口" : options.title;
-                var _width = $.common.isEmpty(options.width) ? "800" : options.width;
-                var _height = $.common.isEmpty(options.height) ? ($(window).height() - 50) : options.height;
-                var _btn = ['<i class="fa fa-check"></i> 确认', '<i class="fa fa-close"></i> 关闭'];
+                const _url = $.common.isEmpty(options.url) ? "/404.html" : options.url;
+                const _title = $.common.isEmpty(options.title) ? "系统窗口" : options.title;
+                let _width = $.common.isEmpty(options.width) ? "800" : options.width;
+                let _height = $.common.isEmpty(options.height) ? ($(window).height() - 50) : options.height;
+                const _btn = ['<i class="fa fa-check"></i> 确认', '<i class="fa fa-close"></i> 关闭'];
                 // 如果是移动端，就使用自适应大小弹窗
                 if ($.common.isMobile()) {
                     _width = 'auto';
@@ -899,16 +896,17 @@ var table = {
                         options.callBack(index, layero);
                     }
                 }
-                var btnCallback = {};
+                const btnCallback = {};
                 if (options.btn instanceof Array){
-                    for (var i = 1, len = options.btn.length; i < len; i++) {
-                        var btn = options["btn" + (i + 1)];
+                    let i = 1, len = options.btn.length;
+                    for (; i < len; i++) {
+                        const btn = options["btn" + (i + 1)];
                         if (btn) {
                             btnCallback["btn" + (i + 1)] = btn;
                         }
                     }
                 }
-                var index = top.layer.open($.extend({
+                const index = top.layer.open($.extend({
                     id: options.id,       // 唯一id
                     anim: options.anim,   // 弹出动画 0-6
                     type: 2,
@@ -953,7 +951,7 @@ var table = {
                 if ($.common.isEmpty(height)) {
                     height = ($(window).height() - 50);
                 }
-                var index = top.layer.open({
+                const index = top.layer.open({
                     type: 2,
                     area: [width + 'px', height + 'px'],
                     fix: false,
@@ -965,11 +963,11 @@ var table = {
                     btn: ['确定', '关闭'],
                     // 弹层外区域关闭
                     shadeClose: true,
-                    yes: function(index, layero) {
-                        var iframeWin = layero.find('iframe')[0];
+                    yes: function (index, layero) {
+                        const iframeWin = layero.find('iframe')[0];
                         iframeWin.contentWindow.submitHandler(index, layero);
                     },
-                    cancel: function(index) {
+                    cancel: function (index) {
                         return true;
                     },
                     success: function () {
@@ -984,7 +982,7 @@ var table = {
             },
             // 选卡页同一页签打开
             parentTab: function (title, url) {
-                var dataId = window.frameElement.getAttribute('data-id');
+                const dataId = window.frameElement.getAttribute('data-id');
                 createMenuItem(url, title);
                 closeItem(dataId);
             },
@@ -994,12 +992,12 @@ var table = {
             },
             // 禁用按钮
             disable: function() {
-                var doc = window.top == window.parent ? top.window.document : window.parent.document;
+                const doc = window.top === window.parent ? top.window.document : window.parent.document;
                 $("a[class*=layui-layer-btn]", doc).addClass("layer-disabled");
             },
             // 启用按钮
             enable: function() {
-                var doc = window.top == window.parent ? top.window.document : window.parent.document;
+                const doc = window.top === window.parent ? top.window.document : window.parent.document;
                 $("a[class*=layui-layer-btn]", doc).removeClass("layer-disabled");
             },
             // 打开遮罩层
@@ -1021,7 +1019,7 @@ var table = {
         operate: {
             // 提交数据
             submit: function(url, type, dataType, data, callback) {
-                var config = {
+                const config = {
                     url: url,
                     type: type,
                     dataType: dataType,
@@ -1029,7 +1027,7 @@ var table = {
                     beforeSend: function () {
                         $.modal.loading("正在处理中，请稍候...");
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (typeof callback == "function") {
                             callback(result);
                         }
@@ -1049,8 +1047,8 @@ var table = {
             // 详细信息
             detail: function(id, width, height) {
                 table.set();
-                var _url = $.operate.detailUrl(id);
-                var options = {
+                const _url = $.operate.detailUrl(id);
+                const options = {
                     title: table.options.modalName + "详细",
                     width: width,
                     height: height,
@@ -1070,12 +1068,12 @@ var table = {
             },
             // 详细访问地址
             detailUrl: function(id) {
-                var url = "/404.html";
+                let url = "/404.html";
                 if ($.common.isNotEmpty(id)) {
                     url = table.options.detailUrl.replace("{id}", id);
                 } else {
-                    var id = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
-                    if (id.length == 0) {
+                    id = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+                    if (id.length === 0) {
                         $.modal.alertWarning("请至少选择一条记录");
                         return;
                     }
@@ -1087,11 +1085,11 @@ var table = {
             remove: function(id) {
                 table.set();
                 $.modal.confirm("确定删除该条" + table.options.modalName + "信息吗？", function() {
-                    var url = $.common.isEmpty(id) ? table.options.removeUrl : table.options.removeUrl.replace("{id}", id);
-                    if (table.options.type == table_type.bootstrapTreeTable) {
+                    const url = $.common.isEmpty(id) ? table.options.removeUrl : table.options.removeUrl.replace("{id}", id);
+                    if (table.options.type === table_type.bootstrapTreeTable) {
                         $.operate.get(url);
                     } else {
-                        var data = { "ids": id };
+                        const data = {"ids": id};
                         $.operate.submit(url, "post", "json", data);
                     }
                 });
@@ -1099,14 +1097,14 @@ var table = {
             // 批量删除信息
             removeAll: function() {
                 table.set();
-                var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
-                if (rows.length == 0) {
+                const rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+                if (rows.length === 0) {
                     $.modal.alertWarning("请至少选择一条记录");
                     return;
                 }
                 $.modal.confirm("确认要删除选中的" + rows.length + "条数据吗?", function() {
-                    var url = table.options.removeUrl;
-                    var data = { "ids": rows.join() };
+                    const url = table.options.removeUrl;
+                    const data = {"ids": rows.join()};
                     $.operate.submit(url, "post", "json", data);
                 });
             },
@@ -1114,14 +1112,14 @@ var table = {
             clean: function() {
                 table.set();
                 $.modal.confirm("确定清空所有" + table.options.modalName + "吗？", function() {
-                    var url = table.options.cleanUrl;
+                    const url = table.options.cleanUrl;
                     $.operate.submit(url, "post", "json", "");
                 });
             },
             // 添加信息
-            add: function(id) {
+            add: function (id, w, h) {
                 table.set();
-                $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id));
+                $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), w, h);
             },
             // 添加信息，以tab页展现
             addTab: function (id) {
@@ -1135,22 +1133,21 @@ var table = {
             },
             // 添加访问地址
             addUrl: function(id) {
-                var url = $.common.isEmpty(id) ? table.options.createUrl.replace("{id}", "") : table.options.createUrl.replace("{id}", id);
-                return url;
+                return $.common.isEmpty(id) ? table.options.createUrl.replace("/{id}", "") : table.options.createUrl.replace("{id}", id);
             },
             // 修改信息
-            edit: function(id) {
+            edit: function (id, w, h) {
                 table.set();
-                if ($.common.isEmpty(id) && table.options.type == table_type.bootstrapTreeTable) {
-                    var row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
+                if ($.common.isEmpty(id) && table.options.type === table_type.bootstrapTreeTable) {
+                    const row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
                     if ($.common.isEmpty(row)) {
                         $.modal.alertWarning("请至少选择一条记录");
                         return;
                     }
-                    var url = table.options.updateUrl.replace("{id}", row[table.options.uniqueId]);
-                    $.modal.open("修改" + table.options.modalName, url);
+                    const url = table.options.updateUrl.replace("{id}", row[table.options.uniqueId]);
+                    $.modal.open("修改" + table.options.modalName, url, w, h);
                 } else {
-                    $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id));
+                    $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), w, h);
                 }
             },
             // 修改信息，以tab页展现
@@ -1160,20 +1157,21 @@ var table = {
             },
             // 修改信息 全屏
             editFull: function(id) {
+                let row;
                 table.set();
-                var url = "/404.html";
+                let url = "/404.html";
                 if ($.common.isNotEmpty(id)) {
                     url = table.options.updateUrl.replace("{id}", id);
                 } else {
-                    if (table.options.type == table_type.bootstrapTreeTable) {
-                        var row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
+                    if (table.options.type === table_type.bootstrapTreeTable) {
+                        row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
                         if ($.common.isEmpty(row)) {
                             $.modal.alertWarning("请至少选择一条记录");
                             return;
                         }
                         url = table.options.updateUrl.replace("{id}", row[table.options.uniqueId]);
                     } else {
-                        var row = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+                        row = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
                         url = table.options.updateUrl.replace("{id}", row);
                     }
                 }
@@ -1181,12 +1179,12 @@ var table = {
             },
             // 修改访问地址
             editUrl: function(id) {
-                var url = "/404.html";
+                let url = "/404.html";
                 if ($.common.isNotEmpty(id)) {
                     url = table.options.updateUrl.replace("{id}", id);
                 } else {
-                    var id = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
-                    if (id.length == 0) {
+                    id = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+                    if (id.length === 0) {
                         $.modal.alertWarning("请至少选择一条记录");
                         return;
                     }
@@ -1196,7 +1194,7 @@ var table = {
             },
             // 保存信息 刷新表格
             save: function(url, data, callback) {
-                var config = {
+                const config = {
                     url: url,
                     type: "post",
                     dataType: "json",
@@ -1205,7 +1203,7 @@ var table = {
                         $.modal.loading("正在处理中，请稍候...");
                         $.modal.disable();
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (typeof callback == "function") {
                             callback(result);
                         }
@@ -1216,7 +1214,7 @@ var table = {
             },
             // 保存信息 弹出结果提示框
             saveModal: function(url, data, callback) {
-                var config = {
+                const config = {
                     url: url,
                     type: "post",
                     dataType: "json",
@@ -1224,13 +1222,13 @@ var table = {
                     beforeSend: function () {
                         $.modal.loading("正在处理中，请稍候...");
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (typeof callback == "function") {
                             callback(result);
                         }
-                        if (result.code == web_status.SUCCESS) {
+                        if (result.code === web_status.SUCCESS) {
                             $.modal.alertSuccess(result.msg)
-                        } else if (result.code == web_status.WARNING) {
+                        } else if (result.code === web_status.WARNING) {
                             $.modal.alertWarning(result.msg)
                         } else {
                             $.modal.alertError(result.msg);
@@ -1242,7 +1240,7 @@ var table = {
             },
             // 保存选项卡信息
             saveTab: function(url, data, callback) {
-                var config = {
+                const config = {
                     url: url,
                     type: "post",
                     dataType: "json",
@@ -1250,7 +1248,7 @@ var table = {
                     beforeSend: function () {
                         $.modal.loading("正在处理中，请稍候...");
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (typeof callback == "function") {
                             callback(result);
                         }
@@ -1261,15 +1259,15 @@ var table = {
             },
             // 保存结果弹出msg刷新table表格
             ajaxSuccess: function (result) {
-                if (result.code == web_status.SUCCESS && table.options.type == table_type.bootstrapTable) {
+                if (result.code === web_status.SUCCESS && table.options.type === table_type.bootstrapTable) {
                     $.modal.msgSuccess(result.msg);
                     $.table.refresh();
-                } else if (result.code == web_status.SUCCESS && table.options.type == table_type.bootstrapTreeTable) {
+                } else if (result.code === web_status.SUCCESS && table.options.type === table_type.bootstrapTreeTable) {
                     $.modal.msgSuccess(result.msg);
                     $.treeTable.refresh();
-                } else if (result.code == web_status.SUCCESS && $.common.isEmpty(table.options.type)) {
+                } else if (result.code === web_status.SUCCESS && $.common.isEmpty(table.options.type)) {
                     $.modal.msgSuccess(result.msg)
-                }  else if (result.code == web_status.WARNING) {
+                } else if (result.code === web_status.WARNING) {
                     $.modal.alertWarning(result.msg)
                 }  else {
                     $.modal.alertError(result.msg);
@@ -1278,9 +1276,9 @@ var table = {
             },
             // 保存结果重新加载页面
             saveReload: function (result) {
-                if (result.code == web_status.SUCCESS) {
+                if (result.code === web_status.SUCCESS) {
                     $.modal.msgSuccessReload(result.msg);
-                } else if (result.code == web_status.WARNING) {
+                } else if (result.code === web_status.WARNING) {
                     $.modal.alertWarning(result.msg)
                 }  else {
                     $.modal.alertError(result.msg);
@@ -1289,20 +1287,20 @@ var table = {
             },
             // 成功回调执行事件（父窗体静默更新）
             successCallback: function(result) {
-                if (result.code == web_status.SUCCESS) {
-                    var parent = activeWindow();
+                if (result.code === web_status.SUCCESS) {
+                    const parent = activeWindow();
                     if ($.common.isEmpty(parent.table)) {
                         $.modal.msgSuccessReload(result.msg);
-                    } else if (parent.table.options.type == table_type.bootstrapTable) {
+                    } else if (parent.table.options.type === table_type.bootstrapTable) {
                         $.modal.close();
                         parent.$.modal.msgSuccess(result.msg);
                         parent.$.table.refresh();
-                    } else if (parent.table.options.type == table_type.bootstrapTreeTable) {
+                    } else if (parent.table.options.type === table_type.bootstrapTreeTable) {
                         $.modal.close();
                         parent.$.modal.msgSuccess(result.msg);
                         parent.$.treeTable.refresh();
                     }
-                } else if (result.code == web_status.WARNING) {
+                } else if (result.code === web_status.WARNING) {
                     $.modal.alertWarning(result.msg)
                 }  else {
                     $.modal.alertError(result.msg);
@@ -1312,17 +1310,17 @@ var table = {
             },
             // 选项卡成功回调执行事件（父窗体静默更新）
             successTabCallback: function(result) {
-                if (result.code == web_status.SUCCESS) {
-                    var topWindow = $(window.parent.document);
-                    var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-panel');
-                    var topWindow = $('.Index_iframe[data-id="' + currentId + '"]', topWindow)[0];
+                if (result.code === web_status.SUCCESS) {
+                    topWindow = $(window.parent.document);
+                    const currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-panel');
+                    topWindow = $('.Index_iframe[data-id="' + currentId + '"]', topWindow)[0];
                     if ($.common.isNotEmpty(topWindow) && $.common.isNotEmpty(currentId)) {
-                        var $contentWindow = topWindow.contentWindow;
+                        const $contentWindow = topWindow.contentWindow;
                         $contentWindow.$.modal.msgSuccess(result.msg);
                         $contentWindow.$(".layui-layer-padding").removeAttr("style");
-                        if ($contentWindow.table.options.type == table_type.bootstrapTable) {
+                        if ($contentWindow.table.options.type === table_type.bootstrapTable) {
                             $contentWindow.$.table.refresh();
-                        } else if ($contentWindow.table.options.type == table_type.bootstrapTreeTable) {
+                        } else if ($contentWindow.table.options.type === table_type.bootstrapTreeTable) {
                             $contentWindow.$.treeTable.refresh();
                         }
                     } else {
@@ -1330,7 +1328,7 @@ var table = {
                     }
                     $.modal.close();
                     $.modal.closeTab();
-                } else if (result.code == web_status.WARNING) {
+                } else if (result.code === web_status.WARNING) {
                     $.modal.alertWarning(result.msg)
                 } else {
                     $.modal.alertError(result.msg);
@@ -1342,12 +1340,12 @@ var table = {
         validate: {
             // 表单验证
             form: function (formId) {
-                var currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
+                const currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
                 return $("#" + currentId).validate().form();
             },
             // 重置表单验证（清除提示信息）
             reset: function (formId) {
-                var currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
+                const currentId = $.common.isEmpty(formId) ? $('form').attr('id') : formId;
                 return $("#" + currentId).validate().resetForm();
             }
         },
@@ -1357,7 +1355,7 @@ var table = {
             _lastValue: {},
             // 初始化树结构
             init: function(options) {
-                var defaults = {
+                const defaults = {
                     id: "tree",                    // 属性ID
                     expandLevel: 0,                // 展开等级节点
                     view: {
@@ -1367,7 +1365,7 @@ var table = {
                     check: {
                         enable: false,             // 置 zTree 的节点上是否显示 checkbox / radio
                         nocheckInherit: true,      // 设置子节点是否自动继承
-                        chkboxType: { "Y": "ps", "N": "ps" } // 父子节点的关联关系
+                        chkboxType: {"Y": "ps", "N": "ps"} // 父子节点的关联关系
                     },
                     data: {
                         key: {
@@ -1378,10 +1376,10 @@ var table = {
                         }
                     },
                 };
-                var options = $.extend(defaults, options);
+                options = $.extend(defaults, options);
                 $.tree._option = options;
                 // 树结构初始化加载
-                var setting = {
+                const setting = {
                     callback: {
                         onClick: options.onClick,                      // 用于捕获节点被点击的事件回调函数
                         onCheck: options.onCheck,                      // 用于捕获 checkbox / radio 被勾选 或 取消勾选的事件回调函数
@@ -1392,16 +1390,16 @@ var table = {
                     data: options.data
                 };
                 $.get(options.url, function(data) {
-                    var treeId = $("#treeId").val();
+                    const treeId = $("#treeId").val();
                     tree = $.fn.zTree.init($("#" + options.id), setting, data);
                     $._tree = tree;
-                    for (var i = 0; i < options.expandLevel; i++) {
-                        var nodes = tree.getNodesByParam("level", i);
-                        for (var j = 0; j < nodes.length; j++) {
+                    for (let i = 0; i < options.expandLevel; i++) {
+                        const nodes = tree.getNodesByParam("level", i);
+                        for (let j = 0; j < nodes.length; j++) {
                             tree.expandNode(nodes[j], true, false, false);
                         }
                     }
-                    var node = tree.getNodesByParam("id", treeId, null)[0];
+                    const node = tree.getNodesByParam("id", treeId, null)[0];
                     $.tree.selectByIdName(treeId, node);
                     // 回调tree方法
                     if (typeof(options.callBack) === "function"){
@@ -1412,15 +1410,15 @@ var table = {
             // 搜索节点
             searchNode: function() {
                 // 取得输入的关键字的值
-                var value = $.common.trim($("#keyword").val());
-                if ($.tree._lastValue == value) {
+                const value = $.common.trim($("#keyword").val());
+                if ($.tree._lastValue === value) {
                     return;
                 }
                 // 保存最后一次搜索名称
                 $.tree._lastValue = value;
-                var nodes = $._tree.getNodes();
+                const nodes = $._tree.getNodes();
                 // 如果要查空字串，就退出不查了。
-                if (value == "") {
+                if (value === "") {
                     $.tree.showAllNode(nodes);
                     return;
                 }
@@ -1430,14 +1428,14 @@ var table = {
             },
             // 根据Id和Name选中指定节点
             selectByIdName: function(treeId, node) {
-                if ($.common.isNotEmpty(treeId) && node && treeId == node.id) {
+                if ($.common.isNotEmpty(treeId) && node && treeId === node.id) {
                     $._tree.selectNode(node, true);
                 }
             },
             // 显示所有节点
             showAllNode: function(nodes) {
                 nodes = $._tree.transformToArray(nodes);
-                for (var i = nodes.length - 1; i >= 0; i--) {
+                for (let i = nodes.length - 1; i >= 0; i--) {
                     if (nodes[i].getParentNode() != null) {
                         $._tree.expandNode(nodes[i], true, false, false, false);
                     } else {
@@ -1449,14 +1447,14 @@ var table = {
             },
             // 隐藏所有节点
             hideAllNode: function(nodes) {
-                var nodes = $._tree.transformToArray(nodes);
-                for (var i = nodes.length - 1; i >= 0; i--) {
+                nodes = $._tree.transformToArray(nodes);
+                for (let i = nodes.length - 1; i >= 0; i--) {
                     $._tree.hideNode(nodes[i]);
                 }
             },
             // 显示所有父节点
             showParent: function(treeNode) {
-                var parentNode;
+                let parentNode;
                 while ((parentNode = treeNode.getParentNode()) != null) {
                     $._tree.showNode(parentNode);
                     $._tree.expandNode(parentNode, true, false, false);
@@ -1466,8 +1464,8 @@ var table = {
             // 显示所有孩子节点
             showChildren: function(treeNode) {
                 if (treeNode.isParent) {
-                    for (var idx in treeNode.children) {
-                        var node = treeNode.children[idx];
+                    for (const idx in treeNode.children) {
+                        const node = treeNode.children[idx];
                         $._tree.showNode(node);
                         $.tree.showChildren(node);
                     }
@@ -1476,29 +1474,30 @@ var table = {
             // 更新节点状态
             updateNodes: function(nodeList) {
                 $._tree.showNodes(nodeList);
-                for (var i = 0, l = nodeList.length; i < l; i++) {
-                    var treeNode = nodeList[i];
+                let i = 0, l = nodeList.length;
+                for (; i < l; i++) {
+                    const treeNode = nodeList[i];
                     $.tree.showChildren(treeNode);
                     $.tree.showParent(treeNode)
                 }
             },
             // 获取当前被勾选集合
             getCheckedNodes: function(column) {
-                var _column = $.common.isEmpty(column) ? "id" : column;
-                var nodes = $._tree.getCheckedNodes(true);
+                const _column = $.common.isEmpty(column) ? "id" : column;
+                const nodes = $._tree.getCheckedNodes(true);
                 return $.map(nodes, function (row) {
                     return row[_column];
                 }).join();
             },
             // 不允许根父节点选择
             notAllowParents: function(_tree) {
-                var nodes = _tree.getSelectedNodes();
-                if (nodes.length == 0){
+                const nodes = _tree.getSelectedNodes();
+                if (nodes.length === 0) {
                     $.modal.msgError("请选择节点后提交");
                     return false;
                 }
-                for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i].level == 0) {
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].level === 0) {
                         $.modal.msgError("不能选择根节点（" + nodes[i].name + "）");
                         return false;
                     }
@@ -1511,8 +1510,8 @@ var table = {
             },
             // 不允许最后层级节点选择
             notAllowLastLevel: function(_tree) {
-                var nodes = _tree.getSelectedNodes();
-                for (var i = 0; i < nodes.length; i++) {
+                const nodes = _tree.getSelectedNodes();
+                for (let i = 0; i < nodes.length; i++) {
                     if (!nodes[i].isParent) {
                         $.modal.msgError("不能选择最后层级节点（" + nodes[i].name + "）");
                         return false;
@@ -1540,10 +1539,8 @@ var table = {
         common: {
             // 判断字符串是否为空
             isEmpty: function (value) {
-                if (value == null || this.trim(value) == "" || value == undefined || value == "undefined") {
-                    return true;
-                }
-                return false;
+                return value === null || this.trim(value) === "" || value === undefined || value === "undefined";
+
             },
             // 判断一个字符串是否为非空串
             isNotEmpty: function (value) {
@@ -1562,10 +1559,8 @@ var table = {
             },
             // 是否显示数据 为空默认为显示
             visible: function (value) {
-                if ($.common.isEmpty(value) || value == true) {
-                    return true;
-                }
-                return false;
+                return $.common.isEmpty(value) || value === true;
+
             },
             // 空格截取
             trim: function (value) {
@@ -1576,7 +1571,7 @@ var table = {
             },
             // 比较两个字符串（大小写敏感）
             equals: function (str, that) {
-                return str == that;
+                return str === that;
             },
             // 比较两个字符串（大小写不敏感）
             equalsIgnoreCase: function (str, that) {
@@ -1587,14 +1582,14 @@ var table = {
                 if ($.common.isEmpty(str)) {
                     return null;
                 }
-                var value = String(str).split(sep);
+                const value = String(str).split(sep);
                 return maxLen ? value.slice(0, maxLen - 1) : value;
             },
             // 字符串格式化(%s )
             sprintf: function (str) {
-                var args = arguments, flag = true, i = 1;
+                let args = arguments, flag = true, i = 1;
                 str = str.replace(/%s/g, function () {
-                    var arg = args[i++];
+                    const arg = args[i++];
                     if (typeof arg === 'undefined') {
                         flag = false;
                         return '';
@@ -1605,7 +1600,7 @@ var table = {
             },
             // 日期格式化 时间戳  -> yyyy-MM-dd HH-mm-ss
             dateFormat: function(date, format) {
-                var that = this;
+                const that = this;
                 if (that.isEmpty(date)) return "";
                 if (!date) return;
                 if (!format) format = "yyyy-MM-dd";
@@ -1618,7 +1613,7 @@ var table = {
                         break;
                 }
                 if (!date instanceof Date) return;
-                var dict = {
+                const dict = {
                     "yyyy": date.getFullYear(),
                     "M": date.getMonth() + 1,
                     "d": date.getDate(),
@@ -1638,12 +1633,12 @@ var table = {
             },
             // 获取节点数据，支持多层级访问
             getItemField: function (item, field) {
-                var value = item;
+                let value = item;
                 if (typeof field !== 'string' || item.hasOwnProperty(field)) {
                     return item[field];
                 }
-                var props = field.split('.');
-                for (var p in props) {
+                const props = field.split('.');
+                for (const p in props) {
                     value = value && value[props[p]];
                 }
                 return value;
@@ -1654,19 +1649,19 @@ var table = {
             },
             // 判断字符串是否是以start开头
             startWith: function(value, start) {
-                var reg = new RegExp("^" + start);
+                const reg = new RegExp("^" + start);
                 return reg.test(value)
             },
             // 判断字符串是否是以end结尾
             endWith: function(value, end) {
-                var reg = new RegExp(end + "$");
+                const reg = new RegExp(end + "$");
                 return reg.test(value)
             },
             // 数组去重
             uniqueFn: function(array) {
-                var result = [];
-                var hashObj = {};
-                for (var i = 0; i < array.length; i++) {
+                const result = [];
+                const hashObj = {};
+                for (let i = 0; i < array.length; i++) {
                     if (!hashObj[array[i]]) {
                         hashObj[array[i]] = true;
                         result.push(array[i]);
@@ -1683,7 +1678,7 @@ var table = {
             },
             // 获取form下所有的字段并转换为json对象
             formToJSON: function(formId) {
-                var json = {};
+                const json = {};
                 $.each($("#" + formId).serializeArray(), function(i, field) {
                     if (json[field.name]) {
                         json[field.name] += ("," + field.value);
@@ -1695,11 +1690,11 @@ var table = {
             },
             // 数据字典转下拉框
             dictToSelect: function(datas, value, name) {
-                var actions = [];
+                const actions = [];
                 actions.push($.common.sprintf("<select class='form-control' name='%s'>", name));
                 $.each(datas, function(index, dict) {
                     actions.push($.common.sprintf("<option value='%s'", dict.dictValue));
-                    if (dict.dictValue == ('' + value)) {
+                    if (dict.dictValue === ('' + value)) {
                         actions.push(' selected');
                     }
                     actions.push($.common.sprintf(">%s</option>", dict.dictLabel));
@@ -1709,8 +1704,8 @@ var table = {
             },
             // 获取obj对象长度
             getLength: function(obj) {
-                var count = 0;
-                for (var i in obj) {
+                let count = 0;
+                for (const i in obj) {
                     if (obj.hasOwnProperty(i)) {
                         count++;
                     }
@@ -1723,22 +1718,22 @@ var table = {
             },
             // 数字正则表达式，只能为0-9数字
             numValid : function(text){
-                var patten = new RegExp(/^[0-9]+$/);
+                const patten = new RegExp(/^[0-9]+$/);
                 return patten.test(text);
             },
             // 英文正则表达式，只能为a-z和A-Z字母
             enValid : function(text){
-                var patten = new RegExp(/^[a-zA-Z]+$/);
+                const patten = new RegExp(/^[a-zA-Z]+$/);
                 return patten.test(text);
             },
             // 英文、数字正则表达式，必须包含（字母，数字）
             enNumValid : function(text){
-                var patten = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
+                const patten = new RegExp(/^(?=.*[a-zA-Z]+)(?=.*[0-9]+)[a-zA-Z0-9]+$/);
                 return patten.test(text);
             },
             // 英文、数字、特殊字符正则表达式，必须包含（字母，数字，特殊字符!@#$%^&*()-=_+）
             charValid : function(text){
-                var patten = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#\$%\^&\*\(\)\-=_\+])[A-Za-z\d~!@#\$%\^&\*\(\)\-=_\+]{6,}$/);
+                const patten = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*()\-=_+])[A-Za-z\d~!@#$%^&*()\-=_+]{6,}$/);
                 return patten.test(text);
             },
         }
@@ -1760,7 +1755,7 @@ function isJson(json) {
     if (!is_json) {
         countCharacter = function(string,character) {
             count = 0;
-            for (var i = 0; i < string.length; i++) {
+            for (let i = 0; i < string.length; i++) {
                 if (string.charAt(i) === character) { //counting : or ,
                     count ++;
                 }
@@ -1785,7 +1780,7 @@ function isJson(json) {
             json = json.split(',');
 
 
-            for (var i = 0; i < json.length; i++) {
+            for (let i = 0; i < json.length; i++) {
 
                 pairs = json[i];
                 if (pairs.indexOf(':') === -1) { //if colon not exist in b/w
