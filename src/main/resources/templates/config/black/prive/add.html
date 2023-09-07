@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+    <th:block th:insert="~{include :: header('用户黑名单')}"/>
+    <body>
+        <div class="white-bg">
+            <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+                <form class="form-horizontal m" id="form-prive-black-add">
+                    <input id="id" name="id" type="hidden">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="userUid">QQ：</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input class="form-control" id="userUid" name="userUid" placeholder="要加入黑名单的QQ账号"
+                                       type="number">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <th:block th:insert="~{include :: footer}"/>
+        <script type="text/javascript">
+            const prefix = ctx + "config/black/prive";
+
+            $.validator.addMethod("qq", function (value, element, param) {
+                var qqPattern = /^[1-9][0-9]{4,10}$/;
+                return new RegExp(qqPattern).test(value);
+            }, "请输入5-11位的QQ账号");
+
+            $("#form-prive-black-add").validate({
+                rules: {
+                    userId: {
+                        required: true,
+                        qq: true,
+                    }
+                },
+                messages: {
+                    userId: {
+                        required: "请输入正确的QQ账号",
+                    }
+                },
+                focusCleanup: true
+            });
+
+            function submitHandler() {
+                if ($.validate.form()) {
+                    $.operate.save(prefix + "/add", $('#form-prive-black-add').serialize());
+                }
+            }
+
+
+        </script>
+    </body>
+</html>

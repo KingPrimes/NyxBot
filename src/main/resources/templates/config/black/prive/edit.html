@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+    <th:block th:insert="~{include :: header('用户黑名单')}"/>
+    <body>
+        <div class="white-bg">
+            <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+                <form class="form-horizontal m" id="form-prive-black-edit" th:object="${black}">
+                    <input name="id" th:field="*{id}" type="hidden">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="userUid">QQ：</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input class="form-control" id="userUid" name="userUid" th:field="*{userUid}"
+                                       type="number">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <th:block th:insert="~{include :: footer}"/>
+        <script type="text/javascript">
+            const prefix = ctx + "config/black/prive";
+
+            function submitHandler() {
+                if ($.validate.form()) {
+                    $.operate.save(prefix + "/update", $('#form-prive-black-edit').serialize());
+                }
+            }
+
+            function doSubmit(index, layero) {
+                const tree = layero.find("iframe")[0].contentWindow.$._tree;
+                if ($.tree.notAllowLastLevel(tree)) {
+                    const body = $.modal.getChildFrame(index);
+                    $("#userUid").val(body.find('#userUid').val());
+                    $.modal.close(index);
+                }
+            }
+        </script>
+    </body>
+</html>
