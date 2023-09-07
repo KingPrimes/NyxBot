@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -51,11 +52,11 @@ public class Runners {
             List<SysMenu> ms = menu.findAll();
             List<SysUserAndMenu> ums = um.findAll();
             if (ms.isEmpty()) {
-                List<SysMenu> array = JSON.parseArray(Runners.class.getResourceAsStream("/menu/menu")).toJavaList(SysMenu.class);
+                List<SysMenu> array = Objects.requireNonNull(JSON.parseArray(Runners.class.getResourceAsStream("/menu/menu"))).toJavaList(SysMenu.class);
                 menu.saveAll(array);
             }
             if (ums.isEmpty()) {
-                List<SysUserAndMenu> array = JSON.parseArray(Runners.class.getResourceAsStream("/menu/user_and_menu")).toJavaList(SysUserAndMenu.class);
+                List<SysUserAndMenu> array = Objects.requireNonNull(JSON.parseArray(Runners.class.getResourceAsStream("/menu/user_and_menu"))).toJavaList(SysUserAndMenu.class);
                 um.saveAll(array);
             }
         };
@@ -80,16 +81,16 @@ public class Runners {
 
 
     //程序启动完成后初始化数据
-    @Bean
+    /*@Bean
     public ApplicationRunner inItDataSource() {
         return args -> {
             if (!test) {
                 AsyncUtils.me().execute(WarframeDataSource::init);
             }
         };
-    }
+    }*/
 
-    @Bean
+  /*  @Bean
     public ApplicationRunner warframeDataSocket() {
         return args -> {
             if (!test) {
@@ -97,7 +98,7 @@ public class Runners {
                 WarframeSocket.socket().connectServer(ApiUrl.WARFRAME_SOCKET);
             }
         };
-    }
+    }*/
 
     /**
      * 初始化服务
