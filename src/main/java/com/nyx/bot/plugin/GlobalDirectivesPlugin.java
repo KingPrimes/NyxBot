@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.CodeUtils;
 import org.springframework.stereotype.Component;

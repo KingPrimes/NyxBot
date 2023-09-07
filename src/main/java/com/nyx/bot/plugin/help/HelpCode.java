@@ -1,4 +1,4 @@
-package com.nyx.bot.plugin;
+package com.nyx.bot.plugin.help;
 
 
 import com.mikuac.shiro.core.Bot;
