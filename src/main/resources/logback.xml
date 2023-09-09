@@ -18,7 +18,7 @@
     <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i-info.log</fileNamePattern>
+            <fileNamePattern>${log.path}/info/%d{yyyy-MM-dd}-%i-info.log</fileNamePattern>
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
             <!--日志文件最大文件大小-->
@@ -41,7 +41,7 @@
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i-error.log</fileNamePattern>
+            <fileNamePattern>${log.path}/error/%d{yyyy-MM-dd}-%i-error.log</fileNamePattern>
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
             <!--日志文件最大文件大小-->
@@ -65,7 +65,7 @@
     <appender name="file_warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i-warn.log</fileNamePattern>
+            <fileNamePattern>${log.path}/warn/%d{yyyy-MM-dd}-%i-warn.log</fileNamePattern>
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
             <!--日志文件最大文件大小-->
