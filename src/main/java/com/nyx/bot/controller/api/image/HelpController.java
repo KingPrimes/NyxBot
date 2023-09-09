@@ -23,7 +23,7 @@ public class HelpController {
         response.setHeader("content-type","image/png");
         response.getOutputStream().write(
                 HtmlToImage.conver(
-                        Constants.LOCALHOST+"private/getHelpHtml"
+                        Constants.LOCALHOST + "private/getHelpHtml/" + data.getPermissionsEnums()
                 ).toByteArray()
         );
     }
