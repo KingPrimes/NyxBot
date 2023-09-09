@@ -16,7 +16,7 @@ public class ApiUrl {
     /**
      * 战甲数据源
      */
-    public static final String WARFRAME_DATA_SOURCE = "https://ghproxy.com/https://raw.githubusercontent.com/KingPrimes/DataSource/main/warframe/";
+    public static final String WARFRAME_DATA_SOURCE = "https://raw.gitmirror.com/KingPrimes/DataSource/main/warframe/";
 
 
     /**
