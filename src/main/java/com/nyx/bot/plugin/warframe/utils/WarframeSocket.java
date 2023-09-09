@@ -38,6 +38,12 @@ public class WarframeSocket extends WebSocketListener {
         webSocket = client.newWebSocket(request,this);
     }
 
+    public void close() {
+        if (webSocket != null) {
+            webSocket.close(1000, "service close");
+        }
+    }
+
 
 
     @Override
