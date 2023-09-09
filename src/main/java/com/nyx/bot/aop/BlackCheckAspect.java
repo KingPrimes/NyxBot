@@ -21,7 +21,7 @@ public class BlackCheckAspect {
 
 
     //黑名单过滤
-    @Around(value = "execution(* com.nyx.bot.plugin.*.*(..))")
+    @Around(value = "execution(* com.nyx.bot.plugin.*.*Handler(..))")
     public Object handler(ProceedingJoinPoint pjp) {
         try {
             for (Object arg : pjp.getArgs()) {
