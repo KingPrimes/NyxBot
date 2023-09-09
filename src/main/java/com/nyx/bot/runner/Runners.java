@@ -2,7 +2,6 @@ package com.nyx.bot.runner;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.Services;
 import com.nyx.bot.entity.sys.SysMenu;
 import com.nyx.bot.entity.sys.SysUser;
@@ -15,6 +14,7 @@ import com.nyx.bot.repo.sys.SysMenuRepository;
 import com.nyx.bot.repo.sys.SysUserAndMenuRepository;
 import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.IoUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,10 @@ public class Runners {
     @Resource
     SysUserAndMenuRepository um;
 
+
+    /**
+     * 初始化动态菜单选项
+     */
     @Bean
     public ApplicationRunner initMenu() {
         return args -> {
@@ -80,25 +84,29 @@ public class Runners {
     }
 
 
-    //程序启动完成后初始化数据
-    /*@Bean
-    public ApplicationRunner inItDataSource() {
+    //程序启动完成后恢复服务状态
+    @Bean
+    public ApplicationRunner initService() {
         return args -> {
-            if (!test) {
-                AsyncUtils.me().execute(WarframeDataSource::init);
-            }
+            List<Services> all = repository.findAll();
+            CacheUtils.set(CacheUtils.SYSTEM, "service", all);
+            all.forEach(s -> {
+                switch (s.getService()) {
+                    case WARFRAME -> {
+                        if (s.getSwit()) {
+                            WarframeSocket.socket().connectServer(ApiUrl.WARFRAME_SOCKET);
+                        }
+                    }
+                    case CHAT_GPT -> {
+                    }
+                    case YI_YAN -> {
+                    }
+                    case STABLE_DIFFUSION -> {
+                    }
+                }
+            });
         };
-    }*/
-
-  /*  @Bean
-    public ApplicationRunner warframeDataSocket() {
-        return args -> {
-            if (!test) {
-                //创建WebSocket链接 或许游戏数据
-                WarframeSocket.socket().connectServer(ApiUrl.WARFRAME_SOCKET);
-            }
-        };
-    }*/
+    }
 
     /**
      * 初始化服务
@@ -108,11 +116,29 @@ public class Runners {
         List<Services> all = repository.findAll();
         if (ServicesEnums.values().length != all.size()) {
             return args -> {
-                for (ServicesEnums enums : ServicesEnums.values()) {
-                    Services service = new Services();
-                    service.setService(enums);
-                    service.setSwit(false);
-                    repository.save(service);
+                if (all.isEmpty()) {
+                    for (ServicesEnums enums : ServicesEnums.values()) {
+                        Services service = new Services();
+                        service.setService(enums);
+                        service.setSwit(false);
+                        repository.save(service);
+                    }
+                } else {
+                    for (ServicesEnums value : ServicesEnums.values()) {
+                        boolean falg = true;
+                        for (Services services : all) {
+                            if (services.getService().equals(value)) {
+                                falg = false;
+                                break;
+                            }
+                        }
+                        if (falg) {
+                            Services service = new Services();
+                            service.setService(value);
+                            service.setSwit(false);
+                            repository.save(service);
+                        }
+                    }
                 }
             };
         } else {
