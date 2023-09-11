@@ -29,7 +29,7 @@ public class HttpUtils {
     }
 
     public static Body sendGet(String url, String param) {
-        return sendGet(url, param, null);
+        return sendGet(url, param, Headers.of("*", "*"));
     }
 
     public static Body sendGet(String url, Headers headers) {
@@ -46,7 +46,7 @@ public class HttpUtils {
      * @return 返回的文本
      */
     public static Body sendGet(String url, String param, Headers headers) {
-
+        log.debug("发送请求\nUrl:{}\n参数:{}\n请求头:{}", url, param, headers.toString());
         try (Response response = client.newCall(send(url, param, headers)).execute()) {
             Body body = new Body();
             Optional.ofNullable(response.body().string()).ifPresentOrElse(r -> {

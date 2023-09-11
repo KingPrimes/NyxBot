@@ -98,10 +98,13 @@ public class Runners {
                         }
                     }
                     case CHAT_GPT -> {
+
                     }
                     case YI_YAN -> {
+
                     }
                     case STABLE_DIFFUSION -> {
+
                     }
                 }
             });

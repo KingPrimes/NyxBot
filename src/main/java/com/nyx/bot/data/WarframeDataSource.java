@@ -63,7 +63,9 @@ public class WarframeDataSource {
                     }
                 });
                 log.info("共更新Warframe.ephemeras {} 条数据！", i);
+                return;
             }
+            log.info("ephemeras数据未变更！");
         });
     }
 
@@ -82,7 +84,9 @@ public class WarframeDataSource {
             if (aliasR.findAll().size() != records.size()) {
                 records = aliasR.saveAll(records);
                 log.info("共更新Warframe别名表 {} 条数据！", records.size());
+                return;
             }
+            log.info("Warframe别名表数据未变更！");
         });
     }
 
@@ -100,7 +104,9 @@ public class WarframeDataSource {
             if (t.findAll().size() != records.size()) {
                 records = t.saveAll(records);
                 log.info("共更新Warframe翻译表 {} 条数据！", records.size());
+                return;
             }
+            log.info("Warframe翻译表数据未变更！");
         });
     }
 
@@ -127,7 +133,9 @@ public class WarframeDataSource {
                     }
                 });
                 log.info("共更新Warframe.Market {} 条数据！", size);
+                return;
             }
+            log.info("Warframe.Market数据未变更！");
         });
     }
 
@@ -161,9 +169,9 @@ public class WarframeDataSource {
                     }
                 });
                 log.info("共更新Warframe.Weapons {} 条数据！", i);
+                return;
             }
+            log.info("Warframe.Weapons数据未变更！");
         });
     }
-
-
 }

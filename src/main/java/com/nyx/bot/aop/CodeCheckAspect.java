@@ -17,11 +17,11 @@ import java.util.Objects;
 @Component
 public class CodeCheckAspect {
 
-    private static boolean isOpen() {
+    private static boolean isOpen(ServicesEnums enums) {
         ArrayList servers = CacheUtils.get(CacheUtils.SYSTEM, "service", ArrayList.class);
         for (Object server : servers) {
             if (server instanceof Services) {
-                if (Objects.requireNonNull(((Services) server).getService()) == ServicesEnums.WARFRAME) {
+                if (Objects.requireNonNull(((Services) server).getService()) == enums) {
                     return ((Services) server).getSwit();
                 }
             }
@@ -33,9 +33,9 @@ public class CodeCheckAspect {
      * 是否开启Warframe查询服务
      */
     @Around(value = "execution(* com.nyx.bot.plugin.warframe.code.*.*(..))")
-    public Object handler(ProceedingJoinPoint pjp) {
+    public Object handlerWarframe(ProceedingJoinPoint pjp) {
         try {
-            if (isOpen()) {
+            if (isOpen(ServicesEnums.WARFRAME)) {
                 return pjp.proceed();
             }
             return 0;
@@ -43,4 +43,71 @@ public class CodeCheckAspect {
             throw new RuntimeException(e);
         }
     }
+
+    //Acg图片
+    @Around(value = "execution(* com.nyx.bot.plugin.acg.code.*.*(..))")
+    public Object handlerAcg(ProceedingJoinPoint pjp) {
+        try {
+            if (isOpen(ServicesEnums.ACG_IMAGE)) {
+                return pjp.proceed();
+            }
+            return 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //ChatGpt
+    @Around(value = "execution(* com.nyx.bot.plugin.chat.code.*.*(..))")
+    public Object handlerChat(ProceedingJoinPoint pjp) {
+        try {
+            if (isOpen(ServicesEnums.CHAT_GPT)) {
+                return pjp.proceed();
+            }
+            return 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //表情包
+    @Around(value = "execution(* com.nyx.bot.plugin.expression.code.*.*(..))")
+    public Object handlerExpression(ProceedingJoinPoint pjp) {
+        try {
+            if (isOpen(ServicesEnums.DRAW_EMOJIS)) {
+                return pjp.proceed();
+            }
+            return 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //点歌
+    @Around(value = "execution(* com.nyx.bot.plugin.music.code.*.*(..))")
+    public Object handlerMusic(ProceedingJoinPoint pjp) {
+        try {
+            if (isOpen(ServicesEnums.MUSIC)) {
+                return pjp.proceed();
+            }
+            return 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //鉴别图片
+    @Around(value = "execution(* com.nyx.bot.plugin.nsfw.code.*.*(..))")
+    public Object handlerNsfw(ProceedingJoinPoint pjp) {
+        try {
+            if (isOpen(ServicesEnums.LOOK_IMAGE)) {
+                return pjp.proceed();
+            }
+            return 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

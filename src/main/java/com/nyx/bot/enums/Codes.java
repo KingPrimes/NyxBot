@@ -13,36 +13,20 @@ public enum Codes {
     CHECK_VERSION("^检查版本|^版本|^运行状态|^状态", PermissionsEnums.ADMIN),
 
     UPDATE_HTML("^更新HTML", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_RES_MARKET_ITEMS("^更新WM物品", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_RES_MARKET_RIVEN("^更新WM紫卡", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_RES_RM("^更新RM紫卡", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_RIVEN_CHANGES("^更新紫卡倾向变动", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_SISTER("^更新信条", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_TAR("^更新翻译", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_MARKET_ITEMS("^更新WM物品", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_MARKET_RIVEN("^更新WM紫卡", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_RM("^更新RM紫卡", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RIVEN_CHANGES("^更新紫卡倾向变动", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_SISTER("^更新信条", PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_TAR("^更新翻译", PermissionsEnums.SUPER_ADMIN),
     UPDATE_JAR("^自动更新|^更新版本|^版本更新", PermissionsEnums.SUPER_ADMIN),
 
     TYPE_CODE("^指令|^命令|^菜单", PermissionsEnums.USER),
 
-    SWITCH_OPEN_WARFRAME("^开启WF|^开启WARFRAME|^OPENWARFRAME", PermissionsEnums.ADMIN),
-    SWITCH_OPEN_MUSIC("^开启点歌|^OPENMUSIC", PermissionsEnums.ADMIN),
-    SWITCH_OPEN_IMAGE("^开启色图|^开启涩图|^OPENIMAGE", PermissionsEnums.ADMIN),
-    SWITCH_OPEN_IMAGE_NSFW("^开启鉴图", PermissionsEnums.ADMIN),
-    SWITCH_OPEN_CHAT_GPT("^开启CHAT|^OPENCHAT|^ONCHAT", PermissionsEnums.SUPER_ADMIN),
-    SWITCH_OPEN_EXPRESSION("^开启表情|^开启GIF", PermissionsEnums.ADMIN),
-    SWITCH_OPEN_DRAWING("^开启绘图|^绘图开", PermissionsEnums.SUPER_ADMIN),
-
-    SWITCH_OFF_WARFRAME("^关闭WF|^关闭WARFRAME|^OFFWARFRAME", PermissionsEnums.ADMIN),
-    SWITCH_OFF_MUSIC("^关闭点歌|^OFFMUSIC", PermissionsEnums.ADMIN),
-    SWITCH_OFF_IMAGE("^关闭色图|^关闭涩图|^OFFIMAGE", PermissionsEnums.ADMIN),
-    SWITCH_OFF_IMAGE_NSFW("^关闭鉴图", PermissionsEnums.ADMIN),
-    SWITCH_OFF_CHAT_GPT("^关闭CHAT|^OFFCHAT", PermissionsEnums.SUPER_ADMIN),
-    SWITCH_OFF_EXPRESSION("^关闭表情|^关闭GIF", PermissionsEnums.ADMIN),
-    SWITCH_OFF_DRAWING("^关闭绘图|^绘图关", PermissionsEnums.SUPER_ADMIN),
-
 
     MUSIC("^点歌|^来首歌", PermissionsEnums.USER),
 
-    IMAGE("^涩图|^色图|^来张色图", PermissionsEnums.USER),
+    ACG_IMAGE("^涩图|^色图|^来张色图", PermissionsEnums.USER),
     IMAGE_NSFW("^鉴图|^看图", PermissionsEnums.USER),
     DRAWING("^绘个图|^绘图|^画张图|^画图", PermissionsEnums.USER),
 
@@ -78,7 +62,7 @@ public enum Codes {
     WARFRAME_RELICS_PLUGIN("^核桃|^查核桃", PermissionsEnums.USER),
     WARFRAME_OPEN_RELICS_PLUGIN("^开核桃|^砸核桃", PermissionsEnums.USER),
     WARFRAME_RIVEN_ANALYSE("^紫卡分析|^分析紫卡", PermissionsEnums.USER),
-    WARFRAME_SUBSCRIBE("^订阅", PermissionsEnums.USER),
+    WARFRAME_SUBSCRIBE("^订阅[0-9]+", PermissionsEnums.USER),
     ;
 
     private String str;

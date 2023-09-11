@@ -27,14 +27,13 @@ public class WarframeCodes {
      * 订阅消息
      * @param bot Bot
      * @param event 消息体
-     * @param code 指令
      */
-    public static void subscribe(Bot bot, AnyMessageEvent event, String code){
+    public static void subscribe(Bot bot, AnyMessageEvent event) {
         if(!ActionParams.GROUP.equals(event.getMessageType())){
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
         }
-
+        String code = event.getRawMessage().replaceAll(Codes.WARFRAME_SUBSCRIBE.getStr(), "").trim();
         if(code.isEmpty()){
             bot.sendMsg(event, "请在订阅指令后面加上要订阅的编号！\n编号通过使用 订阅列表查看！",false);
         }

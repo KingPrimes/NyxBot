@@ -21,64 +21,52 @@ public class GlobalDirectivesPlugin {
     }
 
     @AnyMessageHandler
-    public void messageDispose(Bot bot, AnyMessageEvent event) {
+    public void messageDisposeHandler(Bot bot, AnyMessageEvent event) {
         String raw = event.getRawMessage();
         Codes code = CodeUtils.matchInstructions(raw);
         Optional.ofNullable(code).ifPresent(codes -> {
             switch (codes) {
                 //帮助菜单
                 case HELP, TYPE_CODE -> HelpCode.help(bot, event);
-                //检查版本
+                //运行状态
                 case CHECK_VERSION -> {
                 }
-                //更新HTML
-                case UPDATE_HTML -> {
+                //更新操作
+                case UPDATE_HTML,
+                        UPDATE_WARFRAME_RES_MARKET_ITEMS,
+                        UPDATE_WARFRAME_RES_MARKET_RIVEN,
+                        UPDATE_WARFRAME_RES_RM,
+                        UPDATE_WARFRAME_RIVEN_CHANGES,
+                        UPDATE_WARFRAME_SISTER,
+                        UPDATE_WARFRAME_TAR,
+                        UPDATE_JAR -> {
+
                 }
-                //更新WM物品
-                case UPDATE_RES_MARKET_ITEMS -> {
-                }
-                //更新WM紫卡
-                case UPDATE_RES_MARKET_RIVEN -> {
-                }
-                //更新RM紫卡
-                case UPDATE_RES_RM -> {
-                }
-                //更新紫卡倾向变动
-                case UPDATE_RIVEN_CHANGES -> {
-                }
-                //更新信条
-                case UPDATE_SISTER -> {
-                }
-                //更新翻译
-                case UPDATE_TAR -> {
-                }
-                //更新版本
-                case UPDATE_JAR -> {
-                }
-                //开
-                case SWITCH_OPEN_WARFRAME, SWITCH_OPEN_MUSIC, SWITCH_OPEN_IMAGE, SWITCH_OPEN_IMAGE_NSFW, SWITCH_OPEN_CHAT_GPT, SWITCH_OPEN_EXPRESSION, SWITCH_OPEN_DRAWING -> {
-                }
-                //关
-                case SWITCH_OFF_WARFRAME, SWITCH_OFF_MUSIC, SWITCH_OFF_IMAGE, SWITCH_OFF_IMAGE_NSFW, SWITCH_OFF_CHAT_GPT, SWITCH_OFF_EXPRESSION, SWITCH_OFF_DRAWING -> {
+                //画图
+                case DRAWING -> {
+
                 }
                 //点歌
                 case MUSIC -> {
+                    not(bot, event);
                 }
                 //涩图
-                case IMAGE -> {
+                case ACG_IMAGE -> {
+                    not(bot, event);
                 }
                 //鉴图
                 case IMAGE_NSFW -> {
+                    not(bot, event);
                 }
                 //CHAT
                 case CHAT_GPT -> {
+                    not(bot, event);
                 }
                 //表情包
-                case EXPRESSION_CAPO -> {
-                }
-                case EXPRESSION_EMAIL_FUNNY -> {
-                }
-                case EXPRESSION_SPIRITUAL_PILLARS -> {
+                case EXPRESSION_CAPO,
+                        EXPRESSION_EMAIL_FUNNY,
+                        EXPRESSION_SPIRITUAL_PILLARS -> {
+                    not(bot, event);
                 }
 
                 //Warframe
@@ -135,7 +123,7 @@ public class GlobalDirectivesPlugin {
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> not(bot, event);
                 //订阅处理
-                case WARFRAME_SUBSCRIBE -> not(bot, event);
+                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event);
             }
         });
     }
