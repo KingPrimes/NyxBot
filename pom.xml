@@ -25,49 +25,62 @@
         <java.version>17</java.version>
         <oneSdk.version>2.0.9</oneSdk.version>
         <fastJson2.version>2.0.38</fastJson2.version>
-        <kaptcha.version>2.3.3</kaptcha.version>
         <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.16.1</jsoup.version>
+        <tess4j.version>5.8.0</tess4j.version>
+        <animated-gif-lib.vsersion>1.4</animated-gif-lib.vsersion>
     </properties>
 
 
     <dependencies>
+
+
+        <!--SpringBoot JPA操作DAO-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!--SpringBoot日志-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
 
+        <!--SpringBoot Thymeleaf模板-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
+        <!--SpringBoot WebMVC-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+
+        <!--SpringBoot Security权限验证-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!--SpringBoot AOP切面-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <!--验证码-->
-        <dependency>
-            <groupId>pro.fessional</groupId>
-            <artifactId>kaptcha</artifactId>
-            <version>${kaptcha.version}</version>
         </dependency>
 
         <!--热部署-->
@@ -80,28 +93,39 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--Http请求-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
 
+        <!--内存缓存-->
         <dependency>
             <groupId>org.cache2k</groupId>
             <artifactId>cache2k-spring</artifactId>
         </dependency>
 
+        <!--文本识别-->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>${tess4j.version}</version>
+        </dependency>
 
+        <!--H2数据库-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
+        <!--工具包-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <!--One Bot SDK-->
         <dependency>
             <groupId>com.mikuac</groupId>
             <artifactId>shiro</artifactId>
@@ -120,29 +144,34 @@
             <optional>true</optional>
         </dependency>
 
+        <!--JSON解析-->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
             <version>${fastJson2.version}</version>
         </dependency>
 
+        <!--在Java中运行JS脚本-->
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
             <version>${rhino.version}</version>
         </dependency>
 
+        <!--Git操作-->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>6.6.0.202305301015-r</version>
         </dependency>
 
+        <!--YAML操作-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
 
+        <!--Html解析-->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -156,6 +185,14 @@
             <version>${xhtmlrenderer.version}</version>
         </dependency>
 
+        <!--GIF绘图核心-->
+        <dependency>
+            <groupId>com.madgag</groupId>
+            <artifactId>animated-gif-lib</artifactId>
+            <version>${animated-gif-lib.vsersion}</version>
+        </dependency>
+
+        <!--SpringBoot测试-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
