@@ -1,6 +1,6 @@
-package com.nyx.bot.utils.image.combiner.combiner.element;
+package com.nyx.bot.utils.image.combiner.element;
 
-import com.nyx.bot.utils.image.combiner.combiner.enums.ZoomMode;
+import com.nyx.bot.utils.image.combiner.enums.ZoomMode;
 import lombok.Getter;
 
 import javax.imageio.ImageIO;

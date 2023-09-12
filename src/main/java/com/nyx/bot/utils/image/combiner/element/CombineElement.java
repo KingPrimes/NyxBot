@@ -1,7 +1,7 @@
-package com.nyx.bot.utils.image.combiner.combiner.element;
+package com.nyx.bot.utils.image.combiner.element;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.enums.Direction;
+import com.nyx.bot.utils.image.combiner.enums.Direction;
 
 public abstract class CombineElement<T extends CombineElement> {
     private int x;

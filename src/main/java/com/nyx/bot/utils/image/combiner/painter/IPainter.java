@@ -1,7 +1,7 @@
-package com.nyx.bot.utils.image.combiner.combiner.painter;
+package com.nyx.bot.utils.image.combiner.painter;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.element.CombineElement;
+import com.nyx.bot.utils.image.combiner.element.CombineElement;
 
 import java.awt.*;
 import java.io.IOException;

@@ -20,53 +20,50 @@ import java.awt.*;
 import java.awt.image.*;
 
 /**
- * An abstract superclass for filters which distort images in some way. The subclass only needs to override
- * two methods to provide the mapping between source and destination pixels.
+ * 一个抽象的超类，用于以某种方式扭曲图像的过滤器。子类只需要覆盖
+ * 提供源像素和目标像素之间映射的两种方法。
  */
 public abstract class TransformFilter extends AbstractBufferedImageOp {
 
     /**
-     * Treat pixels off the edge as zero.
+     * 将边缘外的像素视为零。
      */
     public final static int ZERO = 0;
 
     /**
-     * Clamp pixels to the image edges.
+     *将像素夹在图像边缘。
      */
     public final static int CLAMP = 1;
-
     /**
-     * Wrap pixels off the edge onto the oppsoite edge.
+     * 将像素从边缘包裹到对立边缘上。
      */
     public final static int WRAP = 2;
 
     /**
-     * Clamp pixels RGB to the image edges, but zero the alpha. This prevents gray borders on your image.
+     * 将像素 RGB 固定到图像边缘，但将 alpha 归零。这可以防止图像上出现灰色边框。
      */
     public final static int RGB_CLAMP = 3;
 
     /**
-     * Use nearest-neighbout interpolation.
+     * 使用最近邻内插值。
      */
     public final static int NEAREST_NEIGHBOUR = 0;
 
     /**
-     * Use bilinear interpolation.
+     * 使用双线性插值。
      */
     public final static int BILINEAR = 1;
 
     /**
-     * The action to take for pixels off the image edge.
+     * 对图像边缘的像素执行的操作。
      */
     protected int edgeAction = RGB_CLAMP;
-
     /**
-     * The type of interpolation to use.
+     * 要使用的插值类型。
      */
     protected int interpolation = BILINEAR;
-
     /**
-     * The output image rectangle.
+     * 输出图像矩形。
      */
     protected Rectangle transformedSpace;
 
@@ -76,19 +73,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     protected Rectangle originalSpace;
 
     /**
-     * Set the action to perform for pixels off the edge of the image.
+     * 获取要对图像边缘的像素执行的操作。
      *
-     * @param edgeAction one of ZERO, CLAMP or WRAP
-     * @see #getEdgeAction
-     */
-    public void setEdgeAction(int edgeAction) {
-        this.edgeAction = edgeAction;
-    }
-
-    /**
-     * Get the action to perform for pixels off the edge of the image.
-     *
-     * @return one of ZERO, CLAMP or WRAP
+     * @return零、夹或换行之一
      * @see #setEdgeAction
      */
     public int getEdgeAction() {
@@ -96,19 +83,19 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set the type of interpolation to perform.
+     * 设置要对图像边缘的像素执行的操作。
      *
-     * @param interpolation one of NEAREST_NEIGHBOUR or BILINEAR
-     * @see #getInterpolation
+     * @param边缘动作之一，零，夹或包裹
+     * @see #getEdgeAction
      */
-    public void setInterpolation(int interpolation) {
-        this.interpolation = interpolation;
+    public void setEdgeAction(int edgeAction) {
+        this.edgeAction = edgeAction;
     }
 
     /**
-     * Get the type of interpolation to perform.
+     * 获取要执行的插值类型。
      *
-     * @return one of NEAREST_NEIGHBOUR or BILINEAR
+     * @return NEAREST_NEIGHBOUR或双线性之一
      * @see #setInterpolation
      */
     public int getInterpolation() {
@@ -116,18 +103,28 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Inverse transform a point. This method needs to be overriden by all subclasses.
+     * 设置要执行的插值类型。
      *
-     * @param x   the X position of the pixel in the output image
-     * @param y   the Y position of the pixel in the output image
-     * @param out the position of the pixel in the input image
+     * @param插值NEAREST_NEIGHBOUR或双线性之一
+     * @see #getInterpolation
+     */
+    public void setInterpolation(int interpolation) {
+        this.interpolation = interpolation;
+    }
+
+    /**
+     * 逆变换一个点。此方法需要由所有子类重写。
+     *
+     * @param x 输出图像中像素的 X 位置
+     * @param y 输出图像中像素的 Y 位置
+     * @param出输入图像中像素的位置
      */
     protected abstract void transformInverse(int x, int y, float[] out);
 
     /**
-     * Forward transform a rectangle. Used to determine the size of the output image.
+     * 前向变换矩形。用于确定输出图像的大小。
      *
-     * @param rect the rectangle to transform
+     * @param矩形进行变换
      */
     protected void transformSpace(Rectangle rect) {
     }
@@ -195,6 +192,10 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
             setRGB(dst, 0, y, transformedSpace.width, 1, outPixels);
         }
         return dst;
+    }
+
+    public BufferedImage filter(BufferedImage src) {
+        return filter(src, new BufferedImage(src.getWidth() * 2, src.getHeight() * 2, BufferedImage.TYPE_INT_ARGB));
     }
 
     final private int getPixel(int[] pixels, int x, int y, int width, int height) {

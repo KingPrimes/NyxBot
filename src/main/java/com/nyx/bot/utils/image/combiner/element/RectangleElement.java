@@ -1,7 +1,7 @@
-package com.nyx.bot.utils.image.combiner.combiner.element;
+package com.nyx.bot.utils.image.combiner.element;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.enums.GradientDirection;
+import com.nyx.bot.utils.image.combiner.enums.GradientDirection;
 import lombok.Getter;
 
 import java.awt.*;

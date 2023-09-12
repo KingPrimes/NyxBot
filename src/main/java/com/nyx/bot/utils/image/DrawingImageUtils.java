@@ -1,7 +1,10 @@
-package com.nyx.bot.utils.image.combiner;
+package com.nyx.bot.utils.image;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class DrawingImageUtils {
     /**
@@ -29,7 +32,7 @@ public class DrawingImageUtils {
      * @param image 图像
      * @return 处理后的图像
      */
-    public static BufferedImage addBlackWhiteFilter(BufferedImage image) {
+    public static BufferedImage barbarization(BufferedImage image) {
         for (int h = 0; h < image.getHeight(); h++) {
             for (int w = 0; w < image.getWidth(); w++) {
                 int gray = getGray(image, w, h);
@@ -41,6 +44,12 @@ public class DrawingImageUtils {
             }
         }
         return image;
+    }
+
+    public static ByteArrayOutputStream barbar(BufferedImage image) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(barbarization(image), "png", os);
+        return os;
     }
 
     /**
@@ -59,6 +68,12 @@ public class DrawingImageUtils {
         return newImage;
     }
 
+    public static ByteArrayOutputStream mirror(BufferedImage image) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(mirrorImage(image), "png", os);
+        return os;
+    }
+
 
     /**
      * 灰度化图像
@@ -75,6 +90,12 @@ public class DrawingImageUtils {
             }
         }
         return newImage;
+    }
+
+    public static ByteArrayOutputStream gray(BufferedImage image) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(grayImage(image), "png", os);
+        return os;
     }
 
 

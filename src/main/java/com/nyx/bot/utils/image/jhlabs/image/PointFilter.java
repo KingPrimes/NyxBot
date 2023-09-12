@@ -20,7 +20,7 @@ package com.nyx.bot.utils.image.jhlabs.image;
 import java.awt.image.*;
 
 /**
- * An abstract superclass for point filters. The interface is the same as the old RGBImageFilter.
+ * 点滤波器的抽象超类。该接口与旧的RGBImageFilter相同。
  */
 public abstract class PointFilter extends AbstractBufferedImageOp {
 
@@ -40,7 +40,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
 
         int[] inPixels = new int[width];
         for (int y = 0; y < height; y++) {
-            // We try to avoid calling getRGB on images as it causes them to become unmanaged, causing horrible performance problems.
+            // 我们尽量避免在图像上调用 getRGB，因为这会导致它们变得不受管理，从而导致可怕的性能问题。
             if (type == BufferedImage.TYPE_INT_ARGB) {
                 srcRaster.getDataElements(0, y, width, 1, inPixels);
                 for (int x = 0; x < width; x++)

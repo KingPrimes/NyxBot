@@ -59,6 +59,10 @@ public class ScaleFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
+    public BufferedImage filter(BufferedImage src) {
+        return filter(src, new BufferedImage(src.getWidth() * 2, src.getHeight() * 2, BufferedImage.TYPE_INT_ARGB));
+    }
+
     public String toString() {
         return "Distort/Scale";
     }

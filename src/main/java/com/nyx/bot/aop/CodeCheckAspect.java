@@ -71,7 +71,7 @@ public class CodeCheckAspect {
     }
 
     //表情包
-    @Around(value = "execution(* com.nyx.bot.plugin.expression.code.*.*(..))")
+    @Around(value = "execution(* com.nyx.bot.plugin.expression.code.ExpressionCode.expression(..))")
     public Object handlerExpression(ProceedingJoinPoint pjp) {
         try {
             if (isOpen(ServicesEnums.DRAW_EMOJIS)) {

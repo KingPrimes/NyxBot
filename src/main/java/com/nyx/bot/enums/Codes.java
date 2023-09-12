@@ -32,9 +32,13 @@ public enum Codes {
 
     CHAT_GPT("^CHAT", PermissionsEnums.USER),
 
-    EXPRESSION_CAPO("^CAPO", PermissionsEnums.USER),
+    EXPRESSION_CAPO_DING("^CAPODING", PermissionsEnums.USER),
+    EXPRESSION_CAPO_T("^CAPOT", PermissionsEnums.USER),
     EXPRESSION_EMAIL_FUNNY("^FUNNY", PermissionsEnums.USER),
     EXPRESSION_SPIRITUAL_PILLARS("^精神支柱", PermissionsEnums.USER),
+    EXPRESSION_BARBARIZATION("^二值化", PermissionsEnums.USER),
+    EXPRESSION_MIRROR_IMAGE("^镜像", PermissionsEnums.USER),
+    EXPRESSION_GRAY_IMAGE("^灰度", PermissionsEnums.USER),
 
     WARFRAME_ASSAULT_PLUGIN("^突击", PermissionsEnums.USER),
     WARFRAME_ARSON_HUNT_PLUGIN("^执刑官猎杀|^猎杀|^执行官|^执政官|^执刑官", PermissionsEnums.USER),

@@ -1,4 +1,4 @@
-package com.nyx.bot.utils.image.combiner;
+package com.nyx.bot.utils.image;
 
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;

@@ -1,14 +1,14 @@
-package com.nyx.bot.utils.image.combiner.combiner;
+package com.nyx.bot.utils.image.combiner;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.element.CombineElement;
-import com.nyx.bot.utils.image.combiner.combiner.element.ImageElement;
-import com.nyx.bot.utils.image.combiner.combiner.element.RectangleElement;
-import com.nyx.bot.utils.image.combiner.combiner.element.TextElement;
-import com.nyx.bot.utils.image.combiner.combiner.enums.OutputFormat;
-import com.nyx.bot.utils.image.combiner.combiner.enums.ZoomMode;
-import com.nyx.bot.utils.image.combiner.combiner.painter.IPainter;
-import com.nyx.bot.utils.image.combiner.combiner.painter.PainterFactory;
+import com.nyx.bot.utils.image.combiner.element.CombineElement;
+import com.nyx.bot.utils.image.combiner.element.ImageElement;
+import com.nyx.bot.utils.image.combiner.element.RectangleElement;
+import com.nyx.bot.utils.image.combiner.element.TextElement;
+import com.nyx.bot.utils.image.combiner.enums.OutputFormat;
+import com.nyx.bot.utils.image.combiner.enums.ZoomMode;
+import com.nyx.bot.utils.image.combiner.painter.IPainter;
+import com.nyx.bot.utils.image.combiner.painter.PainterFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

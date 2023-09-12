@@ -1,7 +1,7 @@
-package com.nyx.bot.utils.image.combiner.combiner.element;
+package com.nyx.bot.utils.image.combiner.element;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.enums.LineAlign;
+import com.nyx.bot.utils.image.combiner.enums.LineAlign;
 import lombok.Getter;
 
 import java.awt.*;

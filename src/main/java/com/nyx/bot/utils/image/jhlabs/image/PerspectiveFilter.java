@@ -18,13 +18,14 @@ package com.nyx.bot.utils.image.jhlabs.image;
 
 
 import java.awt.*;
-import java.awt.image.*;
-import java.awt.geom.*;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 /**
- * A filter which performs a perspective distortion on an image.
- * Coordinates are treated as if the image was a unit square, i.e. the bottom-right corner of the image is at (1, 1).
- * The filter maps the unit square onto an arbitrary convex quadrilateral or vice versa.
+ * 对图像执行透视失真的滤镜。
+ * 坐标被视为图像是单位正方形，即图像的右下角位于 （1， 1）。
+ * 过滤器将单位正方形映射到任意凸四边形上，反之亦然。
  */
 public class PerspectiveFilter extends TransformFilter {
 
@@ -36,49 +37,50 @@ public class PerspectiveFilter extends TransformFilter {
     private boolean clip = false;
 
     /**
-     * Construct a PerspectiveFilter.
+     * 构造透视过滤器。
      */
     public PerspectiveFilter() {
         this(0, 0, 1, 0, 1, 1, 0, 1);
     }
 
     /**
-     * Construct a PerspectiveFilter.
+     * 构造透视过滤器。
      *
-     * @param x0 the new position of the top left corner
-     * @param y0 the new position of the top left corner
-     * @param x1 the new position of the top right corner
-     * @param y1 the new position of the top right corner
-     * @param x2 the new position of the bottom right corner
-     * @param y2 the new position of the bottom right corner
-     * @param x3 the new position of the bottom left corner
-     * @param y3 the new position of the bottom left corner
+     * @param x0 左上角的新位置
+     * @param y0 左上角的新位置
+     * @param x1 右上角的新位置
+     * @param y1 右上角的新位置
+     * @param x2 右下角的新位置
+     * @param y2 右下角的新位置
+     * @param x3 左下角的新位置
+     * @param y3 左下角的新位置
      */
     public PerspectiveFilter(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
         unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
-    }
-
-    public void setClip(boolean clip) {
-        this.clip = clip;
     }
 
     public boolean getClip() {
         return clip;
     }
 
+    public void setClip(boolean clip) {
+        this.clip = clip;
+    }
+
     /**
-     * Set the new positions of the image corners.
-     * This is the same as unitSquareToQuad, but the coordinates are in image pixels, not relative to the unit square.
-     * This method is provided as a convenience.
+     * 设置图像角的新位置
+     * 这与 unitSquareToQuad() 相同,但坐标以像素为单位
+     * 与单位正方形无关
+     * 提供此方法是为了方便
      *
-     * @param x0 the new position of the top left corner
-     * @param y0 the new position of the top left corner
-     * @param x1 the new position of the top right corner
-     * @param y1 the new position of the top right corner
-     * @param x2 the new position of the bottom right corner
-     * @param y2 the new position of the bottom right corner
-     * @param x3 the new position of the bottom left corner
-     * @param y3 the new position of the bottom left corner
+     * @param x0 左上角 X坐标
+     * @param y0 左上角 Y坐标
+     * @param x1 右上角 X坐标
+     * @param y1 右上角 Y坐标
+     * @param x2 右下角 X坐标
+     * @param y2 右下角 Y坐标
+     * @param x3 左下角 X坐标
+     * @param y3 左下角 Y坐标
      */
     public void setCorners(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
         unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
@@ -86,17 +88,16 @@ public class PerspectiveFilter extends TransformFilter {
     }
 
     /**
-     * Set the transform to map the unit square onto a quadrilateral. When filtering, all coordinates will be scaled
-     * by the size of the image.
+     设置变换以将单位正方形映射到四边形上。过滤时，所有坐标都将按图像大小缩放。
      *
-     * @param x0 the new position of the top left corner
-     * @param y0 the new position of the top left corner
-     * @param x1 the new position of the top right corner
-     * @param y1 the new position of the top right corner
-     * @param x2 the new position of the bottom right corner
-     * @param y2 the new position of the bottom right corner
-     * @param x3 the new position of the bottom left corner
-     * @param y3 the new position of the bottom left corner
+     * @param x0 左上角的新位置
+     * @param y0 左上角的新位置
+     * @param x1 右上角的新位置
+     * @param y1 右上角的新位置
+     * @param x2 右下角的新位置
+     * @param y2 右下角的新位置
+     * @param x3 左下角的新位置
+     * @param y3 左下角的新位置
      */
     public void unitSquareToQuad(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
         this.x0 = x0;
@@ -138,17 +139,17 @@ public class PerspectiveFilter extends TransformFilter {
     }
 
     /**
-     * Set the transform to map a quadrilateral onto the unit square. When filtering, all coordinates will be scaled
-     * by the size of the image.
+     * 设置变换以将四边形映射到单位正方形。过滤时，所有坐标都将被缩放
+     * 按图像大小。
      *
-     * @param x0 the old position of the top left corner
-     * @param y0 the old position of the top left corner
-     * @param x1 the old position of the top right corner
-     * @param y1 the old position of the top right corner
-     * @param x2 the old position of the bottom right corner
-     * @param y2 the old position of the bottom right corner
-     * @param x3 the old position of the bottom left corner
-     * @param y3 the old position of the bottom left corner
+     * @param x0 左上角的旧位置
+     * @param y0 左上角的旧位置
+     * @param x1 右上角的旧位置
+     * @param y1 右上角的旧位置
+     * @param x2 右下角的旧位置
+     * @param y2 右下角的旧位置
+     * @param x3 左下角的旧位置
+     * @param y3 左下角的旧位置
      */
     public void quadToUnitSquare(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) {
         unitSquareToQuad(x0, y0, x1, y1, x2, y2, x3, y3);
@@ -176,7 +177,17 @@ public class PerspectiveFilter extends TransformFilter {
         a33 = 1.0f;
     }
 
+    /**
+     * 处理图像
+     *
+     * @param src 要处理的图像
+     * @param dst 图像底图
+     * @return 处理之后的图像
+     */
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
+        if (dst == null) {
+            dst = new BufferedImage(src.getWidth() * 2, src.getHeight() * 2, BufferedImage.TYPE_INT_ARGB);
+        }
         A = a22 * a33 - a32 * a23;
         B = a31 * a23 - a21 * a33;
         C = a21 * a32 - a31 * a22;
@@ -203,6 +214,16 @@ public class PerspectiveFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
+    /**
+     * 处理图像
+     *
+     * @param src 要处理的图像
+     * @return 处理之后的图像
+     */
+    public BufferedImage filter(BufferedImage src) {
+        return filter(src, null);
+    }
+
     protected void transformSpace(Rectangle rect) {
         if (scaled) {
             rect.x = (int) Math.min(Math.min(x0, x1), Math.min(x2, x3));
@@ -223,18 +244,18 @@ public class PerspectiveFilter extends TransformFilter {
     }
 
     /**
-     * Get the origin of the output image. Use this for working out where to draw your new image.
+     * 获取输出图像的原点。使用它来确定在哪里绘制新图像。
      *
-     * @return the X origin.
+     * @return X 原点。
      */
     public float getOriginX() {
         return x0 - (int) Math.min(Math.min(x0, x1), Math.min(x2, x3));
     }
 
     /**
-     * Get the origin of the output image. Use this for working out where to draw your new image.
+     * 获取输出图像的原点。使用它来确定在哪里绘制新图像。
      *
-     * @return the Y origin.
+     * @return Y 原点。
      */
     public float getOriginY() {
         return y0 - (int) Math.min(Math.min(y0, y1), Math.min(y2, y3));

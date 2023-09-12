@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.nyx.bot.utils.image.jhlabs.image;
 
-import com.nyx.bot.utils.filters.jhlabs.math.*;
 import com.nyx.bot.utils.image.jhlabs.math.*;
 
 import java.awt.image.*;
@@ -51,7 +50,7 @@ public class FBMFilter extends PointFilter implements Cloneable {
 	private float max;
 	private Colormap colormap = new Gradient();
 	private boolean ridged;
-	private FBM fBm;
+    private FBM fBm = new FBM(0, 0, 0);
 	protected Random random = new Random();
 	private int basisType = NOISE;
 	private Function2D basis;

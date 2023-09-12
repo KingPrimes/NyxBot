@@ -1,9 +1,9 @@
-package com.nyx.bot.utils.image.combiner.combiner.painter;
+package com.nyx.bot.utils.image.combiner.painter;
 
 
-import com.nyx.bot.utils.image.combiner.combiner.element.CombineElement;
-import com.nyx.bot.utils.image.combiner.combiner.element.RectangleElement;
-import com.nyx.bot.utils.image.combiner.combiner.enums.Direction;
+import com.nyx.bot.utils.image.combiner.element.CombineElement;
+import com.nyx.bot.utils.image.combiner.element.RectangleElement;
+import com.nyx.bot.utils.image.combiner.enums.Direction;
 
 import java.awt.*;
 

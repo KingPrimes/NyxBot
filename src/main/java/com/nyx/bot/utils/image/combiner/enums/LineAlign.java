@@ -1,4 +1,4 @@
-package com.nyx.bot.utils.image.combiner.combiner.enums;
+package com.nyx.bot.utils.image.combiner.enums;
 
 public enum LineAlign {
     Left,
