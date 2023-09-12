@@ -121,6 +121,38 @@ public class HttpUtils {
     }
 
     /**
+     * 根据URL网址获取文件
+     *
+     * @param url - url
+     * @return byte[] 文件
+     */
+    public static InputStream sendGetForFileInputStream(String url) {
+        InputStream inputStream = null;
+        Request req = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        Response response;
+        try {
+            response = new OkHttpClient().newCall(req).execute();
+            if (!response.isSuccessful()) {
+                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
+                return null;
+            }
+            inputStream = response.body().byteStream();
+            return inputStream;
+        } catch (IOException e) {
+            log.error("发起请求出现异常:", e);
+            return inputStream;
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException var12) {
+                log.error("【关闭流异常】");
+            }
+        }
+    }
+    /**
      * 发送Post请求 获取文件
      *
      * @param url  - url
