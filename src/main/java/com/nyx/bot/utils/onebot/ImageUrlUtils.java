@@ -102,6 +102,10 @@ public class ImageUrlUtils {
         return body;
     }
 
+    public static HttpUtils.Body builderBase64Get(String url) {
+        return HttpUtils.sendGetForFile(url);
+    }
+
     public static HttpUtils.Body builderBase64Post(String url, OneBotLogInfoData data) {
         String build = new ImageUrlUtils(url).build();
         return HttpUtils.sendPostForFile(build, data.toString());
