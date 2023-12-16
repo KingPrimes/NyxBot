@@ -39,8 +39,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @param startDate 开始日期
      * @return 动态返回计算结果
      */
-    public static String getDiff(Date endDate, Date startDate){
-        return getDiff(endDate,startDate,true);
+    public static String getDiff(Date endDate, Date startDate) {
+        return getDiff(endDate, startDate, true);
     }
 
 
@@ -200,13 +200,13 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         }
     }
 
-    public static String getDate(){
-        return getDate(new Date(),"yyyy-MM-dd HH:mm:ss");
+    public static String getDate() {
+        return getDate(new Date(), "yyyy-MM-dd HH:mm:ss");
     }
 
 
-    public static String getDate(Date date, String format){
-        if(date == null){
+    public static String getDate(Date date, String format) {
+        if (date == null) {
             return "";
         }
         SimpleDateFormat sdf = new SimpleDateFormat(format);

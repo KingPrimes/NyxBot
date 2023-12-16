@@ -89,19 +89,20 @@ public class WarframeDataUpdateMission {
             MissionSubscribe save = repository.save(subscribe);
             s.add(save);
         }
-        if(s.size() == SubscribeEnums.values().length){
-            log.info("群组：{},用户：{} 已订阅所有消息",subscribe.getSubGroup(),subscribe.getSubUser());
+        if (s.size() == SubscribeEnums.values().length) {
+            log.info("群组：{},用户：{} 已订阅所有消息", subscribe.getSubGroup(), subscribe.getSubUser());
         }
     }
 
     /**
      * 删除全部订阅消息
+     *
      * @param subscribe 群组
      */
     public static void deleteAll(MissionSubscribe subscribe) {
         for (SubscribeEnums enums : SubscribeEnums.values()) {
             subscribe.setSubscribe(enums);
-             repository.delete(subscribe);
+            repository.delete(subscribe);
         }
     }
 
@@ -128,14 +129,14 @@ public class WarframeDataUpdateMission {
         }
         //获取所有订阅
         List<MissionSubscribe> subscribes = repository.findAll();
-        if(subscribes.size() <= 0){
+        if (subscribes.size() <= 0) {
             log.warn("没有人订阅消息！");
             return;
         }
         //获取Bots
         Map<Long, Bot> bots = SpringUtils.getBean(BotContainer.class).robots;
 
-        if (bots.size() <= 0){
+        if (bots.size() <= 0) {
             log.warn("未链接Bot无法发送订阅消息");
             return;
         }
@@ -154,10 +155,10 @@ public class WarframeDataUpdateMission {
                 }
                 //如果user不为空则添加艾特 同时判断此用户是否开启订阅
                 Optional.ofNullable(subscribe.getSubUser()).ifPresent(s -> {
-                    if(subscribe.getSubscribe().equals(enums)){
+                    if (subscribe.getSubscribe().equals(enums)) {
                         String[] users = subscribe.getSubUser().split("-");
                         for (String user : users) {
-                            Optional.ofNullable(user).ifPresent(u->{
+                            Optional.ofNullable(user).ifPresent(u -> {
                                 msg.at(Long.parseLong(user));
                             });
                         }
@@ -167,13 +168,13 @@ public class WarframeDataUpdateMission {
                 if (subscribe.getSubscribe().equals(enums)) {
                     //bots.get(subscribe.getSubscriberBot()).sendGroupMsg(subscribe.getSubscribeGroup(),"",true);
                     //通知所有的订阅群组 同时判断此群组是否开启订阅
-                    bots.get(subscribe.getSubBotUid()).sendGroupMsg(subscribe.getSubGroup(),msg.build(),false);
+                    bots.get(subscribe.getSubBotUid()).sendGroupMsg(subscribe.getSubGroup(), msg.build(), false);
                     Thread.sleep(20);
                 }
 
             }
         } catch (Exception e) {
-           log.error("发送订阅消息失败：{}",e.getMessage());
+            log.error("发送订阅消息失败：{}", e.getMessage());
         }
 
     }

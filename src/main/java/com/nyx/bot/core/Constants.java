@@ -132,5 +132,5 @@ public class Constants {
     /**
      * 本地链接
      */
-    public static final String LOCALHOST = "http://localhost:"+ SpringUtils.getPort()+"/";
+    public static final String LOCALHOST = "http://localhost:" + SpringUtils.getPort() + "/";
 }

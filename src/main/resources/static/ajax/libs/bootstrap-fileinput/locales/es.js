@@ -21,7 +21,7 @@
     "use strict";
 
     $.fn.fileinputLocales['es'] = {
-        sizeUnits: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], 
+        sizeUnits: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
         bitRateUnits: ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s', 'EB/s', 'ZB/s', 'YB/s'],
         fileSingle: 'archivo',
         filePlural: 'archivos',
@@ -88,7 +88,7 @@
         msgAjaxError: 'Algo ha ido mal con la operación {operation}. Por favor, inténtelo de nuevo mas tarde.',
         msgAjaxProgressError: 'La operación {operation} ha fallado',
         msgDuplicateFile: 'File "{name}" of same size "{size}" has already been selected earlier. Skipping duplicate selection.',
-        msgResumableUploadRetriesExceeded:  'Upload aborted beyond <b>{max}</b> retries for file <b>{file}</b>! Error Details: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Upload aborted beyond <b>{max}</b> retries for file <b>{file}</b>! Error Details: <pre>{error}</pre>',
         msgPendingTime: '{time} remaining',
         msgCalculatingTime: 'calculating time remaining',
         ajaxOperations: {
@@ -111,7 +111,7 @@
             indicatorSuccessTitle: 'Subido',
             indicatorErrorTitle: 'Error al subir',
             indicatorPausedTitle: 'Upload Paused',
-            indicatorLoadingTitle:  'Subiendo &hellip;'
+            indicatorLoadingTitle: 'Subiendo &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Anterior',

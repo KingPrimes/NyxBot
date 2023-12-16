@@ -36,13 +36,13 @@ public class ExecutorConfig {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor taskExecutor(){
+    public ThreadPoolTaskExecutor taskExecutor() {
         log.info("start taskExecutor");
         return executor("taskExecutor-");
     }
 
 
-    private ThreadPoolTaskExecutor executor(String namePrefix){
+    private ThreadPoolTaskExecutor executor(String namePrefix) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         //配置核心线程数
         executor.setCorePoolSize(corePoolSize);

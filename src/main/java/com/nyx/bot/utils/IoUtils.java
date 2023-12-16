@@ -9,7 +9,7 @@ public class IoUtils {
 
     //启动完成之后自动打开浏览器并访问 Url 地址
     public static void index() {
-        String url = "http://localhost:"+SpringUtils.getPort();
+        String url = "http://localhost:" + SpringUtils.getPort();
         // 获取操作系统的名字
         String osName = System.getProperty("os.name", "");
         try {
@@ -42,7 +42,7 @@ public class IoUtils {
                     Runtime.getRuntime().exec(new String[]{browser, url});
             }
         } catch (Exception e) {
-           log.error("浏览器打开错误：{}",e.getMessage());
+            log.error("浏览器打开错误：{}", e.getMessage());
         }
     }
 }

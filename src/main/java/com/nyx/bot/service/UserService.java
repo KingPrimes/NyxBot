@@ -20,7 +20,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         SysUser user = sysUserRepository.findSysUsersByUserName(username);
-        if(user == null){
+        if (user == null) {
             throw new UsernameNotFoundException("用户名或密码错误");
         }
         return User

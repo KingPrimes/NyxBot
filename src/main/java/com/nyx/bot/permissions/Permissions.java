@@ -21,7 +21,7 @@ public class Permissions {
      */
     public static boolean checkPermissions(Bot bot, AnyMessageEvent event) {
         BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
-        if(byAdminUid==null){
+        if (byAdminUid == null) {
             return false;
         }
         PermissionsEnums permissions = byAdminUid.getPermissions();
@@ -30,32 +30,34 @@ public class Permissions {
 
     /**
      * 判断用户是否是超级管理员
+     *
      * @param userId 用户ID
      */
     public static boolean checkSuperAdmin(Long userId) {
         BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(userId);
-        if(byAdminUid==null){
+        if (byAdminUid == null) {
             return false;
         }
         PermissionsEnums permissions = byAdminUid.getPermissions();
-        switch (permissions){
-            case SUPER_ADMIN,MANAGE -> {
+        switch (permissions) {
+            case SUPER_ADMIN, MANAGE -> {
                 return true;
             }
         }
-       return false;
+        return false;
     }
 
     /**
      * 检查用户权限
+     *
      * @return PermissionsEnums
      */
-    public static PermissionsEnums checkAdmin(Bot bot, AnyMessageEvent event){
-        if(isAdmin(bot, event)){
+    public static PermissionsEnums checkAdmin(Bot bot, AnyMessageEvent event) {
+        if (isAdmin(bot, event)) {
             return PermissionsEnums.ADMIN;
         }
         BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
-        if(byAdminUid==null){
+        if (byAdminUid == null) {
             return PermissionsEnums.USER;
         }
         return byAdminUid.getPermissions();

@@ -53,7 +53,7 @@ public class SecurityConfiguration {
 
     //注册过滤器并配置
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,  PersistentTokenRepository tokenRepository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, PersistentTokenRepository tokenRepository) throws Exception {
         return http
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> {

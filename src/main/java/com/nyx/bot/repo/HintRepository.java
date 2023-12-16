@@ -9,13 +9,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface HintRepository  extends JpaRepository<Hint,Long> {
+public interface HintRepository extends JpaRepository<Hint, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT into HINT(hint)values(:#{#h.hint})",nativeQuery = true)
+    @Query(value = "INSERT into HINT(hint)values(:#{#h.hint})", nativeQuery = true)
     int addHint(@Param("h") Hint hint);
 
-    @Query(value = "SELECT * FROM HINT order by rand() limit 1",nativeQuery = true)
+    @Query(value = "SELECT * FROM HINT order by rand() limit 1", nativeQuery = true)
     Hint randOne();
 }

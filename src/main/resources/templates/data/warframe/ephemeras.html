@@ -1,133 +1,133 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('幻纹')}"/>
-    <th:block th:insert="~{include :: bootstrap-select-css}"/>
-    <style>
-        td a img {
-            width: 50px;
-            display: block;
-        }
+<th:block th:insert="~{include :: header('幻纹')}"/>
+<th:block th:insert="~{include :: bootstrap-select-css}"/>
+<style>
+    td a img {
+        width: 50px;
+        display: block;
+    }
 
-        td a:hover img {
-            transform: scale(3);
-        }
-    </style>
-    <body>
+    td a:hover img {
+        transform: scale(3);
+    }
+</style>
+<body>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="ephemeras-form">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>物品名称： </label><input class="form-control" name="itemName"
+                                                            placeholder="itemName"
+                                                            type="text"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
         <div class="container-div">
             <div class="row">
-                <div class="col-sm-12 search-collapse">
-                    <form id="ephemeras-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label>物品名称： </label><input class="form-control" name="itemName"
-                                                                    placeholder="itemName"
-                                                                    type="text"/>
-                                </li>
-                                <li>
-                                    <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
-                                            class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
-                                            class="fa fa-refresh"></i>&nbsp;重置</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </form>
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
+                        <i class="fa fa-angle-up"></i> 更新
+                    </a>
                 </div>
-                <div class="container-div">
-                    <div class="row">
-                        <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
-                                <i class="fa fa-angle-up"></i> 更新
-                            </a>
-                        </div>
-                        <div class="col-sm-12 select-table table-striped">
-                            <table id="bootstrap-table"></table>
-                        </div>
-                    </div>
+                <div class="col-sm-12 select-table table-striped">
+                    <table id="bootstrap-table"></table>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <th:block th:insert="~{include :: footer}"/>
-        <th:block th:insert="~{include :: bootstrap-select-js}"/>
-        <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/ephemeras"
-            $(function () {
-                var options = {
-                    url: prefix + "/list",
-                    modalName: "幻纹",
-                    sortOrder: "desc",
-                    escape: true,
-                    showPageGo: true,
-                    rememberSelected: true,
-                    columns: [
-                        {
-                            field: 'state',
-                            radio: true
-                        },
-                        {
-                            field: 'eid',
-                            title: 'ID'
-                        },
-                        {
-                            field: 'item_name',
-                            title: '物品名称'
-                        },
-                        {
-                            field: 'url_name',
-                            title: 'Url名称'
-                        },
-                        {
-                            field: 'icon',
-                            title: '图标链接',
-                            formatter: function (value, row, index) {
-                                const actions = [];
-                                actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.icon + '" alt=""/></a>');
-                                return actions.join('');
-                            }
-                        },
-                        {
-                            field: 'icon_format',
-                            title: '图片来源'
-                        },
-                        {
-                            field: 'animation',
-                            title: '动画',
-                            formatter: function (value, row, index) {
-                                const actions = [];
-                                actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.animation + '" alt=""/></a>');
-                                return actions.join('');
-                            }
-                        },
-                        {
-                            field: 'thumb',
-                            title: '图片链接',
-                            formatter: function (value, row, index) {
-                                const actions = [];
-                                actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.thumb + '" alt=""/></a>');
-                                return actions.join('');
-                            }
-                        }
-                    ]
-                };
-                $.table.init(options);
-            });
+<th:block th:insert="~{include :: footer}"/>
+<th:block th:insert="~{include :: bootstrap-select-js}"/>
+<script th:inline="javascript">
+    var prefix = ctx + "data/warframe/ephemeras"
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            modalName: "幻纹",
+            sortOrder: "desc",
+            escape: true,
+            showPageGo: true,
+            rememberSelected: true,
+            columns: [
+                {
+                    field: 'state',
+                    radio: true
+                },
+                {
+                    field: 'eid',
+                    title: 'ID'
+                },
+                {
+                    field: 'item_name',
+                    title: '物品名称'
+                },
+                {
+                    field: 'url_name',
+                    title: 'Url名称'
+                },
+                {
+                    field: 'icon',
+                    title: '图标链接',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.icon + '" alt=""/></a>');
+                        return actions.join('');
+                    }
+                },
+                {
+                    field: 'icon_format',
+                    title: '图片来源'
+                },
+                {
+                    field: 'animation',
+                    title: '动画',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.animation + '" alt=""/></a>');
+                        return actions.join('');
+                    }
+                },
+                {
+                    field: 'thumb',
+                    title: '图片链接',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.thumb + '" alt=""/></a>');
+                        return actions.join('');
+                    }
+                }
+            ]
+        };
+        $.table.init(options);
+    });
 
-            function searchPre() {
-                $.table.search('ephemeras-form', 'bootstrap-table');
-            }
+    function searchPre() {
+        $.table.search('ephemeras-form', 'bootstrap-table');
+    }
 
-            function update() {
-                $.operate.post(prefix + "/update")
-            }
+    function update() {
+        $.operate.post(prefix + "/update")
+    }
 
-            function resetPre() {
-                $("#log-form")[0].reset();
-                $.table.search('ephemeras-form', 'bootstrap-table');
-            }
+    function resetPre() {
+        $("#log-form")[0].reset();
+        $.table.search('ephemeras-form', 'bootstrap-table');
+    }
 
-        </script>
+</script>
 
-    </body>
+</body>
 </html>

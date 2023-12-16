@@ -286,7 +286,7 @@ $().ready(function () {
             change_month_assign();
         }
     });
-    
+
     //week
     $("#week_all").click(function () {
         if ($(this).prop('checked')) {
@@ -350,7 +350,7 @@ $().ready(function () {
             change_week_assign();
         }
     });
-    
+
     //year
     $("#year_all").click(function () {
         if ($(this).prop('checked')) {

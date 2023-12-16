@@ -33,12 +33,19 @@ build/
 .vscode/
 ./data
 
+### Maven ###
+mvnw
+mvnw.cmd
+
 ### 忽略测试文件
 test
 ### 忽略Log文件
 logs
 *.log
+### 忽略db文件
 /data/H2.mv.db
 /data/H2.trace.db
+### 忽略其余文件
 nyxTemplates
 go-cqhttp
+emoji_file

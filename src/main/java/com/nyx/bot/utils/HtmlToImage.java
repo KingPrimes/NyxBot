@@ -46,7 +46,7 @@ public class HtmlToImage {
             g2r.render(g);
             g.dispose();
             return buff;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         }
@@ -96,13 +96,13 @@ public class HtmlToImage {
                 .replaceAll("/img/{0,}", "./img/");
         StringBuilder str = new StringBuilder(html);
         ;
-        if(hint!=null){
+        if (hint != null) {
             str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
                     "\tPosted by:KingPrimes<br/>\n" +
                     "\t" +
-                    hint.getHint()+
+                    hint.getHint() +
                     "\n</div>\n");
-        }else{
+        } else {
             str.insert(str.indexOf("</body>"), """
                     <div class="foot-by">
                     \tPosted by:KingPrimes<br/>
@@ -169,7 +169,7 @@ public class HtmlToImage {
             String url = htmlFile.toURI().toURL().toExternalForm();
             BufferedImage image = renderToImageAutoSize(url, width);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            Optional.ofNullable(image).ifPresent(i ->{
+            Optional.ofNullable(image).ifPresent(i -> {
                 try {
                     ImageIO.write(i, "png", os);
                 } catch (IOException e) {

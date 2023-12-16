@@ -2,6 +2,7 @@ package com.nyx.bot.plugin.warframe.utils;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.AsyncUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 
@@ -27,15 +29,16 @@ public class WarframeSocket extends WebSocketListener {
     WebSocket webSocket;
 
 
-    public void connectServer(String url){
+    public void connectServer(String url) {
+        log.info("正在向{}链接...", ApiUrl.WARFRAME_SOCKET);
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .writeTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60,TimeUnit.SECONDS)
-                .connectTimeout(60,TimeUnit.SECONDS)
-                .pingInterval(45,TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .pingInterval(45, TimeUnit.SECONDS)
                 .build();
         Request request = new Request.Builder().url(url).build();
-        webSocket = client.newWebSocket(request,this);
+        webSocket = client.newWebSocket(request, this);
     }
 
     public void close() {
@@ -45,31 +48,57 @@ public class WarframeSocket extends WebSocketListener {
     }
 
 
-
     @Override
     public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-        log.warn("链接已被关闭:{},{}",code,reason);
+        log.info("链接已被关闭:{},{}", code, reason);
         super.onClosed(webSocket, code, reason);
+        if (code == 1000) {
+            return;
+        }
+        log.info("链接已被关闭将于5秒后重新链接");
+        try {
+            Thread.sleep(5000);
+            connectServer(ApiUrl.WARFRAME_SOCKET);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-        log.warn("链接已被关闭2:{},{}",code,reason);
+        log.info("链接已被关闭:{},{}", code, reason);
         super.onClosing(webSocket, code, reason);
+        if (code == 1000) {
+            return;
+        }
+        log.info("链接已被关闭将于5秒后重新链接");
+        try {
+            Thread.sleep(5000);
+            connectServer(ApiUrl.WARFRAME_SOCKET);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
-        log.warn("链接失败：{},{}",t.getMessage(),response);
+        log.info("链接失败：{},{}", t.getMessage(), response);
         super.onFailure(webSocket, t, response);
+        log.info("链接已被关闭将于5秒后重新链接");
+        try {
+            Thread.sleep(5000);
+            connectServer(ApiUrl.WARFRAME_SOCKET);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
-        SocketGlobalStates states = JSONObject.parseObject(text,SocketGlobalStates.class,JSONReader.Feature.SupportSmartMatch);
+        SocketGlobalStates states = JSONObject.parseObject(text, SocketGlobalStates.class, JSONReader.Feature.SupportSmartMatch);
         if (!states.getEvent().equals("connected") && states.getEvent().equals("ws:update")) {
             if (states.getPacket().getLanguage().equals("en") && states.getPacket().getPlatform().equals("pc")) {
-                AsyncUtils.me().execute(()->{
+                AsyncUtils.me().execute(() -> {
                     WarframeSubscribe.isUpdated(states);
                 });
 
@@ -88,7 +117,6 @@ public class WarframeSocket extends WebSocketListener {
         log.info("建立链接");
         super.onOpen(webSocket, response);
     }
-
 
 
 }

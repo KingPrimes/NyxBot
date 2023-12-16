@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.0</version>
         <relativePath/>
     </parent>
 
@@ -13,7 +13,8 @@
 
     <artifactId>NxyBot</artifactId>
 
-    <version>0.0.1</version>
+
+    <version>1.0.0</version>
 
     <name>NxyBot</name>
 
@@ -23,15 +24,12 @@
 
     <properties>
         <java.version>17</java.version>
-        <oneSdk.version>2.0.9</oneSdk.version>
+        <oneSdk.version>2.1.3</oneSdk.version>
         <fastJson2.version>2.0.38</fastJson2.version>
         <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.16.1</jsoup.version>
         <tess4j.version>5.8.0</tess4j.version>
-        <animated-gif-lib.vsersion>1.4</animated-gif-lib.vsersion>
-        <!--Google Image Thumbnailator-->
-        <thumbnailator.version>0.4.19</thumbnailator.version>
 
     </properties>
 
@@ -113,6 +111,12 @@
             <groupId>net.sourceforge.tess4j</groupId>
             <artifactId>tess4j</artifactId>
             <version>${tess4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--H2数据库-->
@@ -188,20 +192,6 @@
             <version>${xhtmlrenderer.version}</version>
         </dependency>
 
-        <!--GIF绘图核心-->
-        <dependency>
-            <groupId>com.madgag</groupId>
-            <artifactId>animated-gif-lib</artifactId>
-            <version>${animated-gif-lib.vsersion}</version>
-        </dependency>
-
-        <!--Google Image Thumbnailator-->
-        <dependency>
-            <groupId>net.coobird</groupId>
-            <artifactId>thumbnailator</artifactId>
-            <version>${thumbnailator.version}</version>
-        </dependency>
-
         <!--SpringBoot测试-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -211,16 +201,16 @@
     </dependencies>
 
 
-    <repositories>
-        <repository>
-            <id>public</id>
-            <name>aliyun nexus</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
+    <!-- <repositories>
+         <repository>
+             <id>public</id>
+             <name>aliyun nexus</name>
+             <url>https://maven.aliyun.com/repository/public</url>
+             <releases>
+                 <enabled>true</enabled>
+             </releases>
+         </repository>
+     </repositories>-->
 
 
     <build>
@@ -256,13 +246,13 @@
                         <manifestEntries>
                             <Class-Path>.</Class-Path>
                             <!--版本信息-->
-                            <version>0.0.1</version>
+                            <version>${project.version}</version>
                         </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>NyxBot</finalName>
+        <finalName>NyxBot-v${project.version}</finalName>
     </build>
 
 </project>

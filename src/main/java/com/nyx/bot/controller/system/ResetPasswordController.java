@@ -25,19 +25,19 @@ public class ResetPasswordController extends BaseController {
     SysUserRepository repository;
 
     @GetMapping("/resetPwd")
-    public String resetPwd(){
+    public String resetPwd() {
         return "password";
     }
 
     @PostMapping("/password")
     @ResponseBody
-    public AjaxResult restPwd(HttpServletRequest request, String oldPassword, String newPassword){
+    public AjaxResult restPwd(HttpServletRequest request, String oldPassword, String newPassword) {
         UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if(!encoder.matches(oldPassword,userDetails.getPassword())){
+        if (!encoder.matches(oldPassword, userDetails.getPassword())) {
             return AjaxResult.error(I18nUtils.message("controller.rest.password.old.error"));
         }
-        if(encoder.matches(newPassword, userDetails.getPassword())){
+        if (encoder.matches(newPassword, userDetails.getPassword())) {
             return AjaxResult.error(I18nUtils.message("controller.rest.password.o.n"));
         }
         SysUser sysUser = repository.findSysUsersByUserName(userDetails.getUsername());
@@ -46,7 +46,6 @@ public class ResetPasswordController extends BaseController {
         return AjaxResult.success();
 
     }
-
 
 
 }

@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * 用于接收
  * Warframe Market <a href="https://api.warframe.market/v1/items/mirage_prime_systems/orders?include=item">...</a> API接口的返回值
- *
  */
 @NoArgsConstructor
 @Data

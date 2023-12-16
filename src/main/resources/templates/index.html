@@ -1,301 +1,327 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="utf-8">
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="webkit" name="renderer">
-        <title>NyxBot</title>
-        <!-- 避免IE使用兼容模式 -->
-        <meta content="IE=edge" http-equiv="X-UA-Compatible">
-        <link rel="shortcut icon" th:href="@{/img/index.png}"/>
-        <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/jquery.contextMenu.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/fontawesome.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/font-awesome5.15.4.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/animate.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
-        <link rel="stylesheet" th:href="@{/css/skins.css}"/>
-        <link rel="stylesheet" th:href="@{/nyx/css/nyx-ui.css}"/>
-        <style>
-            embed {
-                width: 15px;
-            }
-        </style>
-    </head>
-    <body class="fixed-sidebar full-height-layout gray-bg" style="overflow: hidden"
-          th:classappend="${isMobile} ? 'canvas-menu'">
-        <div id="wrapper">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="webkit" name="renderer">
+    <title>NyxBot</title>
+    <!-- 避免IE使用兼容模式 -->
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <link rel="shortcut icon" th:href="@{/img/index.png}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/jquery.contextMenu.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/fontawesome.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/font-awesome5.15.4.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/skins.css}"/>
+    <link rel="stylesheet" th:href="@{/nyx/css/nyx-ui.css}"/>
+    <style>
+        embed {
+            width: 15px;
+        }
+    </style>
+</head>
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow: hidden"
+      th:classappend="${isMobile} ? 'canvas-menu'">
+<div id="wrapper">
 
-            <!--左侧导航开始-->
-            <nav class="navbar-default navbar-static-side" role="navigation">
-                <div class="nav-close">
-                    <i class="fa fa-times-circle"></i>
-                </div>
-                <a th:href="@{/}">
-                    <li class="logo hidden-xs">
-                        <span class="logo-lg">NyxBot</span>
-                    </li>
-                </a>
-                <div class="sidebar-collapse">
-                    <ul class="nav" id="side-menu">
-                        <li class="active">
-                            <a th:href="@{/}"><i class="fa fa-home"></i> <span
-                                    class="nav-label" i18n="Index">首页</span> </a>
-                        </li>
-                        <li th:each="m : ${menu}"
-                            th:if="${#strings.isEmpty(m.url) || m.url == '#' ? !#lists.isEmpty(m.children) : true}">
-                            <a th:class="@{${!#strings.isEmpty(m.url) && m.url != '#'} ? ${m.target}}"
-                               th:data-refresh="${m.isRefresh == '0'}"
-                               th:href="@{${#strings.isEmpty(m.url)} ? |#| : ${m.url}}">
-                                <i th:class="${m.icon}" th:if="${#strings.isEmpty(m.svg)}"></i>
-                                <embed th:if="${!#strings.isEmpty(m.svg)}" th:src="@{${m.svg}}">
-                                <span class="nav-label" th:i18n="${m.i18n}"
-                                      th:text="${m.menuName}">一级菜单</span>
-                                <span th:class="${#strings.isEmpty(m.url) || m.url == '#'} ? 'fa arrow'"></span>
+    <!--左侧导航开始-->
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="nav-close">
+            <i class="fa fa-times-circle"></i>
+        </div>
+        <a th:href="@{/}">
+            <li class="logo hidden-xs">
+                <span class="logo-lg">NyxBot</span>
+            </li>
+        </a>
+        <div class="sidebar-collapse">
+            <ul class="nav" id="side-menu">
+                <li class="active">
+                    <a th:href="@{/}"><i class="fa fa-home"></i> <span
+                            class="nav-label" i18n="Index">首页</span> </a>
+                </li>
+                <li>
+                    <a class="menuItem" th:href="@{/log/info}" data-refresh="true">
+                        <i class="fa fa-calendar"></i>
+                        <span class="nav-label" i18n="Log_Viewing">日志查看</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-refresh="false">
+                        <i class="fa fa-edit"></i>
+                        <span class="nav-label" i18n="Config">配置</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a class="menuItem" th:href="@{/config/bot}" data-refresh="false">
+                                <i class="fas fa-robot"></i>
+                                <span class="nav-label" i18n="Config_Bot">Bot配置</span>
                             </a>
-                            <ul class="nav nav-second-level collapse">
-                                <li th:each="cmenu : ${m.children}"
-                                    th:if="${#strings.isEmpty(cmenu.url) || cmenu.url == '#' ? !#lists.isEmpty(cmenu.children) : true}">
-                                    <a th:class="${#strings.isEmpty(cmenu.target)} ? |menuItem| : ${cmenu.target}"
-                                       th:data-refresh="${cmenu.isRefresh == '0'}"
-                                       th:href="@{${cmenu.url}}"
-                                       th:if="${#lists.isEmpty(cmenu.children)}">
-                                        <i th:class="${cmenu.icon}" th:if="${#strings.isEmpty(cmenu.svg)}"></i>
-                                        <embed th:if="${!#strings.isEmpty(cmenu.svg)}" th:src="@{${cmenu.svg}}">
-                                        <span class="nav-label" th:i18n="${cmenu.i18n}"
-                                              th:text="${cmenu.menuName}">二级菜单</span></a>
-                                    <a href="#" th:if="${not #lists.isEmpty(cmenu.children)}">
-                                        <i th:class="${cmenu.icon}" th:if="${#strings.isEmpty(cmenu.svg)}"></i>
-                                        <embed th:if="${!#strings.isEmpty(cmenu.svg)}" th:src="@{${cmenu.svg}}">
-                                        <span class="nav-label" th:i18n="${cmenu.i18n}"
-                                              th:text="${cmenu.menuName}">二级菜单</span>
-                                        <span class="fa arrow"></span></a>
-
-                                    <ul class="nav nav-third-level" th:if="${not #lists.isEmpty(cmenu.children)}">
-                                        <li th:each="emenu : ${cmenu.children}">
-                                            <a th:class="${#strings.isEmpty(emenu.target)} ? |menuItem| : ${emenu.target}"
-                                               th:data-refresh="${emenu.isRefresh == '0'}"
-                                               th:href="@{${emenu.url}}"
-                                               th:if="${#lists.isEmpty(emenu.children)}">
-                                                <i th:class="${emenu.icon}" th:if="${#strings.isEmpty(emenu.svg)}"></i>
-                                                <embed th:if="${!#strings.isEmpty(emenu.svg)}" th:src="@{${emenu.svg}}">
-                                                <span class="nav-label" th:i18n="${emenu.i18n}"
-                                                      th:text="${emenu.menuName}">三级菜单</span></a>
-                                            <a href="#" th:if="${not #lists.isEmpty(emenu.children)}">
-                                                <i th:class="${emenu.icon}" th:if="${#strings.isEmpty(emenu.svg)}"></i>
-                                                <embed th:if="${!#strings.isEmpty(emenu.svg)}" th:src="@{${emenu.svg}}">
-                                                <span class="nav-label" th:i18n="${emenu.i18n}"
-                                                      th:text="${emenu.menuName}">三级菜单</span>
-                                                <span class="fa arrow"></span></a>
-
-                                            <ul class="nav nav-four-level"
-                                                th:if="${not #lists.isEmpty(emenu.children)}">
-                                                <li th:each="fmenu : ${emenu.children}"><a
-                                                        th:class="${#strings.isEmpty(fmenu.target)} ? |menuItem| : ${fmenu.target}"
-                                                        th:data-refresh="${fmenu.isRefresh == '0'}"
-                                                        th:href="@{${fmenu.url}}"
-                                                        th:if="${#lists.isEmpty(fmenu.children)}">
-                                                    <i th:class="${fmenu.icon}"
-                                                       th:if="${#strings.isEmpty(fmenu.svg)}"></i>
-                                                    <embed th:if="${!#strings.isEmpty(fmenu.svg)}"
-                                                           th:src="@{${fmenu.svg}}">
-                                                    <span class="nav-label" th:i18n="${fmenu.i18n}"
-                                                          th:text="${fmenu.menuName}">四级菜单</span></a>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
+                        </li>
+                        <li>
+                            <a class="menuItem" th:href="@{/config/admin}" data-refresh="false">
+                                <i class="fas fa-user-cog"></i>
+                                <span class="nav-label" i18n="Config_Super_Admin">超级管理员</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="menuItem" th:href="@{/config/black/group}" data-refresh="false">
+                                <i class="fas fa-users-slash"></i>
+                                <span class="nav-label" i18n="Config_Group_Black">群黑名单</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="menuItem" th:href="@{/config/black/prive}" data-refresh="false">
+                                <i class="fas fa-user-slash"></i>
+                                <span class="nav-label" i18n="Config_Prove_Black">个人黑名单</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" data-refresh="false">
+                        <i class="fa fa-database"></i>
+                        <span class="nav-label" i18n="Data_Source">本地数据</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul class="nav nav-second-level collapse">
+                        <li>
+                            <a href="#" data-refresh="false">
+                                <embed th:src="@{/svg/WARFRAME.svg}">
+                                <span class="nav-label" i18n="Data_Warframe">Warframe</span>
+                                <span class="fa arrow"></span>
+                            </a>
+                            <ul class="nav nav-third-level">
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/alias}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Alias">别名</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/ephemeras}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Ephemeras">幻纹</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/subscribe}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Subscribe">订阅</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/market}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Market">Market</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/rivent}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Riven">Rivent</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" th:href="@{/data/warframe/translation}" data-refresh="false">
+                                        <i></i>
+                                        <span class="nav-label" i18n="Data_Warframe_Translation">翻译</span>
+                                    </a>
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                </div>
-            </nav>
-            <!--左侧导航结束-->
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!--左侧导航结束-->
 
-            <!--右侧部分开始-->
-            <div class="gray-bg dashbard-1" id="page-wrapper">
-                <div class="row border-bottom">
-                    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
-                        <div class="navbar-header">
-                            <a class="navbar-minimalize minimalize-styl-2" href="#" style="color:#FFF;"
-                               title="收起菜单">
-                                <i class="fa fa-bars"></i>
-                            </a>
-                        </div>
-                        <ul class="nav navbar-top-links navbar-right welcome-message">
-                            <li class="dropdown user-menu">
-                                <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
-                                    <span class="hidden-xs" i18n="Language">Language</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a onclick="language('cn')">
-                                            中文(简体)</a>
-                                    </li>
-                                    <li>
-                                        <a onclick="language('en')">
-                                            English</a>
-                                    </li>
-                                </ul>
+    <!--右侧部分开始-->
+    <div class="gray-bg dashbard-1" id="page-wrapper">
+        <div class="row border-bottom">
+            <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <a class="navbar-minimalize minimalize-styl-2" href="#" style="color:#FFF;"
+                       title="收起菜单">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </div>
+                <ul class="nav navbar-top-links navbar-right welcome-message">
+                    <li class="dropdown user-menu">
+                        <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
+                            <span class="hidden-xs" i18n="Language">Language</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a onclick="language('cn')">
+                                    中文(简体)</a>
                             </li>
-                            <li class="dropdown user-menu">
-                                <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
-                                    <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a i18n="Reset_Password" onclick="resetPwd()">
-                                            <i class="fa fa-key"></i> 修改密码</a>
-                                    </li>
-                                    <li>
-                                        <a i18n="Switch_Skin" onclick="switchSkin()">
-                                            <i class="fa fa-dashboard"></i> 切换主题</a>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li>
-                                        <a i18n="Logout" th:href="@{logout}">
-                                            <i class="fa fa-sign-out"></i> 退出登录</a>
-                                    </li>
-                                </ul>
+                            <li>
+                                <a onclick="language('en')">
+                                    English</a>
                             </li>
                         </ul>
-                    </nav>
-                </div>
-                <div class="row content-tabs">
-                    <button class="roll-nav roll-left tabLeft">
-                        <i class="fa fa-backward"></i>
-                    </button>
-                    <nav class="page-tabs menuTabs">
-                        <div class="page-tabs-content">
-                            <a class="active menuTab" href="javascript:void(0);" i18n="Index"
-                               th:data-id="@{/system/main}">首页</a>
-                        </div>
-                    </nav>
-                    <button class="roll-nav roll-right tabRight">
-                        <i class="fa fa-forward"></i>
-                    </button>
-                    <a class="roll-nav roll-right tabReload" href="javascript:void(0);" i18n="Flushed"><i
-                            class="fa fa-refresh"></i> 刷新</a>
-                </div>
-
-                <div class="row mainContent" id="content-main" th:classappend="${mainClass}">
-                    <iframe class="Index_iframe" frameborder="0" height="100%" name="iframe0" seamless
-                            th:data-id="@{/system/main}" th:src="@{/system/main}" width="100%"></iframe>
-                </div>
-
-
-                <div class="footer">
-                    <div class="pull-right">
-                        <b>
-                            <span i18n="Author">作者: </span><span style="color: red">KingPrimes</span> <br/>
-                            <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
-                            UID:<span style="color: red">16131052</span>
-                        </b>
-                    </div>
-                </div>
-            </div>
-            <!--右侧部分结束-->
+                    </li>
+                    <li class="dropdown user-menu">
+                        <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
+                            <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a i18n="Reset_Password" onclick="resetPwd()">
+                                    <i class="fa fa-key"></i> 修改密码</a>
+                            </li>
+                            <li>
+                                <a i18n="Switch_Skin" onclick="switchSkin()">
+                                    <i class="fa fa-dashboard"></i> 切换主题</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a i18n="Logout" th:href="@{logout}">
+                                    <i class="fa fa-sign-out"></i> 退出登录</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
         </div>
-        <!-- 全局js -->
-        <script th:src="@{/js/jquery.min.js}"></script>
-        <script th:src="@{/js/i18n/jquery.i18n.min.js}"></script>
-        <script th:src="@{/js/bootstrap.min.js}"></script>
-        <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
-        <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
-        <script th:src="@{/js/jquery.contextMenu.min.js}"></script>
-        <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-        <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-        <script th:src="@{/nyx/js/nyx-ui.js}"></script>
-        <script th:src="@{/nyx/js/common.js}"></script>
-        <script th:src="@{/nyx/index.js}"></script>
-        <script th:src="@{/ajax/libs/fullscreen/jquery.fullscreen.js}"></script>
-        <script th:inline="javascript">
-            window.history.forward(1);
-            const ctx = [[@{/}]];
-            const lockscreen = [[${session.lockscreen}]];
-            if (lockscreen) {
-                window.top.location = ctx + "lockscreen";
+        <div class="row content-tabs">
+            <button class="roll-nav roll-left tabLeft">
+                <i class="fa fa-backward"></i>
+            </button>
+            <nav class="page-tabs menuTabs">
+                <div class="page-tabs-content">
+                    <a class="active menuTab" href="javascript:void(0);" i18n="Index"
+                       th:data-id="@{/system/main}">首页</a>
+                </div>
+            </nav>
+            <button class="roll-nav roll-right tabRight">
+                <i class="fa fa-forward"></i>
+            </button>
+            <a class="roll-nav roll-right tabReload" href="javascript:void(0);" i18n="Flushed"><i
+                    class="fa fa-refresh"></i> 刷新</a>
+        </div>
+
+        <div class="row mainContent" id="content-main" th:classappend="${mainClass}">
+            <iframe class="Index_iframe" frameborder="0" height="100%" name="iframe0" seamless
+                    th:data-id="@{/system/main}" th:src="@{/system/main}" width="100%"></iframe>
+        </div>
+
+        <div class="footer">
+            <div class="pull-right">
+                <b>
+                    <span i18n="Author">作者: </span><span style="color: red">KingPrimes</span> <br/>
+                    <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
+                    UID:<span style="color: red">16131052</span>
+                </b>
+            </div>
+        </div>
+    </div>
+    <!--右侧部分结束-->
+</div>
+<!-- 全局js -->
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/i18n/jquery.i18n.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+<script th:src="@{/js/jquery.contextMenu.min.js}"></script>
+<script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+<script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+<script th:src="@{/nyx/js/nyx-ui.js}"></script>
+<script th:src="@{/nyx/js/common.js}"></script>
+<script th:src="@{/nyx/index.js}"></script>
+<script th:src="@{/ajax/libs/fullscreen/jquery.fullscreen.js}"></script>
+<script th:inline="javascript">
+    window.history.forward(1);
+    const ctx = [[@{/}]];
+    const lockscreen = [[${session.lockscreen}]];
+    if (lockscreen) {
+        window.top.location = ctx + "lockscreen";
+    }
+    // 皮肤缓存
+    const skin = storage.get("skin");
+    // history（表示去掉地址的#）否则地址以"#"形式展示
+    const mode = "history";
+    // 历史访问路径缓存
+    const historyPath = storage.get("historyPath");
+    // 是否页签与菜单联动
+    const isLinkage = true;
+
+    const body = $("body");
+
+    // 本地主题优先，未设置取系统配置
+    if ($.common.isNotEmpty(skin)) {
+        body.addClass(skin.split('|')[0]);
+        body.addClass(skin.split('|')[1]);
+    } else {
+        body.addClass([[${sideTheme}]]);
+        body.addClass([[${skinName}]]);
+    }
+
+    /* 用户管理-重置密码 */
+    function resetPwd() {
+        var url = ctx + 'resetPwd';
+        $.modal.open("重置密码", url, '770', '380');
+    }
+
+    function chatGPTConfig() {
+        var url = ctx + 'bot/ai/chat/config';
+        $.modal.open('ChatGPT配置', url, '770', '380')
+    }
+
+    function botConfig() {
+        var url = ctx + 'bot/config';
+        $.modal.open('Bot配置', url, '770', '380')
+    }
+
+    /* 切换主题 */
+    function switchSkin() {
+        layer.open({
+            type: 2,
+            shadeClose: true,
+            title: "切换主题",
+            area: ["530px", "386px"],
+            content: [ctx + "system/switchSkin", 'no']
+        })
+    }
+
+    /** 刷新时访问路径页签 */
+    function applyPath(url) {
+        $('a[href$="' + decodeURI(url) + '"]').click();
+        if (!$('a[href$="' + url + '"]').hasClass("noactive")) {
+            $('a[href$="' + url + '"]').parent("li").addClass("selected").parents("li").addClass("active").end().parents("ul").addClass("in");
+        }
+    }
+
+    $(function () {
+        let url;
+        const lockPath = storage.get('lockPath');
+        if ($.common.equals("history", mode) && window.performance.navigation.type === 1) {
+            url = storage.get('publicPath');
+            if ($.common.isNotEmpty(url)) {
+                applyPath(url);
             }
-            // 皮肤缓存
-            const skin = storage.get("skin");
-            // history（表示去掉地址的#）否则地址以"#"形式展示
-            const mode = "history";
-            // 历史访问路径缓存
-            const historyPath = storage.get("historyPath");
-            // 是否页签与菜单联动
-            const isLinkage = true;
-
-            const body = $("body");
-
-            // 本地主题优先，未设置取系统配置
-            if ($.common.isNotEmpty(skin)) {
-                body.addClass(skin.split('|')[0]);
-                body.addClass(skin.split('|')[1]);
+        } else if ($.common.isNotEmpty(lockPath)) {
+            applyPath(lockPath);
+            storage.remove('lockPath');
+        } else {
+            const hash = location.hash;
+            if ($.common.isNotEmpty(hash)) {
+                url = hash.substring(1, hash.length);
+                applyPath(url);
             } else {
-                body.addClass([[${sideTheme}]]);
-                body.addClass([[${skinName}]]);
-            }
-
-            /* 用户管理-重置密码 */
-            function resetPwd() {
-                var url = ctx + 'resetPwd';
-                $.modal.open("重置密码", url, '770', '380');
-            }
-
-            function chatGPTConfig() {
-                var url = ctx + 'bot/ai/chat/config';
-                $.modal.open('ChatGPT配置', url, '770', '380')
-            }
-
-            function botConfig() {
-                var url = ctx + 'bot/config';
-                $.modal.open('Bot配置', url, '770', '380')
-            }
-
-            /* 切换主题 */
-            function switchSkin() {
-                layer.open({
-                    type: 2,
-                    shadeClose: true,
-                    title: "切换主题",
-                    area: ["530px", "386px"],
-                    content: [ctx + "system/switchSkin", 'no']
-                })
-            }
-
-            /** 刷新时访问路径页签 */
-            function applyPath(url) {
-                $('a[href$="' + decodeURI(url) + '"]').click();
-                if (!$('a[href$="' + url + '"]').hasClass("noactive")) {
-                    $('a[href$="' + url + '"]').parent("li").addClass("selected").parents("li").addClass("active").end().parents("ul").addClass("in");
+                if ($.common.equals("history", mode)) {
+                    storage.set('publicPath', "");
                 }
             }
-
-            $(function () {
-                let url;
-                const lockPath = storage.get('lockPath');
-                if ($.common.equals("history", mode) && window.performance.navigation.type === 1) {
-                    url = storage.get('publicPath');
-                    if ($.common.isNotEmpty(url)) {
-                        applyPath(url);
-                    }
-                } else if ($.common.isNotEmpty(lockPath)) {
-                    applyPath(lockPath);
-                    storage.remove('lockPath');
-                } else {
-                    const hash = location.hash;
-                    if ($.common.isNotEmpty(hash)) {
-                        url = hash.substring(1, hash.length);
-                        applyPath(url);
-                    } else {
-                        if ($.common.equals("history", mode)) {
-                            storage.set('publicPath', "");
-                        }
-                    }
-                }
-                $("[data-toggle='tooltip']").tooltip();
-            });
-        </script>
-    </body>
+        }
+        $("[data-toggle='tooltip']").tooltip();
+    });
+</script>
+</body>
 </html>

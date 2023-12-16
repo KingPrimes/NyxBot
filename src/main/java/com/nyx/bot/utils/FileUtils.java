@@ -5,6 +5,7 @@ public class FileUtils {
     public static String readFileToString(String fileName) {
         return null;
     }
+
     //写入文件
     public static void writeFile(String fileName, String content) {
 

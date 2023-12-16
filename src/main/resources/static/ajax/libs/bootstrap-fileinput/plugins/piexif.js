@@ -37,13 +37,13 @@ SOFTWARE.
         } else {
             throw new Error("Given data is not jpeg.");
         }
-        
+
         var segments = splitIntoSegments(jpeg);
-        var newSegments = segments.filter(function(seg){
-          return  !(seg.slice(0, 2) == "\xff\xe1" &&
-                   seg.slice(4, 10) == "Exif\x00\x00"); 
+        var newSegments = segments.filter(function (seg) {
+            return !(seg.slice(0, 2) == "\xff\xe1" &&
+                seg.slice(4, 10) == "Exif\x00\x00");
         });
-        
+
         var new_data = newSegments.join("");
         if (b64) {
             new_data = "data:image/jpeg;base64," + btoa(new_data);
@@ -162,13 +162,13 @@ SOFTWARE.
             interop_ifd,
             gps_ifd,
             first_ifd;
-        
+
         if ("0th" in exif_dict) {
             zeroth_ifd = exif_dict["0th"];
         } else {
             zeroth_ifd = {};
         }
-        
+
         if ((("Exif" in exif_dict) && (Object.keys(exif_dict["Exif"]).length)) ||
             (("Interop" in exif_dict) && (Object.keys(exif_dict["Interop"]).length))) {
             zeroth_ifd[34665] = 1;
@@ -192,7 +192,7 @@ SOFTWARE.
         } else if (Object.keys(zeroth_ifd).indexOf(that.ImageIFD.GPSTag.toString()) > -1) {
             delete zeroth_ifd[that.ImageIFD.GPSTag];
         }
-        
+
         if (("1st" in exif_dict) &&
             ("thumbnail" in exif_dict) &&
             (exif_dict["thumbnail"] != null)) {
@@ -201,7 +201,7 @@ SOFTWARE.
             exif_dict["1st"][514] = 1;
             first_ifd = exif_dict["1st"];
         }
-        
+
         var zeroth_set = _dict_to_bytes(zeroth_ifd, "0th", 0);
         var zeroth_length = (zeroth_set[0].length + exif_is * 12 + gps_is * 12 + 4 +
             zeroth_set[1].length);
@@ -471,7 +471,6 @@ SOFTWARE.
     }
 
 
-
     function ExifReader(data) {
         var segments,
             app1;
@@ -575,17 +574,17 @@ SOFTWARE.
                     data = [];
                     for (var x = 0; x < length; x++) {
                         data.push([unpack(this.endian_mark + "L",
-                                this.tiftag.slice(pointer + x * 8, pointer + 4 + x * 8))[0],
-                                   unpack(this.endian_mark + "L",
+                            this.tiftag.slice(pointer + x * 8, pointer + 4 + x * 8))[0],
+                            unpack(this.endian_mark + "L",
                                 this.tiftag.slice(pointer + 4 + x * 8, pointer + 8 + x * 8))[0]
-                                   ]);
+                        ]);
                     }
                 } else {
                     data = [unpack(this.endian_mark + "L",
-                            this.tiftag.slice(pointer, pointer + 4))[0],
-                            unpack(this.endian_mark + "L",
+                        this.tiftag.slice(pointer, pointer + 4))[0],
+                        unpack(this.endian_mark + "L",
                             this.tiftag.slice(pointer + 4, pointer + 8))[0]
-                            ];
+                    ];
                 }
             } else if (t == 7) { // UNDEFINED BYTES
                 if (length > 4) {
@@ -609,17 +608,17 @@ SOFTWARE.
                     data = [];
                     for (var x = 0; x < length; x++) {
                         data.push([unpack(this.endian_mark + "l",
-                                this.tiftag.slice(pointer + x * 8, pointer + 4 + x * 8))[0],
-                                   unpack(this.endian_mark + "l",
+                            this.tiftag.slice(pointer + x * 8, pointer + 4 + x * 8))[0],
+                            unpack(this.endian_mark + "l",
                                 this.tiftag.slice(pointer + 4 + x * 8, pointer + 8 + x * 8))[0]
-                                  ]);
+                        ]);
                     }
                 } else {
                     data = [unpack(this.endian_mark + "l",
-                            this.tiftag.slice(pointer, pointer + 4))[0],
-                            unpack(this.endian_mark + "l",
+                        this.tiftag.slice(pointer, pointer + 4))[0],
+                        unpack(this.endian_mark + "l",
                             this.tiftag.slice(pointer + 4, pointer + 8))[0]
-                           ];
+                    ];
                 }
             } else {
                 throw new Error("Exif might be wrong. Got incorrect value " +
@@ -639,7 +638,8 @@ SOFTWARE.
         var btoa = window.btoa;
     }
     if (typeof btoa === "undefined") {
-        var btoa = function (input) {        var output = "";
+        var btoa = function (input) {
+            var output = "";
             var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
             var i = 0;
             var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -662,16 +662,16 @@ SOFTWARE.
                 }
 
                 output = output +
-                keyStr.charAt(enc1) + keyStr.charAt(enc2) +
-                keyStr.charAt(enc3) + keyStr.charAt(enc4);
+                    keyStr.charAt(enc1) + keyStr.charAt(enc2) +
+                    keyStr.charAt(enc3) + keyStr.charAt(enc4);
 
             }
 
             return output;
         };
     }
-    
-    
+
+
     if (typeof window !== "undefined" && typeof window.atob === "function") {
         var atob = window.atob;
     }
@@ -919,7 +919,7 @@ SOFTWARE.
         for (var i = 0; i < segments.length; i++) {
             seg = segments[i];
             if (seg.slice(0, 2) == "\xff\xe1" &&
-                   seg.slice(4, 10) == "Exif\x00\x00") {
+                seg.slice(4, 10) == "Exif\x00\x00") {
                 return seg;
             }
         }
@@ -931,7 +931,7 @@ SOFTWARE.
         var hasExifSegment = false;
         var additionalAPP1ExifSegments = [];
 
-        segments.forEach(function(segment, i) {
+        segments.forEach(function (segment, i) {
             // Replace first occurence of APP1:Exif segment
             if (segment.slice(0, 2) == "\xff\xe1" &&
                 segment.slice(4, 10) == "Exif\x00\x00"
@@ -946,7 +946,7 @@ SOFTWARE.
         });
 
         // Remove additional occurences of APP1:Exif segment
-        additionalAPP1ExifSegments.forEach(function(segmentIndex) {
+        additionalAPP1ExifSegments.forEach(function (segmentIndex) {
             segments.splice(segmentIndex, 1);
         });
 
@@ -2143,312 +2143,312 @@ SOFTWARE.
     TAGS["1st"] = TAGS["Image"];
     that.TAGS = TAGS;
 
-    
+
     that.ImageIFD = {
-        ProcessingSoftware:11,
-        NewSubfileType:254,
-        SubfileType:255,
-        ImageWidth:256,
-        ImageLength:257,
-        BitsPerSample:258,
-        Compression:259,
-        PhotometricInterpretation:262,
-        Threshholding:263,
-        CellWidth:264,
-        CellLength:265,
-        FillOrder:266,
-        DocumentName:269,
-        ImageDescription:270,
-        Make:271,
-        Model:272,
-        StripOffsets:273,
-        Orientation:274,
-        SamplesPerPixel:277,
-        RowsPerStrip:278,
-        StripByteCounts:279,
-        XResolution:282,
-        YResolution:283,
-        PlanarConfiguration:284,
-        GrayResponseUnit:290,
-        GrayResponseCurve:291,
-        T4Options:292,
-        T6Options:293,
-        ResolutionUnit:296,
-        TransferFunction:301,
-        Software:305,
-        DateTime:306,
-        Artist:315,
-        HostComputer:316,
-        Predictor:317,
-        WhitePoint:318,
-        PrimaryChromaticities:319,
-        ColorMap:320,
-        HalftoneHints:321,
-        TileWidth:322,
-        TileLength:323,
-        TileOffsets:324,
-        TileByteCounts:325,
-        SubIFDs:330,
-        InkSet:332,
-        InkNames:333,
-        NumberOfInks:334,
-        DotRange:336,
-        TargetPrinter:337,
-        ExtraSamples:338,
-        SampleFormat:339,
-        SMinSampleValue:340,
-        SMaxSampleValue:341,
-        TransferRange:342,
-        ClipPath:343,
-        XClipPathUnits:344,
-        YClipPathUnits:345,
-        Indexed:346,
-        JPEGTables:347,
-        OPIProxy:351,
-        JPEGProc:512,
-        JPEGInterchangeFormat:513,
-        JPEGInterchangeFormatLength:514,
-        JPEGRestartInterval:515,
-        JPEGLosslessPredictors:517,
-        JPEGPointTransforms:518,
-        JPEGQTables:519,
-        JPEGDCTables:520,
-        JPEGACTables:521,
-        YCbCrCoefficients:529,
-        YCbCrSubSampling:530,
-        YCbCrPositioning:531,
-        ReferenceBlackWhite:532,
-        XMLPacket:700,
-        Rating:18246,
-        RatingPercent:18249,
-        ImageID:32781,
-        CFARepeatPatternDim:33421,
-        CFAPattern:33422,
-        BatteryLevel:33423,
-        Copyright:33432,
-        ExposureTime:33434,
-        ImageResources:34377,
-        ExifTag:34665,
-        InterColorProfile:34675,
-        GPSTag:34853,
-        Interlace:34857,
-        TimeZoneOffset:34858,
-        SelfTimerMode:34859,
-        FlashEnergy:37387,
-        SpatialFrequencyResponse:37388,
-        Noise:37389,
-        FocalPlaneXResolution:37390,
-        FocalPlaneYResolution:37391,
-        FocalPlaneResolutionUnit:37392,
-        ImageNumber:37393,
-        SecurityClassification:37394,
-        ImageHistory:37395,
-        ExposureIndex:37397,
-        TIFFEPStandardID:37398,
-        SensingMethod:37399,
-        XPTitle:40091,
-        XPComment:40092,
-        XPAuthor:40093,
-        XPKeywords:40094,
-        XPSubject:40095,
-        PrintImageMatching:50341,
-        DNGVersion:50706,
-        DNGBackwardVersion:50707,
-        UniqueCameraModel:50708,
-        LocalizedCameraModel:50709,
-        CFAPlaneColor:50710,
-        CFALayout:50711,
-        LinearizationTable:50712,
-        BlackLevelRepeatDim:50713,
-        BlackLevel:50714,
-        BlackLevelDeltaH:50715,
-        BlackLevelDeltaV:50716,
-        WhiteLevel:50717,
-        DefaultScale:50718,
-        DefaultCropOrigin:50719,
-        DefaultCropSize:50720,
-        ColorMatrix1:50721,
-        ColorMatrix2:50722,
-        CameraCalibration1:50723,
-        CameraCalibration2:50724,
-        ReductionMatrix1:50725,
-        ReductionMatrix2:50726,
-        AnalogBalance:50727,
-        AsShotNeutral:50728,
-        AsShotWhiteXY:50729,
-        BaselineExposure:50730,
-        BaselineNoise:50731,
-        BaselineSharpness:50732,
-        BayerGreenSplit:50733,
-        LinearResponseLimit:50734,
-        CameraSerialNumber:50735,
-        LensInfo:50736,
-        ChromaBlurRadius:50737,
-        AntiAliasStrength:50738,
-        ShadowScale:50739,
-        DNGPrivateData:50740,
-        MakerNoteSafety:50741,
-        CalibrationIlluminant1:50778,
-        CalibrationIlluminant2:50779,
-        BestQualityScale:50780,
-        RawDataUniqueID:50781,
-        OriginalRawFileName:50827,
-        OriginalRawFileData:50828,
-        ActiveArea:50829,
-        MaskedAreas:50830,
-        AsShotICCProfile:50831,
-        AsShotPreProfileMatrix:50832,
-        CurrentICCProfile:50833,
-        CurrentPreProfileMatrix:50834,
-        ColorimetricReference:50879,
-        CameraCalibrationSignature:50931,
-        ProfileCalibrationSignature:50932,
-        AsShotProfileName:50934,
-        NoiseReductionApplied:50935,
-        ProfileName:50936,
-        ProfileHueSatMapDims:50937,
-        ProfileHueSatMapData1:50938,
-        ProfileHueSatMapData2:50939,
-        ProfileToneCurve:50940,
-        ProfileEmbedPolicy:50941,
-        ProfileCopyright:50942,
-        ForwardMatrix1:50964,
-        ForwardMatrix2:50965,
-        PreviewApplicationName:50966,
-        PreviewApplicationVersion:50967,
-        PreviewSettingsName:50968,
-        PreviewSettingsDigest:50969,
-        PreviewColorSpace:50970,
-        PreviewDateTime:50971,
-        RawImageDigest:50972,
-        OriginalRawFileDigest:50973,
-        SubTileBlockSize:50974,
-        RowInterleaveFactor:50975,
-        ProfileLookTableDims:50981,
-        ProfileLookTableData:50982,
-        OpcodeList1:51008,
-        OpcodeList2:51009,
-        OpcodeList3:51022,
-        NoiseProfile:51041,
+        ProcessingSoftware: 11,
+        NewSubfileType: 254,
+        SubfileType: 255,
+        ImageWidth: 256,
+        ImageLength: 257,
+        BitsPerSample: 258,
+        Compression: 259,
+        PhotometricInterpretation: 262,
+        Threshholding: 263,
+        CellWidth: 264,
+        CellLength: 265,
+        FillOrder: 266,
+        DocumentName: 269,
+        ImageDescription: 270,
+        Make: 271,
+        Model: 272,
+        StripOffsets: 273,
+        Orientation: 274,
+        SamplesPerPixel: 277,
+        RowsPerStrip: 278,
+        StripByteCounts: 279,
+        XResolution: 282,
+        YResolution: 283,
+        PlanarConfiguration: 284,
+        GrayResponseUnit: 290,
+        GrayResponseCurve: 291,
+        T4Options: 292,
+        T6Options: 293,
+        ResolutionUnit: 296,
+        TransferFunction: 301,
+        Software: 305,
+        DateTime: 306,
+        Artist: 315,
+        HostComputer: 316,
+        Predictor: 317,
+        WhitePoint: 318,
+        PrimaryChromaticities: 319,
+        ColorMap: 320,
+        HalftoneHints: 321,
+        TileWidth: 322,
+        TileLength: 323,
+        TileOffsets: 324,
+        TileByteCounts: 325,
+        SubIFDs: 330,
+        InkSet: 332,
+        InkNames: 333,
+        NumberOfInks: 334,
+        DotRange: 336,
+        TargetPrinter: 337,
+        ExtraSamples: 338,
+        SampleFormat: 339,
+        SMinSampleValue: 340,
+        SMaxSampleValue: 341,
+        TransferRange: 342,
+        ClipPath: 343,
+        XClipPathUnits: 344,
+        YClipPathUnits: 345,
+        Indexed: 346,
+        JPEGTables: 347,
+        OPIProxy: 351,
+        JPEGProc: 512,
+        JPEGInterchangeFormat: 513,
+        JPEGInterchangeFormatLength: 514,
+        JPEGRestartInterval: 515,
+        JPEGLosslessPredictors: 517,
+        JPEGPointTransforms: 518,
+        JPEGQTables: 519,
+        JPEGDCTables: 520,
+        JPEGACTables: 521,
+        YCbCrCoefficients: 529,
+        YCbCrSubSampling: 530,
+        YCbCrPositioning: 531,
+        ReferenceBlackWhite: 532,
+        XMLPacket: 700,
+        Rating: 18246,
+        RatingPercent: 18249,
+        ImageID: 32781,
+        CFARepeatPatternDim: 33421,
+        CFAPattern: 33422,
+        BatteryLevel: 33423,
+        Copyright: 33432,
+        ExposureTime: 33434,
+        ImageResources: 34377,
+        ExifTag: 34665,
+        InterColorProfile: 34675,
+        GPSTag: 34853,
+        Interlace: 34857,
+        TimeZoneOffset: 34858,
+        SelfTimerMode: 34859,
+        FlashEnergy: 37387,
+        SpatialFrequencyResponse: 37388,
+        Noise: 37389,
+        FocalPlaneXResolution: 37390,
+        FocalPlaneYResolution: 37391,
+        FocalPlaneResolutionUnit: 37392,
+        ImageNumber: 37393,
+        SecurityClassification: 37394,
+        ImageHistory: 37395,
+        ExposureIndex: 37397,
+        TIFFEPStandardID: 37398,
+        SensingMethod: 37399,
+        XPTitle: 40091,
+        XPComment: 40092,
+        XPAuthor: 40093,
+        XPKeywords: 40094,
+        XPSubject: 40095,
+        PrintImageMatching: 50341,
+        DNGVersion: 50706,
+        DNGBackwardVersion: 50707,
+        UniqueCameraModel: 50708,
+        LocalizedCameraModel: 50709,
+        CFAPlaneColor: 50710,
+        CFALayout: 50711,
+        LinearizationTable: 50712,
+        BlackLevelRepeatDim: 50713,
+        BlackLevel: 50714,
+        BlackLevelDeltaH: 50715,
+        BlackLevelDeltaV: 50716,
+        WhiteLevel: 50717,
+        DefaultScale: 50718,
+        DefaultCropOrigin: 50719,
+        DefaultCropSize: 50720,
+        ColorMatrix1: 50721,
+        ColorMatrix2: 50722,
+        CameraCalibration1: 50723,
+        CameraCalibration2: 50724,
+        ReductionMatrix1: 50725,
+        ReductionMatrix2: 50726,
+        AnalogBalance: 50727,
+        AsShotNeutral: 50728,
+        AsShotWhiteXY: 50729,
+        BaselineExposure: 50730,
+        BaselineNoise: 50731,
+        BaselineSharpness: 50732,
+        BayerGreenSplit: 50733,
+        LinearResponseLimit: 50734,
+        CameraSerialNumber: 50735,
+        LensInfo: 50736,
+        ChromaBlurRadius: 50737,
+        AntiAliasStrength: 50738,
+        ShadowScale: 50739,
+        DNGPrivateData: 50740,
+        MakerNoteSafety: 50741,
+        CalibrationIlluminant1: 50778,
+        CalibrationIlluminant2: 50779,
+        BestQualityScale: 50780,
+        RawDataUniqueID: 50781,
+        OriginalRawFileName: 50827,
+        OriginalRawFileData: 50828,
+        ActiveArea: 50829,
+        MaskedAreas: 50830,
+        AsShotICCProfile: 50831,
+        AsShotPreProfileMatrix: 50832,
+        CurrentICCProfile: 50833,
+        CurrentPreProfileMatrix: 50834,
+        ColorimetricReference: 50879,
+        CameraCalibrationSignature: 50931,
+        ProfileCalibrationSignature: 50932,
+        AsShotProfileName: 50934,
+        NoiseReductionApplied: 50935,
+        ProfileName: 50936,
+        ProfileHueSatMapDims: 50937,
+        ProfileHueSatMapData1: 50938,
+        ProfileHueSatMapData2: 50939,
+        ProfileToneCurve: 50940,
+        ProfileEmbedPolicy: 50941,
+        ProfileCopyright: 50942,
+        ForwardMatrix1: 50964,
+        ForwardMatrix2: 50965,
+        PreviewApplicationName: 50966,
+        PreviewApplicationVersion: 50967,
+        PreviewSettingsName: 50968,
+        PreviewSettingsDigest: 50969,
+        PreviewColorSpace: 50970,
+        PreviewDateTime: 50971,
+        RawImageDigest: 50972,
+        OriginalRawFileDigest: 50973,
+        SubTileBlockSize: 50974,
+        RowInterleaveFactor: 50975,
+        ProfileLookTableDims: 50981,
+        ProfileLookTableData: 50982,
+        OpcodeList1: 51008,
+        OpcodeList2: 51009,
+        OpcodeList3: 51022,
+        NoiseProfile: 51041,
     };
 
-    
+
     that.ExifIFD = {
-        ExposureTime:33434,
-        FNumber:33437,
-        ExposureProgram:34850,
-        SpectralSensitivity:34852,
-        ISOSpeedRatings:34855,
-        OECF:34856,
-        SensitivityType:34864,
-        StandardOutputSensitivity:34865,
-        RecommendedExposureIndex:34866,
-        ISOSpeed:34867,
-        ISOSpeedLatitudeyyy:34868,
-        ISOSpeedLatitudezzz:34869,
-        ExifVersion:36864,
-        DateTimeOriginal:36867,
-        DateTimeDigitized:36868,
-        ComponentsConfiguration:37121,
-        CompressedBitsPerPixel:37122,
-        ShutterSpeedValue:37377,
-        ApertureValue:37378,
-        BrightnessValue:37379,
-        ExposureBiasValue:37380,
-        MaxApertureValue:37381,
-        SubjectDistance:37382,
-        MeteringMode:37383,
-        LightSource:37384,
-        Flash:37385,
-        FocalLength:37386,
-        SubjectArea:37396,
-        MakerNote:37500,
-        UserComment:37510,
-        SubSecTime:37520,
-        SubSecTimeOriginal:37521,
-        SubSecTimeDigitized:37522,
-        FlashpixVersion:40960,
-        ColorSpace:40961,
-        PixelXDimension:40962,
-        PixelYDimension:40963,
-        RelatedSoundFile:40964,
-        InteroperabilityTag:40965,
-        FlashEnergy:41483,
-        SpatialFrequencyResponse:41484,
-        FocalPlaneXResolution:41486,
-        FocalPlaneYResolution:41487,
-        FocalPlaneResolutionUnit:41488,
-        SubjectLocation:41492,
-        ExposureIndex:41493,
-        SensingMethod:41495,
-        FileSource:41728,
-        SceneType:41729,
-        CFAPattern:41730,
-        CustomRendered:41985,
-        ExposureMode:41986,
-        WhiteBalance:41987,
-        DigitalZoomRatio:41988,
-        FocalLengthIn35mmFilm:41989,
-        SceneCaptureType:41990,
-        GainControl:41991,
-        Contrast:41992,
-        Saturation:41993,
-        Sharpness:41994,
-        DeviceSettingDescription:41995,
-        SubjectDistanceRange:41996,
-        ImageUniqueID:42016,
-        CameraOwnerName:42032,
-        BodySerialNumber:42033,
-        LensSpecification:42034,
-        LensMake:42035,
-        LensModel:42036,
-        LensSerialNumber:42037,
-        Gamma:42240,
+        ExposureTime: 33434,
+        FNumber: 33437,
+        ExposureProgram: 34850,
+        SpectralSensitivity: 34852,
+        ISOSpeedRatings: 34855,
+        OECF: 34856,
+        SensitivityType: 34864,
+        StandardOutputSensitivity: 34865,
+        RecommendedExposureIndex: 34866,
+        ISOSpeed: 34867,
+        ISOSpeedLatitudeyyy: 34868,
+        ISOSpeedLatitudezzz: 34869,
+        ExifVersion: 36864,
+        DateTimeOriginal: 36867,
+        DateTimeDigitized: 36868,
+        ComponentsConfiguration: 37121,
+        CompressedBitsPerPixel: 37122,
+        ShutterSpeedValue: 37377,
+        ApertureValue: 37378,
+        BrightnessValue: 37379,
+        ExposureBiasValue: 37380,
+        MaxApertureValue: 37381,
+        SubjectDistance: 37382,
+        MeteringMode: 37383,
+        LightSource: 37384,
+        Flash: 37385,
+        FocalLength: 37386,
+        SubjectArea: 37396,
+        MakerNote: 37500,
+        UserComment: 37510,
+        SubSecTime: 37520,
+        SubSecTimeOriginal: 37521,
+        SubSecTimeDigitized: 37522,
+        FlashpixVersion: 40960,
+        ColorSpace: 40961,
+        PixelXDimension: 40962,
+        PixelYDimension: 40963,
+        RelatedSoundFile: 40964,
+        InteroperabilityTag: 40965,
+        FlashEnergy: 41483,
+        SpatialFrequencyResponse: 41484,
+        FocalPlaneXResolution: 41486,
+        FocalPlaneYResolution: 41487,
+        FocalPlaneResolutionUnit: 41488,
+        SubjectLocation: 41492,
+        ExposureIndex: 41493,
+        SensingMethod: 41495,
+        FileSource: 41728,
+        SceneType: 41729,
+        CFAPattern: 41730,
+        CustomRendered: 41985,
+        ExposureMode: 41986,
+        WhiteBalance: 41987,
+        DigitalZoomRatio: 41988,
+        FocalLengthIn35mmFilm: 41989,
+        SceneCaptureType: 41990,
+        GainControl: 41991,
+        Contrast: 41992,
+        Saturation: 41993,
+        Sharpness: 41994,
+        DeviceSettingDescription: 41995,
+        SubjectDistanceRange: 41996,
+        ImageUniqueID: 42016,
+        CameraOwnerName: 42032,
+        BodySerialNumber: 42033,
+        LensSpecification: 42034,
+        LensMake: 42035,
+        LensModel: 42036,
+        LensSerialNumber: 42037,
+        Gamma: 42240,
     };
 
 
     that.GPSIFD = {
-        GPSVersionID:0,
-        GPSLatitudeRef:1,
-        GPSLatitude:2,
-        GPSLongitudeRef:3,
-        GPSLongitude:4,
-        GPSAltitudeRef:5,
-        GPSAltitude:6,
-        GPSTimeStamp:7,
-        GPSSatellites:8,
-        GPSStatus:9,
-        GPSMeasureMode:10,
-        GPSDOP:11,
-        GPSSpeedRef:12,
-        GPSSpeed:13,
-        GPSTrackRef:14,
-        GPSTrack:15,
-        GPSImgDirectionRef:16,
-        GPSImgDirection:17,
-        GPSMapDatum:18,
-        GPSDestLatitudeRef:19,
-        GPSDestLatitude:20,
-        GPSDestLongitudeRef:21,
-        GPSDestLongitude:22,
-        GPSDestBearingRef:23,
-        GPSDestBearing:24,
-        GPSDestDistanceRef:25,
-        GPSDestDistance:26,
-        GPSProcessingMethod:27,
-        GPSAreaInformation:28,
-        GPSDateStamp:29,
-        GPSDifferential:30,
-        GPSHPositioningError:31,
+        GPSVersionID: 0,
+        GPSLatitudeRef: 1,
+        GPSLatitude: 2,
+        GPSLongitudeRef: 3,
+        GPSLongitude: 4,
+        GPSAltitudeRef: 5,
+        GPSAltitude: 6,
+        GPSTimeStamp: 7,
+        GPSSatellites: 8,
+        GPSStatus: 9,
+        GPSMeasureMode: 10,
+        GPSDOP: 11,
+        GPSSpeedRef: 12,
+        GPSSpeed: 13,
+        GPSTrackRef: 14,
+        GPSTrack: 15,
+        GPSImgDirectionRef: 16,
+        GPSImgDirection: 17,
+        GPSMapDatum: 18,
+        GPSDestLatitudeRef: 19,
+        GPSDestLatitude: 20,
+        GPSDestLongitudeRef: 21,
+        GPSDestLongitude: 22,
+        GPSDestBearingRef: 23,
+        GPSDestBearing: 24,
+        GPSDestDistanceRef: 25,
+        GPSDestDistance: 26,
+        GPSProcessingMethod: 27,
+        GPSAreaInformation: 28,
+        GPSDateStamp: 29,
+        GPSDifferential: 30,
+        GPSHPositioningError: 31,
     };
 
 
     that.InteropIFD = {
-        InteroperabilityIndex:1,
+        InteroperabilityIndex: 1,
     };
 
     that.GPSHelper = {
-        degToDmsRational:function (degFloat) {
+        degToDmsRational: function (degFloat) {
             var degAbs = Math.abs(degFloat);
             var minFloat = degAbs % 1 * 60;
             var secFloat = minFloat % 1 * 60;
@@ -2459,17 +2459,17 @@ SOFTWARE.
             return [[deg, 1], [min, 1], [sec, 100]];
         },
 
-        dmsRationalToDeg:function (dmsArray, ref) {
+        dmsRationalToDeg: function (dmsArray, ref) {
             var sign = (ref === 'S' || ref === 'W') ? -1.0 : 1.0;
             var deg = dmsArray[0][0] / dmsArray[0][1] +
-                      dmsArray[1][0] / dmsArray[1][1] / 60.0 +
-                      dmsArray[2][0] / dmsArray[2][1] / 3600.0;
+                dmsArray[1][0] / dmsArray[1][1] / 60.0 +
+                dmsArray[2][0] / dmsArray[2][1] / 3600.0;
 
             return deg * sign;
         }
     };
-    
-    
+
+
     if (typeof exports !== 'undefined') {
         if (typeof module !== 'undefined' && module.exports) {
             exports = module.exports = that;

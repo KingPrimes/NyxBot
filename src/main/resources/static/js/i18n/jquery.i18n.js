@@ -6,9 +6,9 @@
  * Released under the Apache Licence 2.0
  */
 
-(function($) {
+(function ($) {
     $.fn.extend({
-        i18n: function(options) {
+        i18n: function (options) {
             var defaults = {
                 lang: "",
                 defaultLang: "",
@@ -16,7 +16,8 @@
                 filePrefix: "i18n_",
                 fileSuffix: "",
                 forever: true,
-                callback: function() {}
+                callback: function () {
+                }
             };
 
             function getCookie(name) {
@@ -55,13 +56,13 @@
             }
 
             var i = this;
-            $.getJSON(options.filePath + options.filePrefix + options.lang + options.fileSuffix + ".json", function(data) {
+            $.getJSON(options.filePath + options.filePrefix + options.lang + options.fileSuffix + ".json", function (data) {
                 var i18nLang = {};
                 if (data != null) {
                     i18nLang = data;
                 }
 
-                $(i).each(function(i) {
+                $(i).each(function (i) {
                     var i18nOnly = $(this).attr("i18n-only");
                     if ($(this).val() != null && $(this).val() !== "") {
                         if (i18nOnly == null || i18nOnly == undefined || i18nOnly == "" || i18nOnly == "value") {

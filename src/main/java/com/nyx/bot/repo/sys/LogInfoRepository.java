@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * 日志信息
  */
 @Repository
-public interface LogInfoRepository extends JpaRepository<LogInfo,Long>, JpaSpecificationExecutor<LogInfo> {
+public interface LogInfoRepository extends JpaRepository<LogInfo, Long>, JpaSpecificationExecutor<LogInfo> {
 }

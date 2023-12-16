@@ -159,12 +159,13 @@ public class YamlUtils {
 
     /**
      * 将yaml字符串转成类对象
+     *
      * @param yamlStr 字符串
-     * @param clazz 目标类
-     * @param <T> 泛型
+     * @param clazz   目标类
+     * @param <T>     泛型
      * @return 目标类
      */
-    public static <T> T toObject(String yamlStr, Class<T> clazz){
+    public static <T> T toObject(String yamlStr, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         try {
@@ -177,10 +178,11 @@ public class YamlUtils {
 
     /**
      * 将类对象转yaml字符串
+     *
      * @param object 对象
      * @return yaml字符串
      */
-    public static String toYaml(Object object){
+    public static String toYaml(Object object) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -198,6 +200,7 @@ public class YamlUtils {
     /**
      * （此方法非必要）
      * json 2 yaml
+     *
      * @param jsonStr json
      * @return yaml
      * @throws JsonProcessingException Exception
@@ -213,13 +216,13 @@ public class YamlUtils {
      * @param filePath 文件路径
      * @return 返回的字符串
      */
-    public static String readYamlFile(String filePath){
+    public static String readYamlFile(String filePath) {
         Yaml yaml = new Yaml();
-        InputStream input ;
-        try{
+        InputStream input;
+        try {
             input = new FileInputStream(filePath);
             return yaml.dumpAsMap(yaml.load(input));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
             return "";
         }

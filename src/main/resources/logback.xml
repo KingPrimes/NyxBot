@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
 
-    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <!-- 日志存放路径 -->
     <property name="log.path" value="./logs"/>
     <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%-5level %d{yyyy-MM-dd HH:mm:ss} [%thread - ${PID:- }]  %-40.40logger{39} : %msg%n"/>
+    <property name="log.pattern"
+              value="%-5level %d{yyyy-MM-dd HH:mm:ss} [%thread - ${PID:- }]  %-40.40logger{39} : %msg%n"/>
 
-    <property name="log.pattern-2" value="%green(%-5level) %cyan(%d{yyyy-MM-dd HH:mm:ss}) [%yellow(%thread) - %red(${PID:- })]  %-40.40logger{39} : %blue(%msg%n)"/>
+    <property name="log.pattern-2"
+              value="%green(%-5level) %cyan(%d{yyyy-MM-dd HH:mm:ss}) [%yellow(%thread) - %red(${PID:- })]  %-40.40logger{39} : %blue(%msg%n)"/>
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

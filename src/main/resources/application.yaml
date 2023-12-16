@@ -1,6 +1,9 @@
 #是否调试模式
 test:
   isTest: true
+project-name:
+  version: @version@
+  formatted-version: (v@version@)
 
 #线程池
 async:
@@ -73,4 +76,4 @@ spring:
 # OneBot
 shiro:
   ws-config:
-    ws-url: /nyx
+    ws-url: /ws/shiro

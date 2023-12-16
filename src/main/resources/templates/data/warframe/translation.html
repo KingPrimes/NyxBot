@@ -1,90 +1,90 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-    <th:block th:insert="~{include :: header('翻译')}"/>
-    <th:block th:insert="~{include :: bootstrap-select-css}"/>
-    <body>
+<th:block th:insert="~{include :: header('翻译')}"/>
+<th:block th:insert="~{include :: bootstrap-select-css}"/>
+<body>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="translation-form">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>中文： </label><input class="form-control" name="cn" placeholder="中文"
+                                                        type="text"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
         <div class="container-div">
             <div class="row">
-                <div class="col-sm-12 search-collapse">
-                    <form id="translation-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label>中文： </label><input class="form-control" name="cn" placeholder="中文"
-                                                                type="text"/>
-                                </li>
-                                <li>
-                                    <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
-                                            class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
-                                            class="fa fa-refresh"></i>&nbsp;重置</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </form>
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add()">
+                        <i class="fa fa-angle-up"></i> 更新
+                    </a>
                 </div>
-                <div class="container-div">
-                    <div class="row">
-                        <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add()">
-                                <i class="fa fa-angle-up"></i> 更新
-                            </a>
-                        </div>
-                        <div class="col-sm-12 select-table table-striped">
-                            <table id="bootstrap-table"></table>
-                        </div>
-                    </div>
+                <div class="col-sm-12 select-table table-striped">
+                    <table id="bootstrap-table"></table>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <th:block th:insert="~{include :: footer}"/>
-        <th:block th:insert="~{include :: bootstrap-select-js}"/>
-        <script th:inline="javascript">
-            var prefix = ctx + "data/warframe/translation"
-            $(function () {
-                var options = {
-                    url: prefix + "/list",
-                    modalName: "翻译",
-                    sortOrder: "desc",
-                    escape: true,
-                    showPageGo: true,
-                    rememberSelected: true,
-                    columns: [
-                        {
-                            field: 'state',
-                            radio: true
-                        },
-                        {
-                            field: 'id',
-                            title: 'ID'
-                        },
-                        {
-                            field: 'en',
-                            title: '英文'
-                        },
-                        {
-                            field: 'cn',
-                            title: '中文'
-                        }
-                    ]
-                };
-                $.table.init(options);
-            });
+<th:block th:insert="~{include :: footer}"/>
+<th:block th:insert="~{include :: bootstrap-select-js}"/>
+<script th:inline="javascript">
+    var prefix = ctx + "data/warframe/translation"
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            modalName: "翻译",
+            sortOrder: "desc",
+            escape: true,
+            showPageGo: true,
+            rememberSelected: true,
+            columns: [
+                {
+                    field: 'state',
+                    radio: true
+                },
+                {
+                    field: 'id',
+                    title: 'ID'
+                },
+                {
+                    field: 'en',
+                    title: '英文'
+                },
+                {
+                    field: 'cn',
+                    title: '中文'
+                }
+            ]
+        };
+        $.table.init(options);
+    });
 
-            function searchPre() {
-                $.table.search('translation-form', 'bootstrap-table');
-            }
+    function searchPre() {
+        $.table.search('translation-form', 'bootstrap-table');
+    }
 
-            function update() {
-                $.operate.post(prefix + "/update")
-            }
+    function update() {
+        $.operate.post(prefix + "/update")
+    }
 
-            function resetPre() {
-                $("#log-form")[0].reset();
-                $.table.search('translation-form', 'bootstrap-table');
-            }
-        </script>
+    function resetPre() {
+        $("#log-form")[0].reset();
+        $.table.search('translation-form', 'bootstrap-table');
+    }
+</script>
 
-    </body>
+</body>
 </html>

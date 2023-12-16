@@ -7,7 +7,7 @@ public enum HttpCodeEnum {
     SUCCESS(200, "成功"),
     FAIL(400, "失败"),
     ERROR(500, "错误"),
-    WARN(301,"警告"),
+    WARN(301, "警告"),
     NOT_FOUND(404, "资源不存在"),
     UNAUTHORIZED(401, "未授权"),
     FORBIDDEN(403, "禁止访问"),

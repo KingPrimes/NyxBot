@@ -9,9 +9,9 @@ public class CodeUtils {
      * @param str 待匹配的文本
      * @return Codes
      */
-    public static Codes matchInstructions(String str){
+    public static Codes matchInstructions(String str) {
         for (Codes value : Codes.values()) {
-            if(MatcherUtils.matcherIgnoreCase(str,value.getStr())){
+            if (MatcherUtils.matcherIgnoreCase(str, value.getStr())) {
                 return value;
             }
         }

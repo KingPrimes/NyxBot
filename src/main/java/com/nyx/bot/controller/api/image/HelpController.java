@@ -16,11 +16,11 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/api")
 public class HelpController {
-    @LogInfo(title = "Api",codes = Codes.HELP,businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/help",produces = MediaType.IMAGE_PNG_VALUE)
+    @LogInfo(title = "Api", codes = Codes.HELP, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/help", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public void getImage(HttpServletResponse response,@RequestBody OneBotLogInfoData data) throws IOException {
-        response.setHeader("content-type","image/png");
+    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
+        response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.conver(
                         Constants.LOCALHOST + "private/getHelpHtml/" + data.getPermissionsEnums()

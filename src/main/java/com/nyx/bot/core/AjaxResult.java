@@ -9,7 +9,7 @@ import java.io.Serial;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class AjaxResult extends HashMap<String,Object> {
+public class AjaxResult extends HashMap<String, Object> {
     /**
      * 状态码
      */
@@ -178,7 +178,7 @@ public class AjaxResult extends HashMap<String,Object> {
         return this;
     }
 
-    public String toJsonString(){
+    public String toJsonString() {
         return JSON.toJSONString(this);
     }
 

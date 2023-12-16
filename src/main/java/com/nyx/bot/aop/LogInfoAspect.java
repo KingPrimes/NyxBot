@@ -29,7 +29,7 @@ public class LogInfoAspect {
 
     //切入点
     @Pointcut("@annotation(com.nyx.bot.annotation.LogInfo)")
-    public void logPointCut(){
+    public void logPointCut() {
 
     }
 
@@ -76,7 +76,7 @@ public class LogInfoAspect {
             getControllerMethodDescription(joinPoint, controllerLog, logInfo, jsonResult);
             logInfo.setLogTime(new Date());
             // 保存数据库
-            AsyncUtils.me().execute(()->{
+            AsyncUtils.me().execute(() -> {
                 SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
             });
         } catch (Exception exp) {
@@ -120,7 +120,7 @@ public class LogInfoAspect {
      *
      * @param logInfo 操作日志
      */
-    private void setRequestValue(JoinPoint joinPoint,  com.nyx.bot.entity.sys.LogInfo logInfo) {
+    private void setRequestValue(JoinPoint joinPoint, com.nyx.bot.entity.sys.LogInfo logInfo) {
         Map<String, String[]> map = ServletUtils.getRequest().getParameterMap();
         if (StringUtils.isNotEmpty(map)) {
             String params = JSONObject.toJSONString(map);
@@ -139,8 +139,8 @@ public class LogInfoAspect {
                             case "group" -> logInfo.setGroupUid(Long.valueOf(value[i].toString()));
                             case "rawMsg" -> logInfo.setRawMsg(value[i].toString());
                             case "user" -> logInfo.setUserUid(Long.valueOf(value[i].toString()));
-                            case "data" ->{
-                                if(value[i] instanceof OneBotLogInfoData data){
+                            case "data" -> {
+                                if (value[i] instanceof OneBotLogInfoData data) {
                                     logInfo.setBotUid(data.getBotUid());
                                     logInfo.setUserUid(data.getUserUid());
                                     logInfo.setRawMsg(data.getRawMsg());

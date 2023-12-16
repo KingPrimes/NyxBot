@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class StringUtils extends org.apache.commons.lang3.StringUtils{
+public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     private static final String RAND_STR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
@@ -647,7 +647,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils{
     }
 
 
-
     /**
      * 整数到中文大写
      *
@@ -671,6 +670,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils{
 
     /**
      * 整数到中文大写
+     *
      * @param src 整数参数
      * @return 中文大写
      */

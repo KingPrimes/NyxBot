@@ -16,7 +16,7 @@ public class ImageUrlUtils {
     private final StringBuilder builder = new StringBuilder();
 
 
-    public ImageUrlUtils(String url,Long botId,Long user,Long group,String rawMsg) {
+    public ImageUrlUtils(String url, Long botId, Long user, Long group, String rawMsg) {
         builder
                 .append(Constants.LOCALHOST)
                 .append("api/")
@@ -54,7 +54,7 @@ public class ImageUrlUtils {
                     .append("/")
                     .append(new Date().getTime())
             ;
-        }else{
+        } else {
             builder
                     .append(Constants.LOCALHOST)
                     .append("api/")
@@ -69,25 +69,25 @@ public class ImageUrlUtils {
                 .append(url);
     }
 
-    public ImageUrlUtils(){
+    public ImageUrlUtils() {
 
     }
 
-    public static String builder(String url,Long botId,Long user,Long group,String rawMsg) {
+    public static String builder(String url, Long botId, Long user, Long group, String rawMsg) {
         return new ImageUrlUtils(url, botId, user, group, rawMsg).build();
     }
 
-    public static String builder(String url,Bot bot,AnyMessageEvent event) {
-        return new ImageUrlUtils(url, bot,event,true).build();
+    public static String builder(String url, Bot bot, AnyMessageEvent event) {
+        return new ImageUrlUtils(url, bot, event, true).build();
     }
 
     public static HttpUtils.Body builderBase64(String url, Bot bot, AnyMessageEvent event) {
-        String build = new ImageUrlUtils(url, bot, event,true).build();
+        String build = new ImageUrlUtils(url, bot, event, true).build();
         return HttpUtils.sendGetForFile(build);
     }
 
     public static HttpUtils.Body builderBase64Post(String url, Bot bot, AnyMessageEvent event) {
-        String build = new ImageUrlUtils(url, bot, event,false).build();
+        String build = new ImageUrlUtils(url, bot, event, false).build();
         OneBotLogInfoData oneBotLogInfoData = new OneBotLogInfoData();
         oneBotLogInfoData.setBotUid(bot.getSelfId());
         oneBotLogInfoData.setUserUid(event.getUserId());
@@ -111,7 +111,7 @@ public class ImageUrlUtils {
         return HttpUtils.sendPostForFile(build, data.toString());
     }
 
-    private String build(){
+    private String build() {
         return builder.toString();
     }
 

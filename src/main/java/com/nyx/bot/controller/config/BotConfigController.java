@@ -12,8 +12,8 @@ public class BotConfigController extends BaseController {
     String prefix = "config/bot/";
 
     @GetMapping("/bot")
-    public String config(){
-        return prefix+"bot";
+    public String config() {
+        return prefix + "bot";
     }
 
 }

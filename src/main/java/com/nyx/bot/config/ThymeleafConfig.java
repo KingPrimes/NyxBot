@@ -9,7 +9,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 public class ThymeleafConfig {
 
     @Bean
-    public SpringResourceTemplateResolver springResourceTemplateResolver(){
+    public SpringResourceTemplateResolver springResourceTemplateResolver() {
         SpringResourceTemplateResolver srtr = new SpringResourceTemplateResolver();
         srtr.setPrefix("file:./nyxTemplates/");
         srtr.setSuffix(".html");

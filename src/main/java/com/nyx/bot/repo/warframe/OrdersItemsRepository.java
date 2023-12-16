@@ -26,7 +26,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
     @Transactional
     @Modifying
     @Query(value = "INSERT IGNORE INTO ORDERS_ITEMS(ITEM_NAME, ORDER_ID, THUMB, URL_NAME, VAULTED) VALUES (:#{#items.itemName},:#{#items.orderId},:#{#items.thumb},:#{#items.urlName},:#{#items.vaulted})"
-            ,nativeQuery = true)
+            , nativeQuery = true)
     Integer addOrdersItems(@Param("items") OrdersItems items);
 
 
@@ -34,6 +34,9 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
      * 查询最大ID的数据
      */
     OrdersItems findTopByOrderByOidDesc();
+
+
+    OrdersItems findByOrderId(String orderId);
 
 
     /**

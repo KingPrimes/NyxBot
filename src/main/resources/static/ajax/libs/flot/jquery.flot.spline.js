@@ -3,42 +3,42 @@
  * author: Alex Bardas < alex.bardas@gmail.com >
  * modified by: Avi Kohn https://github.com/AMKohn
  * based on the spline interpolation described at:
- *		 http://scaledinnovation.com/analytics/splines/aboutSplines.html
+ *         http://scaledinnovation.com/analytics/splines/aboutSplines.html
  *
  * Example usage: (add in plot options series object)
- *		for linespline:
- *			series: {
- *				...
- *				lines: {
- *					show: false
- *				},
- *				splines: {
- *					show: true,
- *					tension: x, (float between 0 and 1, defaults to 0.5),
- *					lineWidth: y (number, defaults to 2),
- *					fill: z (float between 0 .. 1 or false, as in flot documentation)
- *				},
- *				...
- *			}
- *		areaspline:
- *			series: {
- *				...
- *				lines: {
- *					show: true,
- *					lineWidth: 0, (line drawing will not execute)
- *					fill: x, (float between 0 .. 1, as in flot documentation)
- *					...
- *				},
- *				splines: {
- *					show: true,
- *					tension: 0.5 (float between 0 and 1)
- *				},
- *				...
- *			}
+ *        for linespline:
+ *            series: {
+ *                ...
+ *                lines: {
+ *                    show: false
+ *                },
+ *                splines: {
+ *                    show: true,
+ *                    tension: x, (float between 0 and 1, defaults to 0.5),
+ *                    lineWidth: y (number, defaults to 2),
+ *                    fill: z (float between 0 .. 1 or false, as in flot documentation)
+ *                },
+ *                ...
+ *            }
+ *        areaspline:
+ *            series: {
+ *                ...
+ *                lines: {
+ *                    show: true,
+ *                    lineWidth: 0, (line drawing will not execute)
+ *                    fill: x, (float between 0 .. 1, as in flot documentation)
+ *                    ...
+ *                },
+ *                splines: {
+ *                    show: true,
+ *                    tension: 0.5 (float between 0 and 1)
+ *                },
+ *                ...
+ *            }
  *
  */
 
-(function($) {
+(function ($) {
     'use strict'
 
     /**
@@ -46,7 +46,7 @@
      * @param {Number} x2, y2: the next knot (not connected, but needed to calculate p2)
      * @param {Number} tension: control how far the control points spread
      * @return {Array}: p1 -> control point, from x1 back toward x0
-     * 					p2 -> the next control point, returned to become the next segment's p1
+     *                    p2 -> the next control point, returned to become the next segment's p1
      *
      * @api private
      */
@@ -123,8 +123,7 @@
             cpoints = cpoints.slice(0, 2).concat(points);
 
             line.push([points[0], points[1], cpoints, type]);
-        }
-        else line.push([points[2], points[3], cpoints.concat(points.slice(2)), type]);
+        } else line.push([points[2], points[3], cpoints.concat(points.slice(2)), type]);
     }
 
     /**
@@ -142,7 +141,7 @@
         }
 
         var cp = [],
-        // array of control points
+            // array of control points
             tension = series.splines.tension || 0.5,
             idx, x, y, points = series.datapoints.points,
             ps = series.datapoints.pointsize,
@@ -193,7 +192,7 @@
     }
 
     $.plot.plugins.push({
-        init: function(plot) {
+        init: function (plot) {
             plot.hooks.drawSeries.push(drawSpline);
         },
         options: {

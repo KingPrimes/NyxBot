@@ -4,6 +4,7 @@ public class PrivateUtils {
     /**
      * 根据QQ号获取头像
      * 无法获取头像！本方法已弃用
+     *
      * @param userId QQ账号
      */
     @Deprecated
@@ -39,6 +40,6 @@ public class PrivateUtils {
      * @return 链接
      */
     public static String getUserQzone(long userId, int size) {
-        return String.format("http://qlogo2.store.qq.com/qzone/%s/%s/%s", userId,userId,size);
+        return String.format("http://qlogo2.store.qq.com/qzone/%s/%s/%s", userId, userId, size);
     }
 }

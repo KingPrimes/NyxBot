@@ -5,7 +5,6 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.plugin.expression.code.ExpressionCode;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.CodeUtils;
@@ -42,36 +41,6 @@ public class GlobalDirectivesPlugin {
                         UPDATE_WARFRAME_TAR,
                         UPDATE_JAR -> {
 
-                }
-                //画图
-                case DRAWING -> {
-
-                }
-                //点歌
-                case MUSIC -> {
-                    not(bot, event);
-                }
-                //涩图
-                case ACG_IMAGE -> {
-                    not(bot, event);
-                }
-                //鉴图
-                case IMAGE_NSFW -> {
-                    not(bot, event);
-                }
-                //CHAT
-                case CHAT_GPT -> {
-                    not(bot, event);
-                }
-                //表情包
-                case EXPRESSION_CAPO_T,
-                        EXPRESSION_CAPO_DING,
-                        EXPRESSION_EMAIL_FUNNY,
-                        EXPRESSION_SPIRITUAL_PILLARS,
-                        EXPRESSION_BARBARIZATION,
-                        EXPRESSION_GRAY_IMAGE,
-                        EXPRESSION_MIRROR_IMAGE -> {
-                    ExpressionCode.expression(bot, event, codes);
                 }
 
                 //Warframe

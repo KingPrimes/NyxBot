@@ -60,12 +60,13 @@ public class Msg extends MsgUtils {
 
     /**
      * 图片
+     *
      * @param b Base64 byte[]
      * @return {@link Msg}
      */
     public Msg imgBase64(byte[] b) {
         this.builder.append(
-                format("[CQ:image,file=%s]", ShiroUtils.escape("base64://"+ Base64.encodeBytes(b)))
+                format("[CQ:image,file=%s]", ShiroUtils.escape("base64://" + Base64.encodeBytes(b)))
         );
         return this;
     }
