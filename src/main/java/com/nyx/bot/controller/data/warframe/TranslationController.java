@@ -1,7 +1,9 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
+import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Ephemeras;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.EphemerasService;
@@ -33,5 +35,12 @@ public class TranslationController extends BaseController {
     public TableDataInfo list(Translation t) {
         Page<Translation> list = tlService.list(t);
         return getDataTable(list.getContent(), list.getTotalElements());
+    }
+
+    @PostMapping("/update")
+    @ResponseBody
+    public AjaxResult update() {
+        WarframeDataSource.initTranslation();
+        return success("已执行任务！");
     }
 }

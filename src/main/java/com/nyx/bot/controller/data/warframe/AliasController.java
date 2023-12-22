@@ -40,7 +40,7 @@ public class AliasController extends BaseController {
     @ResponseBody
     public AjaxResult update() {
         WarframeDataSource.getAlias();
-        return success("以执行任务！");
+        return success("已执行任务！");
     }
 
 }

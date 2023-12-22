@@ -39,6 +39,6 @@ public class EphemerasController extends BaseController {
     @ResponseBody
     public AjaxResult update() {
         WarframeDataSource.getEphemeras();
-        return success("以执行任务！");
+        return success("已执行任务！");
     }
 }
