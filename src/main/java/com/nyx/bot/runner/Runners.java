@@ -1,5 +1,6 @@
 package com.nyx.bot.runner;
 
+import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.repo.sys.SysUserRepository;
@@ -50,6 +51,10 @@ public class Runners {
     @Bean
     public ApplicationRunner service() {
         return args -> {
+            if (!test) {
+                //程序启动之后获取WarframeDataSource
+                WarframeDataSource.init();
+            }
         };
     }
 
