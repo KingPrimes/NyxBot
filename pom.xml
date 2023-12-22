@@ -29,8 +29,7 @@
         <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.16.1</jsoup.version>
-        <tess4j.version>5.8.0</tess4j.version>
-
+        <djl.version>0.25.0</djl.version>
     </properties>
 
 
@@ -85,14 +84,14 @@
         </dependency>
 
         <!--热部署-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <!--禁止依赖传递-->
-            <optional>true</optional>
-            <!--只在运行时起作用-->
-            <scope>runtime</scope>
-        </dependency>
+        <!--  <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-devtools</artifactId>
+              &lt;!&ndash;禁止依赖传递&ndash;&gt;
+              <optional>true</optional>
+              &lt;!&ndash;只在运行时起作用&ndash;&gt;
+              <scope>runtime</scope>
+          </dependency>-->
 
         <!--Http请求-->
         <dependency>
@@ -106,18 +105,6 @@
             <artifactId>cache2k-spring</artifactId>
         </dependency>
 
-        <!--文本识别-->
-        <dependency>
-            <groupId>net.sourceforge.tess4j</groupId>
-            <artifactId>tess4j</artifactId>
-            <version>${tess4j.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <!--H2数据库-->
         <dependency>
@@ -145,6 +132,7 @@
             </exclusions>
         </dependency>
 
+        <!--Lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -198,19 +186,57 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+        <!-- 服务器端推理引擎 -->
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>basicdataset</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>model-zoo</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+
+        <!-- ONNX 无NDArray ，需要借用pytorch-->
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+        <!-- ONNX -->
+        <dependency>
+            <groupId>ai.djl.onnxruntime</groupId>
+            <artifactId>onnxruntime-engine</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.djl.opencv</groupId>
+            <artifactId>opencv</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+
     </dependencies>
 
 
     <!-- <repositories>
-         <repository>
-             <id>public</id>
-             <name>aliyun nexus</name>
-             <url>https://maven.aliyun.com/repository/public</url>
-             <releases>
-                 <enabled>true</enabled>
-             </releases>
-         </repository>
-     </repositories>-->
+          <repository>
+              <id>public</id>
+              <name>aliyun nexus</name>
+              <url>https://maven.aliyun.com/repository/public</url>
+              <releases>
+                  <enabled>true</enabled>
+              </releases>
+          </repository>
+      </repositories>-->
 
 
     <build>
