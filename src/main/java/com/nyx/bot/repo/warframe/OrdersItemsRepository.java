@@ -52,7 +52,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
      * 根据物品名称模糊查询
      *
      * @param itemName 物品名称
-     * @return 结果
+     * @return 结果列表
      */
 
     @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ',''))", nativeQuery = true)
