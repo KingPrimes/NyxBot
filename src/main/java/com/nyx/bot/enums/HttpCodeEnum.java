@@ -2,6 +2,9 @@ package com.nyx.bot.enums;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 public enum HttpCodeEnum {
     SUCCESS(200, "成功"),
@@ -31,6 +34,15 @@ public enum HttpCodeEnum {
     HttpCodeEnum(int code, String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public static HttpCodeEnum getCode(int code) {
+        HttpCodeEnum[] values = HttpCodeEnum.values();
+        List<HttpCodeEnum> collect = Arrays.stream(values).filter(v -> v.code == code).toList();
+        if (collect.isEmpty()) {
+            return HttpCodeEnum.ERROR;
+        }
+        return collect.get(0);
     }
 
 }
