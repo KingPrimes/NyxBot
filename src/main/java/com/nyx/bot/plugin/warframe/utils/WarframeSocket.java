@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 
@@ -21,16 +20,14 @@ import java.util.concurrent.TimeUnit;
 public class WarframeSocket extends WebSocketListener {
 
     private static final WarframeSocket socket = new WarframeSocket();
+    WebSocket webSocket;
 
     public static WarframeSocket socket() {
         return socket;
     }
 
-    WebSocket webSocket;
-
-
     public void connectServer(String url) {
-        log.info("正在向{}链接...", ApiUrl.WARFRAME_SOCKET);
+        log.info("正在向{}链接...", url);
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)

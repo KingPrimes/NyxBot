@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,8 @@ public class SteelPathHtmlController {
 
     @GetMapping("/getSteelPathHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates.SteelPath steelPath = sgs.getPacket().getData().getSteelPath();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.SteelPath steelPath = sgs.getSteelPath();
         String key = "";
         for (int i = 0; i < steelPath.getRotation().size(); i++) {
             if (steelPath.getCurrentReward().getName().equals(steelPath.getRotation().get(i).getName())) {

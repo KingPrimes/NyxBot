@@ -1,9 +1,9 @@
 package com.nyx.bot.core.text;
 
+import com.nyx.bot.utils.StringUtils;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import com.nyx.bot.utils.StringUtils;
 
 public class CharsetKit {
     /**

@@ -37,8 +37,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @throws BeansException
      */
     public static <T> T getBean(Class<T> clz) throws BeansException {
-        T result = (T) beanFactory.getBean(clz);
-        return result;
+        return beanFactory.getBean(clz);
     }
 
     /**

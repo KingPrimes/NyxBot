@@ -112,51 +112,6 @@ public class YamlUtils {
         yaml.dump(CONFIG_MAP, new FileWriter(file));
     }
 
-    private static class KeyAndMap {
-        private String key;
-        private Map<String, Object> map;
-        private Map<String, Object> fatherMap;
-
-        public KeyAndMap(String key) {
-            this.key = key;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Map<String, Object> getMap() {
-            return map;
-        }
-
-        public Map<String, Object> getFatherMap() {
-            return fatherMap;
-        }
-
-        @SuppressWarnings("unchecked")
-        public KeyAndMap invoke() {
-            if (file == null) {
-                System.err.println("请设置文件路径");
-            }
-            if (null == CONFIG_MAP) {
-                CONFIG_MAP = new LinkedHashMap<>();
-            }
-            String[] keys = key.split("\\.");
-            key = keys[keys.length - 1];
-            map = (Map<String, Object>) CONFIG_MAP;
-            for (int i = 0; i < keys.length - 1; i++) {
-                String s = keys[i];
-                if (map.get(s) == null || !(map.get(s) instanceof Map)) {
-                    map.put(s, new HashMap<>(4));
-                }
-                fatherMap = map;
-                map = (Map<String, Object>) map.get(s);
-            }
-            return this;
-        }
-    }
-
-
     /**
      * 将yaml字符串转成类对象
      *
@@ -225,6 +180,50 @@ public class YamlUtils {
         } catch (Exception e) {
             log.error(e.getMessage());
             return "";
+        }
+    }
+
+    private static class KeyAndMap {
+        private String key;
+        private Map<String, Object> map;
+        private Map<String, Object> fatherMap;
+
+        public KeyAndMap(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public Map<String, Object> getMap() {
+            return map;
+        }
+
+        public Map<String, Object> getFatherMap() {
+            return fatherMap;
+        }
+
+        @SuppressWarnings("unchecked")
+        public KeyAndMap invoke() {
+            if (file == null) {
+                System.err.println("请设置文件路径");
+            }
+            if (null == CONFIG_MAP) {
+                CONFIG_MAP = new LinkedHashMap<>();
+            }
+            String[] keys = key.split("\\.");
+            key = keys[keys.length - 1];
+            map = (Map<String, Object>) CONFIG_MAP;
+            for (int i = 0; i < keys.length - 1; i++) {
+                String s = keys[i];
+                if (map.get(s) == null || !(map.get(s) instanceof Map)) {
+                    map.put(s, new HashMap<>(4));
+                }
+                fatherMap = map;
+                map = (Map<String, Object>) map.get(s);
+            }
+            return this;
         }
     }
 }

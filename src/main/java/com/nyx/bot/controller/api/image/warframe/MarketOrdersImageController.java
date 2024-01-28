@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.xhtmlrenderer.simple.extend.URLUTF8Encoder;
 
 import java.io.IOException;
 
@@ -23,13 +22,13 @@ public class MarketOrdersImageController {
 
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_MARKET_ORDERS_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getMarketOrdersImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postMarketOrdersImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getMarketOrders/" + URLUTF8Encoder.encode(data.getKey()) + "/" + data.getForm() + "/" + data.getIsBy() + "/" + data.getIsMax()
+                HtmlToImage.converPost(
+                        Constants.LOCALHOST + "private/postMarketOrders", data.toString()
                 ).toByteArray()
         );
     }

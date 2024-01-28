@@ -9,7 +9,10 @@ import com.nyx.bot.utils.HtmlToImage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 
@@ -22,8 +25,8 @@ public class HelpController {
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getHelpHtml/" + data.getPermissionsEnums()
+                HtmlToImage.converPost(
+                        Constants.LOCALHOST + "private/getHelpHtml/", data.toString()
                 ).toByteArray()
         );
     }

@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -25,8 +24,8 @@ public class ArsonHuntHtmlController {
 
     @GetMapping("/getArsonHuntHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates.ArchonHunt archonHunt = sgs.getPacket().getData().getArchonHunt();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.ArchonHunt archonHunt = sgs.getArchonHunt();
         for (GlobalStates.ArchonHunt.Mission mission : archonHunt.getMissions()) {
             mission.setNode(mission.getNode()
                     .replace(

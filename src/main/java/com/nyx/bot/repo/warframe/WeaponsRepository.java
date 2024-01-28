@@ -22,4 +22,6 @@ public interface WeaponsRepository extends JpaRepository<Weapons, Long>, JpaSpec
     @Query(value = "select max(ID) from WEAPONS", nativeQuery = true)
     Integer queryMaxId();
 
+    Weapons findWeaponsByWeaponId(String id);
+
 }

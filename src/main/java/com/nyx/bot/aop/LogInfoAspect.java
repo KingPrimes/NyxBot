@@ -165,7 +165,7 @@ public class LogInfoAspect {
      */
     private String argsArrayToString(Object[] paramsArray) {
         StringBuilder params = new StringBuilder();
-        if (paramsArray != null && paramsArray.length > 0) {
+        if (paramsArray != null) {
             for (Object o : paramsArray) {
                 if (StringUtils.isNotNull(o)) {
                     try {

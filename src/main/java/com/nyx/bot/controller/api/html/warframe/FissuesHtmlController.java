@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -28,8 +27,8 @@ public class FissuesHtmlController {
 
     @NotNull
     private static List<GlobalStates.Fissures> getFissures(Integer type) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        List<GlobalStates.Fissures> fissures = sgs.getPacket().getData().getFissures();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        List<GlobalStates.Fissures> fissures = sgs.getFissures();
         List<GlobalStates.Fissures> list = new ArrayList<>();
         //分级
         switch (type) {

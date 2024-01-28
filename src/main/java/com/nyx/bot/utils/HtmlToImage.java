@@ -2,6 +2,7 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.entity.Hint;
 import com.nyx.bot.repo.HintRepository;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,6 +20,8 @@ import java.util.Optional;
 @Slf4j
 
 public class HtmlToImage {
+
+    private static final String HTML_PATH = "./nyxTemplates/";
 
     /**
      * 高清Html转Image
@@ -51,9 +54,6 @@ public class HtmlToImage {
             return null;
         }
     }
-
-    private static final String HTML_PATH = "./nyxTemplates/";
-
 
     /**
      * 获取宽度
@@ -95,7 +95,6 @@ public class HtmlToImage {
         html = html.replaceAll("/css/{0,}", "./css/")
                 .replaceAll("/img/{0,}", "./img/");
         StringBuilder str = new StringBuilder(html);
-        ;
         if (hint != null) {
             str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
                     "\tPosted by:KingPrimes<br/>\n" +
@@ -111,28 +110,6 @@ public class HtmlToImage {
                     """);
         }
         return str.toString();
-    }
-
-    /***
-     * 根据Html文本生成图片字节流
-     * @param name html文件名称
-     * @param html html文本
-     * @param width 图片宽度
-     * @return 字节流
-     */
-    private static ByteArrayOutputStream tmpHtmlToImageByteArray(String name, String html, int width) {
-        String path = HTML_PATH;
-        path = path + "/" + name + ".html";
-        try {
-            FileOutputStream fo = new FileOutputStream(path);
-            OutputStreamWriter os = new OutputStreamWriter(fo, StandardCharsets.UTF_8);
-            os.write(html);
-            os.flush();
-            os.close();
-        } catch (Exception e) {
-            log.error("生成临时文件出错\n\t\t文件名称：{}\n\t\t错误信息：{}", name, e.getMessage());
-        }
-        return convertHtmlToImage(path, width);
     }
 
     /***
@@ -190,6 +167,17 @@ public class HtmlToImage {
      */
     public static ByteArrayOutputStream conver(String url) {
         String html = HttpUtils.sendGet(url).getBody();
+        int width = getWidth(html);
+        html = outH(html);
+        return tmpHtmlToImageByteArray(html, width);
+    }
+
+    /**
+     * @param url Html Url地址
+     * @return 图片流
+     */
+    public static ByteArrayOutputStream converPost(String url, String json) {
+        String html = HttpUtils.sendPost(url, json).getBody();
         int width = getWidth(html);
         html = outH(html);
         return tmpHtmlToImageByteArray(html, width);

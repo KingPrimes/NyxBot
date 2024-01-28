@@ -52,9 +52,7 @@ public class RivenTrendService {
             );
             Optional.ofNullable(items.getType()).ifPresent(
                     type -> {
-                        if (!type.isEmpty()) {
-                            predicateList.add(bu.like(root.get("type"), "%" + type + "%"));
-                        }
+                        predicateList.add(bu.like(root.get("type"), "%" + type + "%"));
                     }
             );
 

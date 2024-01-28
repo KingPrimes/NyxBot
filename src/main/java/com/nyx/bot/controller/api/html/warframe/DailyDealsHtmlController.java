@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,8 @@ public class DailyDealsHtmlController {
 
     @GetMapping("/getDailyDealsHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates state = sgs.getPacket().getData();
-        GlobalStates.DailyDeals deals = state.getDailyDeals().get(0);
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.DailyDeals deals = sgs.getDailyDeals().get(0);
         deals.setItem(trans.enToZh(deals.getItem()));
         deals.setEta(DateUtils.getDiff(deals.getExpiry(), new Date(), true));
         model.addAttribute("deals", deals);

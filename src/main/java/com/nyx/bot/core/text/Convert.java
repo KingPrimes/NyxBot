@@ -1,8 +1,7 @@
 package com.nyx.bot.core.text;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.nyx.bot.utils.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -606,7 +605,7 @@ public class Convert {
             return new BigDecimal((Long) value);
         }
         if (value instanceof Double) {
-            return new BigDecimal((Double) value);
+            return BigDecimal.valueOf((Double) value);
         }
         if (value instanceof Integer) {
             return new BigDecimal((Integer) value);

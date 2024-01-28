@@ -6,6 +6,7 @@ import com.nyx.bot.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Date;
 
@@ -24,5 +25,9 @@ public class BotCoreEvent extends CoreEvent {
         log.info("机器人 {} 已断开链接", account);
     }
 
-
+    @Override
+    public boolean session(WebSocketSession session) {
+        log.info(session.getUri().getPath());
+        return super.session(session);
+    }
 }

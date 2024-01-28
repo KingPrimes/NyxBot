@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class PrivateHelpHtmlController {
                     }
                 }
             }
-            case SUPER_ADMIN -> {
+            default -> {
                 for (Codes value : Codes.values()) {
                     v.put(value.getStr(), value.getPermissions().getStr());
                 }
@@ -42,4 +43,16 @@ public class PrivateHelpHtmlController {
         model.addAttribute("codes", v);
         return "html/help";
     }
+
+    @PostMapping("/getHtlpHtml")
+    public String getHelpHtml(Model model) {
+        Map<String, String> v = new HashMap<>();
+        for (Codes value : Codes.values()) {
+            v.put(value.getStr(), value.getPermissions().getStr());
+        }
+        model.addAttribute("codes", v);
+        return "html/help";
+    }
+
+
 }

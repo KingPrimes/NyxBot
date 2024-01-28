@@ -2,15 +2,12 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.text.StrFormatter;
-import com.nyx.bot.core.text.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class StringUtils extends org.apache.commons.lang3.StringUtils {

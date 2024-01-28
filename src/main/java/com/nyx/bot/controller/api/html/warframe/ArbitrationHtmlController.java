@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -26,8 +25,8 @@ public class ArbitrationHtmlController {
 
     @GetMapping("/getArbitrationHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates.Arbitration arbitration = sgs.getPacket().getData().getArbitration();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.Arbitration arbitration = sgs.getArbitration();
         arbitration.setNode(arbitration.getNode().
                 replace(
                         StringUtils.quStr(arbitration.getNode()),

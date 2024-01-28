@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,9 +19,8 @@ public class NighTwaveHtmlController {
 
     @GetMapping("/getNighTwaveHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates data = sgs.getPacket().getData();
-        GlobalStates.Nightwave nightwave = data.getNightwave();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.Nightwave nightwave = sgs.getNightwave();
         //翻译
         nightwave.getActiveChallenges().forEach(c -> {
             c.setDesc(trans.enToZh(c.getDesc()));

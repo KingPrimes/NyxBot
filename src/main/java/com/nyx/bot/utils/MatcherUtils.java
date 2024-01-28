@@ -140,7 +140,7 @@ public class MatcherUtils {
      * 对于携带特殊字符的字符串进行过滤
      */
     public static String isOrderItem(String str) {
-        Pattern p = Pattern.compile("([一-龥]+)\s?\\&\s?([一-龥]+)");
+        Pattern p = Pattern.compile("([一-龥]+) ?\\& ?([一-龥]+)");
         Matcher m = p.matcher(str);
         while (m.find()) {
             return m.group();

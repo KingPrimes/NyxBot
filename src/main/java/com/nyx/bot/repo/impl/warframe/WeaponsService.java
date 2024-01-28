@@ -1,6 +1,5 @@
 package com.nyx.bot.repo.impl.warframe;
 
-import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.entity.warframe.Weapons;
 import com.nyx.bot.repo.warframe.WeaponsRepository;
 import jakarta.persistence.criteria.Predicate;

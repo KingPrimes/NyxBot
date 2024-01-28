@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -25,8 +24,8 @@ public class AssaultHtmlController {
 
     @GetMapping("/getAssaultHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates.Sortie assault = sgs.getPacket().getData().getSortie();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.Sortie assault = sgs.getSortie();
         assault.setEta(DateUtils.getDiff((assault.getExpiry()), new Date(), true));
 
         for (GlobalStates.Sortie.Variants variant : assault.getVariants()) {

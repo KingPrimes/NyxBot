@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -26,8 +25,8 @@ public class VoidHtmlController {
 
     @GetMapping("/getVoidHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        GlobalStates.VoidTrader v = sgs.getPacket().getData().getVoidTrader();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        GlobalStates.VoidTrader v = sgs.getVoidTrader();
         v.setLocation(v.getLocation().replace(
                 StringUtils.quStr(v.getLocation()),
                 trans.enToZh(StringUtils.quStr(v.getLocation()))

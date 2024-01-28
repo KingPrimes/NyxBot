@@ -2,7 +2,6 @@ package com.nyx.bot.controller.api.html.warframe;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.res.SocketGlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,8 @@ public class InvasionsHtmlController {
 
     @GetMapping("/getInvasionsHtml")
     public String getHtml(Model model) {
-        SocketGlobalStates sgs = CacheUtils.getGlobalState();
-        List<GlobalStates.Invasions> invasions = sgs.getPacket().getData().getInvasions();
+        GlobalStates sgs = CacheUtils.getGlobalState();
+        List<GlobalStates.Invasions> invasions = sgs.getInvasions();
         for (GlobalStates.Invasions invasion : invasions) {
             if (!invasion.getAttackerReward().getCountedItems().isEmpty()) {
 

@@ -1,6 +1,7 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.Alias;
 import com.nyx.bot.entity.warframe.OrdersItems;
@@ -8,9 +9,9 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.AliasRepository;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import com.nyx.bot.res.MarketOrders;
-import com.nyx.bot.utils.HttpUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -128,7 +129,7 @@ public class MarketUtils {
             return orders;
         }
 
-        orders = JSONObject.parseObject(body.getBody(), MarketOrders.class);
+        orders = JSONObject.parseObject(body.getBody(), MarketOrders.class, JSONReader.Feature.SupportSmartMatch);
 
         orders.setCode(body.getCode().name());
 
@@ -147,6 +148,14 @@ public class MarketUtils {
         return orders;
     }
 
+    /**
+     * 排序查询结果
+     *
+     * @param order 元数据
+     * @param isBy  买/卖
+     * @param isMax 是否为满级
+     * @return 排序后得结果
+     */
     private static List<MarketOrders.Orders> orders(MarketOrders order, Boolean isBy, Boolean isMax) {
         List<MarketOrders.Orders> list;
         AtomicInteger max = new AtomicInteger();
@@ -177,6 +186,16 @@ public class MarketUtils {
 
     }
 
+    /**
+     * 筛选买卖是否为满级
+     *
+     * @param order 元数据
+     * @param isBy  买卖
+     * @param isMax 是否为满级
+     * @param flag  是否查询满级
+     * @param max   MOD得最大等级
+     * @return
+     */
     private static List<MarketOrders.Orders> isByOrSell(MarketOrders order, Boolean isBy, Boolean isMax, Boolean flag, Integer max) {
         List<MarketOrders.Orders> list = new ArrayList<>();
         if (isBy) {

@@ -8,12 +8,16 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.CodeUtils;
+import com.nyx.bot.utils.onebot.CqMatcher;
+import com.nyx.bot.utils.onebot.CqParse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Shiro
 @Component
+@Slf4j
 public class GlobalDirectivesPlugin {
 
     private static void not(Bot bot, AnyMessageEvent event) {
@@ -23,7 +27,17 @@ public class GlobalDirectivesPlugin {
     @AnyMessageHandler
     public void messageDisposeHandler(Bot bot, AnyMessageEvent event) {
         String raw = event.getRawMessage();
+        if (CqMatcher.isCqAt(raw)) {
+            CqParse build = CqParse.build(raw);
+            if (build.getCqAt().get(0).equals(bot.getSelfId())) {
+                raw = build.reovmCq().trim();
+            }
+        }
+        if (raw.contains("/")) {
+            raw = raw.replaceAll("/", "").trim();
+        }
         Codes code = CodeUtils.matchInstructions(raw);
+        String finalRaw = raw;
         Optional.ofNullable(code).ifPresent(codes -> {
             switch (codes) {
                 //帮助菜单
@@ -73,7 +87,7 @@ public class GlobalDirectivesPlugin {
                 //翻译
                 case WARFRAME_TRA_PLUGIN -> not(bot, event);
                 // /WM
-                case WARFRAME_MARKET_ORDERS_PLUGIN -> WarframeCodes.orders(bot, event, codes);
+                case WARFRAME_MARKET_ORDERS_PLUGIN -> WarframeCodes.orders(bot, event, finalRaw, codes);
                 // /WR
                 case WARFRAME_MARKET_RIVEN_PLUGIN -> not(bot, event);
                 // RM
