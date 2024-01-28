@@ -22,6 +22,17 @@ public class I18nUtils {
         return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
 
+    /**
+     * 消息超时提示信息
+     * Message TimeOut
+     *
+     * @return Message: TimeOut
+     */
+    public static String errorTimeOut() {
+        MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
+        return messageSource.getMessage("error.timeout", null, LocaleContextHolder.getLocale());
+    }
+
     public String getMessage(String msgKey, Object[] args) {
         return messageSource.getMessage(msgKey, args, LocaleContextHolder.getLocale());
     }
