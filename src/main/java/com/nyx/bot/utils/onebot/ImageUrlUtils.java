@@ -7,7 +7,7 @@ import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
-import com.nyx.bot.utils.HttpUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 
 import java.util.Date;
 
@@ -16,7 +16,7 @@ public class ImageUrlUtils {
     private final StringBuilder builder = new StringBuilder();
 
 
-    public ImageUrlUtils(String url, Long botId, Long user, Long group, String rawMsg) {
+    private ImageUrlUtils(String url, Long botId, Long user, Long group, String rawMsg) {
         builder
                 .append(Constants.LOCALHOST)
                 .append("api/")
@@ -34,7 +34,7 @@ public class ImageUrlUtils {
         ;
     }
 
-    public ImageUrlUtils(String url, Bot bot, AnyMessageEvent event, Boolean isGet) {
+    private ImageUrlUtils(String url, Bot bot, AnyMessageEvent event, Boolean isGet) {
         if (isGet == null) {
             isGet = true;
         }
@@ -62,15 +62,11 @@ public class ImageUrlUtils {
         }
     }
 
-    public ImageUrlUtils(String url) {
+    private ImageUrlUtils(String url) {
         builder
                 .append(Constants.LOCALHOST)
                 .append("api/")
                 .append(url);
-    }
-
-    public ImageUrlUtils() {
-
     }
 
     public static String builder(String url, Long botId, Long user, Long group, String rawMsg) {
@@ -79,11 +75,6 @@ public class ImageUrlUtils {
 
     public static String builder(String url, Bot bot, AnyMessageEvent event) {
         return new ImageUrlUtils(url, bot, event, true).build();
-    }
-
-    public static HttpUtils.Body builderBase64(String url, Bot bot, AnyMessageEvent event) {
-        String build = new ImageUrlUtils(url, bot, event, true).build();
-        return HttpUtils.sendGetForFile(build);
     }
 
     public static HttpUtils.Body builderBase64Post(String url, Bot bot, AnyMessageEvent event) {
@@ -100,10 +91,6 @@ public class ImageUrlUtils {
             bot.sendMsg(event, "图片上传失败，请检查网络连接", false);
         }
         return body;
-    }
-
-    public static HttpUtils.Body builderBase64Get(String url) {
-        return HttpUtils.sendGetForFile(url);
     }
 
     public static HttpUtils.Body builderBase64Post(String url, OneBotLogInfoData data) {
