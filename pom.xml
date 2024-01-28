@@ -24,8 +24,8 @@
 
     <properties>
         <java.version>17</java.version>
-        <oneSdk.version>2.1.3</oneSdk.version>
-        <fastJson2.version>2.0.38</fastJson2.version>
+        <oneSdk.version>2.1.6</oneSdk.version>
+        <fastJson2.version>2.0.45</fastJson2.version>
         <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.16.1</jsoup.version>
@@ -193,6 +193,17 @@
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
             <version>${djl.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.25.0</version>
         </dependency>
         <dependency>
             <groupId>ai.djl</groupId>
@@ -222,6 +233,12 @@
             <groupId>ai.djl.opencv</groupId>
             <artifactId>opencv</artifactId>
             <version>${djl.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.brotli</groupId>
+            <artifactId>dec</artifactId>
+            <version>0.1.2</version>
         </dependency>
 
     </dependencies>
