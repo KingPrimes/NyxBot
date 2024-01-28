@@ -1,6 +1,6 @@
 package com.nyx.bot.core;
 
-import com.nyx.bot.utils.HttpUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 import okhttp3.Headers;
 
 public class ApiUrl {
@@ -12,6 +12,8 @@ public class ApiUrl {
     public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
     public static final String WARFRAME_SOCKET = "ws://api.warframestat.us/socket";
+
+    public static final String WARFRAME_STATUS = "https://api.warframestat.us/";
 
     /**
      * 战甲数据源
@@ -33,6 +35,11 @@ public class ApiUrl {
      * Market 物品
      */
     public static final String WARFRAME_MARKET_ITEMS = "https://api.warframe.market/v1/items";
+
+    /**
+     * Market 紫卡武器
+     */
+    public static final String WARFRAME_MARKET_Riven_ITEMS = "https://api.warframe.market/v1/riven/items";
 
     /**
      * 赤毒武器
