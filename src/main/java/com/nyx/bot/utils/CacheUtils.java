@@ -1,6 +1,6 @@
 package com.nyx.bot.utils;
 
-import com.nyx.bot.res.SocketGlobalStates;
+import com.nyx.bot.res.GlobalStates;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.annotation.Nullable;
 import org.springframework.cache.CacheManager;
@@ -15,15 +15,15 @@ public class CacheUtils {
     public static final String GROUP_CAPTCHA = "group-captcha";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
-    public static SocketGlobalStates getGlobalState() {
-        SocketGlobalStates data = Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).get("data", SocketGlobalStates.class);
+    public static GlobalStates getGlobalState() {
+        GlobalStates data = Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).get("data", GlobalStates.class);
         if (data == null) {
             throw new RuntimeException("SocketGlobalStates is null");
         }
         return data;
     }
 
-    public static void setGlobalState(SocketGlobalStates state) {
+    public static void setGlobalState(GlobalStates state) {
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
     }
 
