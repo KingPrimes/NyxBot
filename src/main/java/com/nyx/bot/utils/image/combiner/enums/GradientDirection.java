@@ -6,6 +6,6 @@ public enum GradientDirection {
     LeftTopRightBottom,
     RightTopLeftBottom;
 
-    private GradientDirection() {
+    GradientDirection() {
     }
 }

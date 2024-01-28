@@ -6,6 +6,6 @@ public enum ZoomMode {
     Height,
     WidthHeight;
 
-    private ZoomMode() {
+    ZoomMode() {
     }
 }

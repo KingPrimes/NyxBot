@@ -57,7 +57,7 @@ public class TextPainter implements IPainter {
             }
 
             if (currentLineElement.getRotate() != null) {
-                g.rotate(Math.toRadians((double) currentLineElement.getRotate()), currentLineElement.getX() + currentLineElement.getWidth() / 2, (double) currentLineElement.getDrawY());
+                g.rotate(Math.toRadians((double) currentLineElement.getRotate()), currentLineElement.getX() + currentLineElement.getWidth() / 2, currentLineElement.getDrawY());
             }
 
             g.setComposite(AlphaComposite.getInstance(3, currentLineElement.getAlpha()));
@@ -65,13 +65,13 @@ public class TextPainter implements IPainter {
                 AttributedString as = new AttributedString(currentLineElement.getText());
                 as.addAttribute(TextAttribute.FONT, currentLineElement.getFont());
                 as.addAttribute(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON, 0, currentLineElement.getText().length());
-                g.drawString(as.getIterator(), (int) currentLineElement.getX(), currentLineElement.getDrawY());
+                g.drawString(as.getIterator(), currentLineElement.getX(), currentLineElement.getDrawY());
             } else {
                 g.drawString(currentLineElement.getText(), currentLineElement.getX(), currentLineElement.getDrawY());
             }
 
             if (currentLineElement.getRotate() != null) {
-                g.rotate(-Math.toRadians((double) currentLineElement.getRotate()), currentLineElement.getX() + currentLineElement.getWidth() / 2, (double) currentLineElement.getDrawY());
+                g.rotate(-Math.toRadians((double) currentLineElement.getRotate()), currentLineElement.getX() + currentLineElement.getWidth() / 2, currentLineElement.getDrawY());
             }
         }
 
