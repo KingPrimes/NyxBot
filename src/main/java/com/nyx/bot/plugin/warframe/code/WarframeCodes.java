@@ -7,20 +7,27 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
-import com.nyx.bot.utils.HttpUtils;
 import com.nyx.bot.utils.MatcherUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
 import com.nyx.bot.utils.onebot.Msg;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class WarframeCodes {
 
-    static List<String> forms = Arrays.asList("PC", "PS4", "XBOX", "SWITCH");
+    private static OneBotLogInfoData getLogInfoData(Bot bot, AnyMessageEvent event, Codes code) {
+        OneBotLogInfoData oneBotLogInfoData = new OneBotLogInfoData();
+        oneBotLogInfoData.setCodes(code);
+        oneBotLogInfoData.setBotUid(bot.getSelfId());
+        oneBotLogInfoData.setUserUid(event.getUserId());
+        oneBotLogInfoData.setGroupUid(event.getGroupId());
+        oneBotLogInfoData.setRawMsg(event.getRawMessage());
+        oneBotLogInfoData.setTime(DateUtils.getDate());
+        oneBotLogInfoData.setPermissionsEnums(Permissions.checkAdmin(bot, event));
+        return oneBotLogInfoData;
+    }
 
 
     /**
@@ -111,18 +118,9 @@ public class WarframeCodes {
      * 裂隙
      */
     public static void fissues(Bot bot, AnyMessageEvent event, Codes code) {
-        OneBotLogInfoData oneBotLogInfoData = new OneBotLogInfoData();
-        oneBotLogInfoData.setCodes(code);
-        oneBotLogInfoData.setBotUid(bot.getSelfId());
-        oneBotLogInfoData.setUserUid(event.getUserId());
-        oneBotLogInfoData.setGroupUid(event.getGroupId());
-        oneBotLogInfoData.setRawMsg(event.getRawMessage());
-        oneBotLogInfoData.setTime(DateUtils.getDate());
-        oneBotLogInfoData.setPermissionsEnums(Permissions.checkAdmin(bot, event));
-
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 "getFissuesImage",
-                oneBotLogInfoData);
+                getLogInfoData(bot, event, code));
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
@@ -130,6 +128,7 @@ public class WarframeCodes {
             bot.sendMsg(event, "裂隙获取失败", false);
         }
     }
+
 
     /**
      * 入侵
@@ -186,62 +185,58 @@ public class WarframeCodes {
     /**
      * Market Orders 查询
      */
-    public static void orders(Bot bot, AnyMessageEvent event, Codes code) {
-        AtomicReference<String> str = new AtomicReference<>(ShiroUtils.unescape(event.getRawMessage()).toUpperCase());
+    public static void orders(Bot bot, AnyMessageEvent event, String str, Codes code) {
+        str = ShiroUtils.unescape(str).toUpperCase();
 
-        if (MatcherUtils.isSpecialSymbols(str.get())) {
-            String orderItem = MatcherUtils.isOrderItem(str.get());
+        if (MatcherUtils.isSpecialSymbols(str)) {
+            String orderItem = MatcherUtils.isOrderItem(str);
             if (orderItem.isEmpty()) {
                 bot.sendMsg(event, "请输入正确的指令！", false);
                 return;
             }
-            str.set(orderItem);
+            str = orderItem;
         }
 
-        OneBotLogInfoData data = new OneBotLogInfoData();
-        data.setCodes(code);
-        data.setBotUid(bot.getSelfId());
-        data.setUserUid(event.getUserId());
-        data.setGroupUid(event.getGroupId());
-        data.setRawMsg(event.getRawMessage());
-        data.setTime(DateUtils.getDate());
-        data.setPermissionsEnums(Permissions.checkAdmin(bot, event));
+        OneBotLogInfoData data = getLogInfoData(bot, event, code);
 
         //是否是满级
         data.setIsMax(false);
         //是否是购买
         data.setIsBy(false);
+        //是否是卖家
+        data.setIsBy(true);
         //平台
-        data.setForm("PC");
+        data.setForm(MarketFormEnums.PC);
 
-        if (str.get().contains("满级") || str.get().contains("MAX")) {
-            str.set(str.get().replaceAll("满级", "").replaceAll("MAX", ""));
+        if (str.contains("满级") || str.contains("MAX")) {
+            str = (str.replaceAll("满级", "").replaceAll("MAX", ""));
             data.setIsMax(true);
         }
-        if (str.get().contains("购买") || str.get().contains("买家") || str.get().contains("BUY")) {
-            str.set(str.get().replaceAll("购买", "").replaceAll("买家", "").replaceAll("BUY", ""));
+        if (str.contains("购买") || str.contains("买家") || str.contains("BUY")) {
+            str = (str.replaceAll("购买", "").replaceAll("买家", "").replaceAll("BUY", ""));
             data.setIsBy(true);
         }
 
-        if (str.get().contains("出售") || str.get().contains("卖家") || str.get().contains("SELL")) {
-            str.set(str.get().replaceAll("出售", "").replaceAll("卖家", "").replaceAll("SELL", ""));
+        if (str.contains("出售") || str.contains("卖家") || str.contains("SELL")) {
+            str = (str.replaceAll("出售", "").replaceAll("卖家", "").replaceAll("SELL", ""));
             data.setIsBy(false);
         }
         //获取平台
-        String finalStr = str.get();
-        forms.forEach(f -> {
-            if (finalStr.contains(f)) {
-                data.setForm(f);
-                str.set(finalStr.replaceAll(f, ""));
+        String finalStr = str;
+        for (MarketFormEnums form : MarketFormEnums.values()) {
+            if (finalStr.contains(form.getForm())) {
+                data.setForm(form);
+                str = (str.replaceAll(form.getForm(), ""));
+                break;
             }
-        });
-
+        }
 
         //关键字
-        data.setKey(str.get().replaceAll(code.getStr(), "").trim());
+        data.setKey(str.replaceAll(code.getStr(), "").trim());
 
+        //发送POST请求获取生成得图片
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getMarketOrdersImage",
+                "postMarketOrdersImage",
                 data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
