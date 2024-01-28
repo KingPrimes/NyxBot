@@ -122,11 +122,31 @@ public class GlobalStates {
      */
     @JsonProperty("voidTrader")
     private VoidTrader voidTrader;
+    /**
+     * 双衍王境
+     */
+    @JsonProperty("duviriCycle")
+    private DuviriCycle duviriCycle;
+
+    @Data
+    public static class BaseStatus {
+        @JsonProperty("id")
+        private String id;
+        @JsonProperty("activation")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+        private Date activation;
+        @JsonProperty("startString")
+        private String startString;
+        @JsonProperty("expiry")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+        private Date expiry;
+
+    }
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"node", "tierNum", "missionType"})
-    public static class Fissures {
+    @EqualsAndHashCode(of = {"node", "tierNum", "missionType"}, callSuper = false)
+    public static class Fissures extends BaseStatus {
         @JsonProperty("node")
         private String node;
         @JsonProperty("expired")
@@ -147,22 +167,12 @@ public class GlobalStates {
         private String enemy;
         @JsonProperty("enemyKey")
         private String enemyKey;
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
         @JsonProperty("isHard")
         private Boolean isHard;
         @JsonProperty("isStorm")
         private Boolean isStorm;
         @JsonProperty("active")
         private Boolean active;
-        @JsonProperty("startString")
-        private String startString;
     }
 
     @NoArgsConstructor
@@ -212,16 +222,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"attacker", "attackerReward", "node", "defenderReward", "defender", "defendingFaction", "attackingFaction"})
-    public static class Invasions {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"attacker", "attackerReward", "node", "defenderReward", "defender", "defendingFaction", "attackingFaction"}, callSuper = false)
+    public static class Invasions extends BaseStatus {
         @JsonProperty("attacker")
         private Attacker attacker;
         @JsonProperty("attackerReward")
@@ -250,8 +252,6 @@ public class GlobalStates {
         private Integer requiredRuns;
         @JsonProperty("rewardTypes")
         private List<String> rewardTypes;
-        @JsonProperty("startString")
-        private String startString;
         @JsonProperty("vsInfestation")
         private Boolean vsInfestation;
         @JsonProperty("completion")
@@ -436,8 +436,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"nodes", "jobs"})
-    public static class SyndicateMissions {
+    @EqualsAndHashCode(of = {"nodes", "jobs"}, callSuper = false)
+    public static class SyndicateMissions extends BaseStatus {
         @JsonProperty("nodes")
         private List<String> nodes;
         @JsonProperty("eta")
@@ -446,14 +446,6 @@ public class GlobalStates {
         private List<Jobs> jobs;
         @JsonProperty("syndicate")
         private String syndicate;
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
 
         @NoArgsConstructor
         @Data
@@ -502,16 +494,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(exclude = {"expiry", "activation", "timeLeft"})
-    public static class CambionCycle {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
+    @EqualsAndHashCode(exclude = {"expiry", "activation", "timeLeft"}, callSuper = false)
+    public static class CambionCycle extends BaseStatus {
         @JsonProperty("active")
         private String active;
         @JsonProperty("timeLeft")
@@ -520,16 +504,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"isDay", "isCetus", "state"})
-    public static class CetusCycle {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
+    @EqualsAndHashCode(of = {"isDay", "isCetus", "state"}, callSuper = false)
+    public static class CetusCycle extends BaseStatus {
         @JsonProperty("isDay")
         private Boolean isDay;
         @JsonProperty("state")
@@ -557,16 +533,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"isDay", "state"})
-    public static class EarthCycle {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"isDay", "state"}, callSuper = false)
+    public static class EarthCycle extends BaseStatus {
         @JsonProperty("isDay")
         private Boolean isDay;
         @JsonProperty("state")
@@ -577,16 +545,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"season", "activeChallenges"})
-    public static class Nightwave {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"season", "activeChallenges"}, callSuper = false)
+    public static class Nightwave extends BaseStatus {
         @JsonProperty("rewardTypes")
         private List<String> rewardTypes;
         @JsonProperty("season")
@@ -600,16 +560,8 @@ public class GlobalStates {
 
         @NoArgsConstructor
         @Data
-        @EqualsAndHashCode(of = {"title", "desc"})
-        public static class ActiveChallenges {
-            @JsonProperty("id")
-            private String id;
-            @JsonProperty("activation")
-            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-            private Date activation;
-            @JsonProperty("expiry")
-            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-            private Date expiry;
+        @EqualsAndHashCode(of = {"title", "desc"}, callSuper = false)
+        public static class ActiveChallenges extends BaseStatus {
             @JsonProperty("isDaily")
             private Boolean isDaily;
             @JsonProperty("isElite")
@@ -638,18 +590,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"boss", "missions"})
-    public static class ArchonHunt {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
-        @JsonProperty("startString")
-        private String startString;
+    @EqualsAndHashCode(of = {"boss", "missions"}, callSuper = false)
+    public static class ArchonHunt extends BaseStatus {
         @JsonProperty("actice")
         private Boolean actice;
         @JsonProperty("rewardPool")
@@ -683,16 +625,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"variants", "boss"})
-    public static class Sortie {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"variants", "boss"}, callSuper = false)
+    public static class Sortie extends BaseStatus {
         @JsonProperty("rewardPool")
         private String rewardPool;
         @JsonProperty("variants")
@@ -726,14 +660,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"currentReward"})
-    public static class SteelPath {
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"currentReward"}, callSuper = false)
+    public static class SteelPath extends BaseStatus {
         @JsonProperty("currentReward")
         private CurrentReward currentReward;
         @JsonProperty("isReward")
@@ -781,16 +709,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"isWarm", "state"})
-    public static class VallisCycle {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"isWarm", "state"}, callSuper = false)
+    public static class VallisCycle extends BaseStatus {
         @JsonProperty("timeLeft")
         private String timeLeft;
         @JsonProperty("isWarm")
@@ -801,18 +721,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"isCorpus", "state"})
-    public static class ZarimanCycle {
-        @JsonProperty("id")
-        private String id;
-
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"isCorpus", "state"}, callSuper = false)
+    public static class ZarimanCycle extends BaseStatus {
 
         @JsonProperty("bountiesEndDate")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -833,16 +743,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"inventory", "location", "active"})
-    public static class VoidTrader {
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"inventory", "location", "active"}, callSuper = false)
+    public static class VoidTrader extends BaseStatus {
         @JsonProperty("character")
         private String character;
         @JsonProperty("location")
@@ -853,8 +755,6 @@ public class GlobalStates {
         private String psId;
         @JsonProperty("active")
         private Boolean active;
-        @JsonProperty("startString")
-        private String startString;
         @JsonProperty("endString")
         private String endString;
 
@@ -872,22 +772,14 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"mission", "expired", "rewardTypes"})
-    public static class Alerts {
+    @EqualsAndHashCode(of = {"mission", "expired", "rewardTypes"}, callSuper = false)
+    public static class Alerts extends BaseStatus {
         @JsonProperty("mission")
         private Mission mission;
         @JsonProperty("expired")
         private Boolean expired;
         @JsonProperty("eta")
         private String eta;
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
         @JsonProperty("rewardTypes")
         private List<String> rewardTypes;
 
@@ -961,8 +853,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"item"})
-    public static class DailyDeals {
+    @EqualsAndHashCode(of = {"item"}, callSuper = false)
+    public static class DailyDeals extends BaseStatus {
         @JsonProperty("sold")
         private Integer sold;
         @JsonProperty("item")
@@ -977,31 +869,12 @@ public class GlobalStates {
         private Integer salePrice;
         @JsonProperty("discount")
         private Integer discount;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
-        @JsonProperty("id")
-        private String id;
     }
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"description", "rewards"})
-    public static class Events {
-
-        @JsonProperty("id")
-        private String id;
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("startString")
-        private String startString;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    @EqualsAndHashCode(of = {"description", "rewards"}, callSuper = false)
+    public static class Events extends BaseStatus {
         @JsonProperty("active")
         private Boolean active;
         @JsonProperty("maximumScore")
@@ -1132,6 +1005,28 @@ public class GlobalStates {
             private String expiry;
         }
 
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class DuviriCycle extends BaseStatus {
+        @JsonProperty("choices")
+        private List<Choices> choices;
+        @JsonProperty("state")
+        private String state;
+
+        @Data
+        static class Choices {
+            //难度
+            @JsonProperty("category")
+            private String category;
+            //难度
+            @JsonProperty("categoryKey")
+            private String categoryKey;
+            //奖励
+            @JsonProperty("choices")
+            private List<String> choices;
+        }
     }
 
 }
