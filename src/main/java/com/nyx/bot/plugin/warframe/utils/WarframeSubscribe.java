@@ -12,50 +12,47 @@ import java.util.Optional;
 
 @Slf4j
 public class WarframeSubscribe {
-
     public static void isUpdated(SocketGlobalStates states) {
-        //判断是否传来的空值 如果是空则不做一下运算
-        if (states == null) {
-            return;
-        }
+        isUpdated(states.getPacket().getData());
+    }
+
+    public static void isUpdated(GlobalStates states) {
+        //log.info("取得数据：{}", states.toString());
         try {
             //获取缓存数据
-            SocketGlobalStates d = CacheUtils.getGlobalState();
+            GlobalStates d = CacheUtils.getGlobalState();
             Optional.of(d).ifPresentOrElse(data -> {
 
-                GlobalStates form = states.getPacket().getData();
-                GlobalStates cacheData = data.getPacket().getData();
-
                 //检查仲裁信息是否为空值
-                Optional.ofNullable(form.getArbitration()).ifPresentOrElse(f -> {
-                    if (!f.equals(cacheData.getArbitration())) {
+                Optional.ofNullable(states.getArbitration()).ifPresentOrElse(f -> {
+                    if (!f.equals(data.getArbitration())) {
                         WarframeDataUpdateMission.updateArbitration();
                     }
                 }, () -> {
                     //为空则使用缓存中的仲裁信息覆盖
-                    states.getPacket().getData().setArbitration(cacheData.getArbitration());
+                    states.setArbitration(data.getArbitration());
                 });
 
                 //检查警报是否不为空
-                Optional.ofNullable(form.getAlerts()).ifPresent(f -> {
+                Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
                     //判断数据是否有更新
-                    if (!f.equals(cacheData.getAlerts())) {
+                    if (!f.equals(data.getAlerts())) {
                         WarframeDataUpdateMission.updateAlerts();
                     }
                 });
 
                 //检查 夜灵平野 是否为空
-                Optional.ofNullable(form.getCetusCycle()).ifPresent(f -> {
+                Optional.ofNullable(states.getCetusCycle()).ifPresent(f -> {
                     //判断是否更新
-                    if (form.getCetusCycle().getState().toLowerCase(Locale.ROOT).equals("day")) {
+                    if (states.getCetusCycle().getState().toLowerCase(Locale.ROOT).equals("day")) {
                         //判断相差的小时是否在一小时以内
-                        if (DateUtils.getDateHour(form.getCetusCycle().getExpiry(), new Date()) == 0) {
+                        if (DateUtils.getDateHour(states.getCetusCycle().getExpiry(), new Date()) == 0) {
                             //取相差的分钟
-                            long date = DateUtils.getDateMin(form.getCetusCycle().getExpiry(), new Date());
+                            long date = DateUtils.getDateMin(states.getCetusCycle().getExpiry(), new Date());
                             //相差13分钟的时候发送提醒
                             if (date == 13) {
                                 //发送提醒
-                                WarframeDataUpdateMission.updateCetusCycle(DateUtils.getDiff(form.getCetusCycle().getExpiry(), new Date()));
+                                WarframeDataUpdateMission.updateCetusCycle(DateUtils.getDiff(states.getCetusCycle().getExpiry(), new Date()));
                             }
                         }
                     }
