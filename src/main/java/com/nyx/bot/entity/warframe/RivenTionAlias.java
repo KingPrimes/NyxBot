@@ -16,9 +16,10 @@ public class RivenTionAlias extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //唯一自增ID
     Long id;
-
+    //英文
     String en;
-
+    //中文
     String cn;
 }

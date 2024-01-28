@@ -53,6 +53,26 @@ public class Ducats {
         return formatDucats();
     }
 
+    /**
+     * 格式化并限制 数量
+     *
+     * @return 格式化之后的数据
+     */
+    public List<Ducat> formatDucats() {
+        List<Ducat> ducatList = new ArrayList<>();
+        OrdersItemsRepository itemsRepository = SpringUtils.getBean(OrdersItemsRepository.class);
+        int i = 0;
+        for (Ducat ducat : this.ducats) {
+            if (i >= 5) {
+                break;
+            }
+            ducat.setItemName(itemsRepository.findByOrderId(ducat.item).getItemName());
+            ducatList.add(ducat);
+            i++;
+        }
+        return ducatList;
+    }
+
     @Data
     public static class Ducat {
         /**
@@ -132,25 +152,5 @@ public class Ducats {
             return new ToStringBuilder(this, ToStringStyle.JSON_STYLE).append("datetime", datetime).append("positionChangeMonth", positionChangeMonth).append("positionChangeWeek", positionChangeWeek).append("positionChangeDay", positionChangeDay).append("platWorth", platWorth).append("volume", volume).append("ducatsPerPlatinum", ducatsPerPlatinum).append("ducatsPerPlatinumWa", ducatsPerPlatinumWa).append("ducats", ducats).append("item", item).append("median", median).append("waPrice", waPrice).append("id", id).toString();
         }
 
-    }
-
-    /**
-     * 格式化并限制 数量
-     *
-     * @return 格式化之后的数据
-     */
-    public List<Ducat> formatDucats() {
-        List<Ducat> ducatList = new ArrayList<>();
-        OrdersItemsRepository itemsRepository = SpringUtils.getBean(OrdersItemsRepository.class);
-        int i = 0;
-        for (Ducat ducat : this.ducats) {
-            if (i >= 5) {
-                break;
-            }
-            ducat.setItemName(itemsRepository.findByOrderId(ducat.item).getItemName());
-            ducatList.add(ducat);
-            i++;
-        }
-        return ducatList;
     }
 }

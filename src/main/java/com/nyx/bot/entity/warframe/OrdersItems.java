@@ -16,22 +16,27 @@ import lombok.EqualsAndHashCode;
 public class OrdersItems extends BaseEntity {
 
     @Id
-    //自增
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("oid")
+    //唯一自增ID
     Long oid;
     @JsonProperty("id")
     @Column(length = 50)
+    //唯一字符串ID
     String orderId;
     @JsonProperty("url_name")
     @Column(length = 50)
+    //URL name
     String urlName;
     @JsonProperty("item_name")
     @Column(length = 50)
+    //物品名称
     String itemName;
     @JsonProperty("thumb")
     @Column(length = 120)
+    //缩略图
     String thumb;
+    //
     @JsonProperty("vaulted")
     Boolean vaulted;
 
