@@ -1,9 +1,11 @@
-package com.nyx.bot.utils;
+package com.nyx.bot.utils.http;
 
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.MarketFormEnums;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
@@ -14,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,7 @@ public class HttpUtils {
 
     private static final X509TrustManager manager = HttpUtils.getX509TrustManager();
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
+            .addInterceptor(new BrotliInterceptor())
             //调用超时
             .callTimeout(30, TimeUnit.SECONDS)
             //链接超时
@@ -58,6 +60,24 @@ public class HttpUtils {
         return sendGet(url, "", headers.newBuilder());
     }
 
+    public static Body marketSendGet(String url, String param) {
+        return marketSendGet(url, param, MarketFormEnums.PC);
+    }
+
+    public static Body marketSendGet(String url, String param, MarketFormEnums form) {
+        Headers.Builder h = new Headers.Builder();
+        h.add("Accept", "*/*");
+        h.add("Content-Type", "application/json;charset=utf-8");
+        h.add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
+        h.add("Cache-Control", "no-cache");
+        h.add("Language", "en");
+        h.add("Platform", form.getForm());
+        h.add("Origin", "https://warframe.market");
+        h.add("Referer", "https://warframe.market/");
+        h.add("Pragma", "no-cache");
+        return sendGet(url, param, h);
+    }
+
 
     /**
      * Http Get请求
@@ -73,22 +93,56 @@ public class HttpUtils {
 
                 Response response = client.newCall(send(url, param, headers)).execute()
         ) {
-            Body body = new Body();
-            Optional.of(response.body().string()).ifPresentOrElse(r -> {
-                body.setBody(r);
-                body.setCode(HttpCodeEnum.SUCCESS);
-                response.close();
-            }, () -> {
-                body.setCode(HttpCodeEnum.REQUEST_TIMEOUT);
-            });
-
-            return body;
+            //返回体
+            return getBody(response);
         } catch (IOException e) {
             log.error(e.getMessage());
             return new Body(HttpCodeEnum.ERROR);
         }
     }
 
+    public static Body sendPost(String url, String json) {
+        RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
+                return new Body(HttpCodeEnum.ERROR);
+            }
+            return getBody(response);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return new Body(HttpCodeEnum.ERROR);
+        }
+    }
+
+    @NotNull
+    private static Body getBody(Response response) {
+        Body body = new Body();
+        Optional.ofNullable(response.body()).ifPresentOrElse(r -> {
+            //响应体
+            try {
+                body.setBody(r.string());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            //响应code
+            body.setCode(HttpCodeEnum.getCode(response.code()));
+            //响应头
+            body.setHeaders(response.headers());
+
+            response.close();
+        }, () -> {
+            body.setCode(HttpCodeEnum.getCode(response.code()));
+        });
+        response.close();
+        return body;
+    }
+
+    //构造请求
     private static Request send(String url, String param, Headers.Builder headers) {
         String urlNameString;
         if (!param.isEmpty()) {
@@ -114,33 +168,6 @@ public class HttpUtils {
     }
 
     /**
-     * 发送Get请求
-     *
-     * @param url     请求地址
-     * @param param   请求参数 key=v&key=v
-     * @param headers 请求头
-     * @return 返回值
-     */
-    public static String sendGetOkHttp(String url, String param, Headers.Builder headers) {
-        try {
-            Call call = new OkHttpClient().newCall(send(url, param, headers));
-            call.timeout().timeout(30, TimeUnit.SECONDS);
-            Response response = call.execute();
-            String tmp = Objects.requireNonNull(response.body()).string();
-            response.close();
-            return tmp;
-        } catch (Exception e) {
-            if (e.getMessage().equals("timeout")) {
-                log.error("Url:{} 请求超时", url + param);
-                return "timeout";
-            }
-            log.error("Url:{} \n\t\t错误信息:{}", url + param, e.getMessage());
-            return "";
-        }
-
-    }
-
-    /**
      * 根据URL网址获取文件
      *
      * @param url - url
@@ -156,11 +183,11 @@ public class HttpUtils {
         try {
             response = new OkHttpClient().newCall(req).execute();
             if (!response.isSuccessful()) {
-                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
+                log.error("【调用HTTP请求异常】 code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
                 return null;
             }
             inputStream = response.body().byteStream();
-            return new Body(inputToByte(inputStream), HttpCodeEnum.SUCCESS);
+            return new Body(inputToByte(inputStream), HttpCodeEnum.getCode(response.code()), response.headers());
         } catch (IOException e) {
             log.error("发起请求出现异常:", e);
             return new Body(HttpCodeEnum.ERROR);
@@ -228,7 +255,7 @@ public class HttpUtils {
             }
             inputStream = response.body().byteStream();
 
-            return new Body(inputToByte(inputStream), HttpCodeEnum.SUCCESS);
+            return new Body(inputToByte(inputStream), HttpCodeEnum.getCode(response.code()));
 
         } catch (IOException var13) {
             log.error("发起请求出现异常:{}", var13.getMessage());
@@ -259,30 +286,6 @@ public class HttpUtils {
         }
         //返回字节数组输出流
         return swapStream.toByteArray();
-    }
-
-    @Data
-    public static class Body {
-        String body;
-        byte[] file;
-        HttpCodeEnum code;
-
-        public Body() {
-        }
-
-        public Body(HttpCodeEnum code) {
-            this.code = code;
-        }
-
-        public Body(String body, HttpCodeEnum code) {
-            this.body = body;
-            this.code = code;
-        }
-
-        public Body(byte[] file, HttpCodeEnum code) {
-            this.file = file;
-            this.code = code;
-        }
     }
 
     private static SSLSocketFactory getSocketFactory(TrustManager manager) {
@@ -316,9 +319,46 @@ public class HttpUtils {
         };
     }
 
-
     private static HostnameVerifier getHostnameVerifier() {
         return (s, sslSession) -> true;
+    }
+
+
+    @Data
+    public static class Body {
+        String body;
+        byte[] file;
+        HttpCodeEnum code;
+        Headers headers;
+
+        public Body() {
+        }
+
+        public Body(HttpCodeEnum code) {
+            this.code = code;
+        }
+
+        public Body(String body, HttpCodeEnum code) {
+            this.body = body;
+            this.code = code;
+        }
+
+        public Body(byte[] file, HttpCodeEnum code) {
+            this.file = file;
+            this.code = code;
+        }
+
+        public Body(String body, HttpCodeEnum code, Headers headers) {
+            this.body = body;
+            this.code = code;
+            this.headers = headers;
+        }
+
+        public Body(byte[] file, HttpCodeEnum code, Headers headers) {
+            this.file = file;
+            this.code = code;
+            this.headers = headers;
+        }
     }
 
 }
