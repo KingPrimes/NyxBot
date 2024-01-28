@@ -48,14 +48,10 @@ public class BrotliInterceptor implements Interceptor {
         }
         BufferedSource decompressedSource;
         switch (encoding) {
-            case "br" -> {
-                //Brotli压缩格式解压
-                decompressedSource = Okio.buffer(Okio.source(new BrotliInputStream(body.source().inputStream())));
-            }
-            case "gzip" -> {
-                //gzip压缩格式解压
-                decompressedSource = Okio.buffer(new GzipSource(body.source()));
-            }
+            case "br" -> //Brotli压缩格式解压
+                    decompressedSource = Okio.buffer(Okio.source(new BrotliInputStream(body.source().inputStream())));
+            case "gzip" -> //gzip压缩格式解压
+                    decompressedSource = Okio.buffer(new GzipSource(body.source()));
             default -> {
                 //默认不处理
                 return response;
