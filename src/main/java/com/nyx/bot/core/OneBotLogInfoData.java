@@ -1,6 +1,7 @@
 package com.nyx.bot.core;
 
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.enums.PermissionsEnums;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -19,7 +20,7 @@ public class OneBotLogInfoData {
     Codes codes;
 
     //Market平台
-    String form;
+    MarketFormEnums form;
 
     //key
     String key;
