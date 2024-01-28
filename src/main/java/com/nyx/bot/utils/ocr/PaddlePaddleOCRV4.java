@@ -62,29 +62,29 @@ public enum PaddlePaddleOCRV4 {
         log.error(e.getMessage());
     }
 
-    public String ocr(String url) throws Exception {
+    public List<String> ocr(String url) throws Exception {
         Image image = OpenCVImageFactory.getInstance().fromUrl(url);
         return ocr(image);
     }
 
-    public String ocr(URL resource) throws Exception {
+    public List<String> ocr(URL resource) throws Exception {
         Image image = OpenCVImageFactory.getInstance().fromUrl(resource);
         return ocr(image);
     }
 
-    public String ocr(byte[] fileData) throws Exception {
+    public List<String> ocr(byte[] fileData) throws Exception {
         ByteArrayInputStream is = new ByteArrayInputStream(fileData);
         Image image = ImageFactory.getInstance().fromInputStream(is);
         return ocr(image);
     }
 
-    public String ocr(File imageFile) throws Exception {
+    public List<String> ocr(File imageFile) throws Exception {
         Path path = imageFile.toPath();
         Image image = OpenCVImageFactory.getInstance().fromFile(path);
         return ocr(image);
     }
 
-    public String ocr(Image image) throws Exception {
+    public List<String> ocr(Image image) throws Exception {
         List<RotatedBox> detections = recognition.predict(manager, image, detector, recognizer);
 
         // put low Y value at the head of the queue.
@@ -112,17 +112,16 @@ public enum PaddlePaddleOCRV4 {
             }
         }
 
-        StringBuilder fullText = new StringBuilder();
+        List<String> fullText = new ArrayList<>();
         for (ArrayList<RotatedBoxCompX> rotatedBoxCompXES : lines) {
             for (RotatedBoxCompX rotatedBoxCompX : rotatedBoxCompXES) {
                 String text = rotatedBoxCompX.getText();
                 if (text.trim().isEmpty())
                     continue;
-                fullText.append(text).append(" ");
+                fullText.add(text);
             }
-            fullText.append('\n');
         }
-        return fullText.toString();
+        return fullText;
     }
 
     public void close() {
