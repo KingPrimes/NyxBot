@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('Git账户')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-git" th:object="${git}">
+            <input id="id" name="id" th:field="*{id}" type="hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="userName">Git账户：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input class="form-control" id="userName" name="userName" placeholder="Git账户邮箱"
+                               th:field="*{userName}" type="email">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="passWord">Git令牌：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input class="form-control" id="passWord" name="passWord" placeholder="Git令牌"
+                               th:field="*{passWord}" type="text">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "config/git";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-git').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>

@@ -56,7 +56,13 @@
                     </a>
                     <ul class="nav nav-second-level">
                         <li>
-                            <a class="menuItem" th:href="@{/config/bot}" data-refresh="false">
+                            <a class="menuItem" data-refresh="false" onclick="gitConfig()">
+                                <i class="fas fa-user-slash"></i>
+                                <span class="nav-label">配置Git账户</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="menuItem" data-refresh="false" onclick="botConfig()">
                                 <i class="fas fa-robot"></i>
                                 <span class="nav-label" i18n="Config_Bot">Bot配置</span>
                             </a>
@@ -265,18 +271,23 @@
 
     /* 用户管理-重置密码 */
     function resetPwd() {
-        var url = ctx + 'resetPwd';
+        const url = ctx + 'resetPwd';
         $.modal.open("重置密码", url, '770', '380');
     }
 
     function chatGPTConfig() {
-        var url = ctx + 'bot/ai/chat/config';
+        const url = ctx + 'bot/ai/chat/config';
         $.modal.open('ChatGPT配置', url, '770', '380')
     }
 
     function botConfig() {
-        var url = ctx + 'bot/config';
+        const url = ctx + 'config/bot';
         $.modal.open('Bot配置', url, '770', '380')
+    }
+
+    function gitConfig() {
+        const url = ctx + 'config/git/html';
+        $.modal.open('配置Git账户', url, '400', '300')
     }
 
     /* 切换主题 */

@@ -28,7 +28,7 @@
         <fastJson2.version>2.0.45</fastJson2.version>
         <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
-        <jsoup.version>1.16.1</jsoup.version>
+        <jsoup.version>1.17.2</jsoup.version>
         <djl.version>0.25.0</djl.version>
     </properties>
 
@@ -157,7 +157,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>6.6.1.202309021850-r</version>
+            <version>6.8.0.202311291450-r</version>
         </dependency>
 
         <!--YAML操作-->
@@ -244,16 +244,16 @@
     </dependencies>
 
 
-    <!-- <repositories>
-          <repository>
-              <id>public</id>
-              <name>aliyun nexus</name>
-              <url>https://maven.aliyun.com/repository/public</url>
-              <releases>
-                  <enabled>true</enabled>
-              </releases>
-          </repository>
-      </repositories>-->
+    <!--     <repositories>
+              <repository>
+                  <id>public</id>
+                  <name>aliyun nexus</name>
+                  <url>https://maven.aliyun.com/repository/public</url>
+                  <releases>
+                      <enabled>true</enabled>
+                  </releases>
+              </repository>
+          </repositories>-->
 
 
     <build>
