@@ -18,7 +18,11 @@ public class ApiUrl {
     /**
      * 战甲数据源
      */
-    public static final String WARFRAME_DATA_SOURCE = "https://raw.github.com/KingPrimes/DataSource/main/warframe/";
+    public static final String WARFRAME_DATA_SOURCE_GIT_HUB = "https://raw.github.com/KingPrimes/DataSource/main/warframe/";
+    /**
+     * 战甲数据源 备用源
+     */
+    public static final String WARFRAME_DATA_SOURCE_GIT_CODE = "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/";
 
 
     /**

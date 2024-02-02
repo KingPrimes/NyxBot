@@ -26,12 +26,12 @@ public class WarframeDataSource {
 
     public static void init() {
         log.info("开始插入Warframe数据！");
-        getAlias();
+        getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         getMarket();
         getWeapons();
         getEphemeras();
-        initTranslation();
-        getRivenAnalyseTrend();
+        initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
+        getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         getRivenWeapons();
     }
 
@@ -80,15 +80,15 @@ public class WarframeDataSource {
     }
 
     //别名
-    public static void getAlias() {
+    public static void getAlias(String url) {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取别名数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "alias.json");
+            HttpUtils.Body body = HttpUtils.sendGet(url + "alias.json");
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    getAlias();
+                    getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
@@ -115,15 +115,15 @@ public class WarframeDataSource {
     }
 
     //翻译
-    public static void initTranslation() {
+    public static void initTranslation(String url) {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取翻译数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "translation.json");
+            HttpUtils.Body body = HttpUtils.sendGet(url + "translation.json");
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("翻译表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    initTranslation();
+                    initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
@@ -297,15 +297,15 @@ public class WarframeDataSource {
     }
 
     //紫卡计算器数据
-    public static void getRivenAnalyseTrend() {
+    public static void getRivenAnalyseTrend(String url) {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取紫卡计算器数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_DATA_SOURCE + "riven_analyse_trend.json");
+            HttpUtils.Body body = HttpUtils.sendGet(url + "riven_analyse_trend.json");
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("紫卡计算器数据初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    getRivenAnalyseTrend();
+                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
