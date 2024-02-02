@@ -43,8 +43,7 @@ test
 logs
 *.log
 ### 忽略db文件
-/data/H2.mv.db
-/data/H2.trace.db
+/data
 ### 忽略其余文件
 nyxTemplates
 go-cqhttp
