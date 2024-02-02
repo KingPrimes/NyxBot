@@ -40,7 +40,7 @@ public class JgitUtil {
      * @param urlPath   远程仓库地址
      * @param localPath 本地仓库路径
      */
-    public static JgitUtil Buite(String urlPath, String localPath) {
+    public static JgitUtil Build(String urlPath, String localPath) {
         List<GitHubUserProvider> all = SpringUtils.getBean(GitHubUserProviderRepository.class).findAll();
         JgitUtil jgitUtil;
         if (!all.isEmpty()) {
@@ -289,6 +289,22 @@ public class JgitUtil {
     }
 
     /**
+     * /拉取(Pull) git pull origin
+     */
+    public JgitUtil pullNotProvider() throws Exception {
+        //判断localPath是否存在，不存在调用clone方法
+        File directory = new File(localPath);
+        if (!directory.exists()) {
+            gitClone();
+        }
+        openRpo(localPath).pull()
+                .setRemoteBranchName("main")
+                .call();
+        return this;
+    }
+
+
+    /**
      * /拉取(Pull) git pull
      *
      * @param branch 分支
@@ -330,7 +346,21 @@ public class JgitUtil {
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
         git.close();
-
         return this;
+    }
+
+    /**
+     * 克隆(Clone)
+     */
+    public void gitClone() throws Exception {
+        Git git = Git.cloneRepository()
+                .setURI(urlPath + ".git")
+                .setDirectory(new File(localPath))
+                //设置是否克隆子仓库
+                .setCloneSubmodules(true)
+                .call();
+        //关闭源，以释放本地仓库锁
+        git.getRepository().close();
+        git.close();
     }
 }
