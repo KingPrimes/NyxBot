@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class TestTask {
+public class TaskWarframeStatus {
 
     @Scheduled(cron = "0/60 * * * * ?")
     public void execute() {
