@@ -5,7 +5,7 @@ import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.PriveBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class PriveBlackController extends BaseController {
     String prefix = "config/black/prive";
 
-    @Autowired
+    @Resource
     BlackService bs;
 
     @GetMapping

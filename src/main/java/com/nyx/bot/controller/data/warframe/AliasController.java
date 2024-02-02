@@ -1,12 +1,13 @@
 package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Alias;
 import com.nyx.bot.repo.impl.warframe.AliasService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,7 @@ public class AliasController extends BaseController {
 
     String prefix = "data/warframe/";
 
-    @Autowired
+    @Resource
     AliasService aliasService;
 
 
@@ -39,7 +40,7 @@ public class AliasController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.getAlias();
+        WarframeDataSource.getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         return success("已执行任务！");
     }
 

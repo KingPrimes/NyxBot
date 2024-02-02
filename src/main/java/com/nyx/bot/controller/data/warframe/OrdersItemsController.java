@@ -6,7 +6,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.OrdersItems;
 import com.nyx.bot.repo.impl.warframe.OrdersItemsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class OrdersItemsController extends BaseController {
     String prefix = "data/warframe/";
 
-    @Autowired
+    @Resource
     OrdersItemsService oiService;
 
 

@@ -4,7 +4,7 @@ import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import java.util.Date;
 @Controller
 @RequestMapping("/private")
 public class SteelPathHtmlController {
-    @Autowired
+    @Resource
     TranslationService trans;
 
     @GetMapping("/getSteelPathHtml")

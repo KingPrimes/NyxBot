@@ -5,8 +5,8 @@ import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.StringUtils;
+import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/private")
 public class FissuesHtmlController {
 
-    @Autowired
+    @Resource
     TranslationService trans;
 
     @NotNull

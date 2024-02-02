@@ -5,7 +5,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.repo.impl.warframe.MissionSubscribeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MissionSubscribeController extends BaseController {
     String prefix = "data/warframe/";
 
-    @Autowired
+    @Resource
     MissionSubscribeService msService;
 
 

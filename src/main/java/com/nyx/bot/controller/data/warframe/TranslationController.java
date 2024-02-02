@@ -1,12 +1,13 @@
 package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,12 +20,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class TranslationController extends BaseController {
     String prefix = "data/warframe/";
 
-    @Autowired
+    @Resource
     TranslationService tlService;
 
 
     @GetMapping
-    public String alias() {
+    public String html() {
         return prefix + "translation";
     }
 
@@ -38,7 +39,7 @@ public class TranslationController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.initTranslation();
+        WarframeDataSource.initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         return success("已执行任务！");
     }
 }

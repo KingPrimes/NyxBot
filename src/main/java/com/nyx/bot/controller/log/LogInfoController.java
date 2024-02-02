@@ -5,7 +5,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.repo.impl.sys.LogInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/log")
 public class LogInfoController extends BaseController {
 
-    @Autowired
+    @Resource
     LogInfoService repository;
 
     String prefix = "log/info";

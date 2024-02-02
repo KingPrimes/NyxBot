@@ -6,8 +6,8 @@ import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.service.UserService;
 import com.nyx.bot.utils.I18nUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ResetPasswordController extends BaseController {
 
-    @Autowired
+    @Resource
     UserService userService;
 
-    @Autowired
+    @Resource
     SysUserRepository repository;
 
     @GetMapping("/resetPwd")

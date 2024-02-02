@@ -5,7 +5,7 @@ import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.GroupBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -17,7 +17,7 @@ public class GroupBlackController extends BaseController {
 
     String prefix = "config/black/group";
 
-    @Autowired
+    @Resource
     BlackService bs;
 
     @GetMapping
