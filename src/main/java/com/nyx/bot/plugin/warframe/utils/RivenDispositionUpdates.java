@@ -36,7 +36,7 @@ public class RivenDispositionUpdates {
 
         if (!elements.isEmpty()) {
             for (Element e : elements) {
-                Elements span = e.getElementsByClass("ipsStreamItem ipsStreamItem_contentBlock ipsStreamItem_expanded ipsAreaBackground_reset ipsPad  ");
+                Elements span = e.getElementsByClass("ipsStreamItem ipsStreamItem_contentBlock ipsStreamItem_expanded ipsAreaBackground_reset");
                 for (Element li : span) {
                     Elements a = li.getElementsByClass("ipsType_break ipsContained");
                     for (Element url : a) {
@@ -87,17 +87,17 @@ public class RivenDispositionUpdates {
                     Elements p = element.getElementsByTag("p");
                     //遍历 p 标签中的元素
                     for (Element e1 : p) {
-                        //格式化
-                        String br = String.valueOf(e1).replace("<br>", "HN");
-                        if (br.trim().equals("<p>&nbsp;</p>")) {
+                        //格式化 br更改为\n换行 出去多余的strong标签
+                        String br = String.valueOf(e1).replace("<br>", "\n").replaceAll("<strong>.*?</strong>", "");
+                        if (br.trim().equals("<p>&nbsp;</p>") || br.replace("\n", "").trim().isEmpty()) {
                             continue;
                         }
                         //重新解析格式化后的Html
                         Document doc = Jsoup.parse(br);
                         //遍历此标签中的元素
                         for (Element e2 : doc.getElementsByTag("p")) {
-                            //根据HN裁剪内容
-                            String[] rives = e2.text().split("HN");
+                            //根据换行字符裁剪内容
+                            String[] rives = e2.text().split("\n");
 
                             for (String riven : rives) {
                                 //根据：裁剪内容
@@ -126,9 +126,6 @@ public class RivenDispositionUpdates {
                         }
                     }
                 }
-            }
-            if (!trends.isEmpty()) {
-                return trends;
             }
         }
         return trends;
