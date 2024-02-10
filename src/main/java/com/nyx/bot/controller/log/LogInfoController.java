@@ -36,7 +36,7 @@ public class LogInfoController extends BaseController {
 
     @GetMapping("/info/detail/{logId}")
     public String detail(@PathVariable("logId") Long logId, ModelMap map) {
-        map.put("loginfo", repository.findById(logId).get());
+        map.put("info", repository.findById(logId).get());
         return prefix + "/detail";
     }
 }

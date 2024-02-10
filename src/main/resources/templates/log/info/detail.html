@@ -7,47 +7,47 @@
     <form class="form-horizontal m-t" id="signupForm">
         <div class="form-group">
             <label class="col-sm-2 control-label">操作模块：</label>
-            <div class="form-control-static" th:text="${loginfo.title}">
+            <div class="form-control-static" th:text="${info.title}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">执行的命令：</label>
-            <div class="form-control-static" th:text="${loginfo.codes}">
+            <div class="form-control-static" th:text="${info.codes}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">机器人/群组：</label>
-            <div class="form-control-static" th:text="${loginfo.botUid} + ' / ' + ${loginfo.groupUid}">
+            <div class="form-control-static" th:text="${info.botUid} + ' / ' + ${info.groupUid}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">请求的用户：</label>
-            <div class="form-control-static" th:text="${loginfo.userUid}">
+            <div class="form-control-static" th:text="${info.userUid}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">原信息：</label>
-            <div class="form-control-static" th:text="${loginfo.rawMsg}">
+            <div class="form-control-static" th:text="${info.rawMsg}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">请求地址：</label>
-            <div class="form-control-static" th:text="${loginfo.url}">
+            <div class="form-control-static" th:text="${info.url}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">请求方式：</label>
-            <div class="form-control-static" th:text="${loginfo.method}">
+            <div class="form-control-static" th:text="${info.method}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">操作方法：</label>
-            <div class="form-control-static" th:text="${loginfo.requestMethod}">
+            <div class="form-control-static" th:text="${info.requestMethod}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label">执行时间：</label>
-            <div class="form-control-static" th:text="${loginfo.runTime}+'ms'">
+            <div class="form-control-static" th:text="${info.runTime}+'ms'">
             </div>
         </div>
         <div class="form-group">
@@ -65,13 +65,13 @@
         <div class="form-group">
             <label class="col-sm-2 control-label">状态：</label>
             <div class="form-control-static"
-                 th:class="${loginfo.status == 0 ? 'label label-primary' : 'label label-danger'}"
-                 th:text="${loginfo.status == 0 ? '正常' : '异常'}">
+                 th:class="${info.status == 0 ? 'label label-primary' : 'label label-danger'}"
+                 th:text="${info.status == 0 ? '正常' : '异常'}">
             </div>
         </div>
-        <div class="form-group" th:style="'display:' + ${loginfo.status == 0 ? 'none' : 'block'}">
+        <div class="form-group" th:style="'display:' + ${info.status == 0 ? 'none' : 'block'}">
             <label class="col-sm-2 control-label">异常信息：</label>
-            <div class="form-control-static" th:text="${loginfo.errorMsg}">
+            <div class="form-control-static" th:text="${info.errorMsg}">
             </div>
         </div>
     </form>
@@ -80,13 +80,13 @@
 <th:block th:insert="~{include :: jsonview-js}"/>
 <script th:inline="javascript">
     $(function () {
-        var param = [[${loginfo.param}]];
+        const param = [[${info.param}]];
         if ($.common.isNotEmpty(param) && isJson(param)) {
             $("#param").JSONView(param);
         } else {
             $("#param").text(param);
         }
-        var result = [[${loginfo.result}]];
+        var result = [[${info.result}]];
         if ($.common.isNotEmpty(result) && isJson(result)) {
             $("#result").JSONView(result);
         } else {
