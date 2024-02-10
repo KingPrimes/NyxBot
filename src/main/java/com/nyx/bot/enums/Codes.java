@@ -52,8 +52,8 @@ public enum Codes {
     WARFRAME_SUBSCRIBE("^订阅[0-9]+", PermissionsEnums.USER),
     ;
 
-    private String str;
     private final PermissionsEnums permissions;
+    private String str;
 
     Codes(String s, PermissionsEnums permissions) {
         str = s;
