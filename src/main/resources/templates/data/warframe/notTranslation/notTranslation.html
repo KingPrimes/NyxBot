@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('翻译')}"/>
+<th:block th:insert="~{include :: bootstrap-select-css}"/>
+<body>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+        </div>
+        <div class="container-div">
+            <div class="row">
+                <div class="col-sm-12 select-table table-striped">
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:insert="~{include :: footer}"/>
+<th:block th:insert="~{include :: bootstrap-select-js}"/>
+<script th:inline="javascript">
+    const prefix = ctx + "data/warframe/notTranslation";
+    $(function () {
+        const options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add/{id}",
+            modalName: "未翻译信息",
+            sortOrder: "desc",
+            escape: true,
+            showPageGo: true,
+            rememberSelected: true,
+            columns: [
+                {
+                    field: 'state',
+                    radio: true
+                },
+                {
+                    field: 'id',
+                    title: 'ID'
+                },
+                {
+                    field: 'notTranslation',
+                    title: '英文'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.add(' + row.id + ',' + 775 + ',' + 450 + ')"><i class="fa fa-edit"></i>新增</a> ');
+                        return actions.join('');
+                    }
+                }
+            ]
+        };
+        $.table.init(options);
+    });
+</script>
+
+</body>
+</html>

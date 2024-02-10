@@ -1,10 +1,13 @@
 package com.nyx.bot.repo.impl.warframe;
 
+import com.nyx.bot.entity.warframe.NotTranslation;
 import com.nyx.bot.entity.warframe.Translation;
+import com.nyx.bot.repo.warframe.NotTranslationRepository;
 import com.nyx.bot.repo.warframe.TranslationRepository;
+import com.nyx.bot.utils.MatcherUtils;
+import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,8 +22,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class TranslationService {
 
-    @Autowired
+    @Resource
     TranslationRepository repository;
+
+    @Resource
+    NotTranslationRepository ntr;
 
     /**
      * 分页查询
@@ -84,11 +90,22 @@ public class TranslationService {
     public String enToZh(String en) {
         try {
             String cn = repository.findByEn(en).getCn();
+            log.info("查询到翻译数据：{}", cn);
             if (cn != null && !cn.isEmpty()) {
                 return cn;
             }
+            if (!MatcherUtils.isChines(en)) {
+                ntr.save(new NotTranslation(en));
+            }
             return en;
         } catch (Exception e) {
+            try {
+                if (!MatcherUtils.isChines(en)) {
+                    ntr.save(new NotTranslation(en));
+                }
+            } catch (Exception ignored) {
+                return en;
+            }
             return en;
         }
     }

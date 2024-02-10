@@ -29,6 +29,11 @@ public class TranslationController extends BaseController {
         return prefix + "translation";
     }
 
+    /**
+     * 分页查询
+     *
+     * @param t 查询条件
+     */
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(Translation t) {
@@ -36,10 +41,15 @@ public class TranslationController extends BaseController {
         return getDataTable(list.getContent(), list.getTotalElements());
     }
 
+    /**
+     * 更新词典
+     */
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
         WarframeDataSource.initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         return success("已执行任务！");
     }
+
+
 }
