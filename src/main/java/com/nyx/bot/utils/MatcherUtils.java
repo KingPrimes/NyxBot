@@ -148,4 +148,16 @@ public class MatcherUtils {
         return "";
     }
 
+    /**
+     * 匹配是否是中文
+     */
+    public static boolean isChines(String str) {
+        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+        Matcher m = p.matcher(str);
+        while (m.find()) {
+            return true;
+        }
+        return false;
+    }
+
 }
