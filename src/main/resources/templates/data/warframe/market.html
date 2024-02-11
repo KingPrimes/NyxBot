@@ -52,9 +52,9 @@
 <th:block th:insert="~{include :: footer}"/>
 <th:block th:insert="~{include :: bootstrap-select-js}"/>
 <script th:inline="javascript">
-    var prefix = ctx + "data/warframe/market"
+    const prefix = ctx + "data/warframe/market";
     $(function () {
-        var options = {
+        const options = {
             url: prefix + "/list",
             modalName: "幻纹",
             sortOrder: "desc",
@@ -97,7 +97,7 @@
     }
 
     function resetPre() {
-        $("#log-form")[0].reset();
+        $("#market-form")[0].reset();
         $.table.search('market-form', 'bootstrap-table');
     }
 

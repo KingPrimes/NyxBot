@@ -26,8 +26,14 @@
         <div class="container-div">
             <div class="row">
                 <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add(undefined,300,450)">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
                     <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
                         <i class="fa fa-angle-up"></i> 更新
+                    </a>
+                    <a class="btn btn-warning" onclick="push()">
+                        <i class="fa fa-download"></i> 推送到Github
                     </a>
                 </div>
                 <div class="col-sm-12 select-table table-striped">
@@ -41,10 +47,13 @@
 <th:block th:insert="~{include :: footer}"/>
 <th:block th:insert="~{include :: bootstrap-select-js}"/>
 <script th:inline="javascript">
-    var prefix = ctx + "data/warframe/translation"
+    const prefix = ctx + "data/warframe/translation";
     $(function () {
-        var options = {
+        const options = {
             url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            pageSize: 50,
             modalName: "翻译",
             sortOrder: "desc",
             escape: true,
@@ -66,6 +75,15 @@
                 {
                     field: 'cn',
                     title: '中文'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ',' + 300 + ',' + 450 + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        return actions.join('');
+                    }
                 }
             ]
         };
@@ -80,8 +98,12 @@
         $.operate.post(prefix + "/update")
     }
 
+    function push() {
+        $.modal.open("推送", prefix + "/push", 300, 300);
+    }
+
     function resetPre() {
-        $("#log-form")[0].reset();
+        $("#translation-form")[0].reset();
         $.table.search('translation-form', 'bootstrap-table');
     }
 </script>

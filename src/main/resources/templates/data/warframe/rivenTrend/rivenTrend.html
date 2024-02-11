@@ -16,7 +16,7 @@
 <div class="container-div">
     <div class="row">
         <div class="col-sm-12 search-collapse">
-            <form id="rivent-form">
+            <form id="rivenTrend-form">
                 <div class="select-list">
                     <ul>
                         <li>
@@ -52,7 +52,7 @@
 <th:block th:insert="~{include :: footer}"/>
 <th:block th:insert="~{include :: bootstrap-select-js}"/>
 <script th:inline="javascript">
-    var prefix = ctx + "data/warframe/rivent"
+    const prefix = ctx + "data/warframe/rivenTrend";
     $(function () {
         var options = {
             url: prefix + "/list",
@@ -75,6 +75,10 @@
                     title: '物品名称'
                 },
                 {
+                    field: 'traCh',
+                    title: '物品名称'
+                },
+                {
                     field: 'new_num',
                     title: '新的倾向'
                 },
@@ -92,7 +96,7 @@
     });
 
     function searchPre() {
-        $.table.search('rivent-form', 'bootstrap-table');
+        $.table.search('rivenTrend-form', 'bootstrap-table');
     }
 
     function update() {
@@ -100,8 +104,8 @@
     }
 
     function resetPre() {
-        $("#log-form")[0].reset();
-        $.table.search('rivent-form', 'bootstrap-table');
+        $("#rivenTrend-form")[0].reset();
+        $.table.search('rivenTrend-form', 'bootstrap-table');
     }
 
 </script>
