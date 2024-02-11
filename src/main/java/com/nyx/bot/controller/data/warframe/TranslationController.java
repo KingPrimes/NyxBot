@@ -1,5 +1,7 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.core.controller.BaseController;
@@ -7,18 +9,24 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Slf4j
 @Controller
 @RequestMapping("/data/warframe/translation")
 public class TranslationController extends BaseController {
-    String prefix = "data/warframe/";
+    String prefix = "data/warframe/translation/";
 
     @Resource
     TranslationService tlService;
@@ -27,6 +35,29 @@ public class TranslationController extends BaseController {
     @GetMapping
     public String html() {
         return prefix + "translation";
+    }
+
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "add";
+    }
+
+    @GetMapping("/push")
+    public String push() {
+        return prefix + "push";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Long id, ModelMap map) {
+        map.put("translation", tlService.findById(id));
+        return prefix + "edit";
+    }
+
+    @PostMapping("/save")
+    @ResponseBody
+    public AjaxResult save(Translation t) {
+        log.info("收到信息：{}", t.toString());
+        return toAjax(tlService.save(t) != null);
     }
 
     /**
@@ -49,6 +80,28 @@ public class TranslationController extends BaseController {
     public AjaxResult update() {
         WarframeDataSource.initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         return success("已执行任务！");
+    }
+
+    @PostMapping("/push")
+    @ResponseBody
+    public AjaxResult push(String commit) {
+        try {
+            JgitUtil build = JgitUtil.Build();
+            List<Translation> all = tlService.findAllToList();
+            SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
+            Set<String> set = new HashSet<>();
+            set.add("pageNum");
+            set.add("pageSize");
+            set.add("totalCount");
+            set.add("totalPage");
+            spf.getExcludes().addAll(set);
+            String jsonString = JSON.toJSONString(all, spf);
+            FileUtils.writeFile(JgitUtil.lockPath + "/warframe/translation.json", jsonString);
+            build.add().commit(commit).push();
+            return toAjax(true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

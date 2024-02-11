@@ -1,7 +1,10 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
+import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.repo.impl.warframe.RivenTrendService;
 import jakarta.annotation.Resource;
@@ -13,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/data/warframe/rivent")
+@RequestMapping("/data/warframe/rivenTrend")
 public class RivenTrendController extends BaseController {
-    String prefix = "data/warframe/";
+    String prefix = "data/warframe/rivenTrend/";
 
     @Resource
     RivenTrendService rtService;
@@ -23,7 +26,7 @@ public class RivenTrendController extends BaseController {
 
     @GetMapping
     public String market() {
-        return prefix + "rivent";
+        return prefix + "rivenTrend";
     }
 
     @PostMapping("/list")
@@ -32,4 +35,12 @@ public class RivenTrendController extends BaseController {
         Page<RivenTrend> list = rtService.list(rt);
         return getDataTable(list.getContent(), list.getTotalElements());
     }
+
+
+    @PostMapping("/update")
+    public AjaxResult update() {
+        WarframeDataSource.getRivenTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
+        return success("已执行任务！");
+    }
+
 }

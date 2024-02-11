@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * 紫卡倾向库
@@ -14,6 +16,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "trendName"))
+@AllArgsConstructor
+@NoArgsConstructor
 public class RivenTrend extends BaseEntity {
 
     @Id

@@ -139,4 +139,8 @@ public class TranslationService {
     }
 
 
+    public List<Translation> findAllToList() {
+        return repository.findAll();
+    }
+
 }

@@ -59,7 +59,7 @@ public class RivenTrendService {
             Predicate[] predicates = new Predicate[predicateList.size()];
             return query.where(predicateList.toArray(predicates)).getRestriction();
         };
-        return repository.findAll(specification, PageRequest.of(items.getPageNum() - 1, items.getPageSize()));
+        return repository.findRivenTrendAndTra(specification, PageRequest.of(items.getPageNum() - 1, items.getPageSize()));
     }
 
 }
