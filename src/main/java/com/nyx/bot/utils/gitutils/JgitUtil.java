@@ -1,5 +1,6 @@
 package com.nyx.bot.utils.gitutils;
 
+import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.SpringUtils;
@@ -26,13 +27,19 @@ import java.util.Optional;
 @Slf4j
 public class JgitUtil {
 
+    public static String lockPath = "./DataSource";
+
     private final CredentialsProvider provider;
     String urlPath;
     String localPath;
 
     public JgitUtil(String urlPath, String localPath, CredentialsProvider provider) {
         this.urlPath = urlPath;
-        this.localPath = localPath;
+        if (!localPath.isEmpty()) {
+            this.localPath = localPath;
+        } else {
+            this.localPath = lockPath;
+        }
         this.provider = provider;
     }
 
@@ -52,8 +59,14 @@ public class JgitUtil {
         return jgitUtil;
     }
 
+    /**
+     * 构建 Jgit工具类 进行拉取操作
+     */
+    public static JgitUtil Build() throws Exception {
+        return Build(ApiUrl.WARFRAME_DATA_SOURCE_GIT, "").pull();
+    }
 
-    public Git openRpo(String path) {
+    private Git openRpo(String path) {
         Git git = null;
         try {
             Repository repository = new FileRepositoryBuilder()
