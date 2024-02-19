@@ -90,7 +90,6 @@ public class TranslationService {
     public String enToZh(String en) {
         try {
             String cn = repository.findByEn(en).getCn();
-            log.info("查询到翻译数据：{}", cn);
             if (cn != null && !cn.isEmpty()) {
                 return cn;
             }

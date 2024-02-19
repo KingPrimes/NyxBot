@@ -60,7 +60,6 @@ public class NotTranslationController extends BaseController {
     @ResponseBody
     public AjaxResult save(Translation t) {
         notTranslationRepository.deleteById(t.getId());
-        t.setId(translationService.maxId().getId());
         return toAjax(translationService.save(t) != null);
     }
 
