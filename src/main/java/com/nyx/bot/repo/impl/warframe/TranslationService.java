@@ -69,7 +69,7 @@ public class TranslationService {
      * @param tra 不带ID新增，带ID修改
      */
     public Translation save(Translation tra) {
-        return repository.save(tra);
+        return repository.saveAndFlush(tra);
     }
 
     /**
