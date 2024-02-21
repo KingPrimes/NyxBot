@@ -26,48 +26,38 @@ public class InvasionsHtmlController {
     public String getHtml(Model model) {
         GlobalStates sgs = CacheUtils.getGlobalState();
         List<GlobalStates.Invasions> invasions = sgs.getInvasions();
+        List<GlobalStates.Invasions> newInvasions = new ArrayList<>();
         for (GlobalStates.Invasions invasion : invasions) {
-            if (!invasion.getAttackerReward().getCountedItems().isEmpty()) {
-
-                GlobalStates.Invasions.AttackerReward reward = new GlobalStates.Invasions.AttackerReward();
-                reward.setCredits(invasion.getDefenderReward().getCredits());
-                reward.setColor(invasion.getDefenderReward().getColor());
-                reward.setThumbnail(invasion.getDefenderReward().getThumbnail());
-                reward.setAsString(invasion.getDefenderReward().getAsString());
-                List<GlobalStates.Invasions.AttackerReward.CountedItems> countedItems = new ArrayList<>();
-
-                for (GlobalStates.Invasions.AttackerReward.CountedItems countedItem : invasion.getAttackerReward().getCountedItems()) {
-                    countedItem.setType(trans.enToZh(countedItem.getType()));
-                    countedItems.add(countedItem);
-                }
-
-                reward.setCountedItems(countedItems);
-                invasion.setAttackerReward(reward);
-
+            //忽略以结束得数据
+            if (invasion.getCompleted()) {
+                continue;
             }
-            if (!invasion.getDefenderReward().getCountedItems().isEmpty()) {
-                GlobalStates.Invasions.DefenderReward defenderReward = new GlobalStates.Invasions.DefenderReward();
-                defenderReward.setCredits(invasion.getDefenderReward().getCredits());
-                defenderReward.setColor(invasion.getDefenderReward().getColor());
-                defenderReward.setThumbnail(invasion.getDefenderReward().getThumbnail());
-                defenderReward.setAsString(invasion.getDefenderReward().getAsString());
-                List<GlobalStates.Invasions.DefenderReward.CountedItems> countedItems = new ArrayList<>();
-
-                for (GlobalStates.Invasions.DefenderReward.CountedItems countedItem : invasion.getDefenderReward().getCountedItems()) {
-                    countedItem.setType(trans.enToZh(countedItem.getType()));
-                    countedItems.add(countedItem);
-                }
-
-                defenderReward.setCountedItems(countedItems);
-                invasion.setDefenderReward(defenderReward);
-
-
+            if (!invasion.getAttacker().getReward().getCountedItems().isEmpty()) {
+                GlobalStates.Invasions.RewardInfo reward = invasion.getAttacker();
+                List<GlobalStates.Invasions.Reward.CountedItems> countedItems = reward.getReward().getCountedItems()
+                        .stream()
+                        //使用数据流得方式替换元素中得内容
+                        .peek(item -> item.setType(trans.enToZh(item.getType())))
+                        .toList();
+                reward.getReward().setColo(Integer.toHexString(reward.getReward().getColor()));
+                reward.getReward().setCountedItems(countedItems);
+            }
+            if (!invasion.getDefender().getReward().getCountedItems().isEmpty()) {
+                GlobalStates.Invasions.RewardInfo defender = invasion.getDefender();
+                List<GlobalStates.Invasions.Reward.CountedItems> countedItems = defender.getReward().getCountedItems()
+                        .stream()
+                        //使用数据流得方式替换元素中得内容
+                        .peek(item -> item.setType(trans.enToZh(item.getType())))
+                        .toList();
+                defender.getReward().setColo(Integer.toHexString(defender.getReward().getColor()));
+                defender.getReward().setCountedItems(countedItems);
             }
             invasion.setNode(invasion.getNode().replace(StringUtils.quStr(invasion.getNode()), trans.enToZh(StringUtils.quStr(invasion.getNode()))));
             invasion.setCompletion(String.format("%.2f", Double.valueOf(invasion.getCompletion())));
             invasion.setDesc(trans.enToZh(invasion.getDesc()));
+            newInvasions.add(invasion);
         }
-        model.addAttribute("inv", invasions);
+        model.addAttribute("inv", newInvasions);
         return "html/invasions";
     }
 }
