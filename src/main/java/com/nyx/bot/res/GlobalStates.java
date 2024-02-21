@@ -222,83 +222,114 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"attacker", "attackerReward", "node", "defenderReward", "defender", "defendingFaction", "attackingFaction"}, callSuper = false)
+    @EqualsAndHashCode(of = {"attacker", "node", "defender", "defendingFaction", "attackingFaction"}, callSuper = false)
     public static class Invasions extends BaseStatus {
+        /**
+         * 进攻方
+         */
         @JsonProperty("attacker")
-        private Attacker attacker;
-        @JsonProperty("attackerReward")
-        private AttackerReward attackerReward;
+        private RewardInfo attacker;
+        /**
+         * 进攻方派系
+         */
         @JsonProperty("attackingFaction")
         private String attackingFaction;
+        /**
+         * 是否结束
+         * <ul>
+         * <li>true:结束</li>
+         * <li>false:未结束</li>
+         * </ul>
+         */
         @JsonProperty("completed")
         private Boolean completed;
+        /**
+         * 剩余进度
+         */
         @JsonProperty("count")
         private Integer count;
+        /**
+         * 防守方
+         */
         @JsonProperty("defender")
-        private Defender defender;
-        @JsonProperty("defenderReward")
-        private DefenderReward defenderReward;
+        private RewardInfo defender;
+        /**
+         * 防守方派系
+         */
         @JsonProperty("defendingFaction")
         private String defendingFaction;
+        /**
+         * 描述
+         */
         @JsonProperty("desc")
         private String desc;
+        /**
+         * 结束时间
+         */
         @JsonProperty("eta")
         private String eta;
+        /**
+         * 任务星球
+         */
         @JsonProperty("node")
         private String node;
+        /**
+         * 任务星球
+         */
         @JsonProperty("nodeKey")
         private String nodeKey;
+        /**
+         * 最大进度限值
+         */
         @JsonProperty("requiredRuns")
         private Integer requiredRuns;
+        /**
+         * 奖励类型
+         */
         @JsonProperty("rewardTypes")
         private List<String> rewardTypes;
+        /**
+         * 是否是Infestation派系
+         */
         @JsonProperty("vsInfestation")
         private Boolean vsInfestation;
+        /**
+         * 进度百分比
+         */
         @JsonProperty("completion")
         private String completion;
 
+        /**
+         * 进攻方/防守方
+         */
         @NoArgsConstructor
         @Data
-        public static class Attacker {
+        @EqualsAndHashCode(of = {"reward"})
+        public static class RewardInfo {
+            /**
+             * 任务奖励
+             */
             @JsonProperty("reward")
             private Reward reward;
+            /**
+             * 派系
+             */
             @JsonProperty("faction")
             private String faction;
+            /**
+             * 派系
+             */
             @JsonProperty("factionKey")
             private String factionKey;
-
-            @NoArgsConstructor
-            @Data
-            @EqualsAndHashCode(of = {"countedItems", "itemString"})
-            public static class Reward {
-                @JsonProperty("countedItems")
-                private List<CountedItems> countedItems;
-                @JsonProperty("thumbnail")
-                private String thumbnail;
-                @JsonProperty("color")
-                private Integer color;
-                @JsonProperty("credits")
-                private Integer credits;
-                @JsonProperty("asString")
-                private String asString;
-                @JsonProperty("itemString")
-                private String itemString;
-
-                @NoArgsConstructor
-                @Data
-                public static class CountedItems {
-                    @JsonProperty("count")
-                    private Integer count;
-                    @JsonProperty("type")
-                    private String type;
-                }
-            }
         }
 
+        /**
+         * 奖励
+         */
         @NoArgsConstructor
         @Data
         @EqualsAndHashCode(of = {"countedItems", "itemString"})
-        public static class AttackerReward {
+        public static class Reward {
             @JsonProperty("countedItems")
             private List<CountedItems> countedItems;
             @JsonProperty("thumbnail")
@@ -311,71 +342,14 @@ public class GlobalStates {
             private String asString;
             @JsonProperty("itemString")
             private String itemString;
+            /**
+             * 16进制颜色码
+             */
+            private String colo;
 
-            @NoArgsConstructor
-            @Data
-            public static class CountedItems {
-                @JsonProperty("count")
-                private Integer count;
-                @JsonProperty("type")
-                private String type;
-            }
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class Defender {
-            @JsonProperty("reward")
-            private Reward reward;
-            @JsonProperty("faction")
-            private String faction;
-            @JsonProperty("factionKey")
-            private String factionKey;
-
-            @NoArgsConstructor
-            @Data
-            @EqualsAndHashCode(of = {"countedItems", "itemString"})
-            public static class Reward {
-                @JsonProperty("countedItems")
-                private List<CountedItems> countedItems;
-                @JsonProperty("thumbnail")
-                private String thumbnail;
-                @JsonProperty("color")
-                private Integer color;
-                @JsonProperty("credits")
-                private Integer credits;
-                @JsonProperty("asString")
-                private String asString;
-                @JsonProperty("itemString")
-                private String itemString;
-
-                @NoArgsConstructor
-                @Data
-                public static class CountedItems {
-                    @JsonProperty("count")
-                    private Integer count;
-                    @JsonProperty("type")
-                    private String type;
-                }
-            }
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class DefenderReward {
-            @JsonProperty("countedItems")
-            private List<CountedItems> countedItems;
-            @JsonProperty("thumbnail")
-            private String thumbnail;
-            @JsonProperty("color")
-            private Integer color;
-            @JsonProperty("credits")
-            private Integer credits;
-            @JsonProperty("asString")
-            private String asString;
-            @JsonProperty("itemString")
-            private String itemString;
-
+            /**
+             * 奖励物品
+             */
             @NoArgsConstructor
             @Data
             public static class CountedItems {
