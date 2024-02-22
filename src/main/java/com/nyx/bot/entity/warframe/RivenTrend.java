@@ -50,4 +50,15 @@ public class RivenTrend extends BaseEntity {
     //此次更新得时间
     @Transient
     private String isDate;
+
+    public RivenTrend(Long id, String trendName, String newDot, Double newNum, String oldDot, Double oldNum, RivenTrendTypeEnum type, String traCh) {
+        this.id = id;
+        this.trendName = trendName;
+        this.newDot = newDot;
+        this.newNum = newNum;
+        this.oldDot = oldDot;
+        this.oldNum = oldNum;
+        this.type = type;
+        this.traCh = traCh;
+    }
 }

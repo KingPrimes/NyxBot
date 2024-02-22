@@ -1,4 +1,4 @@
-package com.nyx.bot.entity.warframe;
+package com.nyx.bot.plugin.warframe.core;
 
 import com.nyx.bot.utils.DoubleUtils;
 import lombok.Data;
@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class RivenAnaiyseTrend {
+public class RivenAnalyseTrendCompute {
     String weaponsName;
     String rivenName;
-    List<Attribute> c = new ArrayList<>();
+    List<Attribute> attributes = new ArrayList<>();
 
     public boolean add(Attribute attribute) {
-        return c.add(attribute);
+        return attributes.add(attribute);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class RivenAnaiyseTrend {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .append("weaponsName", weaponsName)
                 .append("rivenName", rivenName)
-                .append("c", c)
+                .append("attributes", attributes)
                 .toString();
     }
 

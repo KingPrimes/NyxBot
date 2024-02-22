@@ -7,6 +7,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
+import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
 import com.nyx.bot.utils.CodeUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
@@ -89,7 +90,7 @@ public class GlobalDirectivesPlugin {
                 // /WM
                 case WARFRAME_MARKET_ORDERS_PLUGIN -> WarframeCodes.orders(bot, event, finalRaw, codes);
                 // /WR
-                case WARFRAME_MARKET_RIVEN_PLUGIN -> not(bot, event);
+                case WARFRAME_MARKET_RIVEN_PLUGIN -> WarframeCodes.marketRiven(bot, event, finalRaw, codes);
                 // RM
                 case WARFRAME_RIVEN_MARKET_PLUGIN -> not(bot, event);
                 // CD
@@ -109,7 +110,7 @@ public class GlobalDirectivesPlugin {
                 //开核桃
                 case WARFRAME_OPEN_RELICS_PLUGIN -> not(bot, event);
                 //紫卡分析
-                case WARFRAME_RIVEN_ANALYSE -> not(bot, event);
+                case WARFRAME_RIVEN_ANALYSE -> RivenAttributeCompute.ocrRivenCompute(bot, event, finalRaw, codes);
                 //订阅处理
                 case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event);
             }

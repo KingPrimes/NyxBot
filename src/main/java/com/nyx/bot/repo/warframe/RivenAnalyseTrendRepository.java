@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RivenAnalyseTrendRepository extends JpaRepository<RivenAnalyseTrend, Long>, JpaSpecificationExecutor<RivenAnalyseTrend>, PagingAndSortingRepository<RivenAnalyseTrend, Long> {
+    RivenAnalyseTrend findByName(String name);
 }
