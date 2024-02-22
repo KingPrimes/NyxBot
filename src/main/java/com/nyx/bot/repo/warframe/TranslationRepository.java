@@ -18,4 +18,6 @@ public interface TranslationRepository extends JpaRepository<Translation, Long>,
      * 查询最大ID的数据
      */
     Translation findTopByOrderByIdDesc();
+
+    Translation findByCn(String cn);
 }

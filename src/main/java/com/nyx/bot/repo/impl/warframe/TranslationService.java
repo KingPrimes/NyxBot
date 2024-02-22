@@ -127,6 +127,20 @@ public class TranslationService {
         }
     }
 
+    public String zhToEn(String zh_cn) {
+        try {
+            Translation byCn = repository.findByCn(zh_cn.trim());
+            if (!byCn.getEn().isEmpty()) {
+                return byCn.getEn();
+            } else {
+                return zh_cn;
+            }
+        } catch (Exception ignored) {
+            return zh_cn;
+        }
+    }
+
+
     /**
      * 模糊匹配 英文到中文的翻译 获取模糊匹配的翻译列表
      *
