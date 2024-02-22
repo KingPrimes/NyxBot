@@ -468,7 +468,7 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(exclude = {"expiry", "activation", "timeLeft"}, callSuper = false)
+    @EqualsAndHashCode(exclude = {"timeLeft"}, callSuper = false)
     public static class CambionCycle extends BaseStatus {
         @JsonProperty("active")
         private String active;
