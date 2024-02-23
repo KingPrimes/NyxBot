@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.image.warframe;
+package com.nyx.bot.controller.api.image.warframe.mission;
 
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.core.Constants;
@@ -18,17 +18,15 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class MarketOrdersImageController {
-
-
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_MARKET_ORDERS_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/postMarketOrdersImage", produces = MediaType.IMAGE_PNG_VALUE)
+public class DailyDealsImageController {
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_DAILY_DEALS_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getDailyDealsImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.converPost(
-                        Constants.LOCALHOST + "private/postMarketOrders", data.toString()
+                HtmlToImage.conver(
+                        Constants.LOCALHOST + "private/getDailyDealsHtml"
                 ).toByteArray()
         );
     }

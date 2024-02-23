@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.image.warframe;
+package com.nyx.bot.controller.api.image.warframe.mission;
 
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.core.Constants;
@@ -18,20 +18,15 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class FissuesImageController {
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_FISSURES_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getFissuesImage", produces = MediaType.IMAGE_PNG_VALUE)
+public class NighTwaveImageController {
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_NIGH_WAVE_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getNighTwaveImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
-        int i = 0;
-        switch (data.getCodes()) {
-            case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> i = 1;
-            case WARFRAME_FISSURES_PATH_PLUGIN -> i = 2;
-        }
         response.getOutputStream().write(
                 HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getFissuesHtml/" + i
+                        Constants.LOCALHOST + "private/getNighTwaveHtml"
                 ).toByteArray()
         );
     }

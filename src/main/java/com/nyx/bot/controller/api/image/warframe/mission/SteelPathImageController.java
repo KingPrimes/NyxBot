@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.image.warframe;
+package com.nyx.bot.controller.api.image.warframe.mission;
 
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.core.Constants;
@@ -18,15 +18,15 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class VoidImageController {
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_VOID_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getVoidImage", produces = MediaType.IMAGE_PNG_VALUE)
+public class SteelPathImageController {
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_STEEL_PATH_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getSteelPathImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getVoidHtml"
+                        Constants.LOCALHOST + "private/getSteelPathHtml"
                 ).toByteArray()
         );
     }

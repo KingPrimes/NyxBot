@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.html.warframe;
+package com.nyx.bot.controller.api.html.warframe.mission;
 
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;

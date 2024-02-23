@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.image.warframe;
+package com.nyx.bot.controller.api.image.warframe.mission;
 
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.core.Constants;
@@ -18,15 +18,16 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class NighTwaveImageController {
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_NIGH_WAVE_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getNighTwaveImage", produces = MediaType.IMAGE_PNG_VALUE)
+public class ArsonHuntImageController {
+
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_ARSON_HUNT_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getArsonHuntImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getNighTwaveHtml"
+                        Constants.LOCALHOST + "private/getArsonHuntHtml"
                 ).toByteArray()
         );
     }

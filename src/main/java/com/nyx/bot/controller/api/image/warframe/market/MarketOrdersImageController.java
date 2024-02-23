@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.image.warframe;
+package com.nyx.bot.controller.api.image.warframe.market;
 
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.core.Constants;
@@ -12,21 +12,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class ArbitrationImageController {
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_ARBITRATION_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getArbitrationImage", produces = MediaType.IMAGE_PNG_VALUE)
-    @ResponseBody
+public class MarketOrdersImageController {
+
+
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_MARKET_ORDERS_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/postMarketOrdersImage", produces = MediaType.IMAGE_PNG_VALUE)
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.conver(
-                        Constants.LOCALHOST + "private/getArbitrationHtml"
+                HtmlToImage.converPost(
+                        Constants.LOCALHOST + "private/postMarketOrders", data.toString()
                 ).toByteArray()
         );
     }

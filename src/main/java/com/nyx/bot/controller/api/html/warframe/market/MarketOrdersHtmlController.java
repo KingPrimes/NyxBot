@@ -1,4 +1,4 @@
-package com.nyx.bot.controller.api.html.warframe;
+package com.nyx.bot.controller.api.html.warframe.market;
 
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.plugin.warframe.utils.MarketUtils;
