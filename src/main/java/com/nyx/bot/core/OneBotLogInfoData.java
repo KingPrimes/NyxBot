@@ -31,6 +31,9 @@ public class OneBotLogInfoData {
     //是否是满级
     Boolean isMax;
 
+    //传输数据
+    String data;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
@@ -45,6 +48,7 @@ public class OneBotLogInfoData {
                 .append("key", key)
                 .append("isBy", isBy)
                 .append("isMax", isMax)
+                .append("data", data)
                 .toString();
     }
 }
