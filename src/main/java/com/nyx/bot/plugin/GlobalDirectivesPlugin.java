@@ -7,7 +7,6 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
-import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
 import com.nyx.bot.utils.CodeUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
@@ -110,7 +109,7 @@ public class GlobalDirectivesPlugin {
                 //开核桃
                 case WARFRAME_OPEN_RELICS_PLUGIN -> not(bot, event);
                 //紫卡分析
-                case WARFRAME_RIVEN_ANALYSE -> RivenAttributeCompute.ocrRivenCompute(bot, event, finalRaw, codes);
+                case WARFRAME_RIVEN_ANALYSE -> WarframeCodes.ocrRivenCompute(bot, event, codes);
                 //订阅处理
                 case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event);
             }

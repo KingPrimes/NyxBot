@@ -9,12 +9,17 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.permissions.Permissions;
+import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
 import com.nyx.bot.utils.onebot.Msg;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
+@Slf4j
 public class WarframeCodes {
 
     private static OneBotLogInfoData getLogInfoData(Bot bot, AnyMessageEvent event, Codes code) {
@@ -238,6 +243,37 @@ public class WarframeCodes {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 "postMarketOrdersImage",
                 data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            bot.sendMsg(event, "查询超时！", false);
+        }
+    }
+
+    /**
+     * Warframe Market Riven拍卖查询
+     */
+    public static void marketRiven(Bot bot, AnyMessageEvent event, String str, Codes code) {
+
+    }
+
+    /**
+     * 紫卡属性计算
+     */
+    public static void ocrRivenCompute(Bot bot, AnyMessageEvent event, Codes code) {
+        List<String> msgImgUrlList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
+        if (msgImgUrlList.isEmpty()) {
+            bot.sendMsg(event, "请在指令后方添加上您要查询的紫卡图片!", false);
+            return;
+        }
+        if (msgImgUrlList.size() > 5) {
+            bot.sendMsg(event, "查询紫卡图片一次性不可大于5张", false);
+            return;
+        }
+        OneBotLogInfoData data = getLogInfoData(bot, event, code);
+        data.setData(RivenAttributeCompute.ocrRivenCompute(event));
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postRivenAnalyseImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);

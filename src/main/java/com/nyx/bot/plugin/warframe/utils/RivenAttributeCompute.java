@@ -1,11 +1,9 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.alibaba.fastjson2.JSON;
-import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.entity.warframe.RivenAnalyseTrend;
 import com.nyx.bot.entity.warframe.RivenTrend;
-import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.plugin.warframe.core.RivenAnalyseTrendCompute;
 import com.nyx.bot.plugin.warframe.core.RivenAnalyseTrendModel;
@@ -22,8 +20,7 @@ import java.util.List;
 @Slf4j
 public class RivenAttributeCompute {
 
-
-    public static void ocrRivenCompute(Bot bot, AnyMessageEvent event, String finalRaw, Codes code) {
+    public static String ocrRivenCompute(AnyMessageEvent event) {
         //识别图片
         List<List<String>> ocrImages = OCRImage.ocrImage(event);
         //处理识别数据
@@ -31,10 +28,7 @@ public class RivenAttributeCompute {
         //计算紫卡加成属性
         List<List<RivenAnalyseTrendModel>> models = setAttributeNumber(riven);
         //转换成Json格式数据
-        String jsonString = JSON.toJSONString(models);
-        log.info(jsonString);
-
-
+        return JSON.toJSONString(models);
     }
 
     /**
