@@ -34,6 +34,12 @@ public class WarframeCodes {
         return oneBotLogInfoData;
     }
 
+    private static void sendErrorMsg(Bot bot, AnyMessageEvent event, HttpUtils.Body body) {
+        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event, body.getBody(), false);
+        }
+    }
+
 
     /**
      * 订阅消息
@@ -65,6 +71,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -78,6 +85,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -91,6 +99,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -104,6 +113,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -117,6 +127,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -132,6 +143,7 @@ public class WarframeCodes {
         } else {
             bot.sendMsg(event, "裂隙获取失败", false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
 
@@ -146,6 +158,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -159,6 +172,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -172,6 +186,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -185,6 +200,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         }
+        sendErrorMsg(bot, event, body);
     }
 
     /**
@@ -247,7 +263,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         } else {
-            bot.sendMsg(event, "查询超时！", false);
+            sendErrorMsg(bot, event, body);
         }
     }
 
@@ -278,7 +294,7 @@ public class WarframeCodes {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
         } else {
-            bot.sendMsg(event, "查询超时！", false);
+            sendErrorMsg(bot, event, body);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
@@ -26,7 +27,7 @@ public class FissuesHtmlController {
     TranslationService trans;
 
     @NotNull
-    private static List<GlobalStates.Fissures> getFissures(Integer type) {
+    private static List<GlobalStates.Fissures> getFissures(Integer type) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         List<GlobalStates.Fissures> fissures = sgs.getFissures();
         List<GlobalStates.Fissures> list = new ArrayList<>();
@@ -69,7 +70,7 @@ public class FissuesHtmlController {
     }
 
     @GetMapping("/getFissuesHtml/{type}")
-    public String getHtml(Model model, @PathVariable Integer type) {
+    public String getHtml(Model model, @PathVariable Integer type) throws DataNotInfoException {
         List<GlobalStates.Fissures> list = getFissures(type);
         //排序
         list.sort(Comparator.comparing(GlobalStates.Fissures::getTierNum));

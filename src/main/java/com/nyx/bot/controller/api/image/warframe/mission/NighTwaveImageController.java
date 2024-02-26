@@ -5,6 +5,7 @@ import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.BusinessType;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.utils.HtmlToImage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ public class NighTwaveImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_NIGH_WAVE_PLUGIN, businessType = BusinessType.IMAGE)
     @PostMapping(value = "/getNighTwaveImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
+    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.conver(

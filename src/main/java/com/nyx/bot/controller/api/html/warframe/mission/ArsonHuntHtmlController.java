@@ -1,5 +1,6 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
@@ -23,7 +24,7 @@ public class ArsonHuntHtmlController {
     TranslationService trans;
 
     @GetMapping("/getArsonHuntHtml")
-    public String getHtml(Model model) {
+    public String getHtml(Model model) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         GlobalStates.ArchonHunt archonHunt = sgs.getArchonHunt();
         for (GlobalStates.ArchonHunt.Mission mission : archonHunt.getMissions()) {

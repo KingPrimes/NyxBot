@@ -1,5 +1,6 @@
 package com.nyx.bot.utils;
 
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.GlobalStates;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.annotation.Nullable;
@@ -15,10 +16,10 @@ public class CacheUtils {
     public static final String GROUP_CAPTCHA = "group-captcha";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
-    public static GlobalStates getGlobalState() {
+    public static GlobalStates getGlobalState() throws DataNotInfoException {
         GlobalStates data = Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).get("data", GlobalStates.class);
         if (data == null) {
-            throw new RuntimeException("SocketGlobalStates is null");
+            throw new DataNotInfoException(I18nUtils.message("error.warframe.data.null"));
         }
         return data;
     }

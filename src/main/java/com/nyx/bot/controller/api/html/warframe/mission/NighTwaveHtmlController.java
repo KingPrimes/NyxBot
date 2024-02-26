@@ -1,5 +1,6 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
@@ -18,13 +19,11 @@ public class NighTwaveHtmlController {
     TranslationService trans;
 
     @GetMapping("/getNighTwaveHtml")
-    public String getHtml(Model model) {
+    public String getHtml(Model model) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         GlobalStates.Nightwave nightwave = sgs.getNightwave();
         //翻译
-        nightwave.getActiveChallenges().forEach(c -> {
-            c.setDesc(trans.enToZh(c.getDesc()));
-        });
+        nightwave.getActiveChallenges().forEach(c -> c.setDesc(trans.enToZh(c.getDesc())));
         //排序 从小到大
         nightwave.getActiveChallenges().sort(Comparator.comparing(GlobalStates.Nightwave.ActiveChallenges::getReputation));
 

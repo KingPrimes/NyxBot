@@ -94,13 +94,19 @@ public class TranslationService {
                 return cn;
             }
             if (!MatcherUtils.isChines(en)) {
-                ntr.save(new NotTranslation(en));
+                NotTranslation byNotTranslation = ntr.findByNotTranslation(en);
+                if (byNotTranslation == null) {
+                    ntr.save(new NotTranslation(en));
+                }
             }
             return en;
         } catch (Exception e) {
             try {
                 if (!MatcherUtils.isChines(en)) {
-                    ntr.save(new NotTranslation(en));
+                    NotTranslation byNotTranslation = ntr.findByNotTranslation(en);
+                    if (byNotTranslation == null) {
+                        ntr.save(new NotTranslation(en));
+                    }
                 }
             } catch (Exception ignored) {
                 return en;

@@ -1,9 +1,11 @@
 package com.nyx.bot.utils;
 
 import com.nyx.bot.entity.Hint;
+import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.repo.HintRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.xhtmlrenderer.layout.SharedContext;
@@ -94,22 +96,30 @@ public class HtmlToImage {
         }
         html = html.replaceAll("/css/{0,}", "./css/")
                 .replaceAll("/img/{0,}", "./img/");
-        StringBuilder str = new StringBuilder(html);
-        if (hint != null) {
-            str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
-                    "\tPosted by:KingPrimes<br/>\n" +
-                    "\t" +
-                    hint.getHint() +
-                    "\n</div>\n");
-        } else {
-            str.insert(str.indexOf("</body>"), """
-                    <div class="foot-by">
-                    \tPosted by:KingPrimes<br/>
-                    \t
-                    </div>
-                    """);
-        }
+        StringBuilder str = getBuilder(html, hint);
         return str.toString();
+    }
+
+    @NotNull
+    private static StringBuilder getBuilder(String html, Hint hint) {
+        StringBuilder str = new StringBuilder(html);
+        if (str.indexOf("</body>") > 1) {
+            if (hint != null) {
+                str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
+                        "\tPosted by:KingPrimes<br/>\n" +
+                        "\t" +
+                        hint.getHint() +
+                        "\n</div>\n");
+            } else {
+                str.insert(str.indexOf("</body>"), """
+                        <div class="foot-by">
+                        \tPosted by:KingPrimes<br/>
+                        \t
+                        </div>
+                        """);
+            }
+        }
+        return str;
     }
 
     /***
@@ -165,8 +175,11 @@ public class HtmlToImage {
      * @param url Html Url地址
      * @return 图片流
      */
-    public static ByteArrayOutputStream conver(String url) {
+    public static ByteArrayOutputStream conver(String url) throws HtmlToImageException {
         String html = HttpUtils.sendGet(url).getBody();
+        if (html == null) {
+            throw new HtmlToImageException(I18nUtils.message("error.html.image"));
+        }
         int width = getWidth(html);
         html = outH(html);
         return tmpHtmlToImageByteArray(html, width);
@@ -176,8 +189,11 @@ public class HtmlToImage {
      * @param url Html Url地址
      * @return 图片流
      */
-    public static ByteArrayOutputStream converPost(String url, String json) {
+    public static ByteArrayOutputStream converPost(String url, String json) throws HtmlToImageException {
         String html = HttpUtils.sendPost(url, json).getBody();
+        if (html == null) {
+            throw new HtmlToImageException(I18nUtils.message("error.html.image"));
+        }
         int width = getWidth(html);
         html = outH(html);
         return tmpHtmlToImageByteArray(html, width);

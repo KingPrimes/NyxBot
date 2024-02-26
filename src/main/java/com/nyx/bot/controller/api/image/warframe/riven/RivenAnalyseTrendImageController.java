@@ -5,6 +5,7 @@ import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.BusinessType;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.utils.HtmlToImage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -21,7 +22,7 @@ public class RivenAnalyseTrendImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_RIVEN_ANALYSE, businessType = BusinessType.IMAGE)
     @PostMapping(value = "/postRivenAnalyseImage", produces = MediaType.IMAGE_PNG_VALUE)
-    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException {
+    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.converPost(

@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NotTranslationRepository extends JpaRepository<NotTranslation, Long>, JpaSpecificationExecutor<NotTranslation>, PagingAndSortingRepository<NotTranslation, Long> {
+    NotTranslation findByNotTranslation(String noTranslation);
 }

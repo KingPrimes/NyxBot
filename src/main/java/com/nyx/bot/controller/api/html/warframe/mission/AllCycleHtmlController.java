@@ -1,5 +1,6 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
@@ -24,7 +25,7 @@ public class AllCycleHtmlController {
     TranslationService trans;
 
     @GetMapping("/getAllCycleHtml")
-    public String getHtml(Model model) {
+    public String getHtml(Model model) throws DataNotInfoException {
         GlobalStates gs = CacheUtils.getGlobalState();
         //地球
         GlobalStates.EarthCycle earth = gs.getEarthCycle();

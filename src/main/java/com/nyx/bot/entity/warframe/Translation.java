@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 用于翻译Warframe 中英文
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false, exclude = {"cn", "en", "isPrime", "isSet"})
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"cn", "en"}))
