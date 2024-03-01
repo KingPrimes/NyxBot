@@ -12,14 +12,17 @@ import ai.djl.opencv.OpenCVImageFactory;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.training.util.ProgressBar;
 import ai.djl.translate.TranslateException;
+import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.ocr.common.RotatedBox;
 import com.nyx.bot.utils.ocr.opencv.NDArrayUtils;
 import com.nyx.bot.utils.ocr.opencv.OpenCVUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.Mat;
+import org.springframework.core.io.ClassPathResource;
 
 import java.awt.image.BufferedImage;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +35,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @mail 179209347@qq.com
  * @website www.aias.top
  */
+@Slf4j
 public final class OcrV4Recognition {
+    static String path = System.getProperty("user.dir");
+    static String modePath = path + "\\models\\ch_PP-OCRv4_rec_infer.zip";
 
 
     public OcrV4Recognition() {
+
     }
 
     /**
@@ -43,22 +50,17 @@ public final class OcrV4Recognition {
      *
      * @return
      */
-    public Criteria<Image, String> chRecCriteria() {
-        URL resource = this.getClass().getClassLoader().getResource("models/ch_PP-OCRv4_rec_infer.zip");
-        Criteria<Image, String> criteria;
-        try {
-            criteria = Criteria.builder()
-                    .optEngine("OnnxRuntime")
+    public static Criteria<Image, String> chRecCriteria() throws IOException {
+        ClassPathResource resource = new ClassPathResource("models/ch_PP-OCRv4_rec_infer.zip");
+        FileUtils.copyFile(resource.getInputStream(), new File(modePath));
+        return Criteria.builder()
+                .optEngine("OnnxRuntime")
 //                        .optModelName("inference")
-                    .setTypes(Image.class, String.class)
-                    .optModelPath(Paths.get(resource.toURI()))
-                    .optProgress(new ProgressBar())
-                    .optTranslator(new PpWordRecTranslator(new ConcurrentHashMap<String, String>()))
-                    .build();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return criteria;
+                .setTypes(Image.class, String.class)
+                .optModelPath(Paths.get(modePath))
+                .optProgress(new ProgressBar())
+                .optTranslator(new PpWordRecTranslator(new ConcurrentHashMap<String, String>()))
+                .build();
     }
 
 

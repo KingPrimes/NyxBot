@@ -32,7 +32,7 @@ public class PpWordRecTranslator implements Translator<Image, String> {
 
     public PpWordRecTranslator(Map<String, ?> arguments) {
         use_space_char =
-                !arguments.containsKey("use_space_char") || Boolean.parseBoolean(arguments.get("use_space_char").toString());
+                arguments.containsKey("use_space_char") ? Boolean.parseBoolean(arguments.get("use_space_char").toString()) : true;
     }
 
     @Override

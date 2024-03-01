@@ -17,12 +17,11 @@ public class OCRImage {
      * @param event 消息事件
      */
     public static List<List<String>> ocrImage(AnyMessageEvent event) {
-        PaddlePaddleOCRV4 instance = PaddlePaddleOCRV4.INSTANCE;
         List<String> msgImgUrlList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
         List<List<String>> images = new ArrayList<>();
         try {
             for (String s : msgImgUrlList) {
-                images.add(instance.ocr(s));
+                images.add(PaddlePaddleOCRV4.ocr(s));
             }
         } catch (Exception e) {
             log.error("识别图片报错：{}", e.getMessage());
