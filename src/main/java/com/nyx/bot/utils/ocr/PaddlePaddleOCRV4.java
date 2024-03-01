@@ -61,10 +61,6 @@ public class PaddlePaddleOCRV4 {
             // 对检测结果根据坐标位置，根据从上到下，从做到右，重新排序，下面算法对图片倾斜旋转角度较小的情形适用
             // 如果图片旋转角度较大，则需要自行改进算法，需要根据斜率校正计算位置。
             List<RotatedBox> initList = new ArrayList<>(detections);
-            for (RotatedBox result : detections) {
-                // put low Y value at the head of the queue.
-                initList.add(result);
-            }
             Collections.sort(initList);
 
             List<ArrayList<RotatedBoxCompX>> lines = new ArrayList<>();
