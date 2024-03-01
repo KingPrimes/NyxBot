@@ -2,10 +2,10 @@ package com.nyx.bot.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 @Slf4j
 public class FileUtils {
@@ -57,5 +57,40 @@ public class FileUtils {
             log.error("write file error:{}", e.getMessage());
         }
     }
+
+    /**
+     * 复制文件
+     *
+     * @param srcFile  源文件
+     * @param destFile 目标文件
+     * @throws IOException IOException
+     */
+    public static void copyFile(File srcFile, File destFile) throws IOException {
+        if (!destFile.getParentFile().exists()) {
+            destFile.getParentFile().mkdirs();
+        }
+        if (!destFile.exists()) {
+            Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+    }
+
+    /**
+     * 复制文件
+     *
+     * @param in       输入流
+     * @param destFile 目标文件
+     * @throws IOException IOException
+     */
+    public static void copyFile(InputStream in, File destFile) throws IOException {
+        if (!destFile.getParentFile().exists()) {
+            destFile.getParentFile().mkdirs();
+        }
+        if (!destFile.exists()) {
+            Files.copy(in, destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+    }
+
 
 }
