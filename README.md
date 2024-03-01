@@ -31,7 +31,15 @@ ws://localhost:8080/ws/shiro
 3. 安装[Java17 Oracle](https://www.oracle.com/java/technologies/downloads/#java17)
    或 [Open Jdk 17](https://www.openlogic.com/openjdk-downloads)
 4. 下载[NyxBot](https://github.com/KingPrimes/NyxBot/releases)
-5. 打开命令行工具，跳转到 "NyxBot.jar" 所存放的目录 输入命令 java -jar NyxBot.jar
+5. 打开命令行工具，跳转到 "NyxBot.jar" 所存放的目录 **启动命令** **java -jar NyxBot.jar**
+6. 如若8080端口被占用或你想要使用别的端口可在启动命令后方添加参数.
+
+```
+选择其中一个启动 NyxBot.jar
+java -Dserver.port = 8080 -jar NyxBot.jar
+
+java -jar NyxBot.jar --server.port = 8080
+```
 
 # 客户端
 
