@@ -1,6 +1,8 @@
 package com.nyx.bot.core.controller;
 
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.enums.HttpCodeEnum;
@@ -17,10 +19,12 @@ import org.springframework.web.bind.annotation.InitBinder;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BaseController {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 返回成功数据
@@ -138,5 +142,15 @@ public class BaseController {
         return StringUtils.format("redirect:{}", url);
     }
 
+    public String pushJson(List all) {
+        SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
+        Set<String> set = new HashSet<>();
+        set.add("pageNum");
+        set.add("pageSize");
+        set.add("totalCount");
+        set.add("totalPage");
+        spf.getExcludes().addAll(set);
+        return JSON.toJSONString(all, spf);
+    }
 
 }
