@@ -8,12 +8,14 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Slf4j
 @Primary
 @Component
 public class BotCoreEvent extends CoreEvent {
+    WebSocketSession session;
 
     @Override
     public void online(Bot bot) {
@@ -22,12 +24,16 @@ public class BotCoreEvent extends CoreEvent {
 
     @Override
     public void offline(long account) {
+        try {
+            session.close();
+        } catch (IOException ignored) {
+        }
         log.info("机器人 {} 已断开链接", account);
     }
 
     @Override
     public boolean session(WebSocketSession session) {
-        log.info(session.getUri().getPath());
+        this.session = session;
         return super.session(session);
     }
 }
