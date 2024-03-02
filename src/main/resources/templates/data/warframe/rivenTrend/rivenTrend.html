@@ -37,8 +37,17 @@
         <div class="container-div">
             <div class="row">
                 <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-primary btn-rounded btn-sm" onclick="init()">
+                        <i class="fa fa-angle-up"></i> 初始化
+                    </a>
                     <a class="btn btn-primary btn-rounded btn-sm" onclick="update()">
                         <i class="fa fa-angle-up"></i> 更新
+                    </a>
+                    <a class="btn btn-success" onclick="$.operate.add(undefined,300,450)">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-warning" onclick="push()">
+                        <i class="fa fa-download"></i> 推送到Github
                     </a>
                 </div>
                 <div class="col-sm-12 select-table table-striped">
@@ -56,6 +65,8 @@
     $(function () {
         var options = {
             url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
             modalName: "紫卡倾向",
             sortOrder: "desc",
             escape: true,
@@ -89,6 +100,15 @@
                 {
                     field: 'type',
                     title: '武器类型'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        const actions = [];
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ',' + 300 + ',' + 450 + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        return actions.join('');
+                    }
                 }
             ]
         };
@@ -101,6 +121,14 @@
 
     function update() {
         $.operate.post(prefix + "/update")
+    }
+
+    function init() {
+        $.operate.post(prefix + "/init")
+    }
+
+    function push() {
+        $.modal.open("推送", prefix + "/push", 300, 300);
     }
 
     function resetPre() {

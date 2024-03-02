@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('新增紫卡倾向词典')}"/>
+<th:block th:insert="~{include :: datetimepicker-css}"/>
+<th:block th:insert="~{include :: datetimepicker-js}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form form-horizontal m-t" id="form-riven-trend-add">
+            <input id="id" name="id" type="hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="trendName">武器名称：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="trendName" name="trendName" placeholder="武器名称" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="newNum">新的倾向：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="newNum" name="newNum" placeholder="新的倾向: 0.5 1.0"
+                               type="number">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="oldNum">旧的倾向：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="oldNum" name="oldNum" placeholder="旧的倾向: 0.25"
+                               type="number">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">
+                    武器类型：
+                    <select class="form-control" id="type" name="type">
+                        <option th:each="t:${types}" th:text="${t.getDesc()}" th:value="${t.value()}"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="isDate">此次更新得时间：</label>
+                <div class="input-group date">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input class="form-control" id="isDate" name="isDate" placeholder="yyyy-MM-dd HH:mm:ss" readonly
+                           type="text">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "data/warframe/rivenTrend";
+
+    layui.use('laydate', function () {
+        const laydate = layui.laydate;
+        laydate.render({
+            elem: '#isDate',
+            type: 'datetime',
+            trigger: 'click'
+        });
+    })
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-riven-trend-add').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>
