@@ -17,10 +17,10 @@ public class Weapons extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     //唯一自增ID
-    Long id;
+    Long weaponId;
     @JsonProperty("id")
     //唯一字符串武器ID
-    String weaponId;
+    String id;
     //在URL路径中的名称
     @JsonProperty("url_name")
     String urlName;

@@ -19,11 +19,11 @@ public class RivenItems extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     //唯一自增ID
-    Long id;
+    Long rivenId;
     @JsonProperty("id")
     @Column(length = 50)
     //紫卡ID
-    String rivenId;
+    String id;
     @JsonProperty("item_name")
     @Column(length = 50)
     //物品名称

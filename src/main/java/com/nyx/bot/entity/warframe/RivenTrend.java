@@ -43,15 +43,17 @@ public class RivenTrend extends BaseEntity {
     @JsonProperty("type")
     RivenTrendTypeEnum type;
 
-    //武器中文名称
-    @Transient
-    private String traCh;
-
     //此次更新得时间
-    @Transient
+    @JsonProperty("isDate")
     private String isDate;
 
-    public RivenTrend(Long id, String trendName, String newDot, Double newNum, String oldDot, Double oldNum, RivenTrendTypeEnum type, String traCh) {
+    //武器中文名称
+    @Transient
+    @JsonProperty("traCh")
+    private String traCh;
+
+
+    public RivenTrend(Long id, String trendName, String newDot, Double newNum, String oldDot, Double oldNum, String isDate, RivenTrendTypeEnum type, String traCh) {
         this.id = id;
         this.trendName = trendName;
         this.newDot = newDot;
@@ -59,6 +61,7 @@ public class RivenTrend extends BaseEntity {
         this.oldDot = oldDot;
         this.oldNum = oldNum;
         this.type = type;
+        this.isDate = isDate;
         this.traCh = traCh;
     }
 }
