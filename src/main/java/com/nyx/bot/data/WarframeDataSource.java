@@ -205,7 +205,10 @@ public class WarframeDataSource {
                     return;
                 }
             }
-            List<Weapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
+            List<Weapons> weapons = JSONObject.parseObject(body.getBody())
+                    .getJSONObject("payload")
+                    .getJSONArray("weapons")
+                    .toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
 
 
             body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
@@ -229,10 +232,10 @@ public class WarframeDataSource {
                                 .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
                                 .containsKey(item.getItemName() + item.getUrlName())).toList();
                 list.forEach(item -> {
-                    Weapons weaponsById = repository.findWeaponsByWeaponId(item.getWeaponId());
+                    Weapons weaponsById = repository.findWeaponsById(item.getId());
                     Optional.ofNullable(weaponsById)
                             .ifPresentOrElse(weapon -> {
-                                item.setId(weapon.getId());
+                                item.setWeaponId(weapon.getWeaponId());
                                 repository.save(item);
                             }, () -> {
                                 repository.save(item);
@@ -261,7 +264,10 @@ public class WarframeDataSource {
                 }
             }
             //获取数据源
-            List<RivenItems> items = JSON.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("items").toJavaList(RivenItems.class, JSONReader.Feature.SupportSmartMatch);
+            List<RivenItems> items = JSON.parseObject(body.getBody())
+                    .getJSONObject("payload")
+                    .getJSONArray("items")
+                    .toJavaList(RivenItems.class, JSONReader.Feature.SupportSmartMatch);
 
             RivenItemsRepository repository = SpringUtils.getBean(RivenItemsRepository.class);
             AtomicInteger size = new AtomicInteger();
@@ -281,10 +287,10 @@ public class WarframeDataSource {
                 //便利结果集合
                 list.forEach(item -> {
                     //到数据库中查询是否有这个值
-                    RivenItems byRivenId = repository.findByRivenId(item.getRivenId());
+                    RivenItems byRivenId = repository.findById(item.getId());
                     //如果有这个值则把ID付给要保存的新值
                     Optional.ofNullable(byRivenId).ifPresent(b ->
-                            item.setId(b.getId()));
+                            item.setRivenId(b.getRivenId()));
                     //增加|修改值
                     repository.save(item);
                     //增加|修改值的数量
