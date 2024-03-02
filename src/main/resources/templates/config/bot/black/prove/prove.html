@@ -6,7 +6,7 @@
 <div class="container-div">
     <div class="row">
         <div class="col-sm-12 search-collapse">
-            <form id="prive-form">
+            <form id="prove-black-form">
                 <div class="select-list">
                     <ul>
                         <li>
@@ -27,6 +27,9 @@
             <a class="btn btn-primary btn-rounded btn-sm" onclick="$.operate.add('',775,200)">
                 <i class="fa fa-add"></i> 添加
             </a>
+            <a class="btn btn-primary btn-rounded btn-sm" onclick="handoff()">
+                <i class="fa fa-add"></i> 切换至白名单
+            </a>
         </div>
         <div class="col-sm-12 select-table table-striped">
             <table id="bootstrap-table"></table>
@@ -37,10 +40,10 @@
 <th:block th:insert="~{include :: footer}"/>
 <th:block th:insert="~{include :: bootstrap-select-js}"/>
 <script th:inline="javascript">
-    const prefix = ctx + "config/black/prive";
+    const prefix = ctx + "config/bot/black/prove";
 
     $(function () {
-        var options = {
+        const options = {
             url: prefix + "/list",
             createUrl: prefix + "/add/{id}",
             updateUrl: prefix + "/edit/{id}",
@@ -57,7 +60,7 @@
                     radio: true
                 },
                 {
-                    field: 'userUid',
+                    field: 'prove',
                     title: 'QQ号'
                 },
                 {
@@ -76,17 +79,24 @@
         $.table.init(options);
     });
 
+    function handoff() {
+        $.operate.post(prefix + "/handoff", "", function () {
+            parent.location.reload()
+        });
+
+    }
+
     function queryParams(params) {
         return $.table.queryParams(params);
     }
 
     function searchPre() {
-        $.table.search('prive-form', 'bootstrap-table');
+        $.table.search('prove-black-form', 'bootstrap-table');
     }
 
     function resetPre() {
         $("#prive-form")[0].reset();
-        $.table.search('prive-form', 'bootstrap-table');
+        $.table.search('prove-black-form', 'bootstrap-table');
     }
 </script>
 

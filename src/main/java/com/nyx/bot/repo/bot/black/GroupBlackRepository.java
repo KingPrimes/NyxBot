@@ -1,4 +1,4 @@
-package com.nyx.bot.repo.black;
+package com.nyx.bot.repo.bot.black;
 
 import com.nyx.bot.entity.bot.black.GroupBlack;
 import org.springframework.data.jpa.repository.JpaRepository;

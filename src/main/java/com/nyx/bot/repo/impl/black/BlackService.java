@@ -1,12 +1,12 @@
 package com.nyx.bot.repo.impl.black;
 
 import com.nyx.bot.entity.bot.black.GroupBlack;
-import com.nyx.bot.entity.bot.black.PriveBlack;
-import com.nyx.bot.repo.black.GroupBlackRepository;
-import com.nyx.bot.repo.black.PriveBlackRepository;
+import com.nyx.bot.entity.bot.black.ProveBlack;
+import com.nyx.bot.repo.bot.black.GroupBlackRepository;
+import com.nyx.bot.repo.bot.black.ProveBlackRepository;
+import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,29 +17,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
 public class BlackService {
 
-    @Autowired
+    @Resource
     GroupBlackRepository repository;
 
-    @Autowired
-    PriveBlackRepository prepository;
+    @Resource
+    ProveBlackRepository proveBlackRepository;
 
 
     public GroupBlack findByGroupId(Long id) {
-        AtomicReference<GroupBlack> gb = new AtomicReference<>(new GroupBlack());
-        repository.findById(id).ifPresent(gb::set);
-        return gb.get();
+        return repository.findByGroupUid(id);
     }
 
-    public PriveBlack findByPriveId(Long id) {
-        AtomicReference<PriveBlack> pb = new AtomicReference<>();
-        prepository.findById(id).ifPresent(pb::set);
-        return pb.get();
+    public ProveBlack findByProveId(Long id) {
+        return proveBlackRepository.findByProve(id);
     }
 
 
@@ -78,35 +73,35 @@ public class BlackService {
     }
 
 
-    public Page<PriveBlack> list(PriveBlack pb) {
-        Specification<PriveBlack> specs = (root, query, cb) -> {
+    public Page<ProveBlack> list(ProveBlack pb) {
+        Specification<ProveBlack> specs = (root, query, cb) -> {
             // 创建查询列表
             List<Predicate> predicateList = new ArrayList<>();
             //判断是否是Null
-            Optional.ofNullable(pb.getUserUid()).ifPresent(p -> {
+            Optional.ofNullable(pb.getProve()).ifPresent(p -> {
                 //模糊查询
                 predicateList.add(cb.equal(root.get("userUid"), p));
             });
             Predicate[] predicates = new Predicate[predicateList.size()];
             return query.where(predicateList.toArray(predicates)).getRestriction();
         };
-        return prepository.findAll(specs,
+        return proveBlackRepository.findAll(specs,
                 PageRequest.of(pb.getPageNum() - 1, pb.getPageSize()));
     }
 
-    public int save(PriveBlack pb) {
+    public int save(ProveBlack pb) {
         AtomicInteger x = new AtomicInteger();
         Optional.ofNullable(pb).ifPresent(p -> {
-            prepository.save(pb);
+            proveBlackRepository.save(pb);
             x.set(1);
         });
         return x.get();
     }
 
-    public int remove(PriveBlack pb) {
+    public int remove(ProveBlack pb) {
         AtomicInteger x = new AtomicInteger();
         Optional.ofNullable(pb.getId()).ifPresent(id -> {
-            prepository.deleteById(id);
+            proveBlackRepository.deleteById(id);
             x.set(1);
         });
         return x.get();
@@ -127,7 +122,7 @@ public class BlackService {
                 flag.set(false);
             });
         }
-        PriveBlack byUserUid = prepository.findByUserUid(userUid);
+        ProveBlack byUserUid = proveBlackRepository.findByProve(userUid);
         Optional.ofNullable(byUserUid).ifPresent(p -> {
             flag.set(false);
         });

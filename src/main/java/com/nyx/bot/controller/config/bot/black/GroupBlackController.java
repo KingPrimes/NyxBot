@@ -1,10 +1,13 @@
-package com.nyx.bot.controller.config.black;
+package com.nyx.bot.controller.config.bot.black;
 
+import com.mikuac.shiro.core.BotContainer;
+import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.GroupBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
+import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -12,10 +15,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/config/black/group")
+@RequestMapping("/config/bot/black/group")
 public class GroupBlackController extends BaseController {
 
-    String prefix = "config/black/group";
+    String prefix = "config/bot/black/group";
 
     @Resource
     BlackService bs;
@@ -35,7 +38,10 @@ public class GroupBlackController extends BaseController {
 
 
     @GetMapping("/add")
-    public String add() {
+    public String add(ModelMap map) {
+        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> {
+            map.put("group", bot.getGroupList().getData());
+        });
         return prefix + "/add";
     }
 
@@ -63,6 +69,12 @@ public class GroupBlackController extends BaseController {
         GroupBlack gb = new GroupBlack();
         gb.setId(id);
         return toAjax(bs.remove(gb));
+    }
+
+    @PostMapping("/handoff")
+    @ResponseBody
+    public AjaxResult handoff() {
+        return SpringUtils.getBean(HandOff.class).handoff();
     }
 
 }

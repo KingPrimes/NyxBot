@@ -1,21 +1,18 @@
 package com.nyx.bot.entity.bot.black;
 
 import com.nyx.bot.core.dao.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table
-public class PriveBlack extends BaseEntity {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"prove"}))
+public class ProveBlack extends BaseEntity {
     @Id
     @GeneratedValue
     Long id;
 
-    Long userUid;
+    Long prove;
 }

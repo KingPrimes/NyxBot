@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<th:block th:insert="~{include :: header('群黑名单')}"/>
+<th:block th:insert="~{include :: header('用户黑名单')}"/>
 <body>
 <div class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-        <form class="form-horizontal m" id="form-group-black-add">
+        <form class="form-horizontal m" id="form-prove-black-add">
             <input id="id" name="id" type="hidden">
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="groupUid">QQ群号：</label>
+                <label class="col-sm-3 control-label" for="prove">QQ：</label>
                 <div class="col-sm-8">
                     <div class="input-group">
-                        <input class="form-control" id="groupUid" name="groupUid" placeholder="要加入黑名单的QQ群组"
+                        <input class="form-control" id="prove" name="prove" placeholder="要加入黑名单的QQ账号"
                                type="number">
                     </div>
                 </div>
@@ -20,22 +20,22 @@
 </div>
 <th:block th:insert="~{include :: footer}"/>
 <script type="text/javascript">
-    const prefix = ctx + "config/black/group";
+    const prefix = ctx + "config/bot/black/prove";
 
     $.validator.addMethod("qq", function (value, element, param) {
         var qqPattern = /^[1-9][0-9]{4,10}$/;
         return new RegExp(qqPattern).test(value);
     }, "请输入5-11位的QQ账号");
 
-    $("#form-group-black-add").validate({
+    $("#form-prove-black-add").validate({
         rules: {
-            userId: {
+            prove: {
                 required: true,
                 qq: true,
             }
         },
         messages: {
-            userId: {
+            prove: {
                 required: "请输入正确的QQ账号",
             }
         },
@@ -44,7 +44,7 @@
 
     function submitHandler() {
         if ($.validate.form()) {
-            $.operate.save(prefix + "/add", $('#form-group-black-add').serialize());
+            $.operate.save(prefix + "/add", $('#form-prove-black-add').serialize());
         }
     }
 

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
-<th:block th:insert="~{include :: header('群黑名单')}"/>
+<th:block th:insert="~{include :: header('用户黑名单')}"/>
 <body>
 <div class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-        <form class="form-horizontal m" id="form-group-black-edit" th:object="${black}">
+        <form class="form-horizontal m" id="form-prove-black-edit" th:object="${black}">
             <input name="id" th:field="*{id}" type="hidden">
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="groupUid">QQ群号：</label>
+                <label class="col-sm-3 control-label" for="prove">QQ：</label>
                 <div class="col-sm-8">
                     <div class="input-group">
-                        <input class="form-control" id="groupUid" name="groupUid" th:field="*{groupUid}"
+                        <input class="form-control" id="prove" name="prove" th:field="*{prove}"
                                type="number">
                     </div>
                 </div>
@@ -20,11 +20,11 @@
 </div>
 <th:block th:insert="~{include :: footer}"/>
 <script type="text/javascript">
-    const prefix = ctx + "config/black/group";
+    const prefix = ctx + "config/bot/black/prove";
 
     function submitHandler() {
         if ($.validate.form()) {
-            $.operate.save(prefix + "/update", $('#form-group-black-edit').serialize());
+            $.operate.save(prefix + "/update", $('#form-prove-black-edit').serialize());
         }
     }
 
@@ -32,7 +32,7 @@
         const tree = layero.find("iframe")[0].contentWindow.$._tree;
         if ($.tree.notAllowLastLevel(tree)) {
             const body = $.modal.getChildFrame(index);
-            $("#groupUid").val(body.find('#groupUid').val());
+            $("#userUid").val(body.find('#userUid').val());
             $.modal.close(index);
         }
     }

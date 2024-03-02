@@ -40,101 +40,123 @@
             <ul class="nav" id="side-menu">
                 <li class="active">
                     <a th:href="@{/}"><i class="fa fa-home"></i> <span
-                            class="nav-label" i18n="Index">首页</span> </a>
+                            class="nav-label">首页</span> </a>
                 </li>
                 <li>
                     <a class="menuItem" th:href="@{/log/info}" data-refresh="true">
                         <i class="fa fa-calendar"></i>
-                        <span class="nav-label" i18n="Log_Viewing">日志查看</span>
+                        <span class="nav-label">日志查看</span>
                     </a>
                 </li>
-                <li>
+                <li id="config">
                     <a href="#" data-refresh="false">
                         <i class="fa fa-edit"></i>
-                        <span class="nav-label" i18n="Config">配置</span>
+                        <span class="nav-label">配置</span>
                         <span class="fa arrow"></span>
                     </a>
                     <ul class="nav nav-second-level">
-                        <li>
+                        <li id="git">
                             <a class="menuItem" data-refresh="false" onclick="gitConfig()">
-                                <i class="fas fa-user-slash"></i>
+                                <i class="fas fa-user"></i>
                                 <span class="nav-label">配置Git账户</span>
                             </a>
                         </li>
                         <li>
-                            <a class="menuItem" data-refresh="false" onclick="botConfig()">
-                                <i class="fas fa-robot"></i>
-                                <span class="nav-label" i18n="Config_Bot">Bot配置</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="menuItem" th:href="@{/config/admin}" data-refresh="false">
+                            <a class="menuItem" data-refresh="false" th:href="@{/config/admin}">
                                 <i class="fas fa-user-cog"></i>
-                                <span class="nav-label" i18n="Config_Super_Admin">超级管理员</span>
+                                <span class="nav-label">管理员</span>
                             </a>
                         </li>
                         <li>
-                            <a class="menuItem" th:href="@{/config/black/group}" data-refresh="false">
-                                <i class="fas fa-users-slash"></i>
-                                <span class="nav-label" i18n="Config_Group_Black">群黑名单</span>
+                            <a data-refresh="false" href="#">
+                                <i class="fa fa-edit"></i>
+                                <span class="nav-label">黑白名单</span>
+                                <span class="fa arrow"></span>
                             </a>
+                            <ul class="nav nav-second-level" th:if="${isBW}">
+                                <li>
+                                    <a class="menuItem" data-refresh="false"
+                                       th:href="@{/config/bot/white/group}">
+                                        <i class="fas fa-users"></i>
+                                        <span class="nav-label">群白名单</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" data-refresh="false"
+                                       th:href="@{/config/bot/white/prove}">
+                                        <i class="fas fa-user"></i>
+                                        <span class="nav-label">个人白名单</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav nav-second-level" th:if="${!isBW}">
+                                <li>
+                                    <a class="menuItem" data-refresh="false"
+                                       th:href="@{/config/bot/black/group}">
+                                        <i class="fas fa-users-slash"></i>
+                                        <span class="nav-label">群黑名单</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menuItem" data-refresh="false"
+                                       th:href="@{/config/bot/black/prove}">
+                                        <i class="fas fa-user-slash"></i>
+                                        <span class="nav-label">个人黑名单</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li>
-                            <a class="menuItem" th:href="@{/config/black/prive}" data-refresh="false">
-                                <i class="fas fa-user-slash"></i>
-                                <span class="nav-label" i18n="Config_Prove_Black">个人黑名单</span>
-                            </a>
-                        </li>
+
                     </ul>
                 </li>
                 <li>
                     <a href="#" data-refresh="false">
                         <i class="fa fa-database"></i>
-                        <span class="nav-label" i18n="Data_Source">本地数据</span>
+                        <span class="nav-label">本地数据</span>
                         <span class="fa arrow"></span>
                     </a>
                     <ul class="nav nav-second-level collapse">
                         <li>
                             <a href="#" data-refresh="false">
                                 <embed th:src="@{/svg/WARFRAME.svg}">
-                                <span class="nav-label" i18n="Data_Warframe">Warframe</span>
+                                <span class="nav-label">Warframe</span>
                                 <span class="fa arrow"></span>
                             </a>
                             <ul class="nav nav-third-level">
                                 <li>
                                     <a class="menuItem" th:href="@{/data/warframe/alias}" data-refresh="false">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Alias">别名</span>
+                                        <span class="nav-label">别名</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="menuItem" th:href="@{/data/warframe/ephemeras}" data-refresh="false">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Ephemeras">幻纹</span>
+                                        <span class="nav-label">幻纹</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="menuItem" th:href="@{/data/warframe/subscribe}" data-refresh="false">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Subscribe">订阅</span>
+                                        <span class="nav-label">订阅</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="menuItem" th:href="@{/data/warframe/market}" data-refresh="false">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Market">Market</span>
+                                        <span class="nav-label">Market</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="menuItem" data-refresh="false" th:href="@{/data/warframe/rivenTrend}">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Riven">Rivent</span>
+                                        <span class="nav-label">Rivent</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="menuItem" th:href="@{/data/warframe/translation}" data-refresh="false">
                                         <i></i>
-                                        <span class="nav-label" i18n="Data_Warframe_Translation">翻译</span>
+                                        <span class="nav-label">翻译</span>
                                     </a>
                                 </li>
                                 <li>
@@ -163,7 +185,7 @@
                     </a>
                 </div>
                 <ul class="nav navbar-top-links navbar-right welcome-message">
-                    <li class="dropdown user-menu">
+                    <!--<li class="dropdown user-menu">
                         <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
                             <span class="hidden-xs" i18n="Language">Language</span>
                         </a>
@@ -177,7 +199,7 @@
                                     English</a>
                             </li>
                         </ul>
-                    </li>
+                    </li>-->
                     <li class="dropdown user-menu">
                         <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
                             <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
@@ -281,19 +303,10 @@
         $.modal.open("重置密码", url, '770', '380');
     }
 
-    function chatGPTConfig() {
-        const url = ctx + 'bot/ai/chat/config';
-        $.modal.open('ChatGPT配置', url, '770', '380')
-    }
-
-    function botConfig() {
-        const url = ctx + 'config/bot';
-        $.modal.open('Bot配置', url, '770', '380')
-    }
-
     function gitConfig() {
         const url = ctx + 'config/git/html';
         $.modal.open('配置Git账户', url, '400', '300')
+        document.getElementById("config").setAttribute("class", "");
     }
 
     /* 切换主题 */
