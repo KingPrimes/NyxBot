@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('群白名单')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-group-white-add">
+            <input id="id" name="id" type="hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="groupUid">QQ群号：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <select class="form-control" id="groupUid" name="groupUid">
+                            <option th:each="g:${group}" th:text="${g.groupName}" th:value="${g.groupId}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "config/bot/white/group";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/add", $('#form-group-white-add').serialize());
+        }
+    }
+</script>
+</body>
+</html>
