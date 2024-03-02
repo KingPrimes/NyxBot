@@ -3,6 +3,8 @@ package com.nyx.bot.plugin.warframe.utils;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
+import com.nyx.bot.repo.warframe.RivenTrendRepository;
+import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -32,16 +34,16 @@ public class RivenDispositionUpdates {
 
         //解析Html文档
         Document document = Jsoup.parse(html);
-        Elements elements = document.getElementsByClass("ipsStream ipsList_reset ");
-
-        if (!elements.isEmpty()) {
-            for (Element e : elements) {
-                Elements span = e.getElementsByClass("ipsStreamItem ipsStreamItem_contentBlock ipsStreamItem_expanded ipsAreaBackground_reset");
-                for (Element li : span) {
-                    Elements a = li.getElementsByClass("ipsType_break ipsContained");
-                    for (Element url : a) {
-                        newRiven.add(url.getElementsByTag("a").attr("href"));
+        Elements ols = document.getElementsByTag("ol");
+        if (!ols.isEmpty()) {
+            for (Element ol : ols) {
+                Elements lis = ol.getElementsByAttribute("data-role");
+                for (Element li : lis) {
+                    Elements as = li.getElementsByAttribute("data-linkType");
+                    for (Element url : as) {
+                        newRiven.add(url.attr("href"));
                     }
+                    break;
                 }
             }
         }
@@ -54,11 +56,13 @@ public class RivenDispositionUpdates {
      *
      * @return 紫卡倾向集
      */
-    public static List<RivenTrend> getRivenDispositionUpdates() {
+    private static List<RivenTrend> getRivenDispositionUpdates() {
         //获取文档Url地址
         List<String> urls = getRivenDispositionUpdateUrl();
         //用于存放返回的结果
         List<RivenTrend> trends = new ArrayList<>();
+        String dateTime = "";
+        boolean falg = false;
         for (String url : urls) {
             //Get请求获取Html文档
             HttpUtils.Body body = HttpUtils.sendGet(url);
@@ -71,14 +75,13 @@ public class RivenDispositionUpdates {
             Document document = Jsoup.parse(html);
             Elements elements = document.getElementsByClass("ipsSpoiler_contents ipsClearfix");
             if (elements.size() > 1) {
+                falg = true;
                 //获取发帖日期
                 Elements times = document.getElementsByClass("ipsType_light ipsType_reset");
-                String dateTime = "";
                 for (Element el : times) {
                     dateTime = el.getElementsByTag("time").attr("datetime").replace("T", " ").replace("Z", "").trim();
                     break;
                 }
-
                 //根据类选择器 获取此类中的元素
                 //Elements elements = document.getElementsByClass("ipsSpoiler_contents ipsClearfix");
                 //遍历此类中元素
@@ -95,10 +98,9 @@ public class RivenDispositionUpdates {
                         //重新解析格式化后的Html
                         Document doc = Jsoup.parse(br);
                         //遍历此标签中的元素
-                        for (Element e2 : doc.getElementsByTag("p")) {
+                        for (Element e2 : doc.getElementsByTag("span")) {
                             //根据换行字符裁剪内容
                             String[] rives = e2.text().split("\n");
-
                             for (String riven : rives) {
                                 //根据：裁剪内容
                                 String[] wep = riven.split(":");
@@ -109,7 +111,11 @@ public class RivenDispositionUpdates {
                                 //根据：裁剪内容的第0位下标是武器名
                                 trend.setTrendName(wep[0]);
                                 //根据->裁剪内容的第1位下标是更改后的倾向值
-                                String newNum = rent[1].replaceAll("[^\\d.]", "");
+                                String newNum = rent[1];
+                                if (newNum.contains("(")) {
+                                    newNum = newNum.replaceAll(newNum.substring(newNum.indexOf("(")), "");
+                                }
+                                newNum = newNum.replaceAll("[^\\d.]", "");
                                 //设置新的倾向值
                                 trend.setNewNum(Double.valueOf(newNum));
                                 //设置旧的倾向值
@@ -127,7 +133,30 @@ public class RivenDispositionUpdates {
                     }
                 }
             }
+            if (falg) {
+                break;
+            }
         }
         return trends;
     }
+
+    public void upRivenTrend() {
+        log.info("正在执行任务...");
+        RivenTrendRepository bean = SpringUtils.getBean(RivenTrendRepository.class);
+        List<RivenTrend> rivenTrends = getRivenDispositionUpdates();
+        if (rivenTrends.isEmpty()) {
+            return;
+        }
+        rivenTrends.forEach(rivenTrend -> {
+            RivenTrend byTrendName = bean.findByTrendName(rivenTrend.getTrendName());
+            if (byTrendName != null) {
+                rivenTrend.setId(byTrendName.getId());
+                bean.save(rivenTrend);
+            } else {
+                bean.save(rivenTrend);
+            }
+        });
+    }
+
+
 }

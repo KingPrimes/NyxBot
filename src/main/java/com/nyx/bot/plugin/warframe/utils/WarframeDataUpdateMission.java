@@ -129,14 +129,13 @@ public class WarframeDataUpdateMission {
         }
         //获取所有订阅
         List<MissionSubscribe> subscribes = repository.findAll();
-        if (subscribes.size() <= 0) {
-            log.warn("没有人订阅消息！");
+        if (subscribes.isEmpty()) {
             return;
         }
         //获取Bots
         Map<Long, Bot> bots = SpringUtils.getBean(BotContainer.class).robots;
 
-        if (bots.size() <= 0) {
+        if (bots.isEmpty()) {
             log.warn("未链接Bot无法发送订阅消息");
             return;
         }
