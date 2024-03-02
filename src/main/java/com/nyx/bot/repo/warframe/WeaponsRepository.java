@@ -16,12 +16,12 @@ public interface WeaponsRepository extends JpaRepository<Weapons, Long>, JpaSpec
      */
     @Transactional
     @Modifying
-    @Query(value = "INSERT IGNORE INTO WEAPONS(icon, icon_for_mat, item_name, thumb, url_name, weapon_id) VALUES (:#{#weapon.icon},:#{#weapon.iconForMat},:#{#weapon.itemName},:#{#weapon.thumb},:#{#weapon.urlName},:#{#weapon.weaponId})", nativeQuery = true)
+    @Query(value = "INSERT IGNORE INTO WEAPONS(icon, icon_for_mat, item_name, thumb, url_name, id) VALUES (:#{#weapon.icon},:#{#weapon.iconForMat},:#{#weapon.itemName},:#{#weapon.thumb},:#{#weapon.urlName},:#{#weapon.id})", nativeQuery = true)
     Integer addWeapons(@Param("weapon") Weapons weapons);
 
-    @Query(value = "select max(id) from Weapons")
+    @Query(value = "select max(weaponId) from Weapons")
     Integer queryMaxId();
 
-    Weapons findWeaponsByWeaponId(String id);
+    Weapons findWeaponsById(String id);
 
 }

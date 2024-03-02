@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RivenItemsRepository extends JpaRepository<RivenItems, Long>, JpaSpecificationExecutor<RivenItems>, PagingAndSortingRepository<RivenItems, Long> {
-    @Query(value = "select max(id) from RivenTrend")
+    @Query(value = "select max(rivenId) from RivenItems")
     Long queryMaxId();
 
-    RivenItems findByRivenId(String rivenId);
+    RivenItems findById(String id);
 }
