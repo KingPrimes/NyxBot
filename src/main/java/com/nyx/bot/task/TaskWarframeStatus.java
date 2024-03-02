@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.plugin.warframe.utils.WarframeSubscribe;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -24,6 +25,11 @@ public class TaskWarframeStatus {
         } else {
             log.info("获取数据失败！");
         }
-
     }
+
+    @Scheduled(cron = "0 0 0 1,11,21,31 * ? ")
+    public void executeRivenTrend() {
+        new RivenDispositionUpdates().upRivenTrend();
+    }
+
 }
