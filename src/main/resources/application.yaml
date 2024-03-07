@@ -1,6 +1,7 @@
 #是否调试模式
 test:
-  isTest: true
+  isTest: false
+
 project-name:
   version: @version@
   formatted-version: (v@version@)
@@ -77,3 +78,5 @@ spring:
 shiro:
   ws-config:
     ws-url: /ws/shiro
+server:
+  port: 8080
