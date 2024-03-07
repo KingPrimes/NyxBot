@@ -26,7 +26,7 @@ public class HelpController {
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.converPost(
+                HtmlToImage.conversePost(
                         Constants.LOCALHOST + "private/getHelpHtml/", data.toString()
                 ).toByteArray()
         );

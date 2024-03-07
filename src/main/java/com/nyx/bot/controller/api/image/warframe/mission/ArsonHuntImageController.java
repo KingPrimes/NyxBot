@@ -27,7 +27,7 @@ public class ArsonHuntImageController {
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.conver(
+                HtmlToImage.converse(
                         Constants.LOCALHOST + "private/getArsonHuntHtml"
                 ).toByteArray()
         );

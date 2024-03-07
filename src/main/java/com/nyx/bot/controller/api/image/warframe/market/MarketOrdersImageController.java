@@ -26,7 +26,7 @@ public class MarketOrdersImageController {
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
-                HtmlToImage.converPost(
+                HtmlToImage.conversePost(
                         Constants.LOCALHOST + "private/postMarketOrders", data.toString()
                 ).toByteArray()
         );

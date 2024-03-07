@@ -31,7 +31,7 @@ public class FissuesImageController {
             case WARFRAME_FISSURES_PATH_PLUGIN -> i = 2;
         }
         response.getOutputStream().write(
-                HtmlToImage.conver(
+                HtmlToImage.converse(
                         Constants.LOCALHOST + "private/getFissuesHtml/" + i
                 ).toByteArray()
         );
