@@ -29,6 +29,11 @@ public class ApiUrl {
      */
     public static final String WARFRAME_DATA_SOURCE_GIT_CODE = "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/";
 
+    /**
+     * 战甲数据源 备用源
+     */
+    public static final String WARFRAME_DATA_SOURCE_GIT_EE = "https://gitee.com/KingPrime/DataSource/raw/main/warframe/";
+
 
     /**
      * 赤毒幻纹

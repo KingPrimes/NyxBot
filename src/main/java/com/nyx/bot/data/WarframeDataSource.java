@@ -90,7 +90,7 @@ public class WarframeDataSource {
                 log.warn("别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
+                    getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
@@ -125,7 +125,7 @@ public class WarframeDataSource {
                 log.warn("翻译表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
+                    initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
@@ -313,7 +313,7 @@ public class WarframeDataSource {
                 log.warn("紫卡计算器数据初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
+                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
@@ -362,7 +362,7 @@ public class WarframeDataSource {
                 log.warn("紫卡倾向数据初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
                     TimeUnit.SECONDS.sleep(30);
-                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_CODE);
+                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
                     return;
                 } catch (InterruptedException ignored) {
                     return;
