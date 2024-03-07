@@ -1,8 +1,12 @@
 package com.nyx.bot.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 @Slf4j
 public class IoUtils {
@@ -11,20 +15,27 @@ public class IoUtils {
     public static void index() {
         String url = "http://localhost:" + SpringUtils.getPort();
         // 获取操作系统的名字
-        String osName = System.getProperty("os.name", "");
         try {
-            if (osName.startsWith("Mac OS")) {
-                // 苹果的打开方式
+            //Docker 环境不打开浏览器
+            String str = Arrays.toString(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
+            if (str.contains("/docker/")) return;
+
+            // 苹果的打开方式
+            if (SystemUtils.IS_OS_MAC) {
                 Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
                 Method openURL = fileMgr.getDeclaredMethod("openURL",
                         String.class);
                 openURL.invoke(null, url);
-            } else if (osName.startsWith("Windows")) {
-                // windows的打开方式。
+                return;
+            }
+            // windows的打开方式。
+            if (SystemUtils.IS_OS_WINDOWS) {
                 Runtime.getRuntime().exec(
                         "rundll32 url.dll,FileProtocolHandler " + url);
-            } else {
-                // Unix or Linux的打开方式
+                return;
+            }
+            //Unix or Linux的打开方式
+            if (SystemUtils.IS_OS_UNIX || SystemUtils.IS_OS_LINUX) {
                 String[] browsers = {"firefox", "opera", "konqueror", "epiphany",
                         "mozilla", "netscape"};
                 String browser = null;
@@ -40,7 +51,9 @@ public class IoUtils {
                 else
                     // 这个值在上面已经成功的得到了一个进程。
                     Runtime.getRuntime().exec(new String[]{browser, url});
+                return;
             }
+
         } catch (Exception e) {
             log.error("浏览器打开错误：{}", e.getMessage());
         }
