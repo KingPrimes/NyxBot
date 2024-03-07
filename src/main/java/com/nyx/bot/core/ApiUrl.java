@@ -18,7 +18,9 @@ public class ApiUrl {
     /**
      * 战甲数据源 git push pull等操作链接
      */
-    public static final String WARFRAME_DATA_SOURCE_GIT = "https://github.com/KingPrimes/DataSource";
+    public static final String DATA_SOURCE_GIT = "https://github.com/KingPrimes/DataSource";
+
+    public static final String DATA_SOURCE_GIT_EE = "https://gitee.com/KingPrime/DataSource";
 
     /**
      * 战甲数据源

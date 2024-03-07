@@ -10,15 +10,15 @@ public class ThymeleafConfig {
 
     @Bean
     public SpringResourceTemplateResolver springResourceTemplateResolver() {
-        SpringResourceTemplateResolver srtr = new SpringResourceTemplateResolver();
-        srtr.setPrefix("file:./nyxTemplates/");
-        srtr.setSuffix(".html");
-        srtr.setTemplateMode(TemplateMode.HTML);
-        srtr.setCharacterEncoding("UTF-8");
-        srtr.setOrder(1);
-        srtr.setCacheable(false);
-        srtr.setCheckExistence(true);
-        return srtr;
+        SpringResourceTemplateResolver str = new SpringResourceTemplateResolver();
+        str.setPrefix("file:./DataSource/Template/");
+        str.setSuffix(".html");
+        str.setTemplateMode(TemplateMode.HTML);
+        str.setCharacterEncoding("UTF-8");
+        str.setOrder(1);
+        str.setCacheable(false);
+        str.setCheckExistence(true);
+        return str;
     }
 
 }

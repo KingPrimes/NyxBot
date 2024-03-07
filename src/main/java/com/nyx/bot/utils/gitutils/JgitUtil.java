@@ -63,7 +63,7 @@ public class JgitUtil {
      * 构建 Jgit工具类 进行拉取操作
      */
     public static JgitUtil Build() throws Exception {
-        return Build(ApiUrl.WARFRAME_DATA_SOURCE_GIT, "").pull();
+        return Build(ApiUrl.DATA_SOURCE_GIT, "").pull();
     }
 
     private Git openRpo(String path) {
@@ -283,16 +283,19 @@ public class JgitUtil {
     }
 
     /**
-     * /拉取(Pull) git pull origin
+     * 拉取(Pull) git pull origin
      */
     public JgitUtil pull() throws Exception {
-        if (provider == null) {
-            throw new RuntimeException("请设置Git账户");
-        }
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
             gitClone("main");
+        }
+        if (provider == null) {
+            openRpo(localPath).pull()
+                    .setRemoteBranchName("main")
+                    .call();
+            return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName("main")
@@ -301,35 +304,23 @@ public class JgitUtil {
         return this;
     }
 
-    /**
-     * /拉取(Pull) git pull origin
-     */
-    public JgitUtil pullNotProvider() throws Exception {
-        //判断localPath是否存在，不存在调用clone方法
-        File directory = new File(localPath);
-        if (!directory.exists()) {
-            gitClone();
-        }
-        openRpo(localPath).pull()
-                .setRemoteBranchName("main")
-                .call();
-        return this;
-    }
-
 
     /**
-     * /拉取(Pull) git pull
+     * 拉取(Pull) git pull
      *
      * @param branch 分支
      */
     public JgitUtil pull(String branch) throws Exception {
-        if (provider == null) {
-            throw new RuntimeException("请设置Git账户");
-        }
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
             gitClone(branch);
+        }
+        if (provider == null) {
+            openRpo(localPath).pull()
+                    .setRemoteBranchName("main")
+                    .call();
+            return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName(branch)
@@ -345,7 +336,18 @@ public class JgitUtil {
      */
     public JgitUtil gitClone(String branch) throws Exception {
         if (provider == null) {
-            throw new RuntimeException("请设置Git账户");
+            Git git = Git.cloneRepository()
+                    .setURI(urlPath + ".git")
+                    .setDirectory(new File(localPath))
+                    //设置是否克隆子仓库
+                    .setCloneSubmodules(true)
+                    //设置克隆分支
+                    .setBranch(branch)
+                    .call();
+            //关闭源，以释放本地仓库锁
+            git.getRepository().close();
+            git.close();
+            return this;
         }
         Git git = Git.cloneRepository()
                 .setURI(urlPath + ".git")

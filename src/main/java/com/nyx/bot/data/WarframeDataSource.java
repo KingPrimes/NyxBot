@@ -11,6 +11,7 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,8 @@ import java.util.stream.Collectors;
 public class WarframeDataSource {
 
     public static void init() {
-        log.info("开始插入Warframe数据！");
+        log.info("开始初始化数据！");
+        cloneDataSource(ApiUrl.DATA_SOURCE_GIT);
         getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
         getMarket();
         getWeapons();
@@ -395,6 +397,18 @@ public class WarframeDataSource {
             } else {
                 ratrs = rater.saveAll(ratrs);
                 log.info("共初始化紫卡计算器表 {} 条数据！", ratrs.size());
+            }
+        });
+    }
+
+    public static void cloneDataSource(String url) {
+        AsyncUtils.me().execute(() -> {
+            JgitUtil git = JgitUtil.Build(url, "");
+            try {
+                TimeUnit.SECONDS.sleep(30);
+                git.pull();
+            } catch (Exception e) {
+                cloneDataSource(ApiUrl.DATA_SOURCE_GIT_EE);
             }
         });
     }

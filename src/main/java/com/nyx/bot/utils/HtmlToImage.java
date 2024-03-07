@@ -23,7 +23,8 @@ import java.util.Optional;
 
 public class HtmlToImage {
 
-    private static final String HTML_PATH = "./nyxTemplates/";
+
+    private static final String HTML_PATH = "./DataSource/Template/";
 
     /**
      * 高清Html转Image
@@ -175,7 +176,7 @@ public class HtmlToImage {
      * @param url Html Url地址
      * @return 图片流
      */
-    public static ByteArrayOutputStream conver(String url) throws HtmlToImageException {
+    public static ByteArrayOutputStream converse(String url) throws HtmlToImageException {
         String html = HttpUtils.sendGet(url).getBody();
         if (html == null) {
             throw new HtmlToImageException(I18nUtils.message("error.html.image"));
@@ -189,7 +190,7 @@ public class HtmlToImage {
      * @param url Html Url地址
      * @return 图片流
      */
-    public static ByteArrayOutputStream converPost(String url, String json) throws HtmlToImageException {
+    public static ByteArrayOutputStream conversePost(String url, String json) throws HtmlToImageException {
         String html = HttpUtils.sendPost(url, json).getBody();
         if (html == null) {
             throw new HtmlToImageException(I18nUtils.message("error.html.image"));
