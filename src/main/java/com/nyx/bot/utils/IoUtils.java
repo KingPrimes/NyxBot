@@ -16,10 +16,6 @@ public class IoUtils {
         String url = "http://localhost:" + SpringUtils.getPort();
         // 获取操作系统的名字
         try {
-            //Docker 环境不打开浏览器
-            String str = Arrays.toString(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
-            if (str.contains("/docker/")) return;
-
             // 苹果的打开方式
             if (SystemUtils.IS_OS_MAC) {
                 Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
@@ -53,6 +49,9 @@ public class IoUtils {
                     Runtime.getRuntime().exec(new String[]{browser, url});
                 return;
             }
+            //Docker 环境不打开浏览器
+            String str = Arrays.toString(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
+            if (str.contains("/docker/")) return;
 
         } catch (Exception e) {
             log.error("浏览器打开错误：{}", e.getMessage());
