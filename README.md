@@ -41,6 +41,13 @@ java -Dserver.port = 8080 -jar NyxBot.jar
 java -jar NyxBot.jar --server.port = 8080
 ```
 
+# 配置
+
+1. 正常启动程序后会自动打开浏览器并跳转到 [配置页面 http://localhost:8080](http://localhost:8080)
+2. 在web页面登录 默认账号: **admin** 密码：**admin123**
+3. 默认是配置是白名单模式，请自行添加要使用机器人的群，若不添加则发送任何指令机器人无响应
+4. 也可以在根目录下更改 **locate.yaml** 中的 **isBW: false** 为黑名单
+
 # 客户端
 
 ----
