@@ -32,7 +32,6 @@ public class WarframeSocket extends WebSocketListener {
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .connectTimeout(60, TimeUnit.SECONDS)
-                .pingInterval(45, TimeUnit.SECONDS)
                 .build();
         Request request = new Request.Builder().url(url).build();
         webSocket = client.newWebSocket(request, this);
