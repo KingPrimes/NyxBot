@@ -8,9 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableCaching
 @EnableScheduling
-public class NxyBotApplication {
+public class NyxBotApplication {
     public static void main(String[] args) {
-        SpringApplication.run(NxyBotApplication.class, args);
+        SpringApplication.run(NyxBotApplication.class, args);
     }
+
 
 }
