@@ -33,15 +33,17 @@ public class InvasionsHtmlController {
             if (invasion.getCompleted()) {
                 continue;
             }
-            if (!invasion.getAttacker().getReward().getCountedItems().isEmpty()) {
-                GlobalStates.Invasions.RewardInfo reward = invasion.getAttacker();
-                List<GlobalStates.Invasions.Reward.CountedItems> countedItems = reward.getReward().getCountedItems()
-                        .stream()
-                        //使用数据流得方式替换元素中得内容
-                        .peek(item -> item.setType(trans.enToZh(item.getType())))
-                        .toList();
-                reward.getReward().setColo(Integer.toHexString(reward.getReward().getColor()));
-                reward.getReward().setCountedItems(countedItems);
+            if (!invasion.getVsInfestation()) {
+                if (!invasion.getAttacker().getReward().getCountedItems().isEmpty()) {
+                    GlobalStates.Invasions.RewardInfo reward = invasion.getAttacker();
+                    List<GlobalStates.Invasions.Reward.CountedItems> countedItems = reward.getReward().getCountedItems()
+                            .stream()
+                            //使用数据流得方式替换元素中得内容
+                            .peek(item -> item.setType(trans.enToZh(item.getType())))
+                            .toList();
+                    reward.getReward().setColo(Integer.toHexString(reward.getReward().getColor()));
+                    reward.getReward().setCountedItems(countedItems);
+                }
             }
             if (!invasion.getDefender().getReward().getCountedItems().isEmpty()) {
                 GlobalStates.Invasions.RewardInfo defender = invasion.getDefender();
