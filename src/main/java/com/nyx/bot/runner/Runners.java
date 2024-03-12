@@ -1,10 +1,8 @@
 package com.nyx.bot.runner;
 
-import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.AsyncBeanName;
-import com.nyx.bot.plugin.warframe.utils.WarframeSocket;
 import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.IoUtils;
@@ -56,7 +54,7 @@ public class Runners {
             if (!test) {
                 //程序启动之后获取WarframeDataSource
                 WarframeDataSource.init();
-                new WarframeSocket().connectServer(ApiUrl.WARFRAME_SOCKET);
+                //new WarframeSocket().connectServer(ApiUrl.WARFRAME_SOCKET);
             }
         };
     }
