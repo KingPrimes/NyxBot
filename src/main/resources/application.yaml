@@ -77,9 +77,13 @@ spring:
   output:
     ansi:
       enabled: detect
+
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
 # OneBot
 shiro:
   ws-config:
     ws-url: /ws/shiro
 server:
   port: 8080
+  shutdown: graceful
