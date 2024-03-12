@@ -45,6 +45,6 @@ logs
 ### 忽略db文件
 /data
 ### 忽略其余文件
-nyxTemplates
-go-cqhttp
-emoji_file
+/DataSource
+/models
+locate.yaml
