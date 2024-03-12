@@ -8,12 +8,12 @@
     <property name="log.pattern"
               value="%-5level %d{yyyy-MM-dd HH:mm:ss} [%thread - ${PID:- }]  %-40.40logger{39} : %msg%n"/>
 
-    <property name="log.pattern-2"
-              value="%green(%-5level) %cyan(%d{yyyy-MM-dd HH:mm:ss}) [%yellow(%thread) - %red(${PID:- })]  %-40.40logger{39} : %blue(%msg%n)"/>
+    <property name="CONSOLE_LOG"
+              value="${CONSOLE_LOG:-%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss}}){faint}  %clr([%thread - ${PID:- }]){magenta}  %clr(${LOG_CORRELATION_PATTERN:-}){faint}%clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${log.pattern-2}</pattern>
+            <pattern>${CONSOLE_LOG}</pattern>
         </encoder>
     </appender>
 
@@ -63,7 +63,6 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-
     <appender name="file_warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
