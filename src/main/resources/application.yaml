@@ -74,6 +74,9 @@ spring:
   cache:
     type: cache2k
 
+  output:
+    ansi:
+      enabled: detect
 # OneBot
 shiro:
   ws-config:
