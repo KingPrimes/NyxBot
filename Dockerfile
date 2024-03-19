@@ -9,10 +9,7 @@ WORKDIR /app
 
 COPY target/NyxBot.jar /app/
 
-VOLUME [ "/app/data" ]
-VOLUME [ "/app/DataSource" ]
-VOLUME [ "/app/logs" ]
-VOLUME [ "/app/locate.yaml" ]
+VOLUME [ "/app" ]
 
 EXPOSE 8080
 
