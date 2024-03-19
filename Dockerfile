@@ -5,10 +5,15 @@ ENV TZ="Asia/Shanghai"
 RUN apk add --no-cache font-noto-cjk wget && \
     rm -rf /var/cache/apk/*
 
-COPY target/NyxBot.jar /
+WORKDIR /app
 
-VOLUME [ "/data" ]
+COPY target/NyxBot.jar /app/
+
+VOLUME [ "/app/data" ]
+VOLUME [ "/app/DataSource" ]
+VOLUME [ "/app/logs" ]
+VOLUME [ "/app/locate.yaml" ]
 
 EXPOSE 8080
 
-CMD ["java", "-Dfile.encoding=UTF-8","-jar", "NyxBot.jar"]
+CMD ["java", "-Dfile.encoding=UTF-8","-jar", "/app/NyxBot.jar"]
