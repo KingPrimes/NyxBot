@@ -224,7 +224,7 @@ public class WarframeCodes {
         data.setIsMax(false);
         //是否是购买
         data.setIsBy(false);
-        //是否是卖家
+        //是否是买家
         data.setIsBy(false);
         //平台
         data.setForm(MarketFormEnums.PC);

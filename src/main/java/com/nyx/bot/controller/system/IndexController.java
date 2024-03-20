@@ -10,14 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class IndexController {
 
     //首页
-    @GetMapping("/")
+    @GetMapping({"/", "/index"})
     public String indexX(ModelMap map) {
-        map.put("isBW", SpringUtils.getBean(HandOff.class).isBW());
-        return "index";
-    }
-
-    @GetMapping("/index")
-    public String index(ModelMap map) {
         map.put("isBW", SpringUtils.getBean(HandOff.class).isBW());
         return "index";
     }

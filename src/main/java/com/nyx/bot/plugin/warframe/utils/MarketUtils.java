@@ -13,6 +13,7 @@ import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.util.CollectionUtils;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
+@Slf4j
 public class MarketUtils {
 
     /**
@@ -169,21 +171,7 @@ public class MarketUtils {
             });
         }
 
-        list = isByOrSell(order, isBy, isMax, flag, max.get());
-
-        if (!isBy) {
-            list.sort(Comparator.comparingInt(MarketOrders.Orders::getPlatinum));
-        } else {
-            list.sort((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()));
-        }
-
-        if (list.size() > 8) {
-            list = list.subList(0, 7);
-        }
-
-        return list;
-
-
+        return isByOrSell(order, isBy, isMax, flag, max.get());
     }
 
     /**
@@ -194,40 +182,45 @@ public class MarketUtils {
      * @param isMax 是否为满级
      * @param flag  是否查询满级
      * @param max   MOD得最大等级
-     * @return
      */
     private static List<MarketOrders.Orders> isByOrSell(MarketOrders order, Boolean isBy, Boolean isMax, Boolean flag, Integer max) {
-        List<MarketOrders.Orders> list = new ArrayList<>();
         if (isBy) {
             if (isMax && flag) {
-                order.getPayload().getOrders()
+                return order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy") && Objects.equals(orders.getModRank(), max))
-                        .forEach(list::add);
+                        .sorted((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()))
+                        .limit(8)
+                        .toList();
             } else {
-                order.getPayload().getOrders()
+                return order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy"))
-                        .forEach(list::add);
+                        .sorted((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()))
+                        .limit(8)
+                        .toList();
             }
         } else {
             if (isMax && flag) {
-                order.getPayload().getOrders()
+                return order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell") && Objects.equals(orders.getModRank(), max))
-                        .forEach(list::add);
+                        .sorted(Comparator.comparingInt(MarketOrders.Orders::getPlatinum))
+                        .limit(8)
+                        .toList();
             } else {
-                order.getPayload().getOrders()
+                return order.getPayload().getOrders()
                         .stream()
                         //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
                         .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell"))
-                        .forEach(list::add);
+                        .sorted(Comparator.comparingInt(MarketOrders.Orders::getPlatinum))
+                        .limit(8)
+                        .toList();
             }
         }
-        return list;
     }
 
     @Data
