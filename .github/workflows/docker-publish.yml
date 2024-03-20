@@ -35,5 +35,5 @@ jobs:
 
       - name: Build and push
         run: |
-          docker build -t 9ikj/nyxbot:latest .
-          docker push 9ikj/nyxbot:latest
+          docker build -t Kingprimes/nyxbot:latest .
+          docker push Kingprimes/nyxbot:latest
