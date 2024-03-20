@@ -44,6 +44,5 @@ jobs:
 
       - name: Build and push
         run: |
-          docker builder prune -a
-          docker build -t kingprimes/nyxbot:latest .
-          docker push kingprimes/nyxbot:latest
+          docker build -t 9ikj/nyxbot:latest .
+          docker push 9ikj/nyxbot:latest
