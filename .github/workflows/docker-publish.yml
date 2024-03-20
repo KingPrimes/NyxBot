@@ -42,8 +42,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tree List
-        run: tree
+      - name: Copy File
+        run: cp target/NyxBot.jar ./
 
       - name: Build and push
         run: |
