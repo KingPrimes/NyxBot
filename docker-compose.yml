@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  nyxbot:
+    container_name: nyxbot
+    restart: unless-stopped
+    image: 9ikj/nyxbot:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+#      - ./DataSource:/app/DataSource
+#      - ./logs:/app/logs
+#      - ./locate.yaml:/app/locate.yaml
