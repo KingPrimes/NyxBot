@@ -4,7 +4,7 @@ services:
   nyxbot:
     container_name: nyxbot
     restart: unless-stopped
-    image: 9ikj/nyxbot:latest
+    image: kingprimes/nyxbot:latest
     ports:
       - "8080:8080"
     volumes:
