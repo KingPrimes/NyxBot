@@ -22,9 +22,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -41,7 +38,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           draft: true
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.NYXBOT_TOKEN }}
           file: target/*.jar
           asset-name: application.jar
           tag: ${{ github.ref }}
