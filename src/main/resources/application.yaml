@@ -87,3 +87,6 @@ shiro:
 server:
   port: 8080
   shutdown: graceful
+logging:
+  level:
+    io.github.mymonstercat: OFF

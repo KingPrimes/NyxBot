@@ -72,4 +72,4 @@ OneBot协议客户端
 
 - [warframe-status](https://github.com/WFCD/warframe-status) 开放的Warframe状态查询接口
 - [Shiro](https://github.com/MisakaTAT/Shiro) OneBot 协议Sdk
-- [AIAS](https://github.com/mymagicpower/AIAS/tree/main/1_image_sdks/ocr_sdks/ocr_v4_sdk) OCR 文字识别
+- [RapidOcr-Java](https://github.com/MyMonsterCat/RapidOcr-Java) OCR 文字识别

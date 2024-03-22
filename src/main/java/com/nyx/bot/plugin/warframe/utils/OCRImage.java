@@ -2,7 +2,7 @@ package com.nyx.bot.plugin.warframe.utils;
 
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.utils.ocr.PaddlePaddleOCRV4;
+import com.nyx.bot.utils.ocr.OcrUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class OCRImage {
         List<List<String>> images = new ArrayList<>();
         try {
             for (String s : msgImgUrlList) {
-                images.add(PaddlePaddleOCRV4.ocr(s));
+                images.add(OcrUtil.ocr(s));
             }
         } catch (Exception e) {
             log.error("识别图片报错：{}", e.getMessage());
@@ -29,6 +29,5 @@ public class OCRImage {
         return images;
 
     }
-
 
 }
