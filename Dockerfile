@@ -7,7 +7,7 @@ RUN apk add --no-cache font-noto-cjk wget && \
 
 WORKDIR /app
 
-COPY target/NyxBot.jar /app/
+COPY NyxBot.jar /app
 
 VOLUME [ "/app" ]
 
