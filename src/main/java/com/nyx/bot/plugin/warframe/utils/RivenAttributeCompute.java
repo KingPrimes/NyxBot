@@ -112,6 +112,14 @@ public class RivenAttributeCompute {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("射速/攻击速度");
                     } else if (attribute.getName().equals("伤害") || attribute.getName().equals("近战伤害")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("伤害/近战伤害");
+                    } else if (attribute.getName().equals("武器后坐力")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("后坐力");
+                    } else if (attribute.getName().contains("Infested")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Infested伤害");
+                    } else if (attribute.getName().contains("Corpus")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Corpus伤害");
+                    } else if (attribute.getName().contains("Grinner")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Grinner伤害");
                     } else {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName(attribute.getName());
                     }
