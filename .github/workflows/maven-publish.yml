@@ -37,9 +37,9 @@ jobs:
       - name: Upload JAR to Release
         uses: svenstaro/upload-release-action@v2
         with:
-          draft: true
-          repo-token: ${{ secrets.NYXBOT_TOKEN }}
-          file: target/*.jar
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/NyxBot.jar
           asset-name: application.jar
           tag: ${{ github.ref }}
           overwrite: true
+          draft: true
