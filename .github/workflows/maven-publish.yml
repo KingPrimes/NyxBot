@@ -32,8 +32,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'Maven'
-          cache-dependency-path: 'sub-project/pom.xml'
+          cache: maven
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
