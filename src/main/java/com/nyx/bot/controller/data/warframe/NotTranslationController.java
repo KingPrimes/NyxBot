@@ -2,14 +2,13 @@ package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.NotTranslation;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.NotTranslationRepository;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -46,9 +45,10 @@ public class NotTranslationController extends BaseController {
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(NotTranslation t) {
-        Page<NotTranslation> list = notTranslationRepository.findAll(PageRequest.of(t.getPageNum() - 1, t.getPageSize()));
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity list(NotTranslation t) {
+        return getDataTable(notTranslationRepository.findAll(
+                PageRequest.of(t.getPageNum() - 1, t.getPageSize())
+        ));
     }
 
     /**

@@ -4,9 +4,10 @@ import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.repo.impl.sys.LogInfoService;
+import com.nyx.bot.repo.sys.LogInfoRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class LogInfoController extends BaseController {
 
     @Resource
-    LogInfoService repository;
+    LogInfoRepository repository;
 
     String prefix = "log/info";
 
@@ -30,7 +31,14 @@ public class LogInfoController extends BaseController {
     @PostMapping("/info/list")
     @ResponseBody
     public TableDataInfo list(LogInfo info) {
-        Page<LogInfo> list = repository.list(info);
+        Page<LogInfo> list = repository.findAllPageable(
+                info.getCodes(),
+                info.getGroupUid(),
+                PageRequest.of(
+                        info.getPageNum() - 1,
+                        info.getPageSize()
+                )
+        );
         return getDataTable(list.getContent(), list.getTotalElements());
     }
 

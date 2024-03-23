@@ -5,16 +5,10 @@ import com.nyx.bot.entity.bot.white.ProveWhite;
 import com.nyx.bot.repo.bot.white.GroupWhiteRepository;
 import com.nyx.bot.repo.bot.white.ProveWhiteRepository;
 import jakarta.annotation.Resource;
-import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,52 +29,53 @@ public class WhiteService {
         return proveWhiteRepository.findByProve(prove);
     }
 
-    public Page<GroupWhite> list(GroupWhite gb) {
-        Specification<GroupWhite> specs = (root, query, cb) -> {
-            // 创建查询列表
-            List<Predicate> predicateList = new ArrayList<>();
-            //判断是否是Null
-            Optional.ofNullable(gb.getGroupUid()).ifPresent(g -> {
-                //模糊查询
-                predicateList.add(cb.equal(root.get("group"), g));
-            });
-            Predicate[] predicates = new Predicate[predicateList.size()];
-            return query.where(predicateList.toArray(predicates)).getRestriction();
-        };
-        return groupWhiteRepository.findAll(specs,
-                PageRequest.of(gb.getPageNum() - 1, gb.getPageSize()));
+    public Page<GroupWhite> list(GroupWhite gw) {
+        return groupWhiteRepository.findAllPageable(
+                gw.getGroupUid(),
+                PageRequest.of(
+                        gw.getPageNum() - 1,
+                        gw.getPageSize()
+                )
+        );
     }
 
-    public Page<ProveWhite> list(ProveWhite gb) {
-        Specification<ProveWhite> specs = (root, query, cb) -> {
-            // 创建查询列表
-            List<Predicate> predicateList = new ArrayList<>();
-            //判断是否是Null
-            Optional.ofNullable(gb.getProve()).ifPresent(g -> {
-                //模糊查询
-                predicateList.add(cb.equal(root.get("prove"), g));
-            });
-            Predicate[] predicates = new Predicate[predicateList.size()];
-            return query.where(predicateList.toArray(predicates)).getRestriction();
-        };
-        return proveWhiteRepository.findAll(specs,
-                PageRequest.of(gb.getPageNum() - 1, gb.getPageSize()));
+    public Page<ProveWhite> list(ProveWhite pw) {
+        return proveWhiteRepository.findAllPageable(
+                pw.getProve(),
+                PageRequest.of(
+                        pw.getPageNum() - 1,
+                        pw.getPageSize()
+                )
+        );
     }
 
-    public GroupWhite save(GroupWhite groupWhite) {
-        return groupWhiteRepository.save(groupWhite);
+    public GroupWhite save(GroupWhite gw) {
+        GroupWhite g = groupWhiteRepository.findByGroupUid(gw.getGroupUid());
+        if (g != null) {
+            gw.setId(g.getId());
+        }
+        return groupWhiteRepository.save(gw);
     }
 
-    public ProveWhite save(ProveWhite proveWhite) {
-        return proveWhiteRepository.save(proveWhite);
+    public ProveWhite save(ProveWhite pw) {
+        ProveWhite prove = proveWhiteRepository.findByProve(pw.getProve());
+        if (prove != null) {
+            pw.setId(prove.getId());
+        }
+        return proveWhiteRepository.save(pw);
     }
 
-    public void remove(GroupWhite groupWhite) {
-        groupWhiteRepository.deleteById(groupWhite.getId());
+    public void remove(Long id) {
+        if (id != null) {
+            groupWhiteRepository.deleteById(id);
+        }
     }
 
-    public void remove(ProveWhite proveWhite) {
-        proveWhiteRepository.deleteById(proveWhite.getId());
+    public void removeProve(Long id) {
+        if (id != null) {
+            proveWhiteRepository.deleteById(id);
+        }
+
     }
 
     public boolean isWhite(Long group, Long prove) {

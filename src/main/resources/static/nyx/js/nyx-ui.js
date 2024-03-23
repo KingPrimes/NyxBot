@@ -182,15 +182,15 @@ const table = {
                 const thisOptions = table.config[this.id];
                 if (res.code === web_status.SUCCESS) {
                     if ($.common.isNotEmpty(thisOptions.sidePagination) && thisOptions.sidePagination === 'client') {
-                        return res.rows;
+                        return res.data.content;
                     } else {
                         if ($.common.isNotEmpty(thisOptions.rememberSelected) && thisOptions.rememberSelected) {
                             const column = $.common.isEmpty(thisOptions.uniqueId) ? thisOptions.columns[1].field : thisOptions.uniqueId;
-                            $.each(res.rows, function (i, row) {
+                            $.each(res.data.content, function (i, row) {
                                 row.state = $.inArray(row[column], table.rememberSelectedIds[thisOptions.id]) !== -1;
                             })
                         }
-                        return {rows: res.rows, total: res.total};
+                        return {rows: res.data.content, total: res.data.totalElements};
                     }
                 } else {
                     $.modal.alertWarning(res.msg);

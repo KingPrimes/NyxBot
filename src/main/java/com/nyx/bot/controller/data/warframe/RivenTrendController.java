@@ -2,18 +2,17 @@ package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
-import com.nyx.bot.repo.impl.warframe.RivenTrendService;
 import com.nyx.bot.repo.warframe.RivenTrendRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +24,6 @@ import java.util.List;
 @RequestMapping("/data/warframe/rivenTrend")
 public class RivenTrendController extends BaseController {
     String prefix = "data/warframe/rivenTrend/";
-
-    @Resource
-    RivenTrendService rtService;
 
     @Resource
     RivenTrendRepository repository;
@@ -64,9 +60,13 @@ public class RivenTrendController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(RivenTrend rt) {
-        Page<RivenTrend> list = rtService.list(rt);
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity list(RivenTrend rt) {
+        return getDataTable(repository.findAllPageable(rt.getTrendName(),
+                PageRequest.of(
+                        rt.getPageNum() - 1,
+                        rt.getPageSize()
+                )
+        ));
     }
 
 

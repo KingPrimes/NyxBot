@@ -68,9 +68,7 @@ public class GroupWhiteController extends BaseController {
     @PostMapping("/remove/{id}")
     @ResponseBody
     public AjaxResult remove(@PathVariable("id") Long id) {
-        GroupWhite white = new GroupWhite();
-        white.setId(id);
-        whiteService.remove(white);
+        whiteService.remove(id);
         return success();
     }
 

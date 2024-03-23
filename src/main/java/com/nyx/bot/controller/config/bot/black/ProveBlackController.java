@@ -3,12 +3,11 @@ package com.nyx.bot.controller.config.bot.black;
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.ProveBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +28,8 @@ public class ProveBlackController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(ProveBlack pb) {
-        Page<ProveBlack> list = bs.list(pb);
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity list(ProveBlack pb) {
+        return getDataTable(bs.list(pb));
     }
 
     @GetMapping("/add")
@@ -60,9 +58,7 @@ public class ProveBlackController extends BaseController {
     @PostMapping("/remove/{id}")
     @ResponseBody
     public AjaxResult remove(@PathVariable("id") Long id) {
-        ProveBlack pb = new ProveBlack();
-        pb.setId(id);
-        return toAjax(bs.remove(pb));
+        return toAjax(bs.removeProve(id));
     }
 
     @PostMapping("/handoff")

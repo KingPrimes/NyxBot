@@ -1,8 +1,11 @@
 package com.nyx.bot.repo.bot.white;
 
 import com.nyx.bot.entity.bot.white.ProveWhite;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,4 +18,7 @@ public interface ProveWhiteRepository extends JpaRepository<ProveWhite, Long>, J
      */
     ProveWhite findByProve(Long prove);
 
+
+    @Query("select p from ProveWhite p where (:prove is null or p.prove = :prove)")
+    Page<ProveWhite> findAllPageable(Long prove, Pageable pageable);
 }

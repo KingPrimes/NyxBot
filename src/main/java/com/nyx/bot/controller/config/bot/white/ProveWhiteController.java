@@ -62,9 +62,7 @@ public class ProveWhiteController extends BaseController {
     @PostMapping("/remove/{id}")
     @ResponseBody
     public AjaxResult remove(@PathVariable("id") Long id) {
-        ProveWhite white = new ProveWhite();
-        white.setId(id);
-        whiteService.remove(white);
+        whiteService.removeProve(id);
         return success();
     }
 

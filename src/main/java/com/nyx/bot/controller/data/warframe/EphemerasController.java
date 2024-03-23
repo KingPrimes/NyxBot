@@ -2,12 +2,12 @@ package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Ephemeras;
-import com.nyx.bot.repo.impl.warframe.EphemerasService;
+import com.nyx.bot.repo.warframe.EphemerasRepository;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ public class EphemerasController extends BaseController {
     String prefix = "data/warframe/";
 
     @Resource
-    EphemerasService epService;
+    EphemerasRepository ephemerasRepository;
 
 
     @GetMapping
@@ -30,9 +30,13 @@ public class EphemerasController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(Ephemeras e) {
-        Page<Ephemeras> list = epService.list(e);
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity list(Ephemeras e) {
+        return getDataTable(ephemerasRepository.findAllPageable(
+                e.getItemName(),
+                PageRequest.of(
+                        e.getPageNum() - 1,
+                        e.getPageSize())
+        ));
     }
 
     @PostMapping("/update")

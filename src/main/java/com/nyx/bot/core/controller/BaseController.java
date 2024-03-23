@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
@@ -57,6 +59,11 @@ public class BaseController {
         rspData.setRows(list);
         rspData.setTotal(total);
         return rspData;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    protected ResponseEntity getDataTable(Page page) {
+        return ResponseEntity.ok(AjaxResult.success(page));
     }
 
     /**

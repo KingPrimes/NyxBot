@@ -1,6 +1,8 @@
 package com.nyx.bot.repo.warframe;
 
 import com.nyx.bot.entity.warframe.OrdersItems;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -65,5 +67,8 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>,
      */
     @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) regexp upper(replace(:#{#r},' ','')) limit 1", nativeQuery = true)
     OrdersItems findByItemNameRegex(@Param("r") String regex);
+
+    @Query("select o from OrdersItems o where (:itemName is null or LOWER(o.itemName) like LOWER(concat('%', :itemName, '%')))")
+    Page<OrdersItems> findAllPageable(String itemName, Pageable pageable);
 
 }
