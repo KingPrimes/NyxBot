@@ -23,7 +23,6 @@ public class TaskWarframeStatus {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            log.info("收到数据！");
             WarframeSubscribe.isUpdated(states);
         } else {
             log.info("获取数据失败！");

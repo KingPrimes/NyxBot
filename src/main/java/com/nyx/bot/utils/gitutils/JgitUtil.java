@@ -1,6 +1,5 @@
 package com.nyx.bot.utils.gitutils;
 
-import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.SpringUtils;
@@ -63,7 +62,7 @@ public class JgitUtil {
      * 构建 Jgit工具类 进行拉取操作
      */
     public static JgitUtil Build() throws Exception {
-        return Build(ApiUrl.DATA_SOURCE_GIT, "").pull();
+        return Build("https://github.com/KingPrimes/DataSource", "").pull();
     }
 
     private Git openRpo(String path) {

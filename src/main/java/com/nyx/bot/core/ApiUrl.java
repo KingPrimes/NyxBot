@@ -3,6 +3,8 @@ package com.nyx.bot.core;
 import com.nyx.bot.utils.http.HttpUtils;
 import okhttp3.Headers;
 
+import java.util.List;
+
 public class ApiUrl {
 
 
@@ -18,23 +20,24 @@ public class ApiUrl {
     /**
      * 战甲数据源 git push pull等操作链接
      */
-    public static final String DATA_SOURCE_GIT = "https://github.com/KingPrimes/DataSource";
+    public static final List<String> DATA_SOURCE_GIT = List.of(
+            "https://github.com/KingPrimes/DataSource",
+            "https://gitcode.com/KingPrimes/DataSource",
+            "https://gitee.com/KingPrime/DataSource",
+            "https://gitlab.com/KingPrimes/DataSource"
+    );
 
-    public static final String DATA_SOURCE_GIT_EE = "https://gitee.com/KingPrime/DataSource";
 
     /**
      * 战甲数据源
      */
-    public static final String WARFRAME_DATA_SOURCE_GIT_HUB = "https://raw.github.com/KingPrimes/DataSource/main/warframe/";
-    /**
-     * 战甲数据源 备用源
-     */
-    public static final String WARFRAME_DATA_SOURCE_GIT_CODE = "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/";
+    public static final List<String> WARFRAME_DATA_SOURCE = List.of(
+            "https://raw.github.com/KingPrimes/DataSource/main/warframe/",
+            "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/",
+            "https://gitee.com/KingPrime/DataSource/raw/main/warframe/",
+            "https://gitlab.com/KingPrimes/DataSource/-/raw/main/warframe/"
 
-    /**
-     * 战甲数据源 备用源
-     */
-    public static final String WARFRAME_DATA_SOURCE_GIT_EE = "https://gitee.com/KingPrime/DataSource/raw/main/warframe/";
+    );
 
 
     /**

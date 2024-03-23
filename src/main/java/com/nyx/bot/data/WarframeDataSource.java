@@ -28,14 +28,14 @@ public class WarframeDataSource {
 
     public static void init() {
         log.info("开始初始化数据！");
-        cloneDataSource(ApiUrl.DATA_SOURCE_GIT);
-        getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
+        cloneDataSource();
+        getAlias();
         getMarket();
         getWeapons();
         getEphemeras();
-        initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
-        getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
-        getRivenTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
+        initTranslation();
+        getRivenAnalyseTrend();
+        getRivenTrend();
         getRivenWeapons();
     }
 
@@ -84,70 +84,75 @@ public class WarframeDataSource {
     }
 
     //别名
-    public static void getAlias(String url) {
+    public static void getAlias() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取别名数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(url + "alias.json");
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
-                try {
-                    TimeUnit.SECONDS.sleep(30);
-                    getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
-                    return;
-                } catch (InterruptedException ignored) {
-                    return;
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "alias.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "alias.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+
+                    }
+
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<Alias> records = array.toJavaList(Alias.class);
+                    AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
+                    if (!aliasR.findAll().isEmpty()) {
+                        List<Alias> all = aliasR.findAll();
+                        List<Alias> list = records.stream().filter(item ->
+                                        !all.stream()
+                                                .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
+                                                .containsKey(item.getCn() + "-" + item.getEn())
+                                )
+                                .toList();
+                        records = aliasR.saveAll(list);
+                        log.info("共更新Warframe别名表 {} 条数据！", records.size());
+                    } else {
+                        records = aliasR.saveAll(records);
+                        log.info("共初始化Warframe别名表 {} 条数据！", records.size());
+                    }
+                    break;
                 }
-            }
-            JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-            List<Alias> records = array.toJavaList(Alias.class);
-            AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
-            if (!aliasR.findAll().isEmpty()) {
-                List<Alias> all = aliasR.findAll();
-                List<Alias> list = records.stream().filter(item ->
-                                !all.stream()
-                                        .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
-                                        .containsKey(item.getCn() + "-" + item.getEn())
-                        )
-                        .toList();
-                records = aliasR.saveAll(list);
-                log.info("共更新Warframe别名表 {} 条数据！", records.size());
-            } else {
-                records = aliasR.saveAll(records);
-                log.info("共初始化Warframe别名表 {} 条数据！", records.size());
             }
         });
     }
 
     //翻译
-    public static void initTranslation(String url) {
+    public static void initTranslation() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取翻译数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(url + "translation.json");
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("翻译表初始化错误！未获取到数据信息！30秒后尝试重新获取！");
-                try {
-                    TimeUnit.SECONDS.sleep(30);
-                    initTranslation(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
-                    return;
-                } catch (InterruptedException ignored) {
-                    return;
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "translation.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("翻译表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "translation.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+                    }
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<Translation> translations = array.toJavaList(Translation.class);
+                    TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
+                    if (!t.findAll().isEmpty()) {
+                        List<Translation> all = t.findAll();
+                        List<Translation> list = translations.stream().filter(item ->
+                                !all.stream()
+                                        .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
+                                        .containsKey(item.getCn() + "-" + item.getEn())).toList();
+                        translations = t.saveAll(list);
+                        log.info("共更新Warframe翻译表 {} 条数据！", translations.size());
+                    } else {
+                        translations = t.saveAll(translations);
+                        log.info("共初始化Warframe翻译表 {} 条数据！", translations.size());
+                    }
+                    break;
                 }
             }
-            JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-            List<Translation> translations = array.toJavaList(Translation.class);
-            TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
-            if (!t.findAll().isEmpty()) {
-                List<Translation> all = t.findAll();
-                List<Translation> list = translations.stream().filter(item ->
-                        !all.stream()
-                                .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
-                                .containsKey(item.getCn() + "-" + item.getEn())).toList();
-                translations = t.saveAll(list);
-                log.info("共更新Warframe翻译表 {} 条数据！", translations.size());
-            } else {
-                translations = t.saveAll(translations);
-                log.info("共初始化Warframe翻译表 {} 条数据！", translations.size());
-            }
+
         });
     }
 
@@ -180,9 +185,7 @@ public class WarframeDataSource {
                     Optional.ofNullable(orders).ifPresentOrElse(o -> {
                         item.setOid(o.getOid());
                         ordersItem.save(item);
-                    }, () -> {
-                        ordersItem.save(item);
-                    });
+                    }, () -> ordersItem.save(item));
                 });
                 log.info("共更新Warframe.Market {} 条数据！", list.size());
             } else {
@@ -239,9 +242,7 @@ public class WarframeDataSource {
                             .ifPresentOrElse(weapon -> {
                                 item.setWeaponId(weapon.getWeaponId());
                                 repository.save(item);
-                            }, () -> {
-                                repository.save(item);
-                            });
+                            }, () -> repository.save(item));
                 });
                 log.info("共更新Warframe.Weapons {} 条数据！", list.size());
             } else {
@@ -307,108 +308,120 @@ public class WarframeDataSource {
     }
 
     //紫卡计算器数据
-    public static void getRivenAnalyseTrend(String url) {
+    public static void getRivenAnalyseTrend() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取紫卡计算器数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(url + "riven_analyse_trend.json");
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("紫卡计算器数据初始化错误！未获取到数据信息！30秒后尝试重新获取！");
-                try {
-                    TimeUnit.SECONDS.sleep(30);
-                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
-                    return;
-                } catch (InterruptedException ignored) {
-                    return;
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "riven_analyse_trend.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("紫卡计算器数据初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "riven_analyse_trend.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+                    }
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<RivenAnalyseTrend> ratrs = array.toJavaList(RivenAnalyseTrend.class);
+                    RivenAnalyseTrendRepository rater = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
+                    if (!rater.findAll().isEmpty()) {
+                        List<RivenAnalyseTrend> all = rater.findAll();
+                        List<RivenAnalyseTrend> list = ratrs.stream().filter(item ->
+                                !all.stream().collect(Collectors.toMap(m ->
+                                                        m.getArchwing() +
+                                                                m.getName() +
+                                                                m.getMelle() +
+                                                                m.getPistol() +
+                                                                m.getPrefix() +
+                                                                m.getRifle() +
+                                                                m.getShotgun() +
+                                                                m.getSuffix(),
+                                                value -> value))
+                                        .containsKey(
+                                                item.getArchwing() +
+                                                        item.getName() +
+                                                        item.getMelle() +
+                                                        item.getPistol() +
+                                                        item.getPrefix() +
+                                                        item.getRifle() +
+                                                        item.getShotgun() +
+                                                        item.getSuffix()
+                                        )).toList();
+                        ratrs = rater.saveAll(list);
+                        log.info("共更新紫卡计算器表 {} 条数据！", ratrs.size());
+                    } else {
+                        ratrs = rater.saveAll(ratrs);
+                        log.info("共初始化紫卡计算器表 {} 条数据！", ratrs.size());
+                    }
+                    break;
                 }
             }
-            JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-            List<RivenAnalyseTrend> ratrs = array.toJavaList(RivenAnalyseTrend.class);
-            RivenAnalyseTrendRepository rater = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
-            if (!rater.findAll().isEmpty()) {
-                List<RivenAnalyseTrend> all = rater.findAll();
-                List<RivenAnalyseTrend> list = ratrs.stream().filter(item ->
-                        !all.stream().collect(Collectors.toMap(m ->
-                                                m.getArchwing() +
-                                                        m.getName() +
-                                                        m.getMelle() +
-                                                        m.getPistol() +
-                                                        m.getPrefix() +
-                                                        m.getRifle() +
-                                                        m.getShotgun() +
-                                                        m.getSuffix(),
-                                        value -> value))
-                                .containsKey(
-                                        item.getArchwing() +
-                                                item.getName() +
-                                                item.getMelle() +
-                                                item.getPistol() +
-                                                item.getPrefix() +
-                                                item.getRifle() +
-                                                item.getShotgun() +
-                                                item.getSuffix()
-                                )).toList();
-                ratrs = rater.saveAll(list);
-                log.info("共更新紫卡计算器表 {} 条数据！", ratrs.size());
-            } else {
-                ratrs = rater.saveAll(ratrs);
-                log.info("共初始化紫卡计算器表 {} 条数据！", ratrs.size());
-            }
+
         });
     }
 
-    public static void getRivenTrend(String url) {
+    public static void getRivenTrend() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取紫卡倾向数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(url + "riven_trend.json");
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("紫卡倾向数据初始化错误！未获取到数据信息！30秒后尝试重新获取！");
-                try {
-                    TimeUnit.SECONDS.sleep(30);
-                    getRivenAnalyseTrend(ApiUrl.WARFRAME_DATA_SOURCE_GIT_EE);
-                    return;
-                } catch (InterruptedException ignored) {
-                    return;
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "riven_trend.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("紫卡倾向数据初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "riven_trend.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+                    }
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<RivenTrend> ratrs = array.toJavaList(RivenTrend.class);
+                    RivenTrendRepository rater = SpringUtils.getBean(RivenTrendRepository.class);
+                    if (!rater.findAll().isEmpty()) {
+                        List<RivenTrend> all = rater.findAll();
+                        List<RivenTrend> list = ratrs.stream().filter(item ->
+                                !all.stream().collect(Collectors.toMap(m ->
+                                                        m.getTrendName() +
+                                                                m.getNewDot() +
+                                                                m.getNewNum() +
+                                                                m.getOldDot() +
+                                                                m.getOldNum() +
+                                                                m.getType(),
+                                                value -> value))
+                                        .containsKey(
+                                                item.getTrendName() +
+                                                        item.getNewDot() +
+                                                        item.getNewNum() +
+                                                        item.getOldDot() +
+                                                        item.getOldNum() +
+                                                        item.getType()
+                                        )).toList();
+                        ratrs = rater.saveAll(list);
+                        log.info("共更新紫卡倾向表 {} 条数据！", ratrs.size());
+                    } else {
+                        ratrs = rater.saveAll(ratrs);
+                        log.info("共初始化紫卡倾向表 {} 条数据！", ratrs.size());
+                    }
+                    break;
                 }
             }
-            JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-            List<RivenTrend> ratrs = array.toJavaList(RivenTrend.class);
-            RivenTrendRepository rater = SpringUtils.getBean(RivenTrendRepository.class);
-            if (!rater.findAll().isEmpty()) {
-                List<RivenTrend> all = rater.findAll();
-                List<RivenTrend> list = ratrs.stream().filter(item ->
-                        !all.stream().collect(Collectors.toMap(m ->
-                                                m.getTrendName() +
-                                                        m.getNewDot() +
-                                                        m.getNewNum() +
-                                                        m.getOldDot() +
-                                                        m.getOldNum() +
-                                                        m.getType(),
-                                        value -> value))
-                                .containsKey(
-                                        item.getTrendName() +
-                                                item.getNewDot() +
-                                                item.getNewNum() +
-                                                item.getOldDot() +
-                                                item.getOldNum() +
-                                                item.getType()
-                                )).toList();
-                ratrs = rater.saveAll(list);
-                log.info("共更新紫卡倾向表 {} 条数据！", ratrs.size());
-            } else {
-                ratrs = rater.saveAll(ratrs);
-                log.info("共初始化紫卡计算器表 {} 条数据！", ratrs.size());
-            }
+
         });
     }
 
-    public static void cloneDataSource(String url) {
+    public static void cloneDataSource() {
         AsyncUtils.me().execute(() -> {
-            JgitUtil git = JgitUtil.Build(url, "");
-            try {
-                TimeUnit.SECONDS.sleep(30);
-                git.pull();
-            } catch (Exception e) {
-                cloneDataSource(ApiUrl.DATA_SOURCE_GIT_EE);
+            for (String url : ApiUrl.DATA_SOURCE_GIT) {
+                try {
+                    JgitUtil git = JgitUtil.Build(url, "");
+                    TimeUnit.SECONDS.sleep(30);
+                    git.pull();
+                    break;
+                } catch (Exception ignored) {
+                    JgitUtil git = JgitUtil.Build(url, "");
+                    try {
+                        git.pull();
+                        break;
+                    } catch (Exception ignored1) {
+                    }
+                }
             }
         });
     }

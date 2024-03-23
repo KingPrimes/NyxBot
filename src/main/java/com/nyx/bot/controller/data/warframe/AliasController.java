@@ -1,7 +1,6 @@
 package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
@@ -40,7 +39,7 @@ public class AliasController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.getAlias(ApiUrl.WARFRAME_DATA_SOURCE_GIT_HUB);
+        WarframeDataSource.getAlias();
         return success("已执行任务！");
     }
 
