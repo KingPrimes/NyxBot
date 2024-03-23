@@ -1,9 +1,10 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-focal
 
 ENV TZ="Asia/Shanghai"
 
-RUN apk add --no-cache font-noto-cjk wget && \
-    rm -rf /var/cache/apk/*
+RUN apt update -y \
+    && apt-get -y install fonts-noto-cjk wget \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
