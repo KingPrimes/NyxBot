@@ -14,7 +14,7 @@
     <artifactId>NxyBot</artifactId>
 
 
-    <version>1.0.0</version>
+    <version>1.0.2-beta</version>
 
     <name>NxyBot</name>
 
@@ -30,6 +30,7 @@
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.17.2</jsoup.version>
         <monstercat.version>0.0.7</monstercat.version>
+        <monstercat.os.version>1.2.2</monstercat.os.version>
     </properties>
 
 
@@ -208,10 +209,29 @@
         </dependency>
         <dependency>
             <groupId>io.github.mymonstercat</groupId>
-            <artifactId>rapidocr-onnx-platform</artifactId>
-            <version>${monstercat.version}</version>
+            <artifactId>rapidocr-onnx-macosx-arm64</artifactId>
+            <version>${monstercat.os.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-onnx-macosx-x86_64</artifactId>
+            <version>${monstercat.os.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-onnx-windows-x86_64</artifactId>
+            <version>${monstercat.os.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-onnx-windows-x86</artifactId>
+            <version>${monstercat.os.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-onnx-linux-x86_64</artifactId>
+            <version>${monstercat.os.version}</version>
+        </dependency>
 
     </dependencies>
 
