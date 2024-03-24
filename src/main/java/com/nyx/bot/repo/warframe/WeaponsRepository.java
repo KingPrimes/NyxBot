@@ -23,5 +23,4 @@ public interface WeaponsRepository extends JpaRepository<Weapons, Long>, JpaSpec
     Integer queryMaxId();
 
     Weapons findWeaponsById(String id);
-
 }

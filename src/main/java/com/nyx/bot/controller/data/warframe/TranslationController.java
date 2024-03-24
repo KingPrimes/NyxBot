@@ -2,14 +2,14 @@ package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Translation;
-import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.repo.warframe.TranslationRepository;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ public class TranslationController extends BaseController {
     String prefix = "data/warframe/translation/";
 
     @Resource
-    TranslationService tlService;
+    TranslationRepository repository;
 
 
     @GetMapping
@@ -42,14 +42,14 @@ public class TranslationController extends BaseController {
 
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id, ModelMap map) {
-        map.put("translation", tlService.findById(id));
+        map.put("translation", repository.findById(id));
         return prefix + "edit";
     }
 
     @PostMapping("/save")
     @ResponseBody
     public AjaxResult save(Translation t) {
-        return toAjax(tlService.save(t) != null);
+        return toAjax(repository.save(t) != null);
     }
 
     /**
@@ -59,9 +59,13 @@ public class TranslationController extends BaseController {
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(Translation t) {
-        Page<Translation> list = tlService.list(t);
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity list(Translation t) {
+        return getDataTable(repository.findAllPageable(
+                t.getCn(),
+                t.getIsPrime(),
+                t.getIsSet(),
+                PageRequest.of(t.getPageNum() - 1, t.getPageSize())
+        ));
     }
 
     /**
@@ -79,7 +83,7 @@ public class TranslationController extends BaseController {
     public AjaxResult push(String commit) {
         try {
             JgitUtil build = JgitUtil.Build();
-            List<Translation> all = tlService.findAllToList();
+            List<Translation> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/translation.json", jsonString);
             build.add().commit(commit).push();

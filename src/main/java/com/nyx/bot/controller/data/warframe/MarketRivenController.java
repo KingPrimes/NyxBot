@@ -1,46 +1,41 @@
 package com.nyx.bot.controller.data.warframe;
 
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.entity.warframe.MissionSubscribe;
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.repo.warframe.MissionSubscribeRepository;
+import com.nyx.bot.entity.warframe.RivenItems;
+import com.nyx.bot.repo.warframe.RivenItemsRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/data/warframe/subscribe")
-public class MissionSubscribeController extends BaseController {
+@RequestMapping("/data/warframe/market/riven")
+public class MarketRivenController extends BaseController {
     String prefix = "data/warframe/";
 
     @Resource
-    MissionSubscribeRepository repository;
+    RivenItemsRepository repository;
 
 
     @GetMapping
-    public String subscribe(ModelMap map) {
-        map.put("sub", SubscribeEnums.values());
-        return prefix + "subscribe";
+    public String market() {
+        return prefix + "riven";
     }
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(MissionSubscribe ms) {
-
+    public ResponseEntity list(RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
-                        ms.getSubGroup(),
-                        ms.getSubscribe(),
+                        rivenItems.getItemName(),
+                        rivenItems.getRivenType(),
                         PageRequest.of(
-                                ms.getPageNum() - 1,
-                                ms.getPageSize()
-                        )
+                                rivenItems.getPageNum() - 1,
+                                rivenItems.getPageSize())
                 )
         );
     }

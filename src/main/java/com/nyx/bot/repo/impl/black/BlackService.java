@@ -5,18 +5,13 @@ import com.nyx.bot.entity.bot.black.ProveBlack;
 import com.nyx.bot.repo.bot.black.GroupBlackRepository;
 import com.nyx.bot.repo.bot.black.ProveBlackRepository;
 import jakarta.annotation.Resource;
-import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -39,72 +34,60 @@ public class BlackService {
 
 
     public Page<GroupBlack> list(GroupBlack gb) {
-        Specification<GroupBlack> specs = (root, query, cb) -> {
-            // 创建查询列表
-            List<Predicate> predicateList = new ArrayList<>();
-            //判断是否是Null
-            Optional.ofNullable(gb.getGroupUid()).ifPresent(g -> {
-                //模糊查询
-                predicateList.add(cb.equal(root.get("groupUid"), g));
-            });
-            Predicate[] predicates = new Predicate[predicateList.size()];
-            return query.where(predicateList.toArray(predicates)).getRestriction();
-        };
-        return repository.findAll(specs,
-                PageRequest.of(gb.getPageNum() - 1, gb.getPageSize()));
+        return repository.findAllPageable(
+                gb.getGroupUid(),
+                PageRequest.of(
+                        gb.getPageNum() - 1,
+                        gb.getPageSize()
+                )
+        );
     }
 
     public int save(GroupBlack gb) {
-        AtomicInteger x = new AtomicInteger();
-        Optional.ofNullable(gb).ifPresent(g -> {
-            repository.save(g);
-            x.set(1);
-        });
-        return x.get();
+        GroupBlack groupBlack = repository.findByGroupUid(gb.getGroupUid());
+        if (groupBlack != null) {
+            gb.setId(groupBlack.getGroupUid());
+        }
+        repository.save(gb);
+        return 1;
     }
 
-    public int remove(GroupBlack gb) {
-        AtomicInteger x = new AtomicInteger();
-        Optional.ofNullable(gb.getId()).ifPresent(id -> {
+    public int remove(Long id) {
+        if (id != null) {
             repository.deleteById(id);
-            x.set(1);
-        });
-        return x.get();
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
 
     public Page<ProveBlack> list(ProveBlack pb) {
-        Specification<ProveBlack> specs = (root, query, cb) -> {
-            // 创建查询列表
-            List<Predicate> predicateList = new ArrayList<>();
-            //判断是否是Null
-            Optional.ofNullable(pb.getProve()).ifPresent(p -> {
-                //模糊查询
-                predicateList.add(cb.equal(root.get("userUid"), p));
-            });
-            Predicate[] predicates = new Predicate[predicateList.size()];
-            return query.where(predicateList.toArray(predicates)).getRestriction();
-        };
-        return proveBlackRepository.findAll(specs,
-                PageRequest.of(pb.getPageNum() - 1, pb.getPageSize()));
+        return proveBlackRepository.findAllPageable(
+                pb.getProve(),
+                PageRequest.of(
+                        pb.getPageNum() - 1,
+                        pb.getPageSize()
+                )
+        );
     }
 
     public int save(ProveBlack pb) {
-        AtomicInteger x = new AtomicInteger();
-        Optional.ofNullable(pb).ifPresent(p -> {
-            proveBlackRepository.save(pb);
-            x.set(1);
-        });
-        return x.get();
+        ProveBlack prove = proveBlackRepository.findByProve(pb.getProve());
+        if (prove != null) {
+            pb.setId(prove.getId());
+        }
+        proveBlackRepository.save(pb);
+        return 1;
     }
 
-    public int remove(ProveBlack pb) {
-        AtomicInteger x = new AtomicInteger();
-        Optional.ofNullable(pb.getId()).ifPresent(id -> {
+    public int removeProve(Long id) {
+        if (id != null) {
             proveBlackRepository.deleteById(id);
-            x.set(1);
-        });
-        return x.get();
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     /**

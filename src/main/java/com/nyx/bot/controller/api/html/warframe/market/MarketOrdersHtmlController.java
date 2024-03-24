@@ -3,6 +3,7 @@ package com.nyx.bot.controller.api.html.warframe.market;
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.plugin.warframe.utils.MarketUtils;
 import com.nyx.bot.res.MarketOrders;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/private")
+@Slf4j
 public class MarketOrdersHtmlController {
 
     @PostMapping("/postMarketOrders")
     public String getHtml(@RequestBody OneBotLogInfoData data, Model model) {
         MarketUtils.Market market = MarketUtils.to(data.getKey());
-
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
             model.addAttribute("items", market.getPossibleItems());
             return "html/marketPossibleItems";
