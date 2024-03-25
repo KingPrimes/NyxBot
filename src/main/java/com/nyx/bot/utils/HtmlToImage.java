@@ -1,5 +1,7 @@
 package com.nyx.bot.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.entity.Hint;
 import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.repo.HintRepository;
@@ -17,6 +19,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -24,7 +28,7 @@ import java.util.Optional;
 public class HtmlToImage {
 
 
-    private static final String HTML_PATH = "./DataSource/Template/";
+    public static final String HTML_PATH = "./DataSource/Template/";
 
     /**
      * 高清Html转Image
@@ -41,6 +45,10 @@ public class HtmlToImage {
             //设置图片清晰度
             sharedContext.setDPI(72);
             sharedContext.setDotsPerPixel(3);
+
+            //设置字体
+            getFontInputStream().forEach(sharedContext::setFontMapping);
+
             Dimension dim = new Dimension(width, 1000);
             BufferedImage buff = new BufferedImage((int) dim.getWidth(), (int) dim.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
             Graphics2D g = (Graphics2D) buff.getGraphics();
@@ -56,6 +64,27 @@ public class HtmlToImage {
             log.error(e.getMessage());
             return null;
         }
+    }
+
+    private static Map<String, Font> getFontInputStream() {
+        String fontPath = HTML_PATH + "css/font.json";
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Font> fontMap = new HashMap<>();
+        try {
+            JsonNode jsonNode = mapper.readTree(new File(fontPath));
+            for (JsonNode node : jsonNode) {
+                File font = new File(node.get("src").asText());
+                if (font.exists()) {
+                    fontMap.put(node.get("name").asText(), Font.createFont(Font.TRUETYPE_FONT, font));
+                } else {
+                    fontMap.put(node.get("name").asText(), Font.createFont(Font.TRUETYPE_FONT, new File(HTML_PATH + "css/" + node.get("src").asText())));
+                }
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return fontMap;
     }
 
     /**
@@ -184,6 +213,7 @@ public class HtmlToImage {
         int width = getWidth(html);
         html = outH(html);
         return tmpHtmlToImageByteArray(html, width);
+
     }
 
     /**

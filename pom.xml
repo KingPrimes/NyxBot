@@ -26,7 +26,7 @@
         <java.version>17</java.version>
         <oneSdk.version>2.1.8</oneSdk.version>
         <fastJson2.version>2.0.45</fastJson2.version>
-        <xhtmlrenderer.version>9.1.22</xhtmlrenderer.version>
+        <xhtmlrenderer.version>9.7.1</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
         <jsoup.version>1.17.2</jsoup.version>
         <monstercat.version>0.0.7</monstercat.version>
