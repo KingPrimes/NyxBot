@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.*;
+import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.utils.AsyncUtils;
@@ -37,6 +38,8 @@ public class WarframeDataSource {
         getRivenAnalyseTrend();
         getRivenTrend();
         getRivenWeapons();
+        getRivenTion();
+        getRivenTionAlias();
     }
 
     //幻纹
@@ -80,7 +83,7 @@ public class WarframeDataSource {
                 return;
             }
             log.info("ephemeras数据未变更！");
-        });
+        }, AsyncBeanName.InitData);
     }
 
     //别名
@@ -118,8 +121,85 @@ public class WarframeDataSource {
                     break;
                 }
             }
-        });
+        }, AsyncBeanName.InitData);
     }
+
+    // 紫卡词条
+    public static void getRivenTion() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始获取紫卡词条参数数据！");
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "market_riven_tion.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("紫卡词条参数表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "market_riven_tion.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+
+                    }
+
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<RivenTion> rivenTionList = array.toJavaList(RivenTion.class);
+                    RivenTionRepository records = SpringUtils.getBean(RivenTionRepository.class);
+                    if (!records.findAll().isEmpty()) {
+                        List<RivenTion> all = records.findAll();
+                        List<RivenTion> list = rivenTionList.stream().filter(item ->
+                                        !all.stream()
+                                                .collect(Collectors.toMap(RivenTion::toString, value -> value))
+                                                .containsKey(item.toString())
+                                )
+                                .toList();
+                        rivenTionList = records.saveAll(list);
+                        log.info("共更新Warframe紫卡词条参数表 {} 条数据！", rivenTionList.size());
+                    } else {
+                        rivenTionList = records.saveAll(rivenTionList);
+                        log.info("共初始化Warframe紫卡词条参数表 {} 条数据！", rivenTionList.size());
+                    }
+                    break;
+                }
+            }
+        }, AsyncBeanName.InitData);
+    }
+
+    // 紫卡词条别名
+    public static void getRivenTionAlias() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始获取紫卡词条别名数据！");
+            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
+                HttpUtils.Body body = HttpUtils.sendGet(url + "market_riven_tion_alias.json");
+                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                    log.warn("紫卡词条别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "market_riven_tion_alias.json");
+                    try {
+                        TimeUnit.SECONDS.sleep(30);
+                    } catch (InterruptedException ignored) {
+
+                    }
+                } else {
+                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
+                    List<RivenTionAlias> records = array.toJavaList(RivenTionAlias.class);
+                    RivenTionAliasRepository aliasR = SpringUtils.getBean(RivenTionAliasRepository.class);
+                    if (!aliasR.findAll().isEmpty()) {
+                        List<RivenTionAlias> all = aliasR.findAll();
+                        List<RivenTionAlias> list = records.stream().filter(item ->
+                                        !all.stream()
+                                                .collect(Collectors.toMap(RivenTionAlias::toString, value -> value))
+                                                .containsKey(item.toString())
+                                )
+                                .toList();
+                        log.info("紫卡词条别名表数据: {} ", list);
+                        records = aliasR.saveAll(list);
+                        log.info("共更新Warframe紫卡词条别名表 {} 条数据！", records.size());
+                    } else {
+                        records = aliasR.saveAll(records);
+                        log.info("共初始化Warframe紫卡词条别名表 {} 条数据！", records.size());
+                    }
+                    break;
+                }
+            }
+        }, AsyncBeanName.InitData);
+    }
+
 
     //翻译
     public static void initTranslation() {
@@ -153,7 +233,7 @@ public class WarframeDataSource {
                 }
             }
 
-        });
+        }, AsyncBeanName.InitData);
     }
 
     //Market
@@ -192,7 +272,7 @@ public class WarframeDataSource {
                 items = ordersItem.saveAll(items);
                 log.info("共初始化Warframe.Market {} 条数据！", items.size());
             }
-        });
+        }, AsyncBeanName.InitData);
     }
 
     //赤毒武器/信条武器
@@ -248,7 +328,7 @@ public class WarframeDataSource {
             } else {
                 log.info("共初始化Warframe.Weapons {} 条数据！", weapons.size());
             }
-        });
+        }, AsyncBeanName.InitData);
     }
 
     //紫卡武器
@@ -304,7 +384,7 @@ public class WarframeDataSource {
                 List<RivenItems> rivenItems = repository.saveAll(items);
                 log.info("共更新Warframe.Market紫卡武器 {} 条数据！", rivenItems.size());
             }
-        });
+        }, AsyncBeanName.InitData);
     }
 
     //紫卡计算器数据
@@ -356,7 +436,7 @@ public class WarframeDataSource {
                 }
             }
 
-        });
+        }, AsyncBeanName.InitData);
     }
 
     public static void getRivenTrend() {
@@ -403,7 +483,7 @@ public class WarframeDataSource {
                 }
             }
 
-        });
+        }, AsyncBeanName.InitData);
     }
 
     public static void cloneDataSource() {
@@ -423,6 +503,7 @@ public class WarframeDataSource {
                     }
                 }
             }
-        });
+        }, AsyncBeanName.InitData);
     }
+
 }

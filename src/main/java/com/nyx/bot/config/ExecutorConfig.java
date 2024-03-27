@@ -29,6 +29,12 @@ public class ExecutorConfig {
         return executor(namePrefix);
     }
 
+    @Bean(name = "initDataExecutor")
+    public ThreadPoolTaskExecutor initDataExecutor() {
+        log.info("start initDataExecutor");
+        return executor("initData-");
+    }
+
     @Bean
     public ThreadPoolTaskExecutor scheduledExecutorService() {
         log.info("start scheduledExecutor");

@@ -17,7 +17,6 @@ public class WarframeSubscribe {
     }
 
     public static void isUpdated(GlobalStates states) {
-        //log.info("取得数据：{}", states.toString());
         try {
             //获取缓存数据
             GlobalStates d = CacheUtils.getGlobalState();

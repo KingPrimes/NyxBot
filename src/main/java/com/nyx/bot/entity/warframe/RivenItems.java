@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * Warframe Riven 数据
  */
@@ -55,6 +57,9 @@ public class RivenItems extends BaseEntity {
     //段位限制
     @JsonProperty("mastery_level")
     Integer masteryLevel;
+
+    @Transient
+    List<RivenItems> items;
 
 
 }

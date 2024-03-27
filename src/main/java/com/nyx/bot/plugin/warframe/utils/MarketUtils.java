@@ -3,12 +3,12 @@ package com.nyx.bot.plugin.warframe.utils;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.entity.warframe.Alias;
-import com.nyx.bot.entity.warframe.OrdersItems;
+import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.enums.HttpCodeEnum;
-import com.nyx.bot.repo.warframe.AliasRepository;
-import com.nyx.bot.repo.warframe.OrdersItemsRepository;
+import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.res.MarketOrders;
+import com.nyx.bot.res.MarketRiven;
+import com.nyx.bot.resp.MarketRivenParameter;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -158,8 +158,7 @@ public class MarketUtils {
      * @param isMax 是否为满级
      * @return 排序后得结果
      */
-    private static List<MarketOrders.Orders> orders(MarketOrders order, Boolean isBy, Boolean isMax) {
-        List<MarketOrders.Orders> list;
+    static List<MarketOrders.Orders> orders(MarketOrders order, Boolean isBy, Boolean isMax) {
         AtomicInteger max = new AtomicInteger();
         boolean flag = order.getPayload().getOrders().get(0).getModRank() != null;
 
@@ -170,7 +169,6 @@ public class MarketUtils {
                 }
             });
         }
-
         return isByOrSell(order, isBy, isMax, flag, max.get());
     }
 
@@ -183,7 +181,7 @@ public class MarketUtils {
      * @param flag  是否查询满级
      * @param max   MOD得最大等级
      */
-    private static List<MarketOrders.Orders> isByOrSell(MarketOrders order, Boolean isBy, Boolean isMax, Boolean flag, Integer max) {
+    static List<MarketOrders.Orders> isByOrSell(MarketOrders order, Boolean isBy, Boolean isMax, Boolean flag, Integer max) {
         if (isBy) {
             if (isMax && flag) {
                 return order.getPayload().getOrders()
@@ -238,5 +236,132 @@ public class MarketUtils {
                     .toString();
         }
     }
+
+
+    /**
+     * 获取紫卡武器信息 如果遇到为查询到的物品则返回可能要查询的物品列表
+     * RivenItems.items 可能要查询的物品列表
+     */
+    static RivenItems getRiveItems(String key) {
+        // 假设用户输入的是正确值，直接查询数据库
+        var repository = SpringUtils.getBean(RivenItemsRepository.class);
+        RivenItems items = new RivenItems();
+        items.setItemName(key);
+        items = repository.findByItemName(key);
+        if (items != null) {
+            return items;
+        }
+
+        // 假设用户输入的是别名，查询数据库
+        var alias = SpringUtils.getBean(AliasRepository.class);
+        key = key.toLowerCase(Locale.ROOT);
+        if (!key.contains("prime") && key.contains("p")) {
+            key = key.replace("p", "Prime");
+        }
+        Alias a = alias.findByCn(key);
+        if (a != null) {
+            items = repository.findByItemName(a.getEn());
+            if (items != null) {
+                return items;
+            }
+        }
+
+        // 正则查询
+        String start = String.valueOf(key.charAt(0));
+        String end = String.valueOf(key.charAt(key.length() - 1));
+        items = repository.findByItemNameRegex("^" + start + ".*?" + end + ".*?");
+        if (items != null) {
+            return items;
+        }
+
+        //最后查询所有以该字符开头的物品，并返回
+        List<RivenItems> itemsList = repository.itemNameLikes(start);
+        RivenItems finalItems = new RivenItems();
+        finalItems.setItems(itemsList);
+        return finalItems;
+    }
+
+    public static MarketRiven marketRivenParameter(String key) {
+        MarketRiven marketRiven = new MarketRiven();
+        RivenItems riveItems;
+        if (!key.contains("-")) {
+            riveItems = getRiveItems(key);
+            // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
+            if (riveItems.getItems() != null) {
+                marketRiven.setPossibleItems(riveItems.getItems());
+                return marketRiven;
+            }
+            // 构建请求url
+            String url = new MarketRivenParameter(
+                    riveItems.getUrlName(),
+                    riveItems.getItemName(),
+                    "",
+                    "",
+                    MarketRivenParameter.Polarity.ANY,
+                    7,
+                    16,
+                    MarketRivenParameter.Policy.ANY,
+                    MarketRivenParameter.SortBy.PRICE_ASC
+            ).getUrl();
+            HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
+
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                return marketRiven;
+            }
+            // 解析返回数据
+            return JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch);
+        }
+
+        // 有请求参数 以-分割
+        List<String> list = Arrays.stream(key.split("-")).toList();
+        riveItems = getRiveItems(list.get(0));
+        // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
+        if (riveItems.getItems() != null) {
+            marketRiven.setPossibleItems(riveItems.getItems());
+            return marketRiven;
+        }
+        // 正面词条
+        String[] stats = list.get(1).replaceAll("，", ",").split(",");
+        // 正面词条 变量
+        StringBuilder statBuilder = new StringBuilder();
+        for (String stat : stats) {
+            RivenTion tion = SpringUtils.getBean(RivenTionRepository.class).findByEffect(stat);
+            if (tion != null) {
+                statBuilder.append(tion.getUrlName()).append(",");
+            } else {
+                RivenTionAlias alias = SpringUtils.getBean(RivenTionAliasRepository.class).findByCn(stat);
+                if (alias != null) {
+                    statBuilder.append(alias.getEn()).append(",");
+                }
+            }
+        }
+        // 负面词条
+        String not = "";
+        if (list.size() > 2) {
+            not = list.get(2).replace("有", "has").replace("无", "none");
+        }
+        // 构建请求url
+        String url = new MarketRivenParameter(
+                riveItems.getUrlName(),
+                riveItems.getItemName(),
+                statBuilder.toString(),
+                not,
+                MarketRivenParameter.Polarity.ANY,
+                7,
+                16,
+                MarketRivenParameter.Policy.ANY,
+                MarketRivenParameter.SortBy.PRICE_ASC
+        ).getUrl();
+
+        HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
+
+        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            return marketRiven;
+        }
+        // 解析返回数据
+        return JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch);
+    }
+
+
 
 }

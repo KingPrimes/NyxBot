@@ -4,6 +4,8 @@ import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * 紫卡词条别名
@@ -22,4 +24,13 @@ public class RivenTionAlias extends BaseEntity {
     String en;
     //中文
     String cn;
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("id", id)
+                .append("en", en)
+                .append("cn", cn)
+                .toString();
+    }
 }

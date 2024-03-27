@@ -11,6 +11,7 @@ public enum AsyncBeanName {
 
     MYASYNC("myAsync"),
     SERVICE("scheduledExecutorService"),
+    InitData("initDataExecutor"),
     ;
     private final String str;
 

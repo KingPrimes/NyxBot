@@ -5,6 +5,8 @@ import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * 紫卡词条参数
@@ -49,4 +51,21 @@ public class RivenTion extends BaseEntity {
     //可用武器类型
     @JsonProperty("exclusive_to")
     String exclusiveTo;
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("ids", ids)
+                .append("effect", effect)
+                .append("group", group)
+                .append("negativeOnly", negativeOnly)
+                .append("positiveIsNegative", positiveIsNegative)
+                .append("prefix", prefix)
+                .append("searchOnly", searchOnly)
+                .append("suffix", suffix)
+                .append("units", units)
+                .append("urlName", urlName)
+                .append("exclusiveTo", exclusiveTo)
+                .toString();
+    }
 }
