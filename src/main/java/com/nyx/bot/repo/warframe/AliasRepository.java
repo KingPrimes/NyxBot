@@ -17,4 +17,7 @@ public interface AliasRepository extends JpaRepository<Alias, Long>, JpaSpecific
 
     @Query("select a from Alias a where (:cn is null or LOWER(a.cn) like LOWER(CONCAT('%', :cn, '%')))")
     Page<Alias> findByLikeCn(String cn, Pageable pageable);
+
+
+    Alias findByCn(String cn);
 }

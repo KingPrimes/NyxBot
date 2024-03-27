@@ -5,6 +5,7 @@ import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class MarketOrders {
          * 上一次在线时间
          */
         @JsonProperty("last_seen")
-        String lastSeen;
+        LocalDateTime lastSeen;
         /**
          * 用户名
          */
@@ -111,12 +112,12 @@ public class MarketOrders {
          * 订单创建日期
          */
         @JsonProperty("creation_date")
-        String creationDate;
+        LocalDateTime creationDate;
         /**
          * 最后一次修改日期
          */
         @JsonProperty("last_update")
-        String lastUpdate;
+        LocalDateTime lastUpdate;
         /**
          * UUID
          */

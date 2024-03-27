@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RivenItemsRepository extends JpaRepository<RivenItems, Long>, JpaSpecificationExecutor<RivenItems>, PagingAndSortingRepository<RivenItems, Long> {
     @Query(value = "select max(rivenId) from RivenItems")
@@ -26,5 +28,14 @@ public interface RivenItemsRepository extends JpaRepository<RivenItems, Long>, J
      */
     @Query("SELECT r FROM RivenItems r WHERE (:itemName IS NULL OR LOWER(r.itemName) LIKE LOWER(CONCAT('%', :itemName, '%'))) AND (:rivenType IS NULL OR r.rivenType = :rivenType)")
     Page<RivenItems> findAllPageable(String itemName, String rivenType, Pageable pageable);
+
+
+    RivenItems findByItemName(String itemName);
+
+    @Query(value = "select * from RIVEN_ITEMS r where upper(replace(r.ITEM_NAME,' ','')) regexp upper(replace(:#{#regex},' ','')) limit 1", nativeQuery = true)
+    RivenItems findByItemNameRegex(String regex);
+
+    @Query("select r from RivenItems r where LOWER(replace(r.itemName,' ','')) like LOWER(replace(CONCAT('%', :name, '%'),' ',''))")
+    List<RivenItems> itemNameLikes(String name);
 
 }
