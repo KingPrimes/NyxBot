@@ -61,7 +61,7 @@ public class RivenTrendController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(RivenTrend rt) {
+    public ResponseEntity<?> list(RivenTrend rt) {
         return getDataTable(repository.findAllPageable(rt.getTrendName(),
                 PageRequest.of(
                         rt.getPageNum() - 1,
@@ -82,9 +82,7 @@ public class RivenTrendController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        AsyncUtils.me().execute(() -> {
-            new RivenDispositionUpdates().upRivenTrend();
-        }, AsyncBeanName.InitData);
+        AsyncUtils.me().execute(() -> new RivenDispositionUpdates().upRivenTrend(), AsyncBeanName.InitData);
         return success("已执行任务！");
     }
 

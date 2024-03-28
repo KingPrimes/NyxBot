@@ -30,7 +30,7 @@ public class MarketRivenController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(RivenItems rivenItems) {
+    public ResponseEntity<?> list(RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
                         rivenItems.getItemName(),

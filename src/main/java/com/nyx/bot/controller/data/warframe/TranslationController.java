@@ -59,7 +59,7 @@ public class TranslationController extends BaseController {
      */
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(Translation t) {
+    public ResponseEntity<?> list(Translation t) {
         return getDataTable(repository.findAllPageable(
                 t.getCn(),
                 t.getIsPrime(),

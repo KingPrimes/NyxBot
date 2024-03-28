@@ -27,18 +27,6 @@ public class ApiUrl {
             "https://gitee.com/KingPrime/DataSource"
     );
 
-
-    /**
-     * 战甲数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE = List.of(
-            "https://raw.github.com/KingPrimes/DataSource/main/warframe/",
-            "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/",
-            "https://gitlab.com/KingPrimes/DataSource/-/raw/main/warframe/",
-            "https://gitee.com/KingPrime/DataSource/raw/main/warframe/"
-    );
-
-
     /**
      * 赤毒幻纹
      */

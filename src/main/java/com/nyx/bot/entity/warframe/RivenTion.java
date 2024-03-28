@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"urlName"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name"}))
 public class RivenTion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

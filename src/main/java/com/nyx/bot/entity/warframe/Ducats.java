@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.Data;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -13,12 +14,9 @@ import java.util.List;
 /**
  * 金银垃圾
  */
+@Setter
 public class Ducats {
     private List<Ducat> ducats;
-
-    public void setDucats(List<Ducat> ducats) {
-        this.ducats = ducats;
-    }
 
     @Override
     public String toString() {

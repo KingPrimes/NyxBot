@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"urlName", "itemName"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name", "item_name"}))
 public class Weapons extends BaseEntity {
     @Id
     @JsonProperty("id")
