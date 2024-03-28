@@ -90,3 +90,4 @@ server:
 logging:
   level:
     io.github.mymonstercat: OFF
+    org.springframework.security.web.DefaultSecurityFilterChain: OFF
