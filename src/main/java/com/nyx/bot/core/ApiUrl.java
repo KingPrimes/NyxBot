@@ -23,8 +23,8 @@ public class ApiUrl {
     public static final List<String> DATA_SOURCE_GIT = List.of(
             "https://github.com/KingPrimes/DataSource",
             "https://gitcode.com/KingPrimes/DataSource",
-            "https://gitee.com/KingPrime/DataSource",
-            "https://gitlab.com/KingPrimes/DataSource"
+            "https://gitlab.com/KingPrimes/DataSource",
+            "https://gitee.com/KingPrime/DataSource"
     );
 
 
@@ -34,9 +34,8 @@ public class ApiUrl {
     public static final List<String> WARFRAME_DATA_SOURCE = List.of(
             "https://raw.github.com/KingPrimes/DataSource/main/warframe/",
             "https://raw.gitcode.com/KingPrimes/DataSource/raw/main/warframe/",
-            "https://gitee.com/KingPrime/DataSource/raw/main/warframe/",
-            "https://gitlab.com/KingPrimes/DataSource/-/raw/main/warframe/"
-
+            "https://gitlab.com/KingPrimes/DataSource/-/raw/main/warframe/",
+            "https://gitee.com/KingPrime/DataSource/raw/main/warframe/"
     );
 
 

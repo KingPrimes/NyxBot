@@ -10,6 +10,7 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
@@ -257,6 +258,7 @@ public class JgitUtil {
                 .setRefSpecs(new RefSpec("main"))
                 //身份验证
                 .setCredentialsProvider(provider)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         return this;
     }
@@ -277,6 +279,7 @@ public class JgitUtil {
                 .setRefSpecs(new RefSpec(branch))
                 //身份验证
                 .setCredentialsProvider(provider)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         return this;
     }
@@ -293,12 +296,14 @@ public class JgitUtil {
         if (provider == null) {
             openRpo(localPath).pull()
                     .setRemoteBranchName("main")
+                    .setProgressMonitor(new TextProgressMonitor())
                     .call();
             return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName("main")
                 .setCredentialsProvider(provider)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         return this;
     }
@@ -318,12 +323,14 @@ public class JgitUtil {
         if (provider == null) {
             openRpo(localPath).pull()
                     .setRemoteBranchName("main")
+                    .setProgressMonitor(new TextProgressMonitor())
                     .call();
             return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName(branch)
                 .setCredentialsProvider(provider)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         return this;
     }
@@ -342,10 +349,10 @@ public class JgitUtil {
                     .setCloneSubmodules(true)
                     //设置克隆分支
                     .setBranch(branch)
+                    .setProgressMonitor(new TextProgressMonitor())
                     .call();
             //关闭源，以释放本地仓库锁
             git.getRepository().close();
-            git.close();
             return this;
         }
         Git git = Git.cloneRepository()
@@ -356,6 +363,7 @@ public class JgitUtil {
                 .setCloneSubmodules(true)
                 //设置克隆分支
                 .setBranch(branch)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
@@ -372,6 +380,7 @@ public class JgitUtil {
                 .setDirectory(new File(localPath))
                 //设置是否克隆子仓库
                 .setCloneSubmodules(true)
+                .setProgressMonitor(new TextProgressMonitor())
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
