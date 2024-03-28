@@ -92,5 +92,71 @@ public class FileUtils {
 
     }
 
+    /**
+     * 删除文件
+     *
+     * @param filePath 文件
+     * @return 是否删除
+     */
+    public static boolean deleteFile(String filePath) {
+        boolean flag;
+        File file = new File(filePath);
+        // 路径为文件且不为空则进行删除
+        if (file.isFile() && file.exists()) {
+            flag = file.delete();
+        } else {
+            return true;
+        }
+        return flag;
+    }
+
+    /**
+     * 删除指定文件夹下所有文件
+     *
+     * @param path 路径
+     * @return 结果
+     */
+    public static boolean delAllFile(String path) {
+        boolean flag = false;
+        File file = new File(path);
+        if (!file.exists()) {
+            return flag;
+        }
+        if (!file.isDirectory()) {
+            return flag;
+        }
+        String[] tempList = file.list();
+        File temp;
+        assert tempList != null;
+        for (String s : tempList) {
+            if (path.endsWith(File.separator)) {
+                temp = new File(path + s);
+            } else {
+                temp = new File(path + File.separator + s);
+            }
+            if (temp.isFile()) {
+                temp.delete();
+            }
+            if (temp.isDirectory()) {
+                delAllFile(path + "/" + s);// 先删除文件夹里面的文件
+                delFolder(path + "/" + s);// 再删除空文件夹
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+
+    private static void delFolder(String folderPath) {
+        try {
+            delAllFile(folderPath); // 删除完里面所有内容
+            java.io.File myFilePath = new java.io.File(folderPath);
+            myFilePath.delete(); // 删除空文件夹
+        } catch (Exception ignored) {
+
+        }
+    }
+
+
 
 }

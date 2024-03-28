@@ -11,6 +11,7 @@ import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -28,7 +29,9 @@ import java.util.stream.Collectors;
 public class WarframeDataSource {
 
     public static void init() {
-        log.info("开始初始化数据！");
+        AsyncUtils.me().execute(() -> {
+            log.info("开始初始化数据！");
+        }, AsyncBeanName.InitData);
         cloneDataSource();
         getAlias();
         getMarket();
@@ -40,6 +43,9 @@ public class WarframeDataSource {
         getRivenWeapons();
         getRivenTion();
         getRivenTionAlias();
+        AsyncUtils.me().execute(() -> {
+            log.info("数据初始化完成！");
+        }, AsyncBeanName.InitData);
     }
 
     //幻纹
@@ -187,7 +193,6 @@ public class WarframeDataSource {
                                                 .containsKey(item.toString())
                                 )
                                 .toList();
-                        log.info("紫卡词条别名表数据: {} ", list);
                         records = aliasR.saveAll(list);
                         log.info("共更新Warframe紫卡词条别名表 {} 条数据！", records.size());
                     } else {
@@ -488,21 +493,27 @@ public class WarframeDataSource {
 
     public static void cloneDataSource() {
         AsyncUtils.me().execute(() -> {
+            log.info("开始获取模板等数据！");
             for (String url : ApiUrl.DATA_SOURCE_GIT) {
                 try {
                     JgitUtil git = JgitUtil.Build(url, "");
-                    TimeUnit.SECONDS.sleep(30);
                     git.pull();
                     break;
                 } catch (Exception ignored) {
-                    JgitUtil git = JgitUtil.Build(url, "");
-                    try {
-                        git.pull();
-                        break;
-                    } catch (Exception ignored1) {
+                    boolean delete = FileUtils.delAllFile(JgitUtil.lockPath);
+                    if (delete) {
+                        JgitUtil git = JgitUtil.Build(url, "");
+                        try {
+                            git.pull();
+                            break;
+                        } catch (Exception ignored1) {
+                        }
+                    } else {
+                        log.error("获取模板等数据！失败！请手动删除{}目录！并重启程序！", JgitUtil.lockPath);
                     }
                 }
             }
+            log.info("获取模板等数据！获取完毕!");
         }, AsyncBeanName.InitData);
     }
 
