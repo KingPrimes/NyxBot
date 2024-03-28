@@ -21,7 +21,7 @@ public class MatchUtil {
      * 判断是否是武器名称
      */
     public static boolean isWeaponsName(String str) {
-        Pattern p = Pattern.compile("^[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5] *?[A-z]*?-?[A-z]*?$");
+        Pattern p = Pattern.compile("^[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5] *?[A-Za-z]*?-?[A-Za-z]*?$");
         Pattern compile = Pattern.compile("^[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5]*$");
         Matcher m = p.matcher(str.trim());
         Matcher m2 = compile.matcher(str.trim());
@@ -29,7 +29,7 @@ public class MatchUtil {
     }
 
     public static String getRivenNameE(String str) {
-        Pattern p = Pattern.compile("[a-zA-z]*-?$");
+        Pattern p = Pattern.compile("[a-zA-Z]*-?$");
         Matcher m = p.matcher(str);
         StringBuilder builder = new StringBuilder();
         while (m.find()) {
@@ -42,7 +42,7 @@ public class MatchUtil {
      * 获取紫卡名称
      */
     public static String getRivenName(String str) {
-        Pattern p = Pattern.compile("[a-zA-z]*-[a-zA-z]*$");
+        Pattern p = Pattern.compile("[a-zA-Z]*-[a-zA-Z]*$");
         Matcher m = p.matcher(str);
         StringBuilder builder = new StringBuilder();
         while (m.find()) {
@@ -93,13 +93,13 @@ public class MatchUtil {
      * 检测是否是紫卡名称
      */
     public static boolean isRivenName(String str) {
-        Pattern p = Pattern.compile("^[一-龥]*? [a-zA-z]*-[a-zA-z]*$");
+        Pattern p = Pattern.compile("^[一-龥]*? [a-zA-Z]*-[a-zA-Z]*$");
         Matcher m = p.matcher(str);
         return m.matches();
     }
 
     public static boolean isRivenNameEx(String str) {
-        Pattern p = Pattern.compile("^[一-龥]*? ?[a-zA-z]*-?$");
+        Pattern p = Pattern.compile("^[一-龥]*? ?[a-zA-Z]*-?$");
         Matcher m = p.matcher(str);
         return isRivenName(str) || m.matches();
     }

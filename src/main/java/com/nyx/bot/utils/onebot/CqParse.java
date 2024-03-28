@@ -44,7 +44,7 @@ public class CqParse {
         Matcher m = p.matcher(CQ);
         List<String> ids = new ArrayList<>();
         while (m.find()) {
-            Pattern pa = Pattern.compile("[a-zA-z]+://[^\\s]*term");
+            Pattern pa = Pattern.compile("[a-zA-Z]+://[^\\s]*term");
             Matcher ma = pa.matcher(m.group());
             while (ma.find()) {
                 ids.add(ma.group());

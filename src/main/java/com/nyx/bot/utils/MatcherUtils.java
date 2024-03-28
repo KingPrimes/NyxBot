@@ -84,7 +84,7 @@ public class MatcherUtils {
      * @return true 是字母 反之
      */
     public static boolean isAlpha(String str) {
-        return str != null && str.matches("[a-zA-z]+");
+        return str != null && str.matches("[a-zA-Z]+");
     }
 
     /**
