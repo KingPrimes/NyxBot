@@ -29,9 +29,7 @@ import java.util.stream.Collectors;
 public class WarframeDataSource {
 
     public static void init() {
-        AsyncUtils.me().execute(() -> {
-            log.info("开始初始化数据！");
-        }, AsyncBeanName.InitData);
+        AsyncUtils.me().execute(() -> log.info("开始初始化数据！"), AsyncBeanName.InitData);
         cloneDataSource();
         getAlias();
         getMarket();
@@ -43,9 +41,7 @@ public class WarframeDataSource {
         getRivenWeapons();
         getRivenTion();
         getRivenTionAlias();
-        AsyncUtils.me().execute(() -> {
-            log.info("数据初始化完成！");
-        }, AsyncBeanName.InitData);
+        AsyncUtils.me().execute(() -> log.info("数据初始化完成！"), AsyncBeanName.InitData);
     }
 
     //幻纹
