@@ -1,25 +1,12 @@
 ${AnsiColor.BRIGHT_YELLOW}
-NNNNNNNN        NNNNNNNN                                          BBBBBBBBBBBBBBBBB                           tttt
-N:::::::N       N::::::N                                          B::::::::::::::::B                       ttt:::t
-N::::::::N      N::::::N                                          B::::::BBBBBB:::::B                      t:::::t
-N:::::::::N     N::::::N                                          BB:::::B     B:::::B                     t:::::t
-N::::::::::N    N::::::yyyyyyy           yyyyyyxxxxxxx      xxxxxxx B::::B     B:::::B  ooooooooooo  ttttttt:::::ttttttt
-N:::::::::::N   N::::::Ny:::::y         y:::::y x:::::x    x:::::x  B::::B     B:::::Boo:::::::::::oot:::::::::::::::::t
-N:::::::N::::N  N::::::N y:::::y       y:::::y   x:::::x  x:::::x   B::::BBBBBB:::::Bo:::::::::::::::t:::::::::::::::::t
-N::::::N N::::N N::::::N  y:::::y     y:::::y     x:::::xx:::::x    B:::::::::::::BB o:::::ooooo:::::tttttt:::::::tttttt
-N::::::N  N::::N:::::::N   y:::::y   y:::::y       x::::::::::x     B::::BBBBBB:::::Bo::::o     o::::o     t:::::t
-N::::::N   N:::::::::::N    y:::::y y:::::y         x::::::::x      B::::B     B:::::o::::o     o::::o     t:::::t
-N::::::N    N::::::::::N     y:::::y:::::y          x::::::::x      B::::B     B:::::o::::o     o::::o     t:::::t
-N::::::N     N:::::::::N      y:::::::::y          x::::::::::x     B::::B     B:::::o::::o     o::::o     t:::::t    tttttt
-N::::::N      N::::::::N       y:::::::y          x:::::xx:::::x  BB:::::BBBBBB::::::o:::::ooooo:::::o     t::::::tttt:::::t
-N::::::N       N:::::::N        y:::::y          x:::::x  x:::::x B:::::::::::::::::Bo:::::::::::::::o     tt::::::::::::::t
-N::::::N        N::::::N       y:::::y          x:::::x    x:::::xB::::::::::::::::B  oo:::::::::::oo        tt:::::::::::tt
-NNNNNNNN         NNNNNNN      y:::::y          xxxxxxx      xxxxxxBBBBBBBBBBBBBBBBB     ooooooooooo            ttttttttttt
-                             y:::::y
-                            y:::::y
-                           y:::::y
-                          y:::::y
-                         yyyyyyy
+ ________       ___    ___ ___    ___ ________  ________  _________
+|\   ___  \    |\  \  /  /|\  \  /  /|\   __  \|\   __  \|\___   ___\
+\ \  \\ \  \   \ \  \/  / | \  \/  / | \  \|\ /\ \  \|\  \|___ \  \_|
+ \ \  \\ \  \   \ \    / / \ \    / / \ \   __  \ \  \\\  \   \ \  \
+  \ \  \\ \  \   \/  /  /   /     \/   \ \  \|\  \ \  \\\  \   \ \  \
+   \ \__\\ \__\__/  / /    /  /\   \    \ \_______\ \_______\   \ \__\
+    \|__| \|__|\___/ /    /__/ /\ __\    \|_______|\|_______|    \|__|
+              \|___|/     |__|/ \|__|
 ${AnsiColor.BLACK}
 ${AnsiColor.BRIGHT_RED}
 NyxBot Version: ${project-name.version}
