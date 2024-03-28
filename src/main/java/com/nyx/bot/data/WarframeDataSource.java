@@ -2,7 +2,6 @@ package com.nyx.bot.data;
 
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
@@ -18,6 +17,8 @@ import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -28,17 +29,20 @@ import java.util.stream.Collectors;
 @Component
 public class WarframeDataSource {
 
+    static final String DATA_SOURCE_PATH = JgitUtil.lockPath + "/warframe/";
+
     public static void init() {
         AsyncUtils.me().execute(() -> log.info("开始初始化数据！"), AsyncBeanName.InitData);
         cloneDataSource();
-        getAlias();
+        getEphemeras();
         getMarket();
         getWeapons();
-        getEphemeras();
+        getRivenWeapons();
+        /*读取已下载的本地数据*/
+        getAlias();
         initTranslation();
         getRivenAnalyseTrend();
         getRivenTrend();
-        getRivenWeapons();
         getRivenTion();
         getRivenTionAlias();
         AsyncUtils.me().execute(() -> log.info("数据初始化完成！"), AsyncBeanName.InitData);
@@ -56,184 +60,34 @@ public class WarframeDataSource {
                     getEphemeras();
                     return;
                 } catch (InterruptedException ignored) {
+                    getEphemeras();
                     return;
                 }
             }
             String s = body.getBody();
-            List<Ephemeras> ephemeras = JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
+            List<Ephemeras> ephemerasList = JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
 
             body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("信条幻纹信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
-            ephemeras.addAll(JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch));
+            ephemerasList.addAll(JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch));
 
             EphemerasRepository repository = SpringUtils.getBean(EphemerasRepository.class);
-
-            if (repository.findAll().size() != ephemeras.size()) {
-                AtomicInteger i = new AtomicInteger();
-                ephemeras.forEach(e -> {
-                    if (repository.findAll().isEmpty()) {
-                        i.addAndGet(repository.addEphemeras(e));
-                    } else {
-                        e.setEid((long) (repository.queryMaxId() + 1));
-                        i.addAndGet(repository.addEphemeras(e));
-                    }
-                });
-                log.info("共更新Warframe.Ephemeras {} 条数据！", i);
-                return;
+            if (!repository.findAll().isEmpty()) {
+                List<Ephemeras> all = repository.findAll();
+                List<Ephemeras> list = ephemerasList.stream()
+                        .filter(i -> !all.stream()
+                                .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName() + m.getElement(), value -> value))
+                                .containsKey(i.getItemName() + i.getUrlName() + i.getElement())
+                        ).toList();
+                repository.saveAll(list);
+                log.info("共更新Warframe.Ephemeras {} 条数据！", list.size());
+            } else {
+                repository.saveAll(ephemerasList);
+                log.info("共更新Warframe.Ephemeras {} 条数据！", ephemerasList.size());
             }
-            log.info("ephemeras数据未变更！");
-        }, AsyncBeanName.InitData);
-    }
-
-    //别名
-    public static void getAlias() {
-        AsyncUtils.me().execute(() -> {
-            log.info("开始获取别名数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "alias.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "alias.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-
-                    }
-
-                } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<Alias> records = array.toJavaList(Alias.class);
-                    AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
-                    if (!aliasR.findAll().isEmpty()) {
-                        List<Alias> all = aliasR.findAll();
-                        List<Alias> list = records.stream().filter(item ->
-                                        !all.stream()
-                                                .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
-                                                .containsKey(item.getCn() + "-" + item.getEn())
-                                )
-                                .toList();
-                        records = aliasR.saveAll(list);
-                        log.info("共更新Warframe别名表 {} 条数据！", records.size());
-                    } else {
-                        records = aliasR.saveAll(records);
-                        log.info("共初始化Warframe别名表 {} 条数据！", records.size());
-                    }
-                    break;
-                }
-            }
-        }, AsyncBeanName.InitData);
-    }
-
-    // 紫卡词条
-    public static void getRivenTion() {
-        AsyncUtils.me().execute(() -> {
-            log.info("开始获取紫卡词条参数数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "market_riven_tion.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("紫卡词条参数表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "market_riven_tion.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-
-                    }
-
-                } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<RivenTion> rivenTionList = array.toJavaList(RivenTion.class);
-                    RivenTionRepository records = SpringUtils.getBean(RivenTionRepository.class);
-                    if (!records.findAll().isEmpty()) {
-                        List<RivenTion> all = records.findAll();
-                        List<RivenTion> list = rivenTionList.stream().filter(item ->
-                                        !all.stream()
-                                                .collect(Collectors.toMap(RivenTion::toString, value -> value))
-                                                .containsKey(item.toString())
-                                )
-                                .toList();
-                        rivenTionList = records.saveAll(list);
-                        log.info("共更新Warframe紫卡词条参数表 {} 条数据！", rivenTionList.size());
-                    } else {
-                        rivenTionList = records.saveAll(rivenTionList);
-                        log.info("共初始化Warframe紫卡词条参数表 {} 条数据！", rivenTionList.size());
-                    }
-                    break;
-                }
-            }
-        }, AsyncBeanName.InitData);
-    }
-
-    // 紫卡词条别名
-    public static void getRivenTionAlias() {
-        AsyncUtils.me().execute(() -> {
-            log.info("开始获取紫卡词条别名数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "market_riven_tion_alias.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("紫卡词条别名表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "market_riven_tion_alias.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-
-                    }
-                } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<RivenTionAlias> records = array.toJavaList(RivenTionAlias.class);
-                    RivenTionAliasRepository aliasR = SpringUtils.getBean(RivenTionAliasRepository.class);
-                    if (!aliasR.findAll().isEmpty()) {
-                        List<RivenTionAlias> all = aliasR.findAll();
-                        List<RivenTionAlias> list = records.stream().filter(item ->
-                                        !all.stream()
-                                                .collect(Collectors.toMap(RivenTionAlias::toString, value -> value))
-                                                .containsKey(item.toString())
-                                )
-                                .toList();
-                        records = aliasR.saveAll(list);
-                        log.info("共更新Warframe紫卡词条别名表 {} 条数据！", records.size());
-                    } else {
-                        records = aliasR.saveAll(records);
-                        log.info("共初始化Warframe紫卡词条别名表 {} 条数据！", records.size());
-                    }
-                    break;
-                }
-            }
-        }, AsyncBeanName.InitData);
-    }
-
-
-    //翻译
-    public static void initTranslation() {
-        AsyncUtils.me().execute(() -> {
-            log.info("开始获取翻译数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "translation.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("翻译表初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "translation.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-                    }
-                } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<Translation> translations = array.toJavaList(Translation.class);
-                    TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
-                    if (!t.findAll().isEmpty()) {
-                        List<Translation> all = t.findAll();
-                        List<Translation> list = translations.stream().filter(item ->
-                                !all.stream()
-                                        .collect(Collectors.toMap(m -> m.getCn() + "-" + m.getEn(), value -> value))
-                                        .containsKey(item.getCn() + "-" + item.getEn())).toList();
-                        translations = t.saveAll(list);
-                        log.info("共更新Warframe翻译表 {} 条数据！", translations.size());
-                    } else {
-                        translations = t.saveAll(translations);
-                        log.info("共初始化Warframe翻译表 {} 条数据！", translations.size());
-                    }
-                    break;
-                }
-            }
-
         }, AsyncBeanName.InitData);
     }
 
@@ -249,6 +103,7 @@ public class WarframeDataSource {
                     getMarket();
                     return;
                 } catch (InterruptedException ignored) {
+                    getMarket();
                     return;
                 }
             }
@@ -261,16 +116,10 @@ public class WarframeDataSource {
                         .filter(item -> !all.stream()
                                 .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
                                 .containsKey(item.getItemName() + item.getUrlName())).toList();
-                list.forEach(item -> {
-                    OrdersItems orders = ordersItem.findByOrderId(item.getOrderId());
-                    Optional.ofNullable(orders).ifPresentOrElse(o -> {
-                        item.setOid(o.getOid());
-                        ordersItem.save(item);
-                    }, () -> ordersItem.save(item));
-                });
+                ordersItem.saveAll(list);
                 log.info("共更新Warframe.Market {} 条数据！", list.size());
             } else {
-                items = ordersItem.saveAll(items);
+                ordersItem.saveAll(items);
                 log.info("共初始化Warframe.Market {} 条数据！", items.size());
             }
         }, AsyncBeanName.InitData);
@@ -288,6 +137,7 @@ public class WarframeDataSource {
                     getWeapons();
                     return;
                 } catch (InterruptedException ignored) {
+                    getWeapons();
                     return;
                 }
             }
@@ -317,16 +167,10 @@ public class WarframeDataSource {
                         .filter(item -> !all.stream()
                                 .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
                                 .containsKey(item.getItemName() + item.getUrlName())).toList();
-                list.forEach(item -> {
-                    Weapons weaponsById = repository.findWeaponsById(item.getId());
-                    Optional.ofNullable(weaponsById)
-                            .ifPresentOrElse(weapon -> {
-                                item.setWeaponId(weapon.getWeaponId());
-                                repository.save(item);
-                            }, () -> repository.save(item));
-                });
+                repository.saveAll(list);
                 log.info("共更新Warframe.Weapons {} 条数据！", list.size());
             } else {
+                repository.saveAll(weapons);
                 log.info("共初始化Warframe.Weapons {} 条数据！", weapons.size());
             }
         }, AsyncBeanName.InitData);
@@ -336,7 +180,7 @@ public class WarframeDataSource {
     public static void getRivenWeapons() {
         AsyncUtils.me().execute(() -> {
             log.info("开始获取Market紫卡武器数据！");
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_Riven_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_RIVEN_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("Market紫卡武器初始化错误！未获取到数据信息！30秒后尝试重新获取！");
                 try {
@@ -344,6 +188,7 @@ public class WarframeDataSource {
                     getRivenWeapons();
                     return;
                 } catch (InterruptedException ignored) {
+                    getRivenWeapons();
                     return;
                 }
             }
@@ -388,128 +233,180 @@ public class WarframeDataSource {
         }, AsyncBeanName.InitData);
     }
 
+    //别名
+    public static void getAlias() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始初始化别名数据！");
+            try {
+                List<Alias> aliasList = JSON.parseArray(new File(DATA_SOURCE_PATH + "alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Alias.class);
+                AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
+                if (!aliasR.findAll().isEmpty()) {
+                    List<Alias> all = aliasR.findAll();
+                    List<Alias> list = aliasList.stream().filter(item ->
+                                    !all.stream()
+                                            .collect(Collectors.toMap(Alias::toString, value -> value))
+                                            .containsKey(item.toString())
+                            )
+                            .toList();
+                    aliasList = aliasR.saveAll(list);
+                    log.info("共更新Warframe别名表 {} 条数据！", aliasList.size());
+                } else {
+                    aliasList = aliasR.saveAll(aliasList);
+                    log.info("共初始化Warframe别名表 {} 条数据！", aliasList.size());
+                }
+            } catch (MalformedURLException e) {
+                log.warn("别名表初始化错误！{}", e.getMessage());
+            }
+        }, AsyncBeanName.InitData);
+    }
+
+    // 紫卡词条
+    public static void getRivenTion() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始初始化紫卡词条参数数据！");
+            try {
+                List<RivenTion> rivenTions = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTion.class);
+                RivenTionRepository records = SpringUtils.getBean(RivenTionRepository.class);
+                if (!records.findAll().isEmpty()) {
+                    List<RivenTion> all = records.findAll();
+                    List<RivenTion> list = rivenTions.stream().filter(item ->
+                                    !all.stream()
+                                            .collect(Collectors.toMap(RivenTion::toString, value -> value))
+                                            .containsKey(item.toString())
+                            )
+                            .toList();
+                    rivenTions = records.saveAll(list);
+                    log.info("共更新Warframe紫卡词条参数表 {} 条数据！", rivenTions.size());
+                } else {
+                    rivenTions = records.saveAll(rivenTions);
+                    log.info("共初始化Warframe紫卡词条参数表 {} 条数据！", rivenTions.size());
+                }
+            } catch (MalformedURLException e) {
+                log.warn("紫卡词条参数表初始化错误！{}", e.getMessage());
+            }
+        }, AsyncBeanName.InitData);
+    }
+
+    // 紫卡词条别名
+    public static void getRivenTionAlias() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始初始化紫卡词条别名数据！");
+            try {
+                List<RivenTionAlias> rivenTionAliases = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion_alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTionAlias.class);
+                RivenTionAliasRepository repository = SpringUtils.getBean(RivenTionAliasRepository.class);
+                if (!repository.findAll().isEmpty()) {
+                    List<RivenTionAlias> all = repository.findAll();
+                    List<RivenTionAlias> list = rivenTionAliases.stream().filter(item ->
+                                    !all.stream()
+                                            .collect(Collectors.toMap(RivenTionAlias::toString, value -> value))
+                                            .containsKey(item.toString())
+                            )
+                            .toList();
+                    rivenTionAliases = repository.saveAll(list);
+                    log.info("共更新Warframe紫卡词条别名表 {} 条数据！", rivenTionAliases.size());
+                } else {
+                    rivenTionAliases = repository.saveAll(rivenTionAliases);
+                    log.info("共初始化Warframe紫卡词条别名表 {} 条数据！", rivenTionAliases.size());
+                }
+
+            } catch (MalformedURLException e) {
+                log.warn("紫卡词条别名表初始化错误！{}", e.getMessage());
+            }
+        }, AsyncBeanName.InitData);
+    }
+
+    //翻译
+    public static void initTranslation() {
+        AsyncUtils.me().execute(() -> {
+            log.info("开始初始化翻译数据！");
+            try {
+                List<Translation> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "translation.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Translation.class);
+                TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
+                if (!t.findAll().isEmpty()) {
+                    List<Translation> all = t.findAll();
+                    List<Translation> list = translations.stream().filter(item ->
+                            !all.stream()
+                                    .collect(Collectors.toMap(m -> m.getCn() + m.getEn() + m.getIsSet() + m.getIsPrime(), value -> value))
+                                    .containsKey(item.getCn() + item.getEn() + item.getIsSet() + item.getIsPrime())).toList();
+                    translations = t.saveAll(list);
+                    log.info("共更新Warframe翻译表 {} 条数据！", translations.size());
+                } else {
+                    translations = t.saveAll(translations);
+                    log.info("共初始化Warframe翻译表 {} 条数据！", translations.size());
+                }
+            } catch (MalformedURLException e) {
+                log.warn("翻译表初始化错误！{}", e.getMessage());
+            }
+        }, AsyncBeanName.InitData);
+    }
+
     //紫卡计算器数据
     public static void getRivenAnalyseTrend() {
         AsyncUtils.me().execute(() -> {
-            log.info("开始获取紫卡计算器数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "riven_analyse_trend.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("紫卡计算器数据初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "riven_analyse_trend.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-                    }
+            log.info("开始初始化紫卡计算器数据！");
+            try {
+                List<RivenAnalyseTrend> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_analyse_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenAnalyseTrend.class);
+                RivenAnalyseTrendRepository r = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
+                if (!r.findAll().isEmpty()) {
+                    List<RivenAnalyseTrend> all = r.findAll();
+                    List<RivenAnalyseTrend> list = translations.stream().filter(item ->
+                            !all.stream().collect(Collectors.toMap(RivenAnalyseTrend::toString, value -> value))
+                                    .containsKey(item.toString())).toList();
+                    translations = r.saveAll(list);
+                    log.info("共更新紫卡计算器表 {} 条数据！", translations.size());
                 } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<RivenAnalyseTrend> ratrs = array.toJavaList(RivenAnalyseTrend.class);
-                    RivenAnalyseTrendRepository rater = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
-                    if (!rater.findAll().isEmpty()) {
-                        List<RivenAnalyseTrend> all = rater.findAll();
-                        List<RivenAnalyseTrend> list = ratrs.stream().filter(item ->
-                                !all.stream().collect(Collectors.toMap(m ->
-                                                        m.getArchwing() +
-                                                                m.getName() +
-                                                                m.getMelle() +
-                                                                m.getPistol() +
-                                                                m.getPrefix() +
-                                                                m.getRifle() +
-                                                                m.getShotgun() +
-                                                                m.getSuffix(),
-                                                value -> value))
-                                        .containsKey(
-                                                item.getArchwing() +
-                                                        item.getName() +
-                                                        item.getMelle() +
-                                                        item.getPistol() +
-                                                        item.getPrefix() +
-                                                        item.getRifle() +
-                                                        item.getShotgun() +
-                                                        item.getSuffix()
-                                        )).toList();
-                        ratrs = rater.saveAll(list);
-                        log.info("共更新紫卡计算器表 {} 条数据！", ratrs.size());
-                    } else {
-                        ratrs = rater.saveAll(ratrs);
-                        log.info("共初始化紫卡计算器表 {} 条数据！", ratrs.size());
-                    }
-                    break;
+                    translations = r.saveAll(translations);
+                    log.info("共初始化紫卡计算器表 {} 条数据！", translations.size());
                 }
+            } catch (MalformedURLException e) {
+                log.warn("紫卡计算器表初始化错误！{}", e.getMessage());
             }
-
         }, AsyncBeanName.InitData);
     }
 
     public static void getRivenTrend() {
         AsyncUtils.me().execute(() -> {
-            log.info("开始获取紫卡倾向数据！");
-            for (String url : ApiUrl.WARFRAME_DATA_SOURCE) {
-                HttpUtils.Body body = HttpUtils.sendGet(url + "riven_trend.json");
-                if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                    log.warn("紫卡倾向数据初始化错误！未获取到数据信息！30秒后尝试重新获取！URL：{}", url + "riven_trend.json");
-                    try {
-                        TimeUnit.SECONDS.sleep(30);
-                    } catch (InterruptedException ignored) {
-                    }
+            log.info("开始初始化紫卡倾向数据！");
+            try {
+                List<RivenTrend> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTrend.class);
+                RivenTrendRepository r = SpringUtils.getBean(RivenTrendRepository.class);
+                if (!r.findAll().isEmpty()) {
+                    List<RivenTrend> all = r.findAll();
+                    List<RivenTrend> list = translations.stream().filter(item ->
+                            !all.stream().collect(Collectors.toMap(RivenTrend::toString, value -> value))
+                                    .containsKey(item.toString())).toList();
+                    translations = r.saveAll(list);
+                    log.info("共更新紫卡倾向表 {} 条数据！", translations.size());
                 } else {
-                    JSONArray array = JSON.parseArray(body.getBody(), JSONReader.Feature.SupportSmartMatch);
-                    List<RivenTrend> ratrs = array.toJavaList(RivenTrend.class);
-                    RivenTrendRepository rater = SpringUtils.getBean(RivenTrendRepository.class);
-                    if (!rater.findAll().isEmpty()) {
-                        List<RivenTrend> all = rater.findAll();
-                        List<RivenTrend> list = ratrs.stream().filter(item ->
-                                !all.stream().collect(Collectors.toMap(m ->
-                                                        m.getTrendName() +
-                                                                m.getNewDot() +
-                                                                m.getNewNum() +
-                                                                m.getOldDot() +
-                                                                m.getOldNum() +
-                                                                m.getType(),
-                                                value -> value))
-                                        .containsKey(
-                                                item.getTrendName() +
-                                                        item.getNewDot() +
-                                                        item.getNewNum() +
-                                                        item.getOldDot() +
-                                                        item.getOldNum() +
-                                                        item.getType()
-                                        )).toList();
-                        ratrs = rater.saveAll(list);
-                        log.info("共更新紫卡倾向表 {} 条数据！", ratrs.size());
-                    } else {
-                        ratrs = rater.saveAll(ratrs);
-                        log.info("共初始化紫卡倾向表 {} 条数据！", ratrs.size());
-                    }
-                    break;
+                    translations = r.saveAll(translations);
+                    log.info("共初始化紫卡倾向表 {} 条数据！", translations.size());
                 }
+            } catch (MalformedURLException e) {
+                log.warn("紫卡倾向表初始化错误！{}", e.getMessage());
             }
-
         }, AsyncBeanName.InitData);
     }
 
     public static void cloneDataSource() {
         AsyncUtils.me().execute(() -> {
-            log.info("开始获取模板等数据！");
+            log.info("开始初始化数据模板！");
+            boolean flag = true;
             for (String url : ApiUrl.DATA_SOURCE_GIT) {
                 try {
                     JgitUtil git = JgitUtil.Build(url, "");
                     git.pull();
+                    flag = false;
                     break;
                 } catch (Exception ignored) {
-                    boolean delete = FileUtils.delAllFile(JgitUtil.lockPath);
-                    if (delete) {
-                        JgitUtil git = JgitUtil.Build(url, "");
-                        try {
-                            git.pull();
-                            break;
-                        } catch (Exception ignored1) {
-                        }
-                    } else {
-                        log.error("获取模板等数据！失败！请手动删除{}目录！并重启程序！", JgitUtil.lockPath);
-                    }
+                    FileUtils.delAllFile(JgitUtil.lockPath);
                 }
             }
-            log.info("获取模板等数据！获取完毕!");
+            if (flag) {
+                log.error("初始化数据模板，失败！请删除{}目录！并检查网络环境之后重启程序！", JgitUtil.lockPath);
+                FileUtils.delAllFile(JgitUtil.lockPath);
+                System.exit(1);
+            }
+            log.info("初始化数据模板！获取完毕!");
         }, AsyncBeanName.InitData);
     }
 

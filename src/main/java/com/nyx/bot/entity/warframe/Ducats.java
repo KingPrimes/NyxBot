@@ -66,7 +66,7 @@ public class Ducats {
             if (i >= 5) {
                 break;
             }
-            ducat.setItemName(itemsRepository.findByOrderId(ducat.item).getItemName());
+            itemsRepository.findById(ducat.item).ifPresent(item -> ducat.setItemName(item.getItemName()));
             ducatList.add(ducat);
             i++;
         }

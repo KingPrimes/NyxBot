@@ -57,7 +57,7 @@ public class ApiUrl {
     /**
      * Market 紫卡武器
      */
-    public static final String WARFRAME_MARKET_Riven_ITEMS = "https://api.warframe.market/v1/riven/items";
+    public static final String WARFRAME_MARKET_RIVEN_ITEMS = "https://api.warframe.market/v1/riven/items";
 
     /**
      * 赤毒武器

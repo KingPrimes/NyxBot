@@ -1,6 +1,8 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenItems;
 import com.nyx.bot.repo.warframe.RivenItemsRepository;
 import jakarta.annotation.Resource;
@@ -38,6 +40,13 @@ public class MarketRivenController extends BaseController {
                                 rivenItems.getPageSize())
                 )
         );
+    }
+
+    @PostMapping("/update")
+    @ResponseBody
+    public AjaxResult update() {
+        WarframeDataSource.getRivenWeapons();
+        return success("已执行任务！");
     }
 
 }

@@ -16,12 +16,8 @@ import lombok.EqualsAndHashCode;
 public class Ephemeras extends BaseEntity {
 
     @Id
-    //自增
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long eid;
-    @Column(length = 50)
     @JsonProperty("id")
-    String Id;
+    String id;
     @Column(length = 120)
     @JsonProperty("icon")
     String icon;

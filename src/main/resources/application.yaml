@@ -33,11 +33,6 @@ spring:
   messages:
     # 国际化资源文件路径
     basename: i18n/messages
-    # 服务模块
-  devtools:
-    restart:
-      # 热部署开关
-      enabled: true
 
   #定时任务
   task:

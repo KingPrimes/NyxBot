@@ -16,12 +16,7 @@ import lombok.EqualsAndHashCode;
 public class OrdersItems extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("oid")
-    //唯一自增ID
-    Long oid;
     @JsonProperty("id")
-    @Column(length = 50)
     //唯一字符串ID
     String orderId;
     @JsonProperty("url_name")

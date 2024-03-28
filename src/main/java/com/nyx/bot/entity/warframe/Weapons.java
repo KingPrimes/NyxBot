@@ -15,9 +15,6 @@ import lombok.EqualsAndHashCode;
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"urlName", "itemName"}))
 public class Weapons extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //唯一自增ID
-    Long weaponId;
     @JsonProperty("id")
     //唯一字符串武器ID
     String id;

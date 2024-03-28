@@ -38,8 +38,7 @@ public class Runners {
             user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
-                SysUser save = userRepository.save(user);
-                log.info("用户不存在！已添加新用户：{}", save);
+               userRepository.save(user);
             }
         }, AsyncBeanName.SERVICE);
     }

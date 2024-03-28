@@ -5,12 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,26 +18,7 @@ import java.util.List;
  * Jpa 操作数据源 接口
  */
 @Repository
-public interface OrdersItemsRepository extends JpaRepository<OrdersItems, Long>, JpaSpecificationExecutor<OrdersItems>, PagingAndSortingRepository<OrdersItems, Long> {
-
-    /**
-     * 添加数据
-     */
-    @Transactional
-    @Modifying
-    @Query(value = "INSERT IGNORE INTO ORDERS_ITEMS(ITEM_NAME, ORDER_ID, THUMB, URL_NAME, VAULTED) VALUES (:#{#items.itemName},:#{#items.orderId},:#{#items.thumb},:#{#items.urlName},:#{#items.vaulted})"
-            , nativeQuery = true)
-    Integer addOrdersItems(@Param("items") OrdersItems items);
-
-
-    /**
-     * 查询最大ID的数据
-     */
-    OrdersItems findTopByOrderByOidDesc();
-
-
-    OrdersItems findByOrderId(String orderId);
-
+public interface OrdersItemsRepository extends JpaRepository<OrdersItems, String>, JpaSpecificationExecutor<OrdersItems>, PagingAndSortingRepository<OrdersItems, String> {
 
     /**
      * 根据物品名称模糊查询

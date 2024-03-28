@@ -30,4 +30,6 @@ public class Translation extends BaseEntity {
     //是否是一套物品
     @JsonProperty("is_set")
     Boolean isSet;
+
+
 }

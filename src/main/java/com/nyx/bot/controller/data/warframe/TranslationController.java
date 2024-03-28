@@ -74,6 +74,7 @@ public class TranslationController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
+        WarframeDataSource.cloneDataSource();
         WarframeDataSource.initTranslation();
         return success("已执行任务！");
     }

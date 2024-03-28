@@ -61,7 +61,7 @@ public class BaseController {
         return rspData;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     protected ResponseEntity getDataTable(Page page) {
         return ResponseEntity.ok(AjaxResult.success(page));
     }

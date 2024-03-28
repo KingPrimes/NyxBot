@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenTrend;
+import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.repo.warframe.RivenTrendRepository;
@@ -73,6 +74,7 @@ public class RivenTrendController extends BaseController {
     @PostMapping("/init")
     @ResponseBody
     public AjaxResult init() {
+        WarframeDataSource.cloneDataSource();
         WarframeDataSource.getRivenTrend();
         return success("已执行任务！");
     }
@@ -82,7 +84,7 @@ public class RivenTrendController extends BaseController {
     public AjaxResult update() {
         AsyncUtils.me().execute(() -> {
             new RivenDispositionUpdates().upRivenTrend();
-        });
+        }, AsyncBeanName.InitData);
         return success("已执行任务！");
     }
 
