@@ -403,9 +403,9 @@ public class MarketUtils {
                         // 取前10个
                         .limit(10)
                         .peek(m -> {
-                            m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a -> {
-                                a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect());
-                            }).toList());
+                            m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a ->
+                                    a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect())).toList()
+                            );
                         })
                         .toList());
         // 解析返回数据
