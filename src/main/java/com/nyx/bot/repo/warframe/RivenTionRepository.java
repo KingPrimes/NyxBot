@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RivenTionRepository extends JpaRepository<RivenTion, Long> {
     RivenTion findByEffect(String stat);
+
+    RivenTion findByUrlName(String urlName);
 }

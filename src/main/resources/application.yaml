@@ -85,4 +85,5 @@ server:
 logging:
   level:
     io.github.mymonstercat: OFF
+    org.xhtmlrenderer: OFF
     org.springframework.security.web.DefaultSecurityFilterChain: OFF

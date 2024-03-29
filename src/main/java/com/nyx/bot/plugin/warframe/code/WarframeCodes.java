@@ -270,8 +270,26 @@ public class WarframeCodes {
     /**
      * Warframe Market Riven拍卖查询
      */
-    public static void marketRiven(Bot bot, AnyMessageEvent event, String str, Codes code) {
-
+    public static void marketRiven(Bot bot, AnyMessageEvent event, String str,Codes code) {
+        if (MatcherUtils.isSpecialSymbols(str)) {
+            String item = MatcherUtils.isOrderItem(str);
+            if (item.isEmpty()) {
+                bot.sendMsg(event, "请输入正确的指令！", false);
+                return;
+            }
+            str = item;
+        }
+        OneBotLogInfoData data = getLogInfoData(bot, event, code);
+        data.setKey(str.replaceAll(code.getStr(), "").trim());
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "postMarketRivenImage",
+                data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            sendErrorMsg(bot, event, body);
+        }
     }
 
     /**

@@ -37,7 +37,7 @@ public class GlobalDirectivesPlugin {
             raw = raw.replaceAll("/", "").trim();
         }
         Codes code = CodeUtils.matchInstructions(raw);
-        String finalRaw = raw;
+        String finalRaw = raw.toUpperCase();
         Optional.ofNullable(code).ifPresent(codes -> {
             switch (codes) {
                 //帮助菜单

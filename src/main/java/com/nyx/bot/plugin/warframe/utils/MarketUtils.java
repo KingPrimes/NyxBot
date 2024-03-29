@@ -304,12 +304,11 @@ public class MarketUtils {
                     MarketRivenParameter.SortBy.PRICE_ASC
             ).getUrl();
             HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
-
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 return marketRiven;
             }
             // 解析返回数据
-            return JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch);
+            return stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
         }
 
         // 有请求参数 以-分割
@@ -324,14 +323,22 @@ public class MarketUtils {
         String[] stats = list.get(1).replaceAll("，", ",").split(",");
         // 正面词条 变量
         StringBuilder statBuilder = new StringBuilder();
-        for (String stat : stats) {
-            RivenTion tion = SpringUtils.getBean(RivenTionRepository.class).findByEffect(stat);
+        for (int i = 0; i < stats.length; i++) {
+            RivenTion tion = SpringUtils.getBean(RivenTionRepository.class).findByEffect(stats[i].trim());
             if (tion != null) {
-                statBuilder.append(tion.getUrlName()).append(",");
+                statBuilder.append(tion.getUrlName());
+                // 判断后续还有没有词条，如果有则添加逗号
+                if (i < stats.length - 1) {
+                    statBuilder.append(",");
+                }
             } else {
-                RivenTionAlias alias = SpringUtils.getBean(RivenTionAliasRepository.class).findByCn(stat);
+                RivenTionAlias alias = SpringUtils.getBean(RivenTionAliasRepository.class).findByCn(stats[i].trim());
                 if (alias != null) {
-                    statBuilder.append(alias.getEn()).append(",");
+                    statBuilder.append(alias.getEn());
+                    // 判断后续还有没有词条，如果有则添加逗号
+                    if (i < stats.length - 1) {
+                        statBuilder.append(",");
+                    }
                 }
             }
         }
@@ -352,16 +359,58 @@ public class MarketUtils {
                 MarketRivenParameter.Policy.ANY,
                 MarketRivenParameter.SortBy.PRICE_ASC
         ).getUrl();
-
         HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
 
         if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             return marketRiven;
         }
         // 解析返回数据
-        return JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch);
+        return stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
     }
 
+    /**
+     * 解析返回数据
+     *
+     * @param marketRiven 数据
+     * @param itemName    物品名称
+     */
+    private static MarketRiven stream(MarketRiven marketRiven, String itemName) {
+        marketRiven.setItemName(itemName);
+        marketRiven.getPayload().setAuctions(
+                marketRiven.getPayload()
+                        .getAuctions().stream()
+                        // 过滤掉已结束的物品
+                        .filter(m -> !m.getClosed())
+                        // 过滤掉已下架的物品
+                        .filter(MarketRiven.Payload.Auctions::getVisible)
+                        // 过滤掉不在线玩家
+                        .filter(m -> m.getOwner().getStatus().equals("online") || m.getOwner().getStatus().equals("ingame"))
+                        // 排序
+                        .sorted((o1, o2) -> {
+                            if (o1.getBuyoutPrice() != null && o2.getBuyoutPrice() != null) {
+                                return o1.getBuyoutPrice() - o2.getBuyoutPrice();
+                            }
+
+                            if (o1.getStartingPrice() != null && o2.getStartingPrice() != null) {
+                                return o1.getStartingPrice() - o2.getStartingPrice();
+                            }
+
+                            if (o1.getTopBid() != null && o2.getTopBid() != null) {
+                                return o1.getTopBid() - o2.getTopBid();
+                            }
+                            return 0;
+                        })
+                        // 取前10个
+                        .limit(10)
+                        .peek(m -> {
+                            m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a -> {
+                                a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect());
+                            }).toList());
+                        })
+                        .toList());
+        // 解析返回数据
+        return marketRiven;
+    }
 
 
 }

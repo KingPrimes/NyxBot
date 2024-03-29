@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class MarketRiven {
 
+    @JsonProperty("item_name")
     String itemName;
     List<RivenItems> possibleItems;
     @JsonProperty("payload")
