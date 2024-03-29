@@ -3,12 +3,11 @@ package com.nyx.bot.controller.config.bot.white;
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.white.ProveWhite;
 import com.nyx.bot.repo.impl.white.WhiteService;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +28,8 @@ public class ProveWhiteController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(ProveWhite proveWhite) {
-        Page<ProveWhite> list = whiteService.list(proveWhite);
-        return getDataTable(list.getContent(), list.getTotalElements());
+    public ResponseEntity<?> list(ProveWhite proveWhite) {
+        return getDataTable(whiteService.list(proveWhite));
     }
 
     @GetMapping("/add")

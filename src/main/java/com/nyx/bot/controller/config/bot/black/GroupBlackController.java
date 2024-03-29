@@ -31,16 +31,14 @@ public class GroupBlackController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(GroupBlack gb) {
+    public ResponseEntity<?> list(GroupBlack gb) {
         return getDataTable(bs.list(gb));
     }
 
 
     @GetMapping("/add")
     public String add(ModelMap map) {
-        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> {
-            map.put("group", bot.getGroupList().getData());
-        });
+        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.put("group", bot.getGroupList().getData()));
         return prefix + "/add";
     }
 

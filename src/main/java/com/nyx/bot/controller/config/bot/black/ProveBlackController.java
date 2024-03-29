@@ -28,7 +28,7 @@ public class ProveBlackController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(ProveBlack pb) {
+    public ResponseEntity<?> list(ProveBlack pb) {
         return getDataTable(bs.list(pb));
     }
 
