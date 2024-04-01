@@ -61,6 +61,12 @@
                                 <span class="nav-label">配置Git账户</span>
                             </a>
                         </li>
+                        <li id="configLoading">
+                            <a class="menuItem" data-refresh="false" onclick="configLoading()">
+                                <i class="fas fa-user"></i>
+                                <span class="nav-label">配置服务</span>
+                            </a>
+                        </li>
                         <li>
                             <a class="menuItem" data-refresh="false" th:href="@{/config/admin}">
                                 <i class="fas fa-user-cog"></i>
@@ -314,6 +320,12 @@
         $.modal.open('配置Git账户', url, '400', '300')
         document.getElementById("config").setAttribute("class", "");
     }
+    function configLoading() {
+        const url = ctx + 'config/loading';
+        $.modal.open('配置服务', url, '450', '400')
+        document.getElementById("config").setAttribute("class", "");
+    }
+
 
     /* 切换主题 */
     function switchSkin() {

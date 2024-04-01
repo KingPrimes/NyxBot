@@ -1,13 +1,13 @@
 package com.nyx.bot.utils.onebot;
 
-import com.mikuac.shiro.common.utils.MsgUtils;
+import com.mikuac.shiro.common.utils.ArrayMsgUtil;
 import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import org.eclipse.jgit.util.Base64;
 
 import static java.lang.String.format;
 
-public class Msg extends MsgUtils {
+public class Msg extends ArrayMsgUtil {
     private final StringBuilder builder = new StringBuilder();
 
     /**

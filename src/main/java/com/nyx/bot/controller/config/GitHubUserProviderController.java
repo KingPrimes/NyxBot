@@ -28,6 +28,8 @@ public class GitHubUserProviderController extends BaseController {
         List<GitHubUserProvider> all = gitRepository.findAll();
         if (!all.isEmpty()) {
             mapp.put("git", all.get(0));
+        }else{
+            mapp.put("git", new GitHubUserProvider());
         }
         return prefix + "github";
     }

@@ -29,7 +29,7 @@ public class SecurityConfiguration {
 
     private final UserDetailsService userDetailService;
 
-    @Value("${shiro.ws-config.ws-url}")
+    @Value("${shiro.ws.server.url}")
     String shiro;
 
 

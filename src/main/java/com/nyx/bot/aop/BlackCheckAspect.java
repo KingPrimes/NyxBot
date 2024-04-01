@@ -46,7 +46,7 @@ public class BlackCheckAspect {
     }
 
     private boolean isCheck(Long group, Long prove) {
-        if (SpringUtils.getBean(HandOff.class).isBW()) {
+        if (HandOff.isBW()) {
             return SpringUtils.getBean(WhiteService.class).isWhite(group, prove);
         } else {
             return SpringUtils.getBean(BlackService.class).isBlack(group, prove);

@@ -3,6 +3,7 @@ package com.nyx.bot.controller.config.bot.white;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.bot.white.GroupWhite;
 import com.nyx.bot.repo.impl.white.WhiteService;
@@ -71,7 +72,9 @@ public class GroupWhiteController extends BaseController {
     @PostMapping("/handoff")
     @ResponseBody
     public AjaxResult handoff() {
-        return SpringUtils.getBean(HandOff.class).handoff();
+        NyxConfig nyxConfig = HandOff.getConfig();
+        nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());
+        return toAjax(HandOff.handoff(nyxConfig));
     }
 
 }

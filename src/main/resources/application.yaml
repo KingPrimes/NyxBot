@@ -77,8 +77,14 @@ spring:
     timeout-per-shutdown-phase: 10s
 # OneBot
 shiro:
-  ws-config:
-    ws-url: /ws/shiro
+  ws:
+    server:
+      url: /ws/shiro
+      enable: true
+    client:
+      enable: false
+      url: ws://localhost:3001
+  debug: false
 server:
   port: 8080
   shutdown: graceful

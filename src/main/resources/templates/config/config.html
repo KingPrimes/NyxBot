@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('Config配置')}"/>
+<style>
+    /* 切换开关的基础样式 */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    /* 隐藏原始的checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* 滑动滑块 */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    /* 当checkbox被选中时，滑动滑块 */
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* 滑动滑块的圆角 */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+</style>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <h2 style="color:red">更改之后需要重启服务才能生效</h2>
+        <form class="form-horizontal m" id="form-config-loading" th:object="${config}">
+            <input id="isBlackOrWhite" name="isBlackOrWhite" th:field="*{isBlackOrWhite}" type="hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="serverPort">端口：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input class="form-control" id="serverPort" name="serverPort" placeholder="端口号"
+                               th:field="*{serverPort}" type="number">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="isServerOrClient">切换到客户端：</label>
+                <div class="col-sm-8">
+                    <div class="input-group switch">
+                        <input class="form-control checkbox" id="isServerOrClient" name="isServerOrClient"
+                               th:checked="${!config.isServerOrClient}" th:value="${config.isServerOrClient}" type="checkbox">
+                        <span class="slider round"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="wsServerUrlDiv">
+                <label class="col-sm-3 control-label" for="wsServerUrl">服务端URL：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input class="form-control" id="wsServerUrl" name="wsServerUrl" placeholder="WebSocket服务端反向链接URL"
+                               th:field="*{wsServerUrl}" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="wsClientDiv" style="display: none">
+                <label class="col-sm-3 control-label" for="wsClientUrl">客户端URL：</label>
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input class="form-control" id="wsClientUrl" name="wsClientUrl" placeholder="WebSocket服务端正向链接URL"
+                               th:field="*{wsClientUrl}" type="text">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    // 等待DOM完全加载
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // 获取复选框元素
+        const switchElement = document.getElementById('isServerOrClient');
+        function updateSliderPosition() {
+            switchElement.value = !switchElement.checked
+            if (!switchElement.checked) {
+                document.getElementById("wsClientDiv").style.display = "none";
+                document.getElementById("wsServerUrlDiv").style.display = "block";
+            } else {
+                document.getElementById("wsServerUrlDiv").style.display = "none";
+                document.getElementById("wsClientDiv").style.display = "block";
+            }
+        }
+        switchElement.addEventListener('change', updateSliderPosition);
+    });
+
+
+    const prefix = ctx + "config/loading";
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-config-loading').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>

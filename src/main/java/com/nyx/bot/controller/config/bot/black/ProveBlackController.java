@@ -2,10 +2,10 @@ package com.nyx.bot.controller.config.bot.black;
 
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.bot.black.ProveBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
-import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -64,7 +64,9 @@ public class ProveBlackController extends BaseController {
     @PostMapping("/handoff")
     @ResponseBody
     public AjaxResult handoff() {
-        return SpringUtils.getBean(HandOff.class).handoff();
+        NyxConfig nyxConfig = HandOff.getConfig();
+        nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());
+        return toAjax(HandOff.handoff(nyxConfig));
     }
 
 }

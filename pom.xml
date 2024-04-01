@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <oneSdk.version>2.1.8</oneSdk.version>
+        <oneSdk.version>2.2.0</oneSdk.version>
         <fastJson2.version>2.0.45</fastJson2.version>
         <xhtmlrenderer.version>9.7.1</xhtmlrenderer.version>
         <rhino.version>1.7.14</rhino.version>
