@@ -13,7 +13,7 @@ public class IoUtils {
 
     //启动完成之后自动打开浏览器并访问 Url 地址
     public static void index() {
-        String url = "http://localhost:" + SpringUtils.getPort();
+        String[] url = {"http://localhost:" + SpringUtils.getPort()};
         // 获取操作系统的名字
         try {
             // 苹果的打开方式
@@ -21,17 +21,21 @@ public class IoUtils {
                 Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
                 Method openURL = fileMgr.getDeclaredMethod("openURL",
                         String.class);
-                openURL.invoke(null, url);
+                openURL.invoke(null, url[0]);
                 return;
             }
             // windows的打开方式。
             if (SystemUtils.IS_OS_WINDOWS) {
                 Runtime.getRuntime().exec(
-                        "rundll32 url.dll,FileProtocolHandler " + url);
+                        "rundll32 url.dll,FileProtocolHandler " + url[0]);
                 return;
             }
             //Unix or Linux的打开方式
             if (SystemUtils.IS_OS_UNIX || SystemUtils.IS_OS_LINUX) {
+                //Docker 环境不打开浏览器
+                String str = Arrays.toString(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
+                if (str.contains("/docker/")) return;
+
                 String[] browsers = {"firefox", "opera", "konqueror", "epiphany",
                         "mozilla", "netscape"};
                 String browser = null;
@@ -46,12 +50,9 @@ public class IoUtils {
                     throw new Exception("Could not find web browser");
                 else
                     // 这个值在上面已经成功的得到了一个进程。
-                    Runtime.getRuntime().exec(new String[]{browser, url});
-                return;
+                    Runtime.getRuntime().exec(new String[]{browser, url[0]});
             }
-            //Docker 环境不打开浏览器
-            String str = Arrays.toString(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
-            if (str.contains("/docker/")) return;
+
 
         } catch (Exception e) {
             log.error("浏览器打开错误：{}", e.getMessage());
