@@ -100,10 +100,8 @@ public class GlobalDirectivesPlugin {
                 case WARFRAME_WIKI_PLUGIN -> not(bot, event);
                 // 佩兰
                 case WARFRAME_SISTER_PLUGIN -> not(bot, event);
-                //金垃圾
-                case WARFRAME_MARKET_GOD_DUMP -> not(bot, event);
-                //银垃圾
-                case WARFRAME_MARKET_SILVER_DUMP -> not(bot, event);
+                //金银垃圾
+                case WARFRAME_MARKET_GOD_DUMP,WARFRAME_MARKET_SILVER_DUMP -> WarframeCodes.ducat(bot, event, codes);
                 //核桃
                 case WARFRAME_RELICS_PLUGIN -> not(bot, event);
                 //开核桃

@@ -6,6 +6,7 @@ import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
+import com.nyx.bot.res.Ducats;
 import com.nyx.bot.res.MarketOrders;
 import com.nyx.bot.res.MarketRiven;
 import com.nyx.bot.resp.MarketRivenParameter;
@@ -402,15 +403,21 @@ public class MarketUtils {
                         })
                         // 取前10个
                         .limit(10)
-                        .peek(m -> {
-                            m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a ->
-                                    a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect())).toList()
-                            );
-                        })
+                        .peek(m -> m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a ->
+                                a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect())).toList()
+                        ))
                         .toList());
         // 解析返回数据
         return marketRiven;
     }
 
+
+    public static Ducats getDucats() {
+        HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
+        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            return null;
+        }
+        return JSONObject.parseObject(body.getBody(), Ducats.class, JSONReader.Feature.SupportSmartMatch);
+    }
 
 }

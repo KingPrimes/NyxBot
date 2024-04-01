@@ -1,5 +1,6 @@
 package com.nyx.bot.plugin.warframe.code;
 
+import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.core.Bot;
@@ -9,7 +10,9 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.permissions.Permissions;
+import com.nyx.bot.plugin.warframe.utils.MarketUtils;
 import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
+import com.nyx.bot.res.Ducats;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -18,6 +21,7 @@ import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class WarframeCodes {
@@ -270,7 +274,7 @@ public class WarframeCodes {
     /**
      * Warframe Market Riven拍卖查询
      */
-    public static void marketRiven(Bot bot, AnyMessageEvent event, String str,Codes code) {
+    public static void marketRiven(Bot bot, AnyMessageEvent event, String str, Codes code) {
         if (MatcherUtils.isSpecialSymbols(str)) {
             String item = MatcherUtils.isOrderItem(str);
             if (item.isEmpty()) {
@@ -316,8 +320,24 @@ public class WarframeCodes {
         }
     }
 
-    public static void ducat(Bot bot, AnyMessageEvent event) {
-
+    //金银垃圾
+    public static void ducat(Bot bot, AnyMessageEvent event, Codes code) {
+        OneBotLogInfoData data = getLogInfoData(bot, event, code);
+        Ducats ducats = MarketUtils.getDucats();
+        if (Objects.isNull(ducats)) {
+            bot.sendMsg(event, "获取ducat失败", false);
+        }
+        switch (code) {
+            case WARFRAME_MARKET_GOD_DUMP -> data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getGodDump()));
+            case WARFRAME_MARKET_SILVER_DUMP -> data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getSilverDump()));
+        }
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postMarketDucatsImage", data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            sendErrorMsg(bot, event, body);
+        }
     }
 
 }

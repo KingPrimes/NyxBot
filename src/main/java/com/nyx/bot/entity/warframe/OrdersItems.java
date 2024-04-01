@@ -12,13 +12,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "orders_items", uniqueConstraints = @UniqueConstraint(name = "ordersItems", columnNames = {"item_name", "url_name"}), indexes = @Index(columnList = "orderId"))
+@Table(name = "orders_items", uniqueConstraints = @UniqueConstraint(name = "ordersItems", columnNames = {"item_name", "url_name"}), indexes = @Index(columnList = "id"))
 public class OrdersItems extends BaseEntity {
 
     @Id
     @JsonProperty("id")
     //唯一字符串ID
-    String orderId;
+    String id;
     @JsonProperty("url_name")
     @Column(length = 50)
     //URL name
