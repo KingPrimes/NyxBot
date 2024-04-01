@@ -27,7 +27,7 @@ public class IoUtils {
             // windows的打开方式。
             if (SystemUtils.IS_OS_WINDOWS) {
                 Runtime.getRuntime().exec(
-                        "rundll32 url.dll,FileProtocolHandler " + url[0]);
+                        new String[]{"rundll32 url.dll,FileProtocolHandler ", url[0]});
                 return;
             }
             //Unix or Linux的打开方式
