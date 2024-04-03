@@ -143,7 +143,7 @@ public class FileUtils {
                 flag = true;
             }
         }
-        return flag;
+        return file.delete();
     }
 
 

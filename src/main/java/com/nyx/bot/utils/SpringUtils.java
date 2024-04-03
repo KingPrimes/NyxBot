@@ -1,5 +1,6 @@
 package com.nyx.bot.utils;
 
+import lombok.Getter;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -18,6 +19,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      */
     private static ConfigurableListableBeanFactory beanFactory;
 
+    @Getter
     private static ApplicationContext applicationContext;
 
     /**

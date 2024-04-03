@@ -15,6 +15,7 @@ import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -66,14 +67,13 @@ public class WarframeDataSource {
             }
             String s = body.getBody();
             List<Ephemeras> ephemerasList = JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
-
             body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("信条幻纹信息初始化错误！未获取到数据信息！请检查网络！");
                 return;
             }
+            s = body.getBody();
             ephemerasList.addAll(JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch));
-
             EphemerasRepository repository = SpringUtils.getBean(EphemerasRepository.class);
             if (!repository.findAll().isEmpty()) {
                 List<Ephemeras> all = repository.findAll();
@@ -402,9 +402,9 @@ public class WarframeDataSource {
                 }
             }
             if (flag) {
-                log.error("初始化数据模板，失败！请删除{}目录！并检查网络环境之后重启程序！", JgitUtil.lockPath);
+                log.error("初始化数据模板，失败！请检查网络环境之后重启程序！");
                 FileUtils.delAllFile(JgitUtil.lockPath);
-                System.exit(1);
+                System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> 0));
             }
             log.info("初始化数据模板！获取完毕!");
         }, AsyncBeanName.InitData);
