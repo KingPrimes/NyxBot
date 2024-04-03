@@ -29,53 +29,6 @@ public class MarketOrders {
         }
     }
 
-    @Data
-    public static class User {
-        /**
-         * 声誉
-         */
-        Integer reputation;
-        /**
-         * 地区
-         */
-        String region;
-        /**
-         * 上一次在线时间
-         */
-        @JsonProperty("last_seen")
-        LocalDateTime lastSeen;
-        /**
-         * 用户名
-         */
-        @JsonProperty("ingame_name")
-        String ingameName;
-        /**
-         * 用户头像
-         */
-        String avatar;
-        /**
-         * 用户状态
-         */
-        String status;
-        /**
-         * UUID
-         */
-        String id;
-
-
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                    .append("reputation", getReputation())
-                    .append("region", getRegion())
-                    .append("last_seen", getLastSeen())
-                    .append("ingame_name", getIngameName())
-                    .append("avatar", getAvatar())
-                    .append("status", getStatus())
-                    .append("id", getId())
-                    .toString();
-        }
-    }
 
     @Data
     public static class Orders {
@@ -99,7 +52,7 @@ public class MarketOrders {
         /**
          * 用户
          */
-        User user;
+        Owner user;
         /**
          * 平台
          */

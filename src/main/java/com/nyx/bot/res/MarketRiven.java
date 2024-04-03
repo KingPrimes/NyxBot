@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 查询市场的紫卡数据
+ */
 @NoArgsConstructor
 @Data
 public class MarketRiven {
@@ -123,35 +126,6 @@ public class MarketRiven {
                     @JsonProperty("url_name")
                     private String urlName;
                 }
-            }
-
-            @NoArgsConstructor
-            @Data
-            public static class Owner {
-                /*声望*/
-                @JsonProperty("reputation")
-                private Integer reputation;
-                /*区服*/
-                @JsonProperty("locale")
-                private String locale;
-                /*玩家头像*/
-                @JsonProperty("avatar")
-                private String avatar;
-                /*上次登录时间*/
-                @JsonProperty("last_seen")
-                private LocalDateTime lastSeen;
-                /*游戏内名称*/
-                @JsonProperty("ingame_name")
-                private String ingameName;
-                /*用户状态*/
-                @JsonProperty("status")
-                private String status;
-                /*用户ID*/
-                @JsonProperty("id")
-                private String id;
-                /*所使用的语言*/
-                @JsonProperty("region")
-                private String region;
             }
         }
     }
