@@ -44,6 +44,7 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Object Exception(Exception e) {
+        log.error("出现未知错误信息：{}" , e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("出现未知错误信息：" + e.getMessage());
     }

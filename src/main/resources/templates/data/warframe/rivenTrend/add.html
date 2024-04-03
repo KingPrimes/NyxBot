@@ -38,7 +38,7 @@
                 <label class="col-sm-3 control-label is-required">
                     武器类型：
                     <select class="form-control" id="type" name="type">
-                        <option th:each="t:${types}" th:text="${t.getDesc()}" th:value="${t.value()}"></option>
+                        <option th:each="t:${types}" th:text="${t.getDesc()}" th:value="${t}"></option>
                     </select>
                 </label>
             </div>

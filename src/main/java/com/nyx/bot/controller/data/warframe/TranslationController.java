@@ -42,7 +42,7 @@ public class TranslationController extends BaseController {
 
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id, ModelMap map) {
-        map.put("translation", repository.findById(id));
+        map.put("translation", repository.findById(id).get());
         return prefix + "edit";
     }
 

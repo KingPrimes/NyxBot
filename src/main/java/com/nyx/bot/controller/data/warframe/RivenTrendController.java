@@ -5,6 +5,7 @@ import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.AsyncBeanName;
+import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.repo.warframe.RivenTrendRepository;
@@ -56,7 +57,9 @@ public class RivenTrendController extends BaseController {
     @PostMapping("/save")
     @ResponseBody
     public AjaxResult save(RivenTrend t) {
-        return toAjax(repository.saveAndFlush(t) != null);
+        t.setOldDot(RivenTrendEnum.getRivenTrendDot(t.getOldNum()));
+        t.setNewDot(RivenTrendEnum.getRivenTrendDot(t.getNewNum()));
+        return toAjax(Math.toIntExact(repository.save(t).getId()));
     }
 
     @PostMapping("/list")
