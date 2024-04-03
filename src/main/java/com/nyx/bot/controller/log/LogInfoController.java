@@ -29,9 +29,9 @@ public class LogInfoController extends BaseController {
     // 分页条件查询
     @PostMapping("/info/list")
     @ResponseBody
-    public ResponseEntity list(LogInfo info) {
+    public ResponseEntity<?> list(LogInfo info) {
         return getDataTable(repository.findAllPageable(
-                info.getCodes(),
+                info.getCodes().trim().isEmpty() ? null : info.getCodes(),
                 info.getGroupUid(),
                 PageRequest.of(info.getPageNum() - 1, info.getPageSize())));
     }
