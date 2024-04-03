@@ -21,32 +21,42 @@
 
 1. 下载[OneBot 客户端](#客户端)
 2. 配置客户端链接方式为 反向Websocket模式 填写链接
-
-``` yaml
-ws://你服务器IP地址:8080/ws/shiro
-本地：
-ws://localhost:8080/ws/shiro
- ```
-
-3. 安装[Java17 Oracle](https://www.oracle.com/java/technologies/downloads/#java17)
+    ``` yaml
+      ws://你服务器IP地址:端口号/ws/shiro
+      
+      ws://localhost:8080/ws/shiro
+     ```
+    - 以上链接为默认配置，若你使用了其他端口或域名，请自行修改
+    - 你可以在web页面的配置中修改链接地址
+      1. 在 web页面配置中选择 **配置 -> 配置服务**
+      2. 在弹出的窗口中配置**端口号**与**地址**
+      3. 点击确定按钮
+      4. 之后重启NyxBot程序即可
+3. 设置消息上报格式为 **CQ码**
+4. 安装[Java17 Oracle](https://www.oracle.com/java/technologies/downloads/#java17)
    或 [Open Jdk 17](https://www.openlogic.com/openjdk-downloads)
-4. 下载[NyxBot](https://github.com/KingPrimes/NyxBot/releases)
-5. 打开命令行工具，跳转到 "NyxBot.jar" 所存放的目录 **启动命令** **java -jar NyxBot.jar**
-6. 如若8080端口被占用或你想要使用别的端口可在启动命令后方添加参数.
-
-```
-选择其中一个启动 NyxBot.jar
-java -Dserver.port = 8080 -jar NyxBot.jar
-
-java -jar NyxBot.jar --server.port = 8080
-```
+5. 下载[NyxBot](https://github.com/KingPrimes/NyxBot/releases)
+6. 打开命令行工具，跳转到 "NyxBot.jar" 所存放的目录 **启动命令** **java -jar NyxBot.jar**
+7. 如若8080端口被占用或你想要使用别的端口可在启动命令后方添加参数.
+   ``` cmd
+   选择其中一个启动 NyxBot.jar
+   java -Dserver.port = 8080 -jar NyxBot.jar
+   
+   java -jar NyxBot.jar --server.port = 8080
+   ```
 
 # 配置
 
 1. 正常启动程序后会自动打开浏览器并跳转到 [配置页面 http://localhost:8080](http://localhost:8080)
 2. 在web页面登录 默认账号: **admin** 密码：**admin123**
-3. 默认是配置是白名单模式，请自行添加要使用机器人的群，若不添加则发送任何指令机器人无响应
-4. 也可以在根目录下更改 **locate.yaml** 中的 **isBW: false** 为黑名单
+3. 默认是配置是白名单模式，请自行添加要使用机器人的群，**若不添加则发送任何指令机器人无响应**
+
+   - 在web中选择 **配置 -> 黑白名单 -> 群白名单**
+   - 点击添加按钮,则会弹出添加群的窗口
+   - 选择要添加的群,点击确定按钮即可
+   - 也可以直接切换成黑名单
+
+4. 所有的配置都可以在web页面进行修改
 
 # 客户端
 
