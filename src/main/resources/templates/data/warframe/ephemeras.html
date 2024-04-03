@@ -20,7 +20,7 @@
                 <div class="select-list">
                     <ul>
                         <li>
-                            <label>物品名称： </label><input class="form-control" name="itemName"
+                            <label for="itemName">物品名称： </label><input class="form-control" name="itemName" id="itemName"
                                                             placeholder="itemName"
                                                             type="text"/>
                         </li>
@@ -81,7 +81,7 @@
                 {
                     field: 'icon',
                     title: '图标链接',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.icon + '" alt=""/></a>');
                         return actions.join('');
@@ -94,7 +94,7 @@
                 {
                     field: 'animation',
                     title: '动画',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.animation + '" alt=""/></a>');
                         return actions.join('');
@@ -103,7 +103,7 @@
                 {
                     field: 'thumb',
                     title: '图片链接',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.thumb + '" alt=""/></a>');
                         return actions.join('');

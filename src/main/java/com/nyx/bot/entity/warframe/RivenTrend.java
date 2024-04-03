@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 /**
  * 紫卡倾向库
  */
-@EqualsAndHashCode(callSuper = true, of = {"trendName", "oldNum", "newNum"})
+@EqualsAndHashCode(callSuper = false, of = {"trendName", "oldNum", "newNum"})
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "trendName"))

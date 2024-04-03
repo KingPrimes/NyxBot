@@ -124,7 +124,6 @@
                     <ul class="nav nav-second-level collapse">
                         <li>
                             <a href="#" data-refresh="false">
-                                <embed th:src="@{/svg/WARFRAME.svg}">
                                 <span class="nav-label">Warframe</span>
                                 <span class="fa arrow"></span>
                             </a>
@@ -197,37 +196,22 @@
                     </a>
                 </div>
                 <ul class="nav navbar-top-links navbar-right welcome-message">
-                    <!--<li class="dropdown user-menu">
-                        <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
-                            <span class="hidden-xs" i18n="Language">Language</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a onclick="language('cn')">
-                                    中文(简体)</a>
-                            </li>
-                            <li>
-                                <a onclick="language('en')">
-                                    English</a>
-                            </li>
-                        </ul>
-                    </li>-->
                     <li class="dropdown user-menu">
                         <a class="dropdown-toggle" data-hover="dropdown" href="javascript:void(0)">
-                            <span class="hidden-xs" i18n="Personal_Center">个人中心</span>
+                            <span class="hidden-xs" >个人中心</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a i18n="Reset_Password" onclick="resetPwd()">
+                                <a  onclick="resetPwd()">
                                     <i class="fa fa-key"></i> 修改密码</a>
                             </li>
                             <li>
-                                <a i18n="Switch_Skin" onclick="switchSkin()">
+                                <a  onclick="switchSkin()">
                                     <i class="fa fa-dashboard"></i> 切换主题</a>
                             </li>
                             <li class="divider"></li>
                             <li>
-                                <a i18n="Logout" th:href="@{logout}">
+                                <a  th:href="@{logout}">
                                     <i class="fa fa-sign-out"></i> 退出登录</a>
                             </li>
                         </ul>
@@ -241,14 +225,14 @@
             </button>
             <nav class="page-tabs menuTabs">
                 <div class="page-tabs-content">
-                    <a class="active menuTab" href="javascript:void(0);" i18n="Index"
+                    <a class="active menuTab" href="javascript:void(0);" 
                        th:data-id="@{/system/main}">首页</a>
                 </div>
             </nav>
             <button class="roll-nav roll-right tabRight">
                 <i class="fa fa-forward"></i>
             </button>
-            <a class="roll-nav roll-right tabReload" href="javascript:void(0);" i18n="Flushed"><i
+            <a class="roll-nav roll-right tabReload" href="javascript:void(0);" ><i
                     class="fa fa-refresh"></i> 刷新</a>
         </div>
 
@@ -260,8 +244,8 @@
         <div class="footer">
             <div class="pull-right">
                 <b>
-                    <span i18n="Author">作者: </span><span style="color: red">KingPrimes</span> <br/>
-                    <span i18n="BiliBili">B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
+                    <span >作者: </span><span style="color: red">KingPrimes</span> <br/>
+                    <span >B站昵称</span><span style="color: red">老王的冒险之旅</span> <br/>
                     UID:<span style="color: red">16131052</span>
                 </b>
             </div>
@@ -271,7 +255,6 @@
 </div>
 <!-- 全局js -->
 <script th:src="@{/js/jquery.min.js}"></script>
-<script th:src="@{/js/i18n/jquery.i18n.min.js}"></script>
 <script th:src="@{/js/bootstrap.min.js}"></script>
 <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
 <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>

@@ -46,7 +46,7 @@
                 {
                     title: '操作',
                     align: 'center',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.add(' + row.id + ',' + 775 + ',' + 450 + ')"><i class="fa fa-edit"></i>新增</a> ');
                         return actions.join('');

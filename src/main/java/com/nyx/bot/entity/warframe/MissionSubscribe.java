@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 订阅
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subGroup", "subUser"}))

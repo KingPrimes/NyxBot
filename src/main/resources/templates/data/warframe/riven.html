@@ -85,7 +85,7 @@
                 {
                     field: 'thumb',
                     title: '图片链接',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a href="#"><img src="https://warframe.market/static/assets/' + row.thumb + '" alt=""/></a>');
                         return actions.join('');

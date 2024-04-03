@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Warframe Riven 数据
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "urlName"))

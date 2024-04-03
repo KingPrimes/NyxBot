@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * Warframe 幻纹
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name", "item_name"}))

@@ -10,17 +10,17 @@
                 <div class="select-list">
                     <ul>
                         <li>
-                            <label>Bot： </label><input class="form-control" name="subBotUid"
+                            <label for="subBotUid">Bot： </label><input class="form-control" name="subBotUid" id="subBotUid"
                                                        placeholder="BotUid"
                                                        type="number"/>
                         </li>
                         <li>
-                            <label>User： </label><input class="form-control" name="subUser"
+                            <label for="subUser">User： </label><input class="form-control" name="subUser" id="subUser"
                                                         placeholder="UserUid"
                                                         type="number"/>
                         </li>
                         <li>
-                            <label>Group： </label><input class="form-control" name="subGroup"
+                            <label for="subGroup">Group： </label><input class="form-control" name="subGroup" id="subGroup"
                                                          placeholder="GroupUid"
                                                          type="number"/>
                         </li>
@@ -79,13 +79,7 @@
                 },
                 {
                     field: 'subscribe',
-                    title: '订阅类型'/*,
-                            这个怎么才能获取到设置的提示文字啊？
-                            formatter: function (value, row, index) {
-                                const actions = [];
-                                actions.push('<span>${sub.valueOf(row.subscribe)}</span>');
-                                return actions.join('');
-                            }*/
+                    title: '订阅类型'
                 }
             ]
         };

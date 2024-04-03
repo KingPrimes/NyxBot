@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * Warframe 物品的别名
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "cn"))

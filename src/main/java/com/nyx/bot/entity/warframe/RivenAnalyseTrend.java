@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 紫卡分析参数
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "name"))

@@ -10,7 +10,7 @@
                 <div class="select-list">
                     <ul>
                         <li>
-                            <label>指令：</label><select class="form-select form-select-sm" name="codes"
+                            <label for="codes">指令：</label><select class="form-select form-select-sm" name="codes" id="codes"
                                                         th:with="type=${code}">
                             <option value="">所有</option>
                             <option th:each="dict : ${type}" th:text="${dict.getStr()}"
@@ -18,7 +18,7 @@
                         </select>
                         </li>
                         <li>
-                            <label>群组： </label><input class="form-control" name="groupUid" placeholder="QQ群"
+                            <label for="groupUid">群组： </label><input class="form-control" name="groupUid" placeholder="QQ群" id="groupUid"
                                                         type="text"/>
                         </li>
                         <li>
@@ -92,7 +92,7 @@
                 {
                     title: '操作',
                     align: 'center',
-                    formatter: function (value, row, index) {
+                    formatter: function (value, row) {
                         const actions = [];
                         actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="$.operate.detail(\'' + row.id + '\')"><i class="fa fa-search"></i>详细</a>');
                         return actions.join('');

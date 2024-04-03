@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 紫卡词条别名
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"en", "cn"}))

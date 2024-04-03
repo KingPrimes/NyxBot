@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * Warframe 信条/赤毒 武器
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name", "item_name"}))
