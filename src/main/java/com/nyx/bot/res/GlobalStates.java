@@ -990,7 +990,7 @@ public class GlobalStates {
         private String state;
 
         @Data
-        static class Choices {
+        public static class Choices {
             //难度
             @JsonProperty("category")
             private String category;

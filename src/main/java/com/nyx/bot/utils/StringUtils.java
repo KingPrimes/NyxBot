@@ -712,4 +712,13 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return getRandomString(new Random().nextInt(14) + 4);
     }
 
+    /**
+     * 在单词之间添加空格
+     * @param str 字符串
+     * @return 字符串
+     */
+    public static String addSpaceBetweenWords(String str) {
+        return str.replaceAll("(?<=\\p{Ll})(?=\\p{Lu})", " ");
+    }
+
 }
