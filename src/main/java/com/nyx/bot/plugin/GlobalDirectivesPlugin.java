@@ -60,6 +60,8 @@ public class GlobalDirectivesPlugin {
                 //Warframe
                 //突击
                 case WARFRAME_ASSAULT_PLUGIN -> WarframeCodes.assault(bot, event);
+                //双衍王境
+                case WARFRAME_KING_REALM_ROTATION -> WarframeCodes.duviriCycle(bot, event);
                 //执刑官猎杀
                 case WARFRAME_ARSON_HUNT_PLUGIN -> WarframeCodes.arsonHun(bot, event);
                 //奸商

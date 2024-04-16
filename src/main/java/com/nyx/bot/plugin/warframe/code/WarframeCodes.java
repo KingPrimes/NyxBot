@@ -78,6 +78,17 @@ public class WarframeCodes {
         sendErrorMsg(bot, event, body);
     }
 
+    public static void duviriCycle(Bot bot, AnyMessageEvent event) {
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "getDuviriCycleImage",
+                bot, event);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        }
+        sendErrorMsg(bot, event, body);
+    }
+
     /**
      * 仲裁
      */
