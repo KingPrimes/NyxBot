@@ -72,6 +72,11 @@ OneBot协议客户端
 | [LLOneBot/LLOneBot](https://github.com/LLOneBot/LLOneBot)             | [文档](https://github.com/LLOneBot/LLOneBot/blob/main/README.md) |
 | [whitechi73/OpenShamrock](https://github.com/whitechi73/OpenShamrock) | [文档](https://whitechi73.github.io/OpenShamrock/)               |
 
+---
+
+# 赞助
+ ### 本项目由 [![粒子GO](https://github.com/KingPrimes/NyxBot/assets/50130875/a6189c8d-6188-4df5-827b-6af70a145c3f)](https://www.lizigo.cn/) 赞助
+
 ----
 
 ## Stargazers over time
