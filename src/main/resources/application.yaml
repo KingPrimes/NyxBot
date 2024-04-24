@@ -84,6 +84,7 @@ shiro:
     client:
       enable: false
       url: ws://localhost:3001
+      reconnect-interval: 5000
   debug: false
 server:
   port: 8080
@@ -92,4 +93,5 @@ logging:
   level:
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
+    org.xnio.listener: OFF
     org.springframework.security.web.DefaultSecurityFilterChain: OFF
