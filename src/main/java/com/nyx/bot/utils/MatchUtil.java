@@ -55,7 +55,7 @@ public class MatchUtil {
      * 判断是否是属性词条
      */
     public static boolean isAttribute(String str) {
-        Pattern p = Pattern.compile(".[+-x]?\\d+(\\.\\d+)?%?.?[\u4e00-\u9fa5]*?（?[a-zA-Z]*?[\u4e00-\u9fa5]+$");
+        Pattern p = Pattern.compile(".[+-x]?\\d+(\\.\\d+)?%?.?[\u4e00-\u9fa5]*?.?（?[a-zA-Z]*?.?[\u4e00-\u9fa5]+$");
         Matcher m = p.matcher(str);
         return m.matches();
     }
