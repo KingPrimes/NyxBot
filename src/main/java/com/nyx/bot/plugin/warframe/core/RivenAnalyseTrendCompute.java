@@ -4,13 +4,16 @@ import com.nyx.bot.utils.DoubleUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Slf4j
 public class RivenAnalyseTrendCompute {
     String weaponsName;
     String rivenName;
@@ -49,29 +52,56 @@ public class RivenAnalyseTrendCompute {
 
         Double highAttribute = 0.0;
 
+
         /**
-         * 正属性计算对比最低值高多少
+         * 根据中间值计算紫卡的数据 高低
          *
-         * @return 差
+         * @return html文本
          */
-        public Double getLowAttributeDiff() {
-            if (lowAttribute.equals(0.0)) {
-                return lowAttribute;
-            }
-            return DoubleUtils.formatDouble4(attribute - lowAttribute);
+        public String getAttributeDiff() {
+            double medianValue = (lowAttribute + highAttribute) / 2;
+            log.debug("中间值：{}", medianValue);
+            double i = Math.abs(attribute) - Math.abs(medianValue);
+            return getString(medianValue, attribute, i);
         }
 
         /**
-         * 负属性计算 对比最高值低多少
+         * 根据中间值计算紫卡的歧视词条数据 高低
          *
-         * @return 差
+         * @return html 文本
          */
-        public Double getHighAttributeDiff() {
-            if (highAttribute.equals(0.0)) {
-                return highAttribute;
+        public String getAttributeDiscriminationDiff() {
+            double medianValue = (lowAttribute + highAttribute) / 2;
+            log.debug("歧视 - 中间值：{}", Math.abs(medianValue));
+            double abs = Math.abs(attribute);
+            if (abs > 1) {
+                abs = (abs - 1) * 100;
+            } else {
+                abs = 100 - (abs * 100);
             }
-            return DoubleUtils.formatDouble4(highAttribute - attribute);
+            log.info("abs:{}", abs);
+            double i = abs - Math.abs(medianValue);
+            return getString(medianValue, abs, i);
         }
+
+        @NotNull
+        private String getString(double medianValue, double abs, double i) {
+            double v = DoubleUtils.formatDouble4(((Math.abs(medianValue) - Math.abs(abs)) / Math.abs(medianValue)) * 100);
+            return i > 0 ? "<span class=\"diff-high\">高：" + Math.abs(v) + "%</span>" :
+                    i == 0 ?
+                            "<span class=\"diff-flat\">平：0.0%</span>" :
+                            "<span class=\"diff-low\">低：" + Math.abs(v) + "%</span>";
+        }
+
+
+        // 计算公式 具体数值 = 浮动系数 * 基础数值 * 倾向值 * 属性种类修正系数
+        // 浮动系数 0.9 - 1.1
+        //              正面修正系数      负面修正系数
+        // 2正            0.99            0
+        // 2正1负         1.2375          -0.495
+        // 3正            0.75            0
+        // 3正1负         0.9375          -0.75
+
 
         /**
          * 获取最低数值
@@ -95,47 +125,17 @@ public class RivenAnalyseTrendCompute {
                             break;
                         }
                         lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 1.2375);
-                        break;
                     } else {
                         lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.75);
-                        break;
                     }
+                    break;
                 case 4: {
                     if (isNag) {
                         lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * -0.75);
-                        break;
                     } else {
                         lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.9375);
-                        break;
                     }
-                }
-                default: {
-                    switch (x - 1) {
-                        case 2:
-                            lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.99);
-                            break;
-                        case 3:
-                            if (nag) {
-                                if (isNag) {
-                                    lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * -0.495);
-                                    break;
-                                }
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 1.2375);
-                                break;
-                            } else {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.75);
-                                break;
-                            }
-                        case 4: {
-                            if (isNag) {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * -0.75);
-                                break;
-                            } else {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.9375);
-                                break;
-                            }
-                        }
-                    }
+                    break;
                 }
             }
             return lowAttribute;
@@ -163,11 +163,10 @@ public class RivenAnalyseTrendCompute {
                             break;
                         }
                         highAttribute = DoubleUtils.formatDouble4(1.1 * baseVal * pro * 1.2375);
-                        break;
                     } else {
                         highAttribute = DoubleUtils.formatDouble4(1.1 * baseVal * pro * 0.75);
-                        break;
                     }
+                    break;
                 case 4: {
                     if (isNag) {
                         highAttribute = DoubleUtils.formatDouble4(1.1 * baseVal * pro * -0.75);
@@ -175,34 +174,6 @@ public class RivenAnalyseTrendCompute {
                         highAttribute = DoubleUtils.formatDouble4(1.1 * baseVal * pro * 0.9375);
                     }
                     break;
-                }
-                default: {
-                    switch (x - 1) {
-                        case 2:
-                            lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.99);
-                            break;
-                        case 3:
-                            if (nag) {
-                                if (isNag) {
-                                    lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * -0.495);
-                                    break;
-                                }
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 1.2375);
-                                break;
-                            } else {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.75);
-                                break;
-                            }
-                        case 4: {
-                            if (isNag) {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * -0.75);
-                                break;
-                            } else {
-                                lowAttribute = DoubleUtils.formatDouble4(0.9 * baseVal * pro * 0.9375);
-                                break;
-                            }
-                        }
-                    }
                 }
             }
             return highAttribute;

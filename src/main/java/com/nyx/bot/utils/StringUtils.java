@@ -721,4 +721,8 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return str.replaceAll("(?<=\\p{Ll})(?=\\p{Lu})", " ");
     }
 
+    public static String removeMatcher(String str){
+        return str.replace("^","").replace("$","").trim();
+    }
+
 }

@@ -8,7 +8,7 @@ public class MatchUtil {
      * 获取中文
      */
     public static String getChines(String str) {
-        Pattern p = Pattern.compile("[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5]");
+        Pattern p = Pattern.compile("[一-龥]*?\\&?[一-龥]");
         Matcher m = p.matcher(str);
         StringBuilder builder = new StringBuilder();
         while (m.find()) {
@@ -21,8 +21,8 @@ public class MatchUtil {
      * 判断是否是武器名称
      */
     public static boolean isWeaponsName(String str) {
-        Pattern p = Pattern.compile("^[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5] *?[A-Za-z]*?-?[A-Za-z]*?$");
-        Pattern compile = Pattern.compile("^[\u4e00-\u9fa5]*?\\&?[\u4e00-\u9fa5]*$");
+        Pattern p = Pattern.compile("^[一-龥]*?\\&?·?[一-龥] *?[A-Za-z]*?-?[A-Za-z]*?$");
+        Pattern compile = Pattern.compile("^[一-龥]*?\\&?·?[一-龥]*$");
         Matcher m = p.matcher(str.trim());
         Matcher m2 = compile.matcher(str.trim());
         return m.matches() || m2.matches();
@@ -55,7 +55,7 @@ public class MatchUtil {
      * 判断是否是属性词条
      */
     public static boolean isAttribute(String str) {
-        Pattern p = Pattern.compile(".[+-x]?\\d+(\\.\\d+)?%?.?[\u4e00-\u9fa5]*?.?（?[a-zA-Z]*?.?[\u4e00-\u9fa5]+$");
+        Pattern p = Pattern.compile(".[+-x]?\\d+(\\.\\d+)?%?.?[一-龥]*?.?（?[a-zA-Z]*?.?[一-龥]+$");
         Matcher m = p.matcher(str);
         return m.matches();
     }
@@ -75,11 +75,18 @@ public class MatchUtil {
         return Double.valueOf(builder.toString().replace("%", "").trim());
     }
 
+    public static Boolean whetherItIsDiscrimination(String str){
+        String regex = "^x\\d+(\\.\\d+)?%?.?[一-龥]*?.?（?[a-zA-Z]*?.?[一-龥]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
+
     /**
      * 获取属性名称
      */
     public static String getAttribetName(String str) {
-        String regex = "[\u4e00-\u9fa5]*?（?[a-zA-Z]*?[\u4e00-\u9fa5]+$";
+        String regex = "[一-龥]*?（?[a-zA-Z]*?[一-龥]+$";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(str);
         StringBuilder builder = new StringBuilder();
