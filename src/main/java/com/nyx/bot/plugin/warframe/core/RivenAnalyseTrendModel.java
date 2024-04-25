@@ -39,6 +39,8 @@ public class RivenAnalyseTrendModel {
         String lowAttr;
         String highAttr;
 
+        String attrDiff;
+
         String lowAttrDiff;
 
         String highAttrDiff;
@@ -51,6 +53,7 @@ public class RivenAnalyseTrendModel {
                     .append("attributeName",attributeName)
                     .append("lowAttr", lowAttr)
                     .append("highAttr", highAttr)
+                    .append("attrDiff",attrDiff)
                     .append("lowAttrDiff", lowAttrDiff)
                     .append("highAttrDiff", highAttrDiff)
                     .toString();
