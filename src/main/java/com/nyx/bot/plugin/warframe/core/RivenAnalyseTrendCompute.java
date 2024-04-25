@@ -2,6 +2,8 @@ package com.nyx.bot.plugin.warframe.core;
 
 import com.nyx.bot.utils.DoubleUtils;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -28,9 +30,19 @@ public class RivenAnalyseTrendCompute {
     }
 
     public static class Attribute {
+        @Getter
+        @Setter
         String name;
+        @Getter
+        @Setter
+        String attributeName;
+
+        @Setter
+        @Getter
         Double attribute;
 
+        @Getter
+        @Setter
         Boolean nag;
 
         Double lowAttribute = 0.0;
@@ -196,36 +208,12 @@ public class RivenAnalyseTrendCompute {
             return highAttribute;
         }
 
-        public Boolean getNag() {
-            return nag;
-        }
-
-        public void setNag(Boolean nag) {
-            this.nag = nag;
-        }
-
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Double getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(Double attribute) {
-            this.attribute = attribute;
-        }
-
         @Override
         public String toString() {
             return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                     .append("name", name)
                     .append("attribute", attribute)
+                    .append("attributeName", attributeName)
                     .append("nag", nag)
                     .append("lowAttribute", lowAttribute)
                     .append("highAttribute", highAttribute)

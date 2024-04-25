@@ -23,10 +23,10 @@ public class RivenAttributeCompute {
     public static String ocrRivenCompute(AnyMessageEvent event) {
         //识别图片
         List<List<String>> ocrImages = OCRImage.ocrImage(event);
-        log.debug("识别文字：{}", ocrImages);
+        log.info("识别文字：{}", ocrImages);
         //处理识别数据
         List<RivenAnalyseTrendCompute> riven = getRiven(ocrImages);
-        log.debug("处理后得数据:{}", riven);
+        log.info("处理后得数据:{}", riven);
         //计算紫卡加成属性
         List<List<RivenAnalyseTrendModel>> models = setAttributeNumber(riven);
         //转换成Json格式数据
@@ -60,17 +60,20 @@ public class RivenAttributeCompute {
                     }
                 }
                 if (MatchUtil.isAttribute(s)) {
+                    s = s.replace(" ", "").trim();
                     if (s.contains("入")) {
                         s = s.replace("入", "");
                     }
                     RivenAnalyseTrendCompute.Attribute attribute = new RivenAnalyseTrendCompute.Attribute();
                     if (s.contains("射速")) {
+                        attribute.setAttributeName(s + " 效果加倍）");
                         attribute.setName(MatchUtil.getAttribetName(s) + " 效果加倍）");
-                    } else {
-                        attribute.setName(MatchUtil.getAttribetName(s));
-                    }
-                    if (s.contains("暴击几率（")) {
+                    } else if (s.contains("暴击几率（")) {
+                        attribute.setAttributeName(s.replaceAll("（重?击?时?","(").trim() + "重击时 x2)");
                         attribute.setName("暴击几率（重击时 x2）");
+                    } else {
+                        attribute.setAttributeName(s);
+                        attribute.setName(MatchUtil.getAttribetName(s));
                     }
                     attribute.setAttribute(MatchUtil.getAttributeNum(s));
                     attribute.setNag(attribute.getAttribute() < 0);
@@ -134,6 +137,7 @@ public class RivenAttributeCompute {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName(attribute.getName());
                     }
                     RivenAnalyseTrendModel.Attribute attributeModel = new RivenAnalyseTrendModel.Attribute();
+                    attributeModel.setAttributeName(attribute.getAttributeName());
                     attributeModel.setAttr(attribute.getAttribute());
                     attributeModel.setName(attribute.getName());
                     boolean isNag = attribute.getAttribute() < 0;

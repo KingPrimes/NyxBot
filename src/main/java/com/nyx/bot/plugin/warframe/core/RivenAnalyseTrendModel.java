@@ -34,6 +34,7 @@ public class RivenAnalyseTrendModel {
     @Data
     public static class Attribute {
         String name;
+        String attributeName;
         Double attr;
         String lowAttr;
         String highAttr;
@@ -47,6 +48,7 @@ public class RivenAnalyseTrendModel {
             return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                     .append("name", name)
                     .append("attr", attr)
+                    .append("attributeName",attributeName)
                     .append("lowAttr", lowAttr)
                     .append("highAttr", highAttr)
                     .append("lowAttrDiff", lowAttrDiff)
