@@ -23,8 +23,10 @@ public class RivenAttributeCompute {
     public static String ocrRivenCompute(AnyMessageEvent event) {
         //识别图片
         List<List<String>> ocrImages = OCRImage.ocrImage(event);
+        log.debug("识别文字：{}", ocrImages);
         //处理识别数据
         List<RivenAnalyseTrendCompute> riven = getRiven(ocrImages);
+        log.debug("处理后得数据:{}", riven);
         //计算紫卡加成属性
         List<List<RivenAnalyseTrendModel>> models = setAttributeNumber(riven);
         //转换成Json格式数据
@@ -67,6 +69,9 @@ public class RivenAttributeCompute {
                     } else {
                         attribute.setName(MatchUtil.getAttribetName(s));
                     }
+                    if (s.contains("暴击几率（")) {
+                        attribute.setName("暴击几率（重击时 x2）");
+                    }
                     attribute.setAttribute(MatchUtil.getAttributeNum(s));
                     attribute.setNag(attribute.getAttribute() < 0);
                     trend.add(attribute);
@@ -106,20 +111,25 @@ public class RivenAttributeCompute {
                 List<RivenAnalyseTrendModel.Attribute> attributes = new ArrayList<>();
                 //计算各数值的数据
                 for (RivenAnalyseTrendCompute.Attribute attribute : trend.getAttributes()) {
+                    String name = attribute.getName();
                     RivenAnalyseTrend analyseTrend;
                     //判断词条是否包含 射速、攻击速度
-                    if (attribute.getName().contains("射速") || attribute.getName().contains("攻击速度")) {
+                    if (name.contains("射速") || name.contains("攻击速度")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("射速/攻击速度");
-                    } else if (attribute.getName().equals("伤害") || attribute.getName().equals("近战伤害")) {
+                    } else if (name.equals("伤害") || name.equals("近战伤害")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("伤害/近战伤害");
-                    } else if (attribute.getName().equals("武器后坐力")) {
+                    } else if (name.equals("武器后坐力")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("后坐力");
-                    } else if (attribute.getName().contains("Infested")) {
+                    } else if (name.contains("Infested")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Infested伤害");
-                    } else if (attribute.getName().contains("Corpus")) {
+                    } else if (name.contains("Corpus")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Corpus伤害");
-                    } else if (attribute.getName().contains("Grinner")) {
+                    } else if (name.contains("Grinner")) {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Grinner伤害");
+                    } else if (name.contains("暴击几率")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("暴击几率");
+                    } else if (name.contains("秒连击持续时间")) {
+                        analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("连击持续时间");
                     } else {
                         analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName(attribute.getName());
                     }
