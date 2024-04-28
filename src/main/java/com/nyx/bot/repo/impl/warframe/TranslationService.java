@@ -6,6 +6,7 @@ import com.nyx.bot.repo.warframe.NotTranslationRepository;
 import com.nyx.bot.repo.warframe.TranslationRepository;
 import com.nyx.bot.utils.MatcherUtils;
 import jakarta.annotation.Resource;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TranslationService {
 
+    @Getter
     @Resource
     TranslationRepository repository;
 
@@ -30,10 +32,6 @@ public class TranslationService {
         return repository.saveAndFlush(tra);
     }
 
-    public TranslationRepository getRepository() {
-        return repository;
-    }
-
     /**
      * 精准匹配 英文到中文的翻译
      *
@@ -42,29 +40,29 @@ public class TranslationService {
      */
     public String enToZh(String en) {
         try {
-            String cn = repository.findByEn(en).getCn();
+            String cn = repository.findByEn(en.trim()).getCn();
             if (cn != null && !cn.isEmpty()) {
                 return cn;
             }
-            if (!MatcherUtils.isChines(en)) {
-                NotTranslation byNotTranslation = ntr.findByNotTranslation(en);
+            if (!MatcherUtils.isChines(en.trim())) {
+                NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
                 if (byNotTranslation == null) {
-                    ntr.save(new NotTranslation(en));
+                    ntr.save(new NotTranslation(en.trim()));
                 }
             }
-            return en;
+            return en.trim();
         } catch (Exception e) {
             try {
-                if (!MatcherUtils.isChines(en)) {
-                    NotTranslation byNotTranslation = ntr.findByNotTranslation(en);
+                if (!MatcherUtils.isChines(en.trim())) {
+                    NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
                     if (byNotTranslation == null) {
-                        ntr.save(new NotTranslation(en));
+                        ntr.save(new NotTranslation(en.trim()));
                     }
                 }
             } catch (Exception ignored) {
-                return en;
+                return en.trim();
             }
-            return en;
+            return en.trim();
         }
     }
 
@@ -76,7 +74,7 @@ public class TranslationService {
      */
     public String enLikeZh(String en) {
         try {
-            String cn = repository.findByEnLike(en).get(0).getCn();
+            String cn = repository.findByEnLike(en.trim()).get(0).getCn();
             if (cn != null && !cn.isEmpty()) {
                 return cn;
             }
