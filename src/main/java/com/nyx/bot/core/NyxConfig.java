@@ -17,6 +17,10 @@ public class NyxConfig {
     // true for server, false for client
     Boolean isServerOrClient = true;
 
+    // status service switch
+    // true for enable, false for disable
+    Boolean isStatusEnable = true;
+
     // websocket client url
     String wsClientUrl = "ws://localhost:3001";
 

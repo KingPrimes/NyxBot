@@ -214,4 +214,30 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
 
+    /**
+     * @param now    现在
+     * @param before 过去
+     * @return 相差的天数
+     */
+    public static int betweenDay(long now, long before) {
+        return betweenDay(now, before, true);
+    }
+
+    /**
+     * @param now    现在
+     * @param before 过去
+     * @param day    true即过0点算一天
+     * @return 相差的天数
+     */
+    public static int betweenDay(long now, long before, boolean day) {
+        if (day) {
+            Calendar nowC = Calendar.getInstance();
+            Calendar beforeC = Calendar.getInstance();
+            nowC.setTimeInMillis(now);
+            beforeC.setTimeInMillis(before);
+            return Math.abs(nowC.get(Calendar.DATE) - beforeC.get(Calendar.DATE));
+        } else {
+            return (int) ((before - now) / (1000 * 60 * 60 * 24));
+        }
+    }
 }

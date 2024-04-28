@@ -7,10 +7,12 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
+import com.nyx.bot.service.StatusService;
 import com.nyx.bot.utils.CodeUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -19,6 +21,9 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class GlobalDirectivesPlugin {
+
+    @Autowired
+    StatusService statusService;
 
     private static void not(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "该功能暂未实现！", false);
@@ -114,5 +119,6 @@ public class GlobalDirectivesPlugin {
                 case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event);
             }
         });
+        statusService.pushDay();
     }
 }

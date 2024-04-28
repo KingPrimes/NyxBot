@@ -31,6 +31,7 @@ public class HandOff {
             }
             load.put("serverPort", config.getServerPort() == null ? 8080 : config.getServerPort());
             load.put("isBlackOrWhite", config.getIsBlackOrWhite() == null || config.getIsBlackOrWhite());
+            load.put("isStatusEnable", config.getIsStatusEnable() == null || config.getIsStatusEnable());
             load.put("isServerOrClient", config.getIsServerOrClient() == null || config.getIsServerOrClient());
             load.put("wsServerUrl", config.getWsServerUrl() == null ? "/ws/shiro" : config.getWsServerUrl());
             load.put("wsClientUrl", config.getWsClientUrl() == null ? "ws://localhost:3001" : config.getWsClientUrl());
@@ -43,6 +44,7 @@ public class HandOff {
             return false;
         }
     }
+
     public static Boolean isBW() {
         try {
             Yaml yaml = new Yaml();
@@ -65,6 +67,7 @@ public class HandOff {
             config.setIsServerOrClient((Boolean) load.get("isServerOrClient"));
             config.setWsServerUrl((String) load.get("wsServerUrl"));
             config.setWsClientUrl((String) load.get("wsClientUrl"));
+            config.setIsStatusEnable((Boolean) load.get("isStatusEnable"));
             return config;
         } catch (Exception e) {
             handoff(new NyxConfig());
