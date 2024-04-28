@@ -1,21 +1,28 @@
 package com.nyx.bot.utils.onebot;
 
-import com.mikuac.shiro.common.utils.ArrayMsgUtil;
+import com.alibaba.fastjson2.JSON;
+import com.mikuac.shiro.common.utils.Keyboard;
 import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.common.utils.ShiroUtils;
+import com.mikuac.shiro.model.ArrayMsg;
 import org.eclipse.jgit.util.Base64;
 
-import static java.lang.String.format;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class Msg extends ArrayMsgUtil {
-    private final StringBuilder builder = new StringBuilder();
+public class Msg {
+
+    private final List<ArrayMsg> builder = new ArrayList<>();
 
     /**
      * 消息构建
      *
      * @return {@link Msg}
      */
-
     public static Msg builder() {
         return new Msg();
     }
@@ -26,12 +33,10 @@ public class Msg extends ArrayMsgUtil {
      * @param text 内容
      * @return {@link Msg}
      */
-    @Override
     public Msg text(String text) {
-        builder.append(text);
+        builder.add(getJsonData("text", m -> m.put("text", text)));
         return this;
     }
-
     /**
      * 图片
      * 支持本地图片、网络图片、Base64 详见 <a href="https://misakatat.github.io/shiro-docs/advanced.html#">消息构建工具</a>
@@ -39,10 +44,8 @@ public class Msg extends ArrayMsgUtil {
      * @param img 图片
      * @return {@link Msg}
      */
-    @Override
     public Msg img(String img) {
-        String code = String.format("[CQ:image,file=%s]", ShiroUtils.escape(img));
-        builder.append(code);
+        builder.add(getJsonData("image", m -> m.put("file", ShiroUtils.escape(img))));
         return this;
     }
 
@@ -52,22 +55,8 @@ public class Msg extends ArrayMsgUtil {
      * @param media {@link OneBotMedia}
      * @return {@link Msg}
      */
-    @Override
     public Msg img(OneBotMedia media) {
-        builder.append("[CQ:image,").append(media.escape()).append("]");
-        return this;
-    }
-
-    /**
-     * 图片
-     *
-     * @param b Base64 byte[]
-     * @return {@link Msg}
-     */
-    public Msg imgBase64(byte[] b) {
-        this.builder.append(
-                format("[CQ:image,file=%s]", ShiroUtils.escape("base64://" + Base64.encodeBytes(b)))
-        );
+        builder.add(getJsonData("image", media::escape));
         return this;
     }
 
@@ -78,12 +67,14 @@ public class Msg extends ArrayMsgUtil {
      * @param cover 视频封面, 支持 http, file 和 base64 发送, 格式必须为 jpg
      * @return {@link Msg}
      */
-    @Override
     public Msg video(String video, String cover) {
-        String code = String.format("[CQ:video,file=%s,cover=%s]", ShiroUtils.escape(video), ShiroUtils.escape(cover));
-        builder.append(code);
+        builder.add(getJsonData("video", m -> {
+            m.put("file", ShiroUtils.escape(video));
+            m.put("cover", ShiroUtils.escape(cover));
+        }));
         return this;
     }
+
 
     /**
      * 闪照
@@ -91,10 +82,11 @@ public class Msg extends ArrayMsgUtil {
      * @param img 图片
      * @return {@link Msg}
      */
-    @Override
     public Msg flashImg(String img) {
-        String code = String.format("[CQ:image,type=flash,file=%s]", ShiroUtils.escape(img));
-        builder.append(code);
+        builder.add(getJsonData("image", m -> {
+            m.put("flash", "flash");
+            m.put("file", ShiroUtils.escape(img));
+        }));
         return this;
     }
 
@@ -105,10 +97,8 @@ public class Msg extends ArrayMsgUtil {
      * @param id QQ 表情 ID
      * @return {@link Msg}
      */
-    @Override
     public Msg face(int id) {
-        String code = String.format("[CQ:face,id=%s]", id);
-        builder.append(code);
+        builder.add(getJsonData("face", m -> m.put("id", String.valueOf(id))));
         return this;
     }
 
@@ -118,9 +108,8 @@ public class Msg extends ArrayMsgUtil {
      * @param media {@link OneBotMedia}
      * @return {@link Msg}
      */
-    @Override
     public Msg voice(OneBotMedia media) {
-        builder.append("[CQ:record,").append(media.escape()).append("]");
+        builder.add(getJsonData("record", media::escape));
         return this;
     }
 
@@ -130,10 +119,8 @@ public class Msg extends ArrayMsgUtil {
      * @param voice 语音, 支持本地文件和 URL
      * @return {@link Msg}
      */
-    @Override
     public Msg voice(String voice) {
-        String code = String.format("[CQ:record,file=%s]", ShiroUtils.escape(voice));
-        builder.append(code);
+        builder.add(getJsonData("record", m -> m.put("file", ShiroUtils.escape(voice))));
         return this;
     }
 
@@ -143,10 +130,8 @@ public class Msg extends ArrayMsgUtil {
      * @param userId at 的 QQ 号, all 表示全体成员
      * @return {@link Msg}
      */
-    @Override
     public Msg at(long userId) {
-        String code = String.format("[CQ:at,qq=%s]", userId);
-        builder.append(code);
+        builder.add(getJsonData("at", m -> m.put("qq", String.valueOf(userId))));
         return this;
     }
 
@@ -155,9 +140,8 @@ public class Msg extends ArrayMsgUtil {
      *
      * @return {@link Msg}
      */
-    @Override
     public Msg atAll() {
-        builder.append("[CQ:at,qq=all]");
+        builder.add(getJsonData("at", m -> m.put("qq", "all")));
         return this;
     }
 
@@ -167,10 +151,8 @@ public class Msg extends ArrayMsgUtil {
      * @param userId 需要戳的成员
      * @return {@link Msg}
      */
-    @Override
     public Msg poke(long userId) {
-        String code = String.format("[CQ:poke,qq=%s]", userId);
-        builder.append(code);
+        builder.add(getJsonData("poke", m -> m.put("qq", String.valueOf(userId))));
         return this;
     }
 
@@ -180,10 +162,8 @@ public class Msg extends ArrayMsgUtil {
      * @param msgId 回复时所引用的消息 id, 必须为本群消息.
      * @return {@link Msg}
      */
-    @Override
     public Msg reply(int msgId) {
-        String code = String.format("[CQ:reply,id=%s]", msgId);
-        builder.append(code);
+        builder.add(getJsonData("reply", m -> m.put("id", String.valueOf(msgId))));
         return this;
     }
 
@@ -193,10 +173,8 @@ public class Msg extends ArrayMsgUtil {
      * @param msgId 回复时所引用的消息 id, 必须为本频道消息.
      * @return {@link Msg}
      */
-    @Override
     public Msg reply(String msgId) {
-        String code = String.format("[CQ:reply,id=\"%s\"]", msgId);
-        builder.append(code);
+        builder.add(getJsonData("reply", m -> m.put("id", msgId)));
         return this;
     }
 
@@ -208,10 +186,11 @@ public class Msg extends ArrayMsgUtil {
      * @param giftId 礼物的类型
      * @return {@link Msg}
      */
-    @Override
     public Msg gift(long userId, int giftId) {
-        String code = String.format("[CQ:gift,qq=%s,id=%s]", userId, giftId);
-        builder.append(code);
+        builder.add(getJsonData("gift", m -> {
+            m.put("qq", String.valueOf(userId));
+            m.put("id", String.valueOf(giftId));
+        }));
         return this;
     }
 
@@ -222,10 +201,8 @@ public class Msg extends ArrayMsgUtil {
      * @param text 内容
      * @return {@link Msg}
      */
-    @Override
     public Msg tts(String text) {
-        String code = String.format("[CQ:tts,text=%s]", ShiroUtils.escape(text));
-        builder.append(code);
+        builder.add(getJsonData("tts", m -> m.put("text", text)));
         return this;
     }
 
@@ -235,10 +212,8 @@ public class Msg extends ArrayMsgUtil {
      * @param data xml内容, xml 中的 value 部分, 记得实体化处理
      * @return {@link Msg}
      */
-    @Override
     public Msg xml(String data) {
-        String xmlCode = String.format("[CQ:xml,data=%s]", ShiroUtils.escape(data));
-        builder.append(xmlCode);
+        builder.add(getJsonData("xml", m -> m.put("data", data)));
         return this;
     }
 
@@ -249,10 +224,11 @@ public class Msg extends ArrayMsgUtil {
      * @param resId 可以不填
      * @return {@link Msg}
      */
-    @Override
     public Msg xml(String data, int resId) {
-        String code = String.format("[CQ:xml,data=%s,resid=%s]", ShiroUtils.escape(data), resId);
-        builder.append(code);
+        builder.add(getJsonData("xml", m -> {
+            m.put("data", String.valueOf(data));
+            m.put("resid", String.valueOf(resId));
+        }));
         return this;
     }
 
@@ -262,10 +238,8 @@ public class Msg extends ArrayMsgUtil {
      * @param data json 内容, json 的所有字符串记得实体化处理
      * @return {@link Msg}
      */
-    @Override
     public Msg json(String data) {
-        String code = String.format("[CQ:json,data=%s]", ShiroUtils.escape(data));
-        builder.append(code);
+        builder.add(getJsonData("json", m -> m.put("data", data)));
         return this;
     }
 
@@ -276,10 +250,11 @@ public class Msg extends ArrayMsgUtil {
      * @param resId 默认不填为 0, 走小程序通道, 填了走富文本通道发送
      * @return {@link Msg}
      */
-    @Override
     public Msg json(String data, int resId) {
-        String code = String.format("[CQ:json,data=%s,resid=%s]", ShiroUtils.escape(data), resId);
-        builder.append(code);
+        builder.add(getJsonData("json", m -> {
+            m.put("data", String.valueOf(data));
+            m.put("resid", String.valueOf(resId));
+        }));
         return this;
     }
 
@@ -290,10 +265,8 @@ public class Msg extends ArrayMsgUtil {
      * @param file 和 image 的 file 字段对齐, 支持也是一样的
      * @return {@link Msg}
      */
-    @Override
     public Msg cardImage(String file) {
-        String code = String.format("[CQ:cardimage,file=%s]", ShiroUtils.escape(file));
-        builder.append(code);
+        builder.add(getJsonData("cardimage", m -> m.put("file", String.valueOf(file))));
         return this;
     }
 
@@ -310,13 +283,16 @@ public class Msg extends ArrayMsgUtil {
      * @param icon      分享来源的 icon 图标 url, 可以留空
      * @return {@link Msg}
      */
-    @Override
     public Msg cardImage(String file, long minWidth, long minHeight, long maxWidth, long maxHeight, String source, String icon) {
-        String code =
-                String.format("[CQ:cardimage,file=%s,minwidth=%s,minheight=%s,maxwidth=%s,maxheight=%s,source=%s,icon=%s]",
-                        ShiroUtils.escape(file), minWidth, minHeight, maxWidth, maxHeight, ShiroUtils.escape(source),
-                        ShiroUtils.escape(icon));
-        builder.append(code);
+        builder.add(getJsonData("cardimage", m -> {
+            m.put("file", ShiroUtils.escape(file));
+            m.put("minwidth", String.valueOf(minWidth));
+            m.put("minheight", String.valueOf(minHeight));
+            m.put("maxwidth", String.valueOf(maxWidth));
+            m.put("maxheight", String.valueOf(maxHeight));
+            m.put("source", ShiroUtils.escape(source));
+            m.put("icon", ShiroUtils.escape(icon));
+        }));
         return this;
     }
 
@@ -327,10 +303,12 @@ public class Msg extends ArrayMsgUtil {
      * @param id   歌曲 ID
      * @return {@link Msg}
      */
-    @Override
+    @SuppressWarnings({"java:S1192"})
     public Msg music(String type, long id) {
-        String code = String.format("[CQ:music,type=%s,id=%s]", ShiroUtils.escape(type), id);
-        builder.append(code);
+        builder.add(getJsonData("music", m -> {
+            m.put("type", String.valueOf(type));
+            m.put("id", String.valueOf(id));
+        }));
         return this;
     }
 
@@ -344,14 +322,16 @@ public class Msg extends ArrayMsgUtil {
      * @param image   发送时可选，图片 URL
      * @return {@link Msg}
      */
-    @Override
+    @SuppressWarnings({"java:S1192"})
     public Msg customMusic(String url, String audio, String title, String content, String image) {
-        String code = String.format(
-                "[CQ:music,type=custom,url=%s,audio=%s,title=%s,content=%s,image=%s]",
-                ShiroUtils.escape(url), ShiroUtils.escape(audio), ShiroUtils.escape(title), ShiroUtils.escape(content),
-                ShiroUtils.escape(image)
-        );
-        builder.append(code);
+        builder.add(getJsonData("music", m -> {
+            m.put("type", "custom");
+            m.put("url", ShiroUtils.escape(url));
+            m.put("audio", ShiroUtils.escape(audio));
+            m.put("title", ShiroUtils.escape(title));
+            m.put("content", ShiroUtils.escape(content));
+            m.put("image", ShiroUtils.escape(image));
+        }));
         return this;
     }
 
@@ -363,13 +343,14 @@ public class Msg extends ArrayMsgUtil {
      * @param title 标题
      * @return {@link Msg}
      */
-    @Override
+    @SuppressWarnings({"java:S1192"})
     public Msg customMusic(String url, String audio, String title) {
-        String code = String.format(
-                "[CQ:music,type=custom,url=%s,audio=%s,title=%s]",
-                ShiroUtils.escape(url), ShiroUtils.escape(audio), ShiroUtils.escape(title)
-        );
-        builder.append(code);
+        builder.add(getJsonData("music", m -> {
+            m.put("type", "custom");
+            m.put("url", ShiroUtils.escape(url));
+            m.put("audio", ShiroUtils.escape(audio));
+            m.put("title", ShiroUtils.escape(title));
+        }));
         return this;
     }
 
@@ -379,21 +360,69 @@ public class Msg extends ArrayMsgUtil {
      * @param value 0石头 1剪刀 2布
      * @return {@link Msg}
      */
-    @Override
     public Msg rps(int value) {
-        String code = String.format("[CQ:rps,value=%s]", value);
-        builder.append(code);
+        builder.add(getJsonData("rps", m -> m.put("value", String.valueOf(value))));
         return this;
     }
 
     /**
-     * 构建消息链
+     * 发送Markdown文档消息
      *
-     * @return {@link String}
+     * @param content 文档内容
+     * @return {@link Msg}
      */
-    @Override
-    public String build() {
-        return builder.toString();
+    public Msg markdown(String content) {
+        builder.add(getJsonData("markdown", m -> {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("content", content);
+            m.put("content", JSON.toJSONString(map));
+        }));
+        return this;
+    }
+
+
+    /**
+     * 发送Markdown文档 按钮
+     * <pre>{@code
+     *     Keyboard keyboard = Keyboard.Builder()
+     *     .addRow()
+     *     .addButton(Keyboard.TextButtonBuilder()
+     *          .label("+1")
+     *          .data("md2")
+     *          .build()
+     *          )
+     *     .build();
+     *     //完整调用
+     *     Msg.builder().markdown("123").keyboard(keyboard).buildList();
+     * }</pre>
+     */
+    public Msg keyboard(Keyboard keyboard) {
+        builder.add(getJsonData("keyboard", m -> m.put("keyboard", JSON.toJSONString(keyboard))));
+        return this;
+    }
+
+    public String buildCQ() {
+        return builder.stream().map(ArrayMsg::toCqCode).collect(Collectors.joining());
+    }
+
+    public List<ArrayMsg> build() {
+        return builder;
+    }
+
+    private ArrayMsg getJsonData(String type, Consumer<Map<String, String>> consumer) {
+        HashMap<String, String> data = new HashMap<>();
+        consumer.accept(data);
+        return new ArrayMsg().setRowType(type).setData(data);
+    }
+
+    /**
+     * 图片
+     *
+     * @param b Base64 byte[]
+     * @return {@link Msg}
+     */
+    public Msg imgBase64(byte[] b) {
+        return img(ShiroUtils.escape("base64://" + Base64.encodeBytes(b)));
     }
 
 }
