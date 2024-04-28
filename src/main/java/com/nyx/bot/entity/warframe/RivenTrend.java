@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 /**
  * 紫卡倾向库
  */
@@ -45,7 +46,7 @@ public class RivenTrend extends BaseEntity {
 
     //此次更新得时间
     @JsonProperty("isDate")
-    private String isDate;
+    private Timestamp isDate;
 
     //武器中文名称
     @Transient
@@ -53,7 +54,7 @@ public class RivenTrend extends BaseEntity {
     private String traCh;
 
 
-    public RivenTrend(Long id, String trendName, String newDot, Double newNum, String oldDot, Double oldNum, String isDate, RivenTrendTypeEnum type, String traCh) {
+    public RivenTrend(Long id, String trendName, String newDot, Double newNum, String oldDot, Double oldNum, Timestamp isDate, RivenTrendTypeEnum type, String traCh) {
         this.id = id;
         this.trendName = trendName;
         this.newDot = newDot;

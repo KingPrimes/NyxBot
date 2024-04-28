@@ -12,6 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +126,7 @@ public class RivenDispositionUpdates {
                                 //设置旧的倾向点
                                 trend.setOldDot(RivenTrendEnum.getRivenTrendDot(Double.parseDouble(rent[0])));
                                 //设置更改日期
-                                trend.setIsDate(dateTime);
+                                trend.setIsDate(Timestamp.valueOf(dateTime));
                                 //保存
                                 trends.add(trend);
                             }
