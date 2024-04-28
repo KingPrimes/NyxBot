@@ -1,10 +1,10 @@
 package com.nyx.bot.controller.api.html;
 
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.utils.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
@@ -18,21 +18,10 @@ public class PrivateHelpHtmlController {
     public String getHtml(Model model) {
         Map<String, String> v = new HashMap<>();
         for (Codes value : Codes.values()) {
-            v.put(value.getStr(), value.getPermissions().getStr());
+            v.put(StringUtils.removeMatcher(value.getStr()), value.getPermissions().getStr());
         }
         model.addAttribute("codes", v);
         return "html/help";
     }
-
-    @PostMapping("/getHtlpHtml")
-    public String getHelpHtml(Model model) {
-        Map<String, String> v = new HashMap<>();
-        for (Codes value : Codes.values()) {
-            v.put(value.getStr(), value.getPermissions().getStr());
-        }
-        model.addAttribute("codes", v);
-        return "html/help";
-    }
-
 
 }
