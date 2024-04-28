@@ -22,7 +22,7 @@ public @interface LogInfo {
     /**
      * 执行的命令
      */
-    Codes codes() default Codes.TYPE_CODE;
+    Codes codes() default Codes.HELP;
 
     /**
      * 操作

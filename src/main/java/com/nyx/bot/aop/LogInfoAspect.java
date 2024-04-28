@@ -76,9 +76,7 @@ public class LogInfoAspect {
             getControllerMethodDescription(joinPoint, controllerLog, logInfo, jsonResult);
             logInfo.setLogTime(new Date());
             // 保存数据库
-            AsyncUtils.me().execute(() -> {
-                SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
-            });
+            AsyncUtils.me().execute(() -> SpringUtils.getBean(LogInfoRepository.class).save(logInfo));
         } catch (Exception exp) {
             // 记录本地异常日志
             log.error("==前置通知异常==");
@@ -98,7 +96,7 @@ public class LogInfoAspect {
         // 设置标题
         logInfo.setTitle(log.title());
         // 执行的命令
-        logInfo.setCodes(log.codes().getStr());
+        logInfo.setCodes(log.codes());
         // 请求的群组
         logInfo.setGroupUid(logInfo.getGroupUid());
         // 请求的用户

@@ -1,6 +1,7 @@
 package com.nyx.bot.entity.sys;
 
 import com.nyx.bot.core.dao.BaseEntity;
+import com.nyx.bot.enums.Codes;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +24,7 @@ public class LogInfo extends BaseEntity implements Serializable {
     // 请求的模块
     String title;
     // 操作指令
-    String codes;
+    Codes codes;
     // 用户等级
     String permissions;
     // 操作类型

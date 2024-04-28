@@ -1,6 +1,7 @@
 package com.nyx.bot.repo.sys;
 
 import com.nyx.bot.entity.sys.LogInfo;
+import com.nyx.bot.enums.Codes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,6 @@ import org.springframework.stereotype.Repository;
 public interface LogInfoRepository extends JpaRepository<LogInfo, Long>, JpaSpecificationExecutor<LogInfo> {
 
     @Query("select l from LogInfo l where (:codes is null or l.codes = :codes) and (:groupUid is null or l.groupUid = :groupUid)")
-    Page<LogInfo> findAllPageable(String codes, Long groupUid, Pageable pageable);
+    Page<LogInfo> findAllPageable(Codes codes, Long groupUid, Pageable pageable);
 
 }
