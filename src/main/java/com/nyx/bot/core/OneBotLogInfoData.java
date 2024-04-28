@@ -34,6 +34,35 @@ public class OneBotLogInfoData {
     //传输数据
     String data;
 
+    public OneBotLogInfoData() {
+    }
+
+    public OneBotLogInfoData(Long botUid, Long userUid, Long groupUid, String rawMsg, String time, PermissionsEnums permissionsEnums, Codes codes, String data) {
+        this.botUid = botUid;
+        this.userUid = userUid;
+        this.groupUid = groupUid;
+        this.rawMsg = rawMsg;
+        this.time = time;
+        this.permissionsEnums = permissionsEnums;
+        this.codes = codes;
+        this.data = data;
+    }
+
+    public OneBotLogInfoData(Long botUid, Long userUid, Long groupUid, String rawMsg, String time, PermissionsEnums permissionsEnums, Codes codes, MarketFormEnums form, String key, Boolean isBy, Boolean isMax, String data) {
+        this.botUid = botUid;
+        this.userUid = userUid;
+        this.groupUid = groupUid;
+        this.rawMsg = rawMsg;
+        this.time = time;
+        this.permissionsEnums = permissionsEnums;
+        this.codes = codes;
+        this.form = form;
+        this.key = key;
+        this.isBy = isBy;
+        this.isMax = isMax;
+        this.data = data;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
