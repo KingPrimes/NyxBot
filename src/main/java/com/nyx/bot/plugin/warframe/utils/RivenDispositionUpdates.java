@@ -3,15 +3,18 @@ package com.nyx.bot.plugin.warframe.utils;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
+import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.repo.warframe.RivenTrendRepository;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,65 +74,64 @@ public class RivenDispositionUpdates {
             }
             String html = body.getBody();
 
-            //解析Html文档
+            //用于存放返回的结果
             Document document = Jsoup.parse(html);
-            Elements elements = document.getElementsByClass("ipsSpoiler_contents ipsClearfix");
-            if (elements.size() > 1) {
-                falg = true;
-                //获取发帖日期
-                Elements times = document.getElementsByClass("ipsType_light ipsType_reset");
-                for (Element el : times) {
-                    dateTime = el.getElementsByTag("time").attr("datetime").replace("T", " ").replace("Z", "").trim();
-                    break;
-                }
-                //根据类选择器 获取此类中的元素
-                //Elements elements = document.getElementsByClass("ipsSpoiler_contents ipsClearfix");
-                //遍历此类中元素
-                for (Element element : elements) {
-                    //根据标签选择器 获取此标签中的元素
-                    Elements p = element.getElementsByTag("p");
-                    //遍历 p 标签中的元素
-                    for (Element e1 : p) {
-                        //格式化 br更改为\n换行 出去多余的strong标签
-                        String br = String.valueOf(e1).replace("<br>", "\n").replaceAll("<strong>.*?</strong>", "");
-                        if (br.trim().equals("<p>&nbsp;</p>") || br.replace("\n", "").trim().isEmpty()) {
-                            continue;
-                        }
-                        //重新解析格式化后的Html
-                        Document doc = Jsoup.parse(br);
-                        //遍历此标签中的元素
-                        for (Element e2 : doc.getElementsByTag("span")) {
-                            //根据换行字符裁剪内容
-                            String[] rives = e2.text().split("\n");
-                            for (String riven : rives) {
-                                //根据：裁剪内容
-                                String[] wep = riven.split(":");
-                                //根据->裁剪内容
-                                String[] rent = wep[1].split("->");
-                                //新建倾向变更实体类
-                                RivenTrend trend = new RivenTrend();
-                                //根据：裁剪内容的第0位下标是武器名
-                                trend.setTrendName(wep[0]);
-                                //根据->裁剪内容的第1位下标是更改后的倾向值
-                                String newNum = rent[1];
-                                if (newNum.contains("(")) {
-                                    newNum = newNum.replaceAll(newNum.substring(newNum.indexOf("(")), "");
+            Elements times = document.getElementsByClass("ipsType_light ipsType_reset");
+            // 获取发帖日期
+            for (Element el : times) {
+                dateTime = el.getElementsByTag("time").attr("datetime").replace("T", " ").replace("Z", "").trim();
+                break;
+            }
+            // 获取 内容
+            Elements ipsTypeNormalIpsTypeRichTextIpsPaddingBottomIpsContained = document.getElementsByClass("ipsType_normal ipsType_richText ipsPadding_bottom ipsContained");
+            // 武器类型标志
+            String type = "";
+            for (Element element : ipsTypeNormalIpsTypeRichTextIpsPaddingBottomIpsContained) {
+                for (Element div : element.getElementsByTag("div")) {
+                    boolean ipsSpoilerContentsIpsClearfix = div.hasClass("ipsSpoiler_contents ipsClearfix");
+                    if (ipsSpoilerContentsIpsClearfix) {
+                        falg = true;
+                        Elements ps = element.getElementsByTag("p");
+                        for (Element p : ps) {
+                            RivenTrend rt = new RivenTrend();
+                            Elements strong = p.getElementsByTag("strong");
+
+                            if (!strong.text().trim().isEmpty()) {
+                                type = strong.text();
+                            }
+                            switch (type.toUpperCase()) {
+                                case "PRIMARIES" -> rt.setType(RivenTrendTypeEnum.RIFLE);
+                                case "SECONDARIES" -> rt.setType(RivenTrendTypeEnum.PISTOL);
+                                case "MELEES" -> rt.setType(RivenTrendTypeEnum.MELEE);
+                                case "ARCHGUNS" -> rt.setType(RivenTrendTypeEnum.ARCHGUN);
+                            }
+                            Elements span = p.getElementsByTag("span");
+                            String riven = span.html();
+                            if (!riven.trim().isEmpty()) {
+                                riven = StringEscapeUtils.unescapeHtml4(riven);
+                                String[] rivenSplit = riven.split("<br>");
+                                for (String r : rivenSplit) {
+                                    String[] wep = r.split(":");
+                                    String[] number = wep[1].split("->");
+                                    rt.setTrendName(wep[0].replaceAll("\n", "").trim());
+                                    String newNum = number[1];
+                                    if (newNum.contains("(")) {
+                                        newNum = newNum.replaceAll(newNum.substring(newNum.indexOf("(")), "");
+                                    }
+                                    newNum = newNum.replaceAll("[^\\d.]", "");
+                                    rt.setNewNum(Double.valueOf(newNum));
+                                    rt.setOldNum(Double.valueOf(number[0]));
+                                    //设置新的倾向点
+                                    rt.setNewDot(RivenTrendEnum.getRivenTrendDot(Double.parseDouble(newNum)));
+                                    //设置旧的倾向点
+                                    rt.setOldDot(RivenTrendEnum.getRivenTrendDot(Double.parseDouble(number[0])));
+                                    //设置更改日期
+                                    rt.setIsDate(Timestamp.valueOf(dateTime));
+                                    trends.add(rt);
                                 }
-                                newNum = newNum.replaceAll("[^\\d.]", "");
-                                //设置新的倾向值
-                                trend.setNewNum(Double.valueOf(newNum));
-                                //设置旧的倾向值
-                                trend.setOldNum(Double.valueOf(rent[0]));
-                                //设置新的倾向点
-                                trend.setNewDot(RivenTrendEnum.getRivenTrendDot(Double.parseDouble(newNum)));
-                                //设置旧的倾向点
-                                trend.setOldDot(RivenTrendEnum.getRivenTrendDot(Double.parseDouble(rent[0])));
-                                //设置更改日期
-                                trend.setIsDate(dateTime);
-                                //保存
-                                trends.add(trend);
                             }
                         }
+                        break;
                     }
                 }
             }
@@ -157,6 +159,7 @@ public class RivenDispositionUpdates {
                 bean.save(rivenTrend);
             }
         });
+        log.info("更新完毕...");
     }
 
 

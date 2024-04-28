@@ -85,7 +85,7 @@ public class GlobalDirectivesPlugin {
                 //电波
                 case WARFRAME_NIGH_WAVE_PLUGIN -> WarframeCodes.nighTwave(bot, event);
                 //倾向变动
-                case WARFRAME_RIVEN_DIS_UPDATE_PLUGIN -> not(bot, event);
+                case WARFRAME_RIVEN_DIS_UPDATE_PLUGIN -> WarframeCodes.rivenDisUpdate(bot, event, codes);
                 //翻译
                 case WARFRAME_TRA_PLUGIN -> not(bot, event);
                 // /WM

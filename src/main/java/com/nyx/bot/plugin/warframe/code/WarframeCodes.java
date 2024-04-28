@@ -331,7 +331,9 @@ public class WarframeCodes {
         }
     }
 
-    //金银垃圾
+    /**
+     * 金银垃圾
+     */
     public static void ducat(Bot bot, AnyMessageEvent event, Codes code) {
         OneBotLogInfoData data = getLogInfoData(bot, event, code);
         Ducats ducats = MarketUtils.getDucats();
@@ -349,6 +351,21 @@ public class WarframeCodes {
         } else {
             sendErrorMsg(bot, event, body);
         }
+    }
+
+    /**
+     * 紫卡倾向列表
+     */
+    public static void rivenDisUpdate(Bot bot, AnyMessageEvent event, Codes code) {
+        OneBotLogInfoData data = getLogInfoData(bot, event, code);
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("RivenDispositionUpdatesImage", data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            sendErrorMsg(bot, event, body);
+        }
+
     }
 
 }
