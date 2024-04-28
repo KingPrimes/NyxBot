@@ -9,7 +9,7 @@ import com.nyx.bot.repo.impl.black.BlackService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -44,8 +44,8 @@ public class ProveBlackController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap map) {
-        map.put("black", bs.findByProveId(id));
+    public String edit(@PathVariable("id") Long id, Model map) {
+        map.addAttribute("black", bs.findByProveId(id));
         return prefix + "/edit";
     }
 

@@ -16,7 +16,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -37,8 +37,8 @@ public class RivenTrendController extends BaseController {
     }
 
     @GetMapping("/add")
-    public String add(ModelMap map) {
-        map.put("types", Arrays.stream(RivenTrendTypeEnum.values()).toList());
+    public String add(Model model) {
+        model.addAttribute("types", Arrays.stream(RivenTrendTypeEnum.values()).toList());
         return prefix + "add";
     }
 
@@ -48,9 +48,9 @@ public class RivenTrendController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, ModelMap map) {
-        map.put("types", RivenTrendTypeEnum.values());
-        map.put("translation", repository.findById(id));
+    public String edit(@PathVariable Long id, Model model) {
+        model.addAttribute("types", RivenTrendTypeEnum.values());
+        model.addAttribute("translation", repository.findById(id));
         return prefix + "edit";
     }
 

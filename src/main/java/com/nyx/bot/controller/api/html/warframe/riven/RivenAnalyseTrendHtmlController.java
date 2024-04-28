@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.plugin.warframe.core.RivenAnalyseTrendModel;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +17,9 @@ import java.util.List;
 public class RivenAnalyseTrendHtmlController {
 
     @PostMapping("/postRivenAnalyseTrend")
-    public String getHtml(@RequestBody OneBotLogInfoData data, ModelMap map) {
+    public String getHtml(@RequestBody OneBotLogInfoData data, Model map) {
         List<List<RivenAnalyseTrendModel>> lists = JSON.parseArray(data.getData(), (Type) List.class);
-        map.put("data", lists);
+        map.addAttribute("data", lists);
         return "html/rivenAnalyseTrend";
     }
 

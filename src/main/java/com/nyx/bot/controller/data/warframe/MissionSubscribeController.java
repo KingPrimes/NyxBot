@@ -8,7 +8,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,14 +24,14 @@ public class MissionSubscribeController extends BaseController {
 
 
     @GetMapping
-    public String subscribe(ModelMap map) {
-        map.put("sub", SubscribeEnums.values());
+    public String subscribe(Model model) {
+        model.addAttribute("sub", SubscribeEnums.values());
         return prefix + "subscribe";
     }
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(MissionSubscribe ms) {
+    public ResponseEntity<?> list(MissionSubscribe ms) {
 
         return getDataTable(
                 repository.findAllPageable(

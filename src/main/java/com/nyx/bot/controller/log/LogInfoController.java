@@ -8,7 +8,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -21,8 +21,8 @@ public class LogInfoController extends BaseController {
     String prefix = "log/info";
 
     @GetMapping("/info")
-    public String info(ModelMap map) {
-        map.put("code", Codes.values());
+    public String info(Model model) {
+        model.addAttribute("code", Codes.values());
         return prefix + "/info";
     }
 
@@ -31,14 +31,14 @@ public class LogInfoController extends BaseController {
     @ResponseBody
     public ResponseEntity<?> list(LogInfo info) {
         return getDataTable(repository.findAllPageable(
-                info.getCodes().trim().isEmpty() ? null : info.getCodes(),
+                info.getCodes() == null ? null : info.getCodes(),
                 info.getGroupUid(),
                 PageRequest.of(info.getPageNum() - 1, info.getPageSize())));
     }
 
     @GetMapping("/info/detail/{logId}")
-    public String detail(@PathVariable("logId") Long logId, ModelMap map) {
-        map.put("info", repository.findById(logId).get());
+    public String detail(@PathVariable("logId") Long logId, Model model) {
+        repository.findById(logId).ifPresent(l -> model.addAttribute("info", l));
         return prefix + "/detail";
     }
 }

@@ -20,7 +20,7 @@ import java.util.Map;
 public class MarketDucatsHtmlController {
     @PostMapping("/postMarketDucats")
     public String getHtml(@RequestBody OneBotLogInfoData data, Model model) {
-        model.addAttribute("code",data.getCodes().equals(Codes.WARFRAME_MARKET_GOD_DUMP));
+        model.addAttribute("code", data.getCodes().equals(Codes.WARFRAME_MARKET_GOD_DUMP));
         Map<String, List<Ducats.Ducat>> map = JSON.parseObject(data.getData(), Map.class);
         model.addAttribute("data", map);
         return "html/marketDucats";

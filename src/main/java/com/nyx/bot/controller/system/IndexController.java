@@ -2,7 +2,7 @@ package com.nyx.bot.controller.system;
 
 import com.nyx.bot.controller.config.bot.HandOff;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -10,8 +10,8 @@ public class IndexController {
 
     //首页
     @GetMapping({"/", "/index"})
-    public String indexX(ModelMap map) {
-        map.put("isBW", HandOff.isBW());
+    public String indexX(Model model) {
+        model.addAttribute("isBW", HandOff.isBW());
         return "index";
     }
 

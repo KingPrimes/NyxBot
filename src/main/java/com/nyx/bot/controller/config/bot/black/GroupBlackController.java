@@ -11,7 +11,7 @@ import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -38,20 +38,23 @@ public class GroupBlackController extends BaseController {
 
 
     @GetMapping("/add")
-    public String add(ModelMap map) {
-        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.put("group", bot.getGroupList().getData()));
+    public String add(Model map) {
+        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.addAttribute("group", bot.getGroupList().getData()));
         return prefix + "/add";
     }
 
     @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(GroupBlack gb) {
+        if (gb == null) {
+            return AjaxResult.error("请先链接机器人");
+        }
         return toAjax(bs.save(gb));
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap map) {
-        map.put("black", bs.findByGroupId(id));
+    public String edit(@PathVariable("id") Long id, Model map) {
+        map.addAttribute("black", bs.findByGroupId(id));
         return prefix + "/edit";
     }
 

@@ -6,7 +6,7 @@ import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,12 +24,12 @@ public class GitHubUserProviderController extends BaseController {
     GitHubUserProviderRepository gitRepository;
 
     @GetMapping("/html")
-    public String html(ModelMap mapp) {
+    public String html(Model model) {
         List<GitHubUserProvider> all = gitRepository.findAll();
         if (!all.isEmpty()) {
-            mapp.put("git", all.get(0));
-        }else{
-            mapp.put("git", new GitHubUserProvider());
+            model.addAttribute("git", all.get(0));
+        } else {
+            model.addAttribute("git", new GitHubUserProvider());
         }
         return prefix + "github";
     }

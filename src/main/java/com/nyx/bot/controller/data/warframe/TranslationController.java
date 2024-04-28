@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,15 +41,16 @@ public class TranslationController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, ModelMap map) {
-        map.put("translation", repository.findById(id).get());
+    public String edit(@PathVariable Long id, Model model) {
+        repository.findById(id).ifPresent(t -> model.addAttribute("translation", t));
         return prefix + "edit";
     }
 
     @PostMapping("/save")
     @ResponseBody
     public AjaxResult save(Translation t) {
-        return toAjax(repository.save(t) != null);
+        repository.save(t);
+        return success();
     }
 
     /**

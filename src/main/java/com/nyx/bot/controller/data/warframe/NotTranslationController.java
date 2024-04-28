@@ -10,7 +10,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -32,9 +32,9 @@ public class NotTranslationController extends BaseController {
     }
 
     @GetMapping("/add/{id}")
-    public String add(@PathVariable Long id, ModelMap map) {
-        map.put("id", id);
-        notTranslationRepository.findById(id).ifPresent(n -> map.put("key", n.getNotTranslation()));
+    public String add(@PathVariable Long id, Model model) {
+        model.addAttribute("id", id);
+        notTranslationRepository.findById(id).ifPresent(n -> model.addAttribute("key", n.getNotTranslation()));
         return prefix + "add";
     }
 
@@ -45,7 +45,7 @@ public class NotTranslationController extends BaseController {
      */
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(NotTranslation t) {
+    public ResponseEntity<?> list(NotTranslation t) {
         return getDataTable(notTranslationRepository.findAll(
                 PageRequest.of(t.getPageNum() - 1, t.getPageSize())
         ));
@@ -60,7 +60,12 @@ public class NotTranslationController extends BaseController {
     @ResponseBody
     public AjaxResult save(Translation t) {
         notTranslationRepository.deleteById(t.getId());
-        return toAjax(translationService.save(t) != null);
+        Translation translation = new Translation();
+        translation.setCn(t.getCn());
+        translation.setEn(t.getEn());
+        translation.setIsSet(t.getIsSet());
+        translation.setIsPrime(t.getIsPrime());
+        return toAjax(translationService.save(translation) != null);
     }
 
 

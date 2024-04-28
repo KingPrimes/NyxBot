@@ -9,7 +9,7 @@ import com.nyx.bot.repo.impl.white.WhiteService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -45,8 +45,8 @@ public class ProveWhiteController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap map) {
-        map.put("white", whiteService.findByProve(id));
+    public String edit(@PathVariable("id") Long id, Model map) {
+        map.addAttribute("white", whiteService.findByProve(id));
         return prefix + "/edit";
     }
 

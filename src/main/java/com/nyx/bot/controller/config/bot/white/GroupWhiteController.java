@@ -11,7 +11,7 @@ import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -37,8 +37,8 @@ public class GroupWhiteController extends BaseController {
 
 
     @GetMapping("/add")
-    public String add(ModelMap map) {
-        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.put("group", bot.getGroupList().getData()));
+    public String add(Model map) {
+        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.addAttribute("group", bot.getGroupList().getData()));
         return prefix + "/add";
     }
 
@@ -50,8 +50,8 @@ public class GroupWhiteController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap map) {
-        map.put("white", whiteService.findByGroup(id));
+    public String edit(@PathVariable("id") Long id, Model map) {
+        map.addAttribute("white", whiteService.findByGroup(id));
         return prefix + "/edit";
     }
 
