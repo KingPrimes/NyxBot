@@ -34,6 +34,13 @@ public class BotCoreEvent extends CoreEvent {
     @Override
     public boolean session(WebSocketSession session) {
         this.session = session;
+        log.debug("---------------------------------------------------");
+        log.debug("Attributes:{}", session.getAttributes());
+        log.debug("Headers:{}", session.getHandshakeHeaders());
+        log.debug("AcceptedProtocol:{}", session.getAcceptedProtocol());
+        log.debug("LocalAddress:{}", session.getLocalAddress());
+        log.debug("Extensions:{}", session.getExtensions());
+        log.debug("---------------------------------------------------");
         return super.session(session);
     }
 }
