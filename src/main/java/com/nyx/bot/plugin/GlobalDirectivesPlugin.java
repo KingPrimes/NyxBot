@@ -41,7 +41,7 @@ public class GlobalDirectivesPlugin {
         Optional.ofNullable(code).ifPresent(codes -> {
             switch (codes) {
                 //帮助菜单
-                case HELP, TYPE_CODE -> HelpCode.help(bot, event);
+                case HELP -> HelpCode.help(bot, event);
                 //运行状态
                 case CHECK_VERSION -> {
                 }

@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 public enum Codes {
 
-    HELP("^HELP$|^帮助$", PermissionsEnums.USER),
+    HELP("^HELP$|^帮助$|^指令$|^命令$|^菜单$", PermissionsEnums.USER),
 
-    CHECK_VERSION("^检查版本$|^版本$|^运行状态$|^状态$", PermissionsEnums.ADMIN),
+    CHECK_VERSION("^检查版本$|^版本$|^运行状态$|^状态$", PermissionsEnums.USER),
 
     UPDATE_HTML("^更新HTML$", PermissionsEnums.SUPER_ADMIN),
     UPDATE_WARFRAME_RES_MARKET_ITEMS("^更新WM物品$", PermissionsEnums.SUPER_ADMIN),
@@ -20,8 +20,6 @@ public enum Codes {
     UPDATE_WARFRAME_SISTER("^更新信条$", PermissionsEnums.SUPER_ADMIN),
     UPDATE_WARFRAME_TAR("^更新翻译$", PermissionsEnums.SUPER_ADMIN),
     UPDATE_JAR("^自动更新$|^更新版本$|^版本更新$", PermissionsEnums.SUPER_ADMIN),
-
-    TYPE_CODE("^指令$|^命令$|^菜单$", PermissionsEnums.USER),
 
     WARFRAME_ASSAULT_PLUGIN("^突击$", PermissionsEnums.USER),
     WARFRAME_ARSON_HUNT_PLUGIN("^执刑官猎杀$|^猎杀$|^执行官$|^执政官$|^执刑官$", PermissionsEnums.USER),
