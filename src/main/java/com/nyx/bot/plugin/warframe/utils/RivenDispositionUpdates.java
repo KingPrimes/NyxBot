@@ -151,6 +151,7 @@ public class RivenDispositionUpdates {
             RivenTrend byTrendName = bean.findByTrendName(rivenTrend.getTrendName());
             if (byTrendName != null) {
                 rivenTrend.setId(byTrendName.getId());
+                rivenTrend.setType(byTrendName.getType());
                 bean.save(rivenTrend);
             } else {
                 bean.save(rivenTrend);
