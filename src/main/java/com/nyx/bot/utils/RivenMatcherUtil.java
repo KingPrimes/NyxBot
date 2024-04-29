@@ -3,7 +3,7 @@ package com.nyx.bot.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MatchUtil {
+public class RivenMatcherUtil {
     /**
      * 获取中文
      */

@@ -10,7 +10,7 @@ import com.nyx.bot.plugin.warframe.core.RivenAnalyseTrendModel;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.RivenAnalyseTrendRepository;
 import com.nyx.bot.repo.warframe.RivenTrendRepository;
-import com.nyx.bot.utils.MatchUtil;
+import com.nyx.bot.utils.RivenMatcherUtil;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,24 +51,24 @@ public class RivenAttributeCompute {
                     continue;
                 }
                 // 武器名称
-                if (MatchUtil.isWeaponsName(s)) {
-                    trend.setWeaponsName(MatchUtil.getChines(s));
-                    if (MatchUtil.isRivenNameEx(s)) {
-                        trend.setRivenName(MatchUtil.getRivenNameE(s));
+                if (RivenMatcherUtil.isWeaponsName(s)) {
+                    trend.setWeaponsName(RivenMatcherUtil.getChines(s));
+                    if (RivenMatcherUtil.isRivenNameEx(s)) {
+                        trend.setRivenName(RivenMatcherUtil.getRivenNameE(s));
                     }
                 }
                 // 紫卡名称
-                if (MatchUtil.isRivenNameEx(s)) {
+                if (RivenMatcherUtil.isRivenNameEx(s)) {
                     if (trend.getRivenName() == null) {
-                        trend.setRivenName(MatchUtil.getRivenNameE(s));
+                        trend.setRivenName(RivenMatcherUtil.getRivenNameE(s));
                     } else {
-                        if (!trend.getRivenName().equals(MatchUtil.getRivenNameE(s))) {
-                            trend.setRivenName(trend.getRivenName() + MatchUtil.getRivenNameE(s));
+                        if (!trend.getRivenName().equals(RivenMatcherUtil.getRivenNameE(s))) {
+                            trend.setRivenName(trend.getRivenName() + RivenMatcherUtil.getRivenNameE(s));
                         }
                     }
                 }
                 // 紫卡词条
-                if (MatchUtil.isAttribute(s)) {
+                if (RivenMatcherUtil.isAttribute(s)) {
                     s = s.replace(" ", "").trim();
                     if (s.contains("入")) {
                         s = s.replace("入", "");
@@ -80,7 +80,7 @@ public class RivenAttributeCompute {
             // 判断紫卡词条是否大于等于3条
             if (attributes.size() >= 3) {
                 String s = attributes.get(attributes.size() - 1);
-                if (MatchUtil.getAttributeNum(s) < 0 || MatchUtil.whetherItIsDiscrimination(s)) {
+                if (RivenMatcherUtil.getAttributeNum(s) < 0 || RivenMatcherUtil.whetherItIsDiscrimination(s)) {
                     nag = true;
                 }
             }
@@ -89,15 +89,15 @@ public class RivenAttributeCompute {
                 RivenAnalyseTrendCompute.Attribute attribute = new RivenAnalyseTrendCompute.Attribute();
                 if (s.contains("射速")) {
                     attribute.setAttributeName(s + " 效果加倍）");
-                    attribute.setName(MatchUtil.getAttribetName(s) + " 效果加倍）");
+                    attribute.setName(RivenMatcherUtil.getAttribetName(s) + " 效果加倍）");
                 } else if (s.contains("暴击几率（")) {
                     attribute.setAttributeName(s.replaceAll("（重?击?时?", "(").trim() + "重击时 x2)");
                     attribute.setName("暴击几率（重击时 x2）");
                 } else {
                     attribute.setAttributeName(s);
-                    attribute.setName(MatchUtil.getAttribetName(s));
+                    attribute.setName(RivenMatcherUtil.getAttribetName(s));
                 }
-                attribute.setAttribute(MatchUtil.getAttributeNum(s));
+                attribute.setAttribute(RivenMatcherUtil.getAttributeNum(s));
                 /* attribute.setNag(MatchUtil.getAttributeNum(s) < 0)*//*|| (MatchUtil.whetherItIsDiscrimination(s) && MatchUtil.getAttributeNum(s) > 0))*//*;*/
                 // 用于判断是否携带负属性
                 attribute.setNag(nag);
@@ -185,8 +185,8 @@ public class RivenAttributeCompute {
 
                             /*boolean isNag = attribute.getAttribute() < 0 *//*|| (MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) && attribute.getAttribute() > 0)*//*;*/
                             // 用于判断最后一个词条是否是歧视属性
-                            boolean isNag = index >= 2 ? MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) : attribute.getAttribute() < 0;
-                            log.debug("whetherItIsDiscrimination:{}",MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
+                            boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) : attribute.getAttribute() < 0;
+                            log.debug("whetherItIsDiscrimination:{}", RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
                             log.debug("getAttribute:{}",attribute.getAttribute() < 0);
                             log.debug("当前属性是否是负属性：{} --- 当前下标:{} -- 当前属性值:{} ---当前属性名称：{}",isNag,index,attribute.getAttribute(),attribute.getAttributeName());
                             switch (weaponsType) {
