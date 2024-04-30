@@ -75,7 +75,8 @@ OneBot协议客户端
 ---
 
 # 赞助
- ### 本项目由 [![粒子GO](https://github.com/KingPrimes/NyxBot/assets/50130875/09cc82ad-4744-495b-9c67-883251ae5342)](https://www.lizigo.cn/) 赞助
+
+### 本项目由 [![粒子GO](https://github.com/KingPrimes/NyxBot/assets/50130875/09cc82ad-4744-495b-9c67-883251ae5342)](https://www.lizigo.cn/aff/LYRPGUMP) 赞助
 
 ----
 
