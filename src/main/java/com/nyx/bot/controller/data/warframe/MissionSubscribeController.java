@@ -36,7 +36,6 @@ public class MissionSubscribeController extends BaseController {
         return getDataTable(
                 repository.findAllPageable(
                         ms.getSubGroup(),
-                        ms.getSubscribe(),
                         PageRequest.of(
                                 ms.getPageNum() - 1,
                                 ms.getPageSize()
