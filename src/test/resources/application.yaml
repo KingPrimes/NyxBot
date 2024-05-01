@@ -60,7 +60,7 @@ spring:
       enabled: true
   #JPA
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
     open-in-view: false
@@ -91,6 +91,7 @@ server:
   shutdown: graceful
 logging:
   level:
+    com.nyx.bot: DEBUG
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF

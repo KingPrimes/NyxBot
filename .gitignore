@@ -37,8 +37,6 @@ build/
 mvnw
 mvnw.cmd
 
-### 忽略测试文件
-test
 ### 忽略Log文件
 logs
 *.log

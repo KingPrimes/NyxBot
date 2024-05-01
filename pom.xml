@@ -267,7 +267,7 @@
                         </exclude>
                     </excludes>
                     <!--跳过测试-->
-                    <skip>false</skip>
+                    <skip>true</skip>
                     <!--排除DevTools-->
                     <excludeDevtools>true</excludeDevtools>
                 </configuration>
@@ -278,6 +278,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
+                    <skip>true</skip>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
