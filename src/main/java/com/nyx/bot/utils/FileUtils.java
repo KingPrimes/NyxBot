@@ -16,12 +16,10 @@ public class FileUtils {
             return "";
         }
         byte[] b = new byte[0];
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             int len = inputStream.available();
             b = new byte[len];
             inputStream.read(b);
-            inputStream.close();
         } catch (Exception e) {
             log.error("read file error:{}", e.getMessage());
         }

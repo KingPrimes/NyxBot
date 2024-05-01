@@ -89,13 +89,13 @@ public class RivenAttributeCompute {
                 RivenAnalyseTrendCompute.Attribute attribute = new RivenAnalyseTrendCompute.Attribute();
                 if (s.contains("射速")) {
                     attribute.setAttributeName(s + " 效果加倍）");
-                    attribute.setName(RivenMatcherUtil.getAttribetName(s) + " 效果加倍）");
+                    attribute.setName(RivenMatcherUtil.getAttributeName(s) + " 效果加倍）");
                 } else if (s.contains("暴击几率（")) {
                     attribute.setAttributeName(s.replaceAll("（重?击?时?", "(").trim() + "重击时 x2)");
                     attribute.setName("暴击几率（重击时 x2）");
                 } else {
                     attribute.setAttributeName(s);
-                    attribute.setName(RivenMatcherUtil.getAttribetName(s));
+                    attribute.setName(RivenMatcherUtil.getAttributeName(s));
                 }
                 attribute.setAttribute(RivenMatcherUtil.getAttributeNum(s));
                 /* attribute.setNag(MatchUtil.getAttributeNum(s) < 0)*//*|| (MatchUtil.whetherItIsDiscrimination(s) && MatchUtil.getAttributeNum(s) > 0))*//*;*/

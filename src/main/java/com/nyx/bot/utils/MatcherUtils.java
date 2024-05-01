@@ -6,6 +6,37 @@ import java.util.regex.Pattern;
 public class MatcherUtils {
 
     /**
+     * 是否是URL地址
+     */
+    public static final Pattern IS_HTTP_URL = Pattern.compile("((https|http)?://)");
+
+    /**
+     * 是否是整数
+     */
+    public static final Pattern IS_NUMBER = Pattern.compile("^\\d+$|-\\d+$");
+
+    /**
+     * 是否是浮点数
+     */
+    public static final Pattern IS_DOUBLE = Pattern.compile("\\d+\\.\\d+$|-\\d+\\.\\d+$");
+
+    /**
+     * 是否是字母
+     */
+    public static final Pattern IS_ALPHA = Pattern.compile("[a-zA-Z]+");
+
+    /**
+     * 是否是特殊字符
+     */
+    public static final Pattern IS_SPECIAL_SYMBOLS = Pattern.compile("[\\!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?`~]");
+
+    public static final Pattern IS_ORDER_ITEM = Pattern.compile("([一-龥]+) ?\\& ?([一-龥]+)");
+
+    public static final Pattern IS_CHINES = Pattern.compile("[\\u4e00-\\u9fa5]");
+
+    public static final Pattern IS_IPV4 = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+
+    /**
      * 正则判断
      *
      * @param str   字符串
@@ -39,10 +70,7 @@ public class MatcherUtils {
      */
     public static boolean isHttpUrl(String urls) {
         boolean distro = false;
-        String regex = "((https|http)?://)";//设置正则表达式
-
-        Pattern pat = Pattern.compile(regex.trim());//对比
-        Matcher mat = pat.matcher(urls.trim());
+        Matcher mat = IS_HTTP_URL.matcher(urls.trim());
         while (mat.find()) {
             distro = true;
         }
@@ -56,13 +84,8 @@ public class MatcherUtils {
      * @return true 是数字 反之
      */
     public static boolean isNumberAndDouble(String str) {
-        //是否整数
-        Pattern num = Pattern.compile("^\\d+$|-\\d+$");
-        //小数
-        Pattern dou = Pattern.compile("\\d+\\.\\d+$|-\\d+\\.\\d+$");
-
-        return num.matcher(str).matches()
-                || dou.matcher(str).matches();
+        return IS_NUMBER.matcher(str).matches()
+                || IS_DOUBLE.matcher(str).matches();
     }
 
     /**
@@ -72,9 +95,7 @@ public class MatcherUtils {
      * @return true 整数 反之
      */
     public static boolean isNumber(String str) {
-        //是否整数
-        Pattern num = Pattern.compile("^\\d+$|-\\d+$");
-        return num.matcher(str).matches();
+        return IS_NUMBER.matcher(str).matches();
     }
 
     /**
@@ -84,7 +105,7 @@ public class MatcherUtils {
      * @return true 是字母 反之
      */
     public static boolean isAlpha(String str) {
-        return str != null && str.matches("[a-zA-Z]+");
+        return str != null && IS_ALPHA.matcher(str).matches();
     }
 
     /**
@@ -92,7 +113,6 @@ public class MatcherUtils {
      *
      * @param str   字符串
      * @param regex 正则表达式
-     * @return
      */
     public static boolean regexG(String str, String regex) {
         Pattern p = Pattern.compile(regex);
@@ -119,45 +139,33 @@ public class MatcherUtils {
 
     /**
      * 正则匹配特殊符号
-     *
-     * @param str
-     * @return
      */
     public static boolean isSpecialSymbols(String str) {
-        String regex = "[" +
-                "\\!@#$%^&*()_+" +
-                "\\-=\\[\\]{};':\"\\\\|,.<>/?`~" +
-                "]";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(str);
-        while (m.find()) {
-            return true;
-        }
-        return false;
+        return IS_SPECIAL_SYMBOLS.matcher(str).matches();
     }
 
     /**
      * 对于携带特殊字符的字符串进行过滤
      */
     public static String isOrderItem(String str) {
-        Pattern p = Pattern.compile("([一-龥]+) ?\\& ?([一-龥]+)");
-        Matcher m = p.matcher(str);
-        while (m.find()) {
-            return m.group();
-        }
-        return "";
+        return IS_ORDER_ITEM.matcher(str).group();
     }
 
     /**
      * 匹配是否是中文
      */
     public static boolean isChines(String str) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
-        Matcher m = p.matcher(str);
-        while (m.find()) {
-            return true;
-        }
-        return false;
+        return IS_CHINES.matcher(str).matches();
+    }
+
+    /**
+     * 判断是否是一个合法的IPV4地址
+     *
+     * @param str 待匹配项
+     * @return true 合规
+     */
+    public static boolean isIPV4(String str) {
+        return IS_IPV4.matcher(str).matches();
     }
 
 }
