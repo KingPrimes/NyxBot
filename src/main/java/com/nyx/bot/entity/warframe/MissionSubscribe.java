@@ -29,7 +29,7 @@ public class MissionSubscribe extends BaseEntity {
     // cascade 联级操作，增删改
     @OneToMany(
             fetch = FetchType.EAGER,
-            targetEntity = MissionSubscribeUsers.class,
+            targetEntity = MissionSubscribeUser.class,
             cascade = CascadeType.ALL
     )
     // name = 外键名称
@@ -40,7 +40,7 @@ public class MissionSubscribe extends BaseEntity {
             referencedColumnName = "subGroup",
             nullable = false
     )
-    List<MissionSubscribeUsers> subUsers = new ArrayList<>();
+    List<MissionSubscribeUser> subUsers = new ArrayList<>();
     //发送消息的Bot
     Long subBotUid;
 

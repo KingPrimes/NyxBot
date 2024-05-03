@@ -40,7 +40,13 @@ public class MissionSubscribeController extends BaseController {
                                 ms.getPageNum() - 1,
                                 ms.getPageSize()
                         )
-                )
+                ).map(subscribe -> {
+                    subscribe.setSubUsers(
+                            subscribe.getSubUsers().stream()
+                                    .peek(s -> s.setSubscribeType(s.getSubscribe().getNAME()))
+                                    .toList());
+                    return subscribe;
+                })
         );
     }
 

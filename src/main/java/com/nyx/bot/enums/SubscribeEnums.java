@@ -58,10 +58,12 @@ public enum SubscribeEnums {
     SORTIE("突击"),
 
     ;
-    private final String name;
+    private final String NAME;
+
 
     SubscribeEnums(String name) {
-        this.name = name;
+        this.NAME = name;
     }
+
 
 }

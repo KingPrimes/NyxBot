@@ -10,14 +10,16 @@
                 <div class="select-list">
                     <ul>
                         <li>
-                            <label for="subBotUid">Bot： </label><input class="form-control" name="subBotUid" id="subBotUid"
-                                                       placeholder="BotUid"
-                                                       type="number"/>
+                            <label for="subBotUid">Bot： </label><input class="form-control" id="subBotUid"
+                                                                       name="subBotUid"
+                                                                       placeholder="BotUid"
+                                                                       type="number"/>
                         </li>
                         <li>
-                            <label for="subGroup">Group： </label><input class="form-control" name="subGroup" id="subGroup"
-                                                         placeholder="GroupUid"
-                                                         type="number"/>
+                            <label for="subGroup">Group： </label><input class="form-control" id="subGroup"
+                                                                        name="subGroup"
+                                                                        placeholder="GroupUid"
+                                                                        type="number"/>
                         </li>
                         <li>
                             <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
@@ -42,9 +44,9 @@
 <th:block th:insert="~{include :: footer}"/>
 <th:block th:insert="~{include :: bootstrap-select-js}"/>
 <script th:inline="javascript">
-    var prefix = ctx + "data/warframe/subscribe"
+    const prefix = ctx + "data/warframe/subscribe";
     $(function () {
-        var options = {
+        const options = {
             url: prefix + "/list",
             modalName: "订阅",
             sortOrder: "desc",
@@ -57,21 +59,35 @@
                     radio: true
                 },
                 {
-                    field: 'id',
-                    title: 'ID'
-                },
-                {
                     field: 'subBotUid',
                     title: 'Bot'
                 },
                 {
-                    field: 'subUsers',
-                    title: '订阅用户'
-                },
-                {
                     field: 'subGroup',
                     title: '订阅群组'
-                }
+                },
+                {
+                    field: 'groupName',
+                    title: '群组名称'
+                },
+                {
+                    field: 'subUsers',
+                    title: '订阅用户',
+                    formatter: function (value, row) {
+                        const actions = [];
+                        actions.push('<table class="table table-bordered table-hover" style="margin-top: 0;"><thead><tr>' +
+                            '<th><div class="th-inner">昵称</div></th>' +
+                            '<th><div class="th-inner">账号</div></th>' +
+                            '<th><div class="th-inner">订阅类型</div></th>' +
+                            '</tr></thead><tbody>')
+                        row.subUsers.forEach(function (subUser) {
+                            actions.push('<tr><td>' + subUser.userName + '</td><td>' + subUser.userId + '</td><td>' + subUser.subscribeType + '</td></tr>')
+                        })
+                        actions.push('</tbody></table>')
+                        return actions.join('');
+                    }
+                },
+
             ]
         };
         $.table.init(options);
@@ -82,7 +98,7 @@
     }
 
     function resetPre() {
-        $("#log-form")[0].reset();
+        $("#subscribe-form")[0].reset();
         $.table.search('subscribe-form', 'bootstrap-table');
     }
 
