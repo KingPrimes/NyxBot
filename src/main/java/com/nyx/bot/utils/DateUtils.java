@@ -27,11 +27,13 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
     public static final Long SECONDS = 1000L;
 
-    public static String yyyy = "yyyy-MM-dd HH:mm:ss";
-    public static String MM = "MM-dd HH:mm:ss";
-    public static String dd = "dd HH:mm:ss";
-    public static String hh = "HH:mm:ss";
-    public static String mm = "mm:ss";
+    public static final String NOT_HMS = "yyyy-MM-dd";
+
+    public static final String YYYY = "yyyy-MM-dd HH:mm:ss";
+    public static final String MM = "MM-dd HH:mm:ss";
+    public static final String DD = "dd HH:mm:ss";
+    public static final String HH = "HH:mm:ss";
+    public static final String mm = "mm:ss";
 
 
     /**

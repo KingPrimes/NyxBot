@@ -13,16 +13,14 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class JgitUtil {
@@ -94,15 +92,15 @@ public class JgitUtil {
      *
      * @param fileName 文件名称
      */
-    public JgitUtil add(String fileName) throws Exception {
-        openRpo(localPath).add().addFilepattern(Optional.ofNullable(fileName).orElse(".")).call();
+    public JgitUtil add(String fileName) throws GitAPIException {
+        openRpo(localPath).add().addFilepattern(Optional.ofNullable(fileName).orElse(".").isEmpty() ? "." : fileName).call();
         return this;
     }
 
     /**
      * 添加所有更改得文件到暂存区
      */
-    public JgitUtil add() throws Exception {
+    public JgitUtil add() throws GitAPIException {
         openRpo(localPath).add().addFilepattern(".").call();
         return this;
     }
@@ -112,7 +110,7 @@ public class JgitUtil {
      *
      * @param fileName 文件名称
      */
-    public JgitUtil rm(String fileName) throws Exception {
+    public JgitUtil rm(String fileName) throws GitAPIException {
         openRpo(localPath).rm().addFilepattern(fileName).call();
         return this;
     }
@@ -122,7 +120,7 @@ public class JgitUtil {
      *
      * @param commitInfo 提交消息
      */
-    public JgitUtil commit(String commitInfo) throws Exception {
+    public JgitUtil commit(String commitInfo) throws GitAPIException {
         openRpo(localPath).commit().setMessage(Optional.ofNullable(commitInfo).orElse("default commit info")).call();
         return this;
     }
@@ -159,7 +157,7 @@ public class JgitUtil {
     /**
      * 状态(status) git status
      */
-    public Map<String, String> status() throws Exception {
+    public Map<String, String> status() throws GitAPIException {
         Map<String, String> map = new HashMap<>();
         Status status = openRpo(localPath).status().call();
         map.put("Added", status.getAdded().toString());
@@ -184,7 +182,7 @@ public class JgitUtil {
      *
      * @param branchName 分支名称
      */
-    public JgitUtil branch(String branchName) throws Exception {
+    public JgitUtil branch(String branchName) throws GitAPIException {
         openRpo(localPath).branchCreate()
                 .setName(branchName)
                 .call();
@@ -196,7 +194,7 @@ public class JgitUtil {
      *
      * @param branchName 分支名称
      */
-    public JgitUtil delBranch(String branchName) throws Exception {
+    public JgitUtil delBranch(String branchName) throws GitAPIException {
         openRpo(localPath).branchDelete()
                 .setBranchNames(branchName)
                 .call();
@@ -208,7 +206,7 @@ public class JgitUtil {
      *
      * @param branchName 分支名称
      */
-    public JgitUtil checkoutBranch(String branchName) throws Exception {
+    public JgitUtil checkoutBranch(String branchName) throws GitAPIException {
         openRpo(localPath).checkout()
                 .setName(branchName)
                 .call();
@@ -218,7 +216,7 @@ public class JgitUtil {
     /**
      * 所有分支(BranchList) git branch
      */
-    public List<Ref> listBranch() throws Exception {
+    public List<Ref> listBranch() throws GitAPIException {
         return openRpo(localPath).branchList().call();
     }
 
@@ -228,7 +226,7 @@ public class JgitUtil {
      * @param branchName 分支名称
      * @param commitMsg  合并信息
      */
-    public JgitUtil mergeBranch(String branchName, String commitMsg) throws Exception {
+    public JgitUtil mergeBranch(String branchName, String commitMsg) throws GitAPIException {
         //切换分支获取分支信息存入Ref对象里
         Ref refdev = openRpo(localPath).checkout().setName(branchName).call();
         //切换回main分支
@@ -247,7 +245,7 @@ public class JgitUtil {
     /**
      * 推送(Push) git push origin master
      */
-    public JgitUtil push() throws Exception {
+    public JgitUtil push() throws GitAPIException {
         if (provider == null) {
             throw new RuntimeException("请设置Git账户");
         }
@@ -268,26 +266,38 @@ public class JgitUtil {
      *
      * @param branch 推送分支
      */
-    public JgitUtil push(String branch) throws Exception {
+    public Iterator<PushResult> push(String branch) throws GitAPIException {
         if (provider == null) {
             throw new RuntimeException("请设置Git账户");
         }
-        openRpo(localPath).push()
+        return openRpo(localPath)
+                .push()
                 //设置推送的URL名称如"origin"
                 .setRemote("origin")
-                //设置需要推送的分支,如果远端没有则创建
-                .setRefSpecs(new RefSpec(branch))
+                .setRefSpecs(new RefSpec(branch + ":refs/heads/" + branch))
                 //身份验证
                 .setCredentialsProvider(provider)
                 .setProgressMonitor(new TextProgressMonitor())
-                .call();
-        return this;
+                .call().iterator();
     }
+
+
+    /**
+     * 创建分支推送
+     *
+     * @param commit     提交信息
+     * @param branchName 分支名称
+     * @param files      推送文件
+     */
+    public Iterator<PushResult> pushBranchCheckout(String commit, String branchName, String files) throws GitAPIException {
+        return branch(branchName).checkoutBranch(branchName).add(files).commit(commit).push(branchName);
+    }
+
 
     /**
      * 拉取(Pull) git pull origin
      */
-    public JgitUtil pull() throws Exception {
+    public JgitUtil pull() throws GitAPIException {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
@@ -340,7 +350,7 @@ public class JgitUtil {
      *
      * @param branch 分支
      */
-    public JgitUtil gitClone(String branch) throws Exception {
+    public JgitUtil gitClone(String branch) throws GitAPIException {
         if (provider == null) {
             Git git = Git.cloneRepository()
                     .setURI(urlPath + ".git")
@@ -374,7 +384,7 @@ public class JgitUtil {
     /**
      * 克隆(Clone)
      */
-    public void gitClone() throws Exception {
+    public void gitClone() throws GitAPIException {
         Git git = Git.cloneRepository()
                 .setURI(urlPath + ".git")
                 .setDirectory(new File(localPath))
