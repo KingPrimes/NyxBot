@@ -1,5 +1,6 @@
 package com.nyx.bot.utils;
 
+import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.GlobalStates;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class CacheUtils {
 
     public static void setGlobalState(GlobalStates state) {
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
+        FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
     }
 
     /**

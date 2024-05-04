@@ -38,7 +38,7 @@ public class Runners {
             user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
-               userRepository.save(user);
+                userRepository.save(user);
             }
         }, AsyncBeanName.SERVICE);
     }
