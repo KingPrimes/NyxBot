@@ -19,8 +19,18 @@ public class WarframeSubscribe {
     public static void isUpdated(GlobalStates states) {
         try {
             //获取缓存数据
-            GlobalStates d = CacheUtils.getGlobalState();
-            Optional.of(d).ifPresentOrElse(data -> {
+            GlobalStates old = CacheUtils.getGlobalState();
+            CacheUtils.setGlobalState(states);
+
+            Optional.of(old).ifPresentOrElse(data -> {
+
+                //检查警报是否不为空
+                Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
+                    //判断数据是否有更新
+                    if (!f.equals(data.getAlerts())) {
+                        WarframeDataUpdateMission.updateAlerts();
+                    }
+                });
 
                 //检查仲裁信息是否为空值
                 Optional.ofNullable(states.getArbitration()).ifPresentOrElse(f -> {
@@ -32,12 +42,61 @@ public class WarframeSubscribe {
                     states.setArbitration(data.getArbitration());
                 });
 
-                //检查警报是否不为空
-                Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
-                    //判断数据是否有更新
-                    if (!f.equals(data.getAlerts())) {
-                        WarframeDataUpdateMission.updateAlerts();
+                //每日特惠
+                Optional.ofNullable(states.getDailyDeals()).ifPresent(r -> {
+                    if (!r.equals(data.getDailyDeals())) {
+
                     }
+                });
+
+                //活动
+                Optional.ofNullable(states.getEvents()).ifPresent(events -> {
+                    if (!events.equals(data.getEvents())) {
+
+                    }
+                });
+
+                //裂隙
+                Optional.ofNullable(states.getFissures()).ifPresent(fissures -> {
+                    if (!fissures.equals(data.getFissures())) {
+
+                    }
+                });
+
+                //入侵
+                Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> {
+                    if (!invasions.equals(data.getInvasions())) {
+
+                    }
+                });
+
+                //新闻
+                Optional.ofNullable(states.getNews()).ifPresent(news -> {
+                    if (!news.equals(data.getNews())) {
+
+                    }
+                });
+
+                //电波
+                Optional.ofNullable(states.getNightwave()).ifPresent(nightwave -> {
+                    if (!nightwave.equals(data.getNightwave())) {
+
+                    }
+                });
+                //突击
+                Optional.ofNullable(states.getSortie()).ifPresent(sortie -> {
+                });
+                //执政官突击
+                Optional.ofNullable(states.getArchonHunt()).ifPresent(archonHunt -> {
+                });
+                //钢铁轮换
+                Optional.ofNullable(states.getSteelPath()).ifPresent(steelPath -> {
+                });
+                //虚空商人
+                Optional.ofNullable(states.getVoidTrader()).ifPresent(voidTrader -> {
+                });
+                //双衍王境
+                Optional.ofNullable(states.getDuviriCycle()).ifPresent(duviriCycle -> {
                 });
 
                 //检查 夜灵平野 是否为空
