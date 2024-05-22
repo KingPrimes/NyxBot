@@ -42,10 +42,22 @@ public class WarframeDataUpdateMission {
     }
 
     /**
+     * 裂隙
+     */
+    public static void updateFissures() {
+    }
+
+    /**
      * 新的入侵
      */
     public static void updateInvasions() {
         sendGroupsToUser(SubscribeEnums.INVASIONS, I18nUtils.message("warframe.up.invasions"), "");
+    }
+
+    /**
+     * 新闻
+     */
+    public static void updateNews() {
     }
 
     /**
@@ -69,6 +81,30 @@ public class WarframeDataUpdateMission {
      */
     public static void updateCetusCycle(String time) {
         sendGroupsToUser(SubscribeEnums.CETUS_CYCLE, I18nUtils.message("warframe.up.cetusCycle") + time, "");
+    }
+
+    /**
+     * 电波
+     */
+    public static void updateNightwave() {
+    }
+
+    /**
+     * 突击
+     */
+    public static void updateSortie() {
+    }
+
+    /**
+     * 执政官突击
+     */
+    public static void updateArchonHunt() {
+    }
+
+    /**
+     * 双衍王境
+     */
+    public static void updateDuviriCycle() {
     }
 
     /**

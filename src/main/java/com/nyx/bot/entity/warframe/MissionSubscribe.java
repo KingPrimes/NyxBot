@@ -3,7 +3,6 @@ package com.nyx.bot.entity.warframe;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
 /**
  * 订阅
  */
-@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subGroup"}))
@@ -41,6 +39,20 @@ public class MissionSubscribe extends BaseEntity {
             nullable = false
     )
     List<MissionSubscribeUser> subUsers = new ArrayList<>();
+
+
+    @OneToMany(
+            fetch = FetchType.EAGER,
+            targetEntity = MissionSubscribeGroupCheckType.class,
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(
+            name = "subGroupCheckType",
+            referencedColumnName = "subGroup",
+            nullable = false
+    )
+    List<MissionSubscribeGroupCheckType> checkTypes = new ArrayList<>();
+
     //发送消息的Bot
     Long subBotUid;
 
