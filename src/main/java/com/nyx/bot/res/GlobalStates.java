@@ -849,16 +849,29 @@ public class GlobalStates {
     @Data
     @EqualsAndHashCode(of = {"description", "rewards"}, callSuper = false)
     public static class Events extends BaseStatus {
+        /**
+         * 当前是否在进行
+         */
         @JsonProperty("active")
         private Boolean active;
+        /**
+         * 最高分
+         */
         @JsonProperty("maximumScore")
         private Integer maximumScore;
+        /**
+         * 当前分
+         */
         @JsonProperty("currentScore")
         private Integer currentScore;
+
         @JsonProperty("smallInterval")
         private Integer smallInterval;
         @JsonProperty("largeInterval")
         private Integer largeInterval;
+        /**
+         * 任务
+         */
         @JsonProperty("jobs")
         private List<Jobs> jobs;
         @JsonProperty("previousJobs")
@@ -867,38 +880,75 @@ public class GlobalStates {
         private String previousId;
         @JsonProperty("faction")
         private String faction;
+        /**
+         * 标题
+         */
         @JsonProperty("description")
         private String description;
+        /**
+         * 副标题
+         */
         @JsonProperty("tooltip")
         private String tooltip;
+        /**
+         * 任务地点
+         */
         @JsonProperty("node")
         private String node;
         @JsonProperty("concurrentNodes")
         private List<String> concurrentNodes;
+        /**
+         * 事件地点
+         */
         @JsonProperty("victimNode")
         private String victimNode;
         @JsonProperty("scoreLocTag")
         private String scoreLocTag;
+        /**
+         * 事件奖励
+         */
         @JsonProperty("rewards")
         private List<Rewards> rewards;
+        /**
+         * 任务是否过期
+         * true：过期
+         * false：未过期
+         */
         @JsonProperty("expired")
         private Boolean expired;
+        /**
+         * 任务进度
+         * 51.12%
+         */
         @JsonProperty("health")
-        private Integer health;
+        private Double health;
+        /**
+         * 隶属于那个集团
+         * Ostrons
+         */
         @JsonProperty("affiliatedWith")
         private String affiliatedWith;
         @JsonProperty("progressTotal")
         private Integer progressTotal;
         @JsonProperty("showTotalAtEndOfMission")
         private Boolean showTotalAtEndOfMission;
+        /**
+         * 是否是个人任务
+         */
         @JsonProperty("isPersonal")
         private Boolean isPersonal;
+        /**
+         * 是否是社区任务
+         */
         @JsonProperty("isCommunity")
         private Boolean isCommunity;
         @JsonProperty("regionDrops")
         private List<String> regionDrops;
         @JsonProperty("archwingDrops")
         private List<String> archwingDrops;
+        /**
+         * 具体描述
+         */
         @JsonProperty("asString")
         private String asString;
         @JsonProperty("metadata")
@@ -914,7 +964,7 @@ public class GlobalStates {
 
         @NoArgsConstructor
         @Data
-        @EqualsAndHashCode(of = {"countedItems", "asString", "itemString"})
+        @EqualsAndHashCode(of = {"countedItems", "items", "asString", "itemString"})
         public static class Rewards {
             @JsonProperty("countedItems")
             private List<CountedItems> countedItems;
@@ -942,7 +992,7 @@ public class GlobalStates {
         }
 
         @NoArgsConstructor
-        @lombok.Data
+        @Data
         public static class Jobs {
             @JsonProperty("id")
             private String id;
@@ -961,7 +1011,7 @@ public class GlobalStates {
         }
 
         @NoArgsConstructor
-        @lombok.Data
+        @Data
         public static class PreviousJobs {
             @JsonProperty("id")
             private String id;

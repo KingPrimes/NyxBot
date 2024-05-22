@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/data/warframe/subscribe")
 public class MissionSubscribeController extends BaseController {
-    String prefix = "data/warframe/";
+    String prefix = "data/warframe/subscribe/";
 
     @Resource
     MissionSubscribeRepository repository;
@@ -36,12 +36,25 @@ public class MissionSubscribeController extends BaseController {
         return getDataTable(
                 repository.findAllPageable(
                         ms.getSubGroup(),
-                        ms.getSubscribe(),
                         PageRequest.of(
                                 ms.getPageNum() - 1,
                                 ms.getPageSize()
                         )
-                )
+                ).map(subscribe -> {
+                    subscribe.setSubUsers(
+                            subscribe.getSubUsers().stream()
+                                    .peek(s ->
+                                            s.setTypeList(
+                                                    s.getTypeList()
+                                                            .stream()
+                                                            .peek(t -> t.setSubscribeType(t.getSubscribe().getNAME()))
+                                                            .toList()
+                                            )
+                                    )
+                                    .toList()
+                    );
+                    return subscribe;
+                })
         );
     }
 

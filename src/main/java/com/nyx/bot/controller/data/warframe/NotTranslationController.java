@@ -7,6 +7,8 @@ import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.NotTranslationRepository;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -46,9 +48,11 @@ public class NotTranslationController extends BaseController {
     @PostMapping("/list")
     @ResponseBody
     public ResponseEntity<?> list(NotTranslation t) {
-        return getDataTable(notTranslationRepository.findAll(
-                PageRequest.of(t.getPageNum() - 1, t.getPageSize())
-        ));
+        ExampleMatcher notTranslation = ExampleMatcher.matching().withMatcher("notTranslation", ExampleMatcher.GenericPropertyMatcher::contains)
+                .withIgnoreCase();
+        Example<NotTranslation> notTranslationExample = Example.of(t, notTranslation);
+
+        return getDataTable(notTranslationRepository.findAll(notTranslationExample, PageRequest.of(t.getPageNum() - 1, t.getPageSize())));
     }
 
     /**

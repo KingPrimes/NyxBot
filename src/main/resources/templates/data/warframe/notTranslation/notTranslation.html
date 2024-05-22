@@ -6,6 +6,23 @@
 <div class="container-div">
     <div class="row">
         <div class="col-sm-12 search-collapse">
+            <form id="not-translation-form">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label for="notTranslation">文本： </label><input class="form-control" id="notTranslation"
+                                                                             name="notTranslation" placeholder="文本"
+                                                                             type="text"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-success btn-rounded btn-sm" onclick="searchPre()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="resetPre()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
         </div>
         <div class="container-div">
             <div class="row">
@@ -25,6 +42,7 @@
         const options = {
             url: prefix + "/list",
             createUrl: prefix + "/add/{id}",
+            pageSize: 50,
             modalName: "未翻译信息",
             sortOrder: "desc",
             escape: true,
@@ -56,6 +74,15 @@
         };
         $.table.init(options);
     });
+
+    function searchPre() {
+        $.table.search('not-translation-form', 'bootstrap-table');
+    }
+
+    function resetPre() {
+        $("#not-translation-form")[0].reset();
+        $.table.search('not-translation-form', 'bootstrap-table');
+    }
 </script>
 
 </body>

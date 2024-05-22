@@ -9,7 +9,9 @@ import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
+import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
@@ -34,6 +36,7 @@ public class WarframeDataSource {
 
     public static void init() {
         AsyncUtils.me().execute(() -> log.info("开始初始化数据！"), AsyncBeanName.InitData);
+        initWarframeStatus();
         cloneDataSource();
         getEphemeras();
         getMarket();
@@ -47,6 +50,16 @@ public class WarframeDataSource {
         getRivenTion();
         getRivenTionAlias();
         AsyncUtils.me().execute(() -> log.info("数据初始化完成！"), AsyncBeanName.InitData);
+    }
+
+    public static void initWarframeStatus() {
+        AsyncUtils.me().execute(() -> {
+            String str = FileUtils.readFileToString("./data/status");
+            if (!str.isEmpty()) {
+                GlobalStates globalStates = JSON.parseObject(str, GlobalStates.class);
+                CacheUtils.setGlobalState(globalStates);
+            }
+        });
     }
 
     //幻纹
