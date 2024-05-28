@@ -25,6 +25,7 @@ jobs:
 
       - name: Sync Release to Gitee
         env:
+          GH_TOKEN: ${{ github.token }}
           GITEE_REPO: https://gitee.com/KingPrime/NyxBot.git
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
         run: |
@@ -39,6 +40,7 @@ jobs:
 
       - name: Sync Release to GitCode
         env:
+          GH_TOKEN: ${{ github.token }}
           GITCODE_REPO: https://gitcode.com/KingPrimes/NyxBot.git
           GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
         run: |
