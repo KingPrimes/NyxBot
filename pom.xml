@@ -32,6 +32,7 @@
         <monstercat.version>0.0.7</monstercat.version>
         <monstercat.os.version>1.2.2</monstercat.os.version>
         <commons-text.varsion>1.12.0</commons-text.varsion>
+        <oshi.version>6.6.1</oshi.version>
     </properties>
 
 
@@ -121,6 +122,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!--获取系统信息-->
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>${oshi.version}</version>
         </dependency>
 
         <!--处理字符串的算法库-->

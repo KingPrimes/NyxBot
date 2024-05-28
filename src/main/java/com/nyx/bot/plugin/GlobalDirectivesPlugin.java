@@ -5,11 +5,15 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.CodeUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
+import com.nyx.bot.utils.onebot.ImageUrlUtils;
+import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +48,13 @@ public class GlobalDirectivesPlugin {
                 case HELP -> HelpCode.help(bot, event);
                 //运行状态
                 case CHECK_VERSION -> {
+                    HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                            "systemInfo",
+                            bot, event);
+                    if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                        bot.sendMsg(event,
+                                Msg.builder().imgBase64(body.getFile()).build(), false);
+                    }
                 }
                 //更新操作
                 case UPDATE_HTML,
