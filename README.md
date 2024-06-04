@@ -1,4 +1,4 @@
-<div align="center">
+<div style="align-items: center; text-align: center">
 
 <img src="https://github.com/KingPrimes/NyxBot/assets/50130875/2620c999-4d63-4d68-8df3-38d4457d9957" style="width: 35%" alt="">
 
@@ -44,6 +44,7 @@
    
    java -jar NyxBot.jar --server.port = 8080
    ```
+8. [云服务器推荐](#推广链接)
 
 # 配置
 
@@ -76,9 +77,30 @@ OneBot协议客户端
 
 # 赞助
 
-### 本项目由 [![粒子GO](https://github.com/KingPrimes/NyxBot/assets/50130875/09cc82ad-4744-495b-9c67-883251ae5342)](https://www.lizigo.cn/aff/LYRPGUMP) 赞助
+### 本项目由
+
+<div>
+<a href="https://www.lizigo.cn/aff/LYRPGUMP"><img src="https://github.com/KingPrimes/NyxBot/assets/50130875/09cc82ad-4744-495b-9c67-883251ae5342" alt="粒子GO" width="256"/>赞助</a>
+<br/>
+<a href=""> <img src="https://github.com/KingPrimes/NyxBot/assets/50130875/40354343-f066-46f6-9d60-a0ee57e5f9a0" alt="云栈互联" width="256" height="128"/> 赞助</a>
+</div>
 
 ----
+
+# 推广链接
+
+## 首推 [阿里云-折扣专区](https://www.aliyun.com/minisite/goods?userCode=8dt5pt0g&share_source=copy_link) 和 [腾讯云-618盛典](https://curl.qcloud.com/TyfmLYii)
+
+### [棕熊互联-挂机宝](http://ser.vps03.cn/aff/DTAIBQRN)
+
+### [阿里云-精选特惠](https://www.aliyun.com/daily-act/ecs/activity_selection?userCode=8dt5pt0g)
+
+### [阿里云-折扣专区](https://www.aliyun.com/minisite/goods?userCode=8dt5pt0g&share_source=copy_link)
+
+### [腾讯云-精选福利](https://curl.qcloud.com/iIyWOF4q)
+
+### [腾讯云-618盛典](https://curl.qcloud.com/TyfmLYii)
+
 
 ## Stargazers over time
 
