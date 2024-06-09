@@ -1,4 +1,4 @@
-<div style="align-items: center; text-align: center">
+<div align="center">
 
 <img src="https://github.com/KingPrimes/NyxBot/assets/50130875/2620c999-4d63-4d68-8df3-38d4457d9957" style="width: 35%" alt="">
 
