@@ -12,6 +12,7 @@ import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.plugin.warframe.utils.MarketUtils;
 import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
+import com.nyx.bot.plugin.warframe.utils.WarframeSubscribeCheck;
 import com.nyx.bot.res.Ducats;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.MatcherUtils;
@@ -51,17 +52,30 @@ public class WarframeCodes {
      * @param bot   Bot
      * @param event 消息体
      */
-    public static void subscribe(Bot bot, AnyMessageEvent event) {
+    public static void subscribe(Bot bot, AnyMessageEvent event,Codes code) {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
         }
-        String code = event.getRawMessage().replaceAll(Codes.WARFRAME_SUBSCRIBE.getStr(), "").trim();
-        if (code.isEmpty()) {
-            bot.sendMsg(event, "请在订阅指令后面加上要订阅的编号！\n编号通过使用 订阅列表查看！", false);
+        String str = event.getRawMessage().replace("订阅", "").trim();
+
+        if (str.isEmpty()) {
+            OneBotLogInfoData data = getLogInfoData(bot, event, code);
+            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+            return;
         }
 
-        bot.sendMsg(event, "订阅成功！", false);
+        String ms = WarframeSubscribeCheck.getMS(bot.getSelfId(),
+                event.getUserId(),
+                bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), false).getData().getNickname(),
+                event.getGroupId(),
+                bot.getGroupInfo(event.getGroupId(), false).getData().getGroupName(),
+                event.getRawMessage()
+        );
+
+        bot.sendMsg(event, ms, false);
     }
 
     /**

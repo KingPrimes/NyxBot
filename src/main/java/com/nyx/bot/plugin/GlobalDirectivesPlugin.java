@@ -122,7 +122,7 @@ public class GlobalDirectivesPlugin {
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> WarframeCodes.ocrRivenCompute(bot, event, codes);
                 //订阅处理
-                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event);
+                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event,codes);
             }
         });
     }

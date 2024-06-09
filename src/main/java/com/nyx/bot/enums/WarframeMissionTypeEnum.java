@@ -1,9 +1,12 @@
 package com.nyx.bot.enums;
 
 public enum WarframeMissionTypeEnum {
+    ERROR("没有此数值！"),
     Assassination("刺杀"),
     Assault("强袭"),
+    Alchemy("元素转换"),
     Capture("捕获"),
+    Cambire("异化区"),
     Defection("叛逃"),
     Defense("防御"),
     Disruption("中断"),
@@ -21,6 +24,8 @@ public enum WarframeMissionTypeEnum {
     Skirmish("前哨战"),
     Spy("间谍"),
     Volatile("爆发"),
+    Void_Cascade("虚空覆涌"),
+    Void_Flood("虚空洪流"),
     ;
     private final String CN;
 

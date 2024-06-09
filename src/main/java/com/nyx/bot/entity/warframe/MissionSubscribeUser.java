@@ -12,13 +12,13 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId"}))
+@Table
 public class MissionSubscribeUser {
 
-
-    Long subGroup;
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long msUid;
+
     Long userId;
 
     String userName;

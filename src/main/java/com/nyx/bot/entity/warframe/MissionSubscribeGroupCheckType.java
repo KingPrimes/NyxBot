@@ -1,9 +1,7 @@
 package com.nyx.bot.entity.warframe;
 
 import com.nyx.bot.enums.SubscribeEnums;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MissionSubscribeGroupCheckType {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long typeId;
-
-    Long subGroup;
 
     //订阅类型
     //订阅类型枚举

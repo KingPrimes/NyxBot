@@ -4,9 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum SubscribeEnums {
-    /**
-     * 订阅所有内容
-     */
+
     ERROR("没有此数值！"),
     /**
      * 警报
