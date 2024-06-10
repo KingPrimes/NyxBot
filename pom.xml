@@ -274,12 +274,18 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <!--跳过测试-->
-                    <skip>true</skip>
-                    <!--排除DevTools-->
-                    <excludeDevtools>true</excludeDevtools>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
             <!--打包插件-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
