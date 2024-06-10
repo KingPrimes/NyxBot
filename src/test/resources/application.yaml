@@ -2,9 +2,6 @@
 test:
   isTest: true
 
-project-name:
-  version: @version@
-  formatted-version: (v@version@)
 
 #线程池
 async:
@@ -60,7 +57,7 @@ spring:
       enabled: true
   #JPA
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
     open-in-view: false

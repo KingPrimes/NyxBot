@@ -1,10 +1,6 @@
 #是否调试模式
 test:
-  isTest: true
-
-project-name:
-  version: @version@
-  formatted-version: (v@version@)
+  isTest: false
 
 #线程池
 async:
