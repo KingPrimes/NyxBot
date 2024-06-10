@@ -1,0 +1,95 @@
+#是否调试模式
+test:
+  isTest: true
+
+
+#线程池
+async:
+  executor:
+    thread:
+      core_pool_size: 5
+      max_pool_size: 20
+      queue_capacity: 80
+      name:
+        prefix: async-
+
+spring:
+  main:
+    allow-circular-references: true
+  mvc:
+    static-path-pattern: /static/**
+
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+    template-resolver-order: 0
+    suffix: .html
+
+  # 资源信息
+  messages:
+    # 国际化资源文件路径
+    basename: i18n/messages
+
+  #定时任务
+  task:
+    execution:
+      pool:
+        allow-core-thread-timeout: true
+        core-size: 8
+        keep-alive: 60s
+        max-size: 8
+        queue-capacity: 8
+    scheduling:
+      shutdown:
+        await-termination: false
+
+  #数据源配置
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    #设置数据源；MODE=MySQL 可以解析MySQL形式的SQL语句
+    url: jdbc:h2:file:./data/H2;MODE=MySQL;AUTO_SERVER=TRUE;PAGE_SIZE=16
+  #H2
+  h2:
+    console:
+      enabled: true
+  #JPA
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  #缓存设置
+  cache:
+    type: cache2k
+
+  output:
+    ansi:
+      enabled: detect
+
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+# OneBot
+shiro:
+  ws:
+    server:
+      url: /ws/shiro
+      enable: true
+    client:
+      enable: false
+      url: ws://localhost:3001
+      reconnect-interval: 5000
+  debug: false
+server:
+  port: 8080
+  shutdown: graceful
+logging:
+  level:
+    com.nyx.bot: DEBUG
+    io.github.mymonstercat: OFF
+    org.xhtmlrenderer: OFF
+    org.xnio.listener: OFF
+    org.springframework.security.web.DefaultSecurityFilterChain: OFF
