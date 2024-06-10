@@ -52,6 +52,14 @@ public class RivenAttributeCompute {
                 }
                 // 武器名称
                 if (RivenMatcherUtil.isWeaponsName(s)) {
+                    if (s.contains("&")) {
+                        int i = s.indexOf("&");
+                        String star = s.substring(i, i + 1);
+                        String end = s.substring(i - 1, i);
+                        if (!star.contains(" ") && !end.contains(" ")) {
+                            s = s.replace("&", " & ");
+                        }
+                    }
                     trend.setWeaponsName(RivenMatcherUtil.getChines(s));
                     if (RivenMatcherUtil.isRivenNameEx(s)) {
                         trend.setRivenName(RivenMatcherUtil.getRivenNameE(s));
@@ -124,7 +132,7 @@ public class RivenAttributeCompute {
             List<RivenAnalyseTrendModel> models = new ArrayList<>();
             //遍历查询到的所有武器
             for (RivenTrend rivenTrend : likeTrendName) {
-                log.debug("武器名称：{}",rivenTrend.getTraCh());
+                log.debug("武器名称：{}", rivenTrend.getTraCh());
                 RivenAnalyseTrendModel model = new RivenAnalyseTrendModel();
                 RivenTrendTypeEnum weaponsType = rivenTrend.getType();
                 model.setWeaponName(rivenTrend.getTraCh());
@@ -175,6 +183,8 @@ public class RivenAttributeCompute {
                                 analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("切割伤害");
                             } else if (name.contains("穿刺")) {
                                 analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("穿刺伤害");
+                            } else if (name.contains("投射物")) {
+                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("投射物飞行速度");
                             } else {
                                 analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName(attribute.getName());
                             }
@@ -185,10 +195,12 @@ public class RivenAttributeCompute {
 
                             /*boolean isNag = attribute.getAttribute() < 0 *//*|| (MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) && attribute.getAttribute() > 0)*//*;*/
                             // 用于判断最后一个词条是否是歧视属性
-                            boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) : attribute.getAttribute() < 0;
-                            log.debug("whetherItIsDiscrimination:{}", RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
-                            log.debug("getAttribute:{}",attribute.getAttribute() < 0);
-                            log.debug("当前属性是否是负属性：{} --- 当前下标:{} -- 当前属性值:{} ---当前属性名称：{}",isNag,index,attribute.getAttribute(),attribute.getAttributeName());
+                            boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) || attribute.getAttribute() < 0 : attribute.getAttribute() < 0;
+                            log.debug("当前下标是否大于等于2：{}", index >= 2);
+                            log.debug("当前属性是否是歧视属性:{}", RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
+                            log.debug("当前属性是否时负数：{}", attribute.getAttribute() < 0);
+                            log.debug("当前属性是否是负属性：{} --- 当前下标:{} -- 当前属性值:{} ---当前属性名称：{}\n", isNag, index, attribute.getAttribute(), attribute.getAttributeName());
+
                             switch (weaponsType) {
                                 case MELEE -> {
                                     attributeModel.setLowAttr(
@@ -319,7 +331,6 @@ public class RivenAttributeCompute {
                             }
                             attributes.add(attributeModel);
                         });
-                log.debug("\n\n");
                 model.setAttributes(attributes);
                 models.add(model);
             }

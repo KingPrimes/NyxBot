@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class RivenMatcherUtil {
 
-    private static final Pattern IS_CHINES = Pattern.compile("[一-龥]*?\\&?[一-龥]");
+    private static final Pattern IS_CHINES = Pattern.compile("[一-龥]*? ?·?\\&? ?[一-龥]");
 
     private static final Pattern WEAPONS_NAME = Pattern.compile("^[一-龥]*?\\&?·?[一-龥]*$");
 
@@ -77,10 +77,14 @@ public class RivenMatcherUtil {
      */
     public static Double getAttributeNum(String str) {
         Matcher m = ATTRIBUTE_NUM.matcher(str);
-        return Double.valueOf(m.group().replace("%", "").trim());
+        double v = 0.0;
+        while (m.find()) {
+            v = Double.parseDouble(m.group().replace("%", "").trim());
+        }
+        return v;
     }
 
-    public static Boolean whetherItIsDiscrimination(String str){
+    public static Boolean whetherItIsDiscrimination(String str) {
         return IS_DISCRIMINATION.matcher(str).matches();
     }
 
