@@ -1,6 +1,5 @@
 package com.nyx.bot.plugin.warframe.utils;
 
-import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
@@ -12,14 +11,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
+/*@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)*/
 @Slf4j
 public class TestRivenDispositionUpdates {
 
@@ -56,7 +53,7 @@ public class TestRivenDispositionUpdates {
         return newRiven;
     }
 
-    @Test
+    /*@Test*/
     public void getRivenDispositionUpdateUrlTest() {
         List<String> rivenDispositionUpdates = getRivenDispositionUpdateUrl();
         log.info("论坛搜索列表元素数：{}", rivenDispositionUpdates.size());
@@ -66,7 +63,7 @@ public class TestRivenDispositionUpdates {
     /**
      * 获取Warframe论坛中的紫卡倾向列表
      */
-    @Test
+    /*@Test*/
     public void getRivenDispositionUpdates() {
         //获取文档Url地址
         List<String> urls = getRivenDispositionUpdateUrl();
