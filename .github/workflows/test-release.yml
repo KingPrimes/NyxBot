@@ -33,7 +33,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kingprimes.top
-          path: target/NyxBot.jar
+         # 描述上传内容的文件、目录或通配符模式
+          # 必填项。
+          path: /home/runner/work/NyxBot/NyxBot/target/NyxBot.jar
           if-no-files-found: warn
           retention-days: 30
           compression-level: 6
