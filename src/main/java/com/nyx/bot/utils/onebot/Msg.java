@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class Msg {
 
@@ -399,10 +398,6 @@ public class Msg {
     public Msg keyboard(Keyboard keyboard) {
         builder.add(getJsonData("keyboard", m -> m.put("keyboard", JSON.toJSONString(keyboard))));
         return this;
-    }
-
-    public String buildCQ() {
-        return builder.stream().map(ArrayMsg::toCqCode).collect(Collectors.joining());
     }
 
     public List<ArrayMsg> build() {
