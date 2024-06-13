@@ -3,16 +3,13 @@ package com.nyx.bot.controller.data.warframe;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.repo.warframe.MissionSubscribeRepository;
+import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/data/warframe/subscribe")
@@ -27,6 +24,20 @@ public class MissionSubscribeController extends BaseController {
     public String subscribe(Model model) {
         model.addAttribute("sub", SubscribeEnums.values());
         return prefix + "subscribe";
+    }
+
+    @GetMapping("/detail/{subGroup}")
+    public String detail(@PathVariable Long subGroup, Model model) {
+        MissionSubscribe group = repository.findByGroupId(subGroup);
+        model.addAttribute("group", group);
+        return prefix + "detail";
+    }
+
+    @GetMapping("/edit/{subGroup}")
+    public String edit(@PathVariable Long subGroup, Model model) {
+        MissionSubscribe group = repository.findByGroupId(subGroup);
+        model.addAttribute("group", group);
+        return prefix + "edit";
     }
 
     @PostMapping("/list")
@@ -57,7 +68,6 @@ public class MissionSubscribeController extends BaseController {
                 })
         );
     }
-
 
 
 }

@@ -121,8 +121,9 @@ public class GlobalDirectivesPlugin {
                 case WARFRAME_OPEN_RELICS_PLUGIN -> not(bot, event);
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> WarframeCodes.ocrRivenCompute(bot, event, codes);
-                //订阅处理
+                //订阅
                 case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event,codes);
+                case WARFRAME_CANCEL_SUBSCRIBE -> WarframeCodes.cancelSubscribe(bot,event,codes);
             }
         });
     }

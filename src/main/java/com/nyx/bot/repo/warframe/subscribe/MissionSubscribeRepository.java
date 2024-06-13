@@ -1,4 +1,4 @@
-package com.nyx.bot.repo.warframe;
+package com.nyx.bot.repo.warframe.subscribe;
 
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.utils.CacheUtils;

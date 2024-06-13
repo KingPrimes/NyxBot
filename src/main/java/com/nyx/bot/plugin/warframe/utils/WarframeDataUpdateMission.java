@@ -1,7 +1,7 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.repo.warframe.MissionSubscribeRepository;
+import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;

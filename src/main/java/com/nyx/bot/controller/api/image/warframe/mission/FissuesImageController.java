@@ -36,4 +36,17 @@ public class FissuesImageController {
                 ).toByteArray()
         );
     }
+
+    @LogInfo(title = "Api订阅", codes = Codes.WARFRAME_FISSURES_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getSubscribeFissuesImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public void getSubscribeImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+        response.setHeader("content-type", "image/png");
+        response.getOutputStream().write(
+                HtmlToImage.conversePost(
+                        Constants.LOCALHOST + "private/getSubscribeFissuesHtml",
+                        data.getData()
+                ).toByteArray()
+        );
+    }
 }

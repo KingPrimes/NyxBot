@@ -45,39 +45,6 @@ public class WarframeCodes {
         }
     }
 
-
-    /**
-     * 订阅消息
-     *
-     * @param bot   Bot
-     * @param event 消息体
-     */
-    public static void subscribe(Bot bot, AnyMessageEvent event,Codes code) {
-        if (!ActionParams.GROUP.equals(event.getMessageType())) {
-            bot.sendMsg(event, "此指令只能在群组中使用！", false);
-            return;
-        }
-        String str = event.getRawMessage().replace("订阅", "").trim();
-
-        if (str.isEmpty()) {
-            OneBotLogInfoData data = getLogInfoData(bot, event, code);
-            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
-            bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
-            return;
-        }
-
-        String ms = WarframeSubscribeCheck.getMS(bot.getSelfId(),
-                event.getUserId(),
-                bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), false).getData().getNickname(),
-                event.getGroupId(),
-                bot.getGroupInfo(event.getGroupId(), false).getData().getGroupName(),
-                event.getRawMessage()
-        );
-
-        bot.sendMsg(event, ms, false);
-    }
-
     /**
      * 平原
      */
@@ -355,8 +322,10 @@ public class WarframeCodes {
             bot.sendMsg(event, "获取ducat失败", false);
         }
         switch (code) {
-            case WARFRAME_MARKET_GOD_DUMP -> data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getGodDump()));
-            case WARFRAME_MARKET_SILVER_DUMP -> data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getSilverDump()));
+            case WARFRAME_MARKET_GOD_DUMP ->
+                    data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getGodDump()));
+            case WARFRAME_MARKET_SILVER_DUMP ->
+                    data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getSilverDump()));
         }
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postMarketDucatsImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
@@ -381,5 +350,64 @@ public class WarframeCodes {
         }
 
     }
+
+    /**
+     * 订阅消息
+     *
+     * @param bot   Bot
+     * @param event 消息体
+     */
+    public static void subscribe(Bot bot, AnyMessageEvent event, Codes code) {
+        if (!ActionParams.GROUP.equals(event.getMessageType())) {
+            bot.sendMsg(event, "此指令只能在群组中使用！", false);
+            return;
+        }
+        String str = event.getRawMessage().replace("订阅", "").trim();
+
+        if (str.isEmpty()) {
+            OneBotLogInfoData data = getLogInfoData(bot, event, code);
+            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+            return;
+        }
+
+        String ms = WarframeSubscribeCheck.userSubscriptions(bot.getSelfId(),
+                event.getUserId(),
+                bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), false).getData().getNickname(),
+                event.getGroupId(),
+                bot.getGroupInfo(event.getGroupId(), false).getData().getGroupName(),
+                str
+        );
+
+        bot.sendMsg(event, ms, false);
+    }
+
+    /**
+     * 取消订阅消息
+     */
+    public static void cancelSubscribe(Bot bot, AnyMessageEvent event, Codes code) {
+        if (!ActionParams.GROUP.equals(event.getMessageType())) {
+            bot.sendMsg(event, "此指令只能在群组中使用！", false);
+            return;
+        }
+        String str = event.getRawMessage().replace("取消订阅", "").trim();
+
+        if (str.isEmpty()) {
+            OneBotLogInfoData data = getLogInfoData(bot, event, code);
+            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+            return;
+        }
+
+        String ms = WarframeSubscribeCheck.userCancelSubscribe(
+                event.getUserId(),
+                event.getGroupId(),
+                str
+        );
+        bot.sendMsg(event, ms, false);
+    }
+
 
 }

@@ -48,6 +48,9 @@
     $(function () {
         const options = {
             url: prefix + "/list",
+            detailUrl: prefix + "/detail/{id}",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove/{id}",
             modalName: "订阅",
             sortOrder: "desc",
             escape: true,
@@ -78,22 +81,30 @@
                         actions.push('<table class="table table-bordered table-hover" style="margin-top: 0;"><thead><tr>' +
                             '<th><div class="th-inner">昵称</div></th>' +
                             '<th><div class="th-inner">账号</div></th>' +
-                            '<th><div class="th-inner">订阅类型</div></th>' +
-                            '<th><div class="th-inner">操作</div></th>' +
+                            '<th><div class="th-inner">订阅内容</div></th>' +
+                            /* '<th><div class="th-inner">操作</div></th>' +*/
                             '</tr></thead><tbody>')
                         row.subUsers.forEach(function (subUser) {
-                            let types = "";
+                            let types = '<table style="text-align: center;width: 100%">';
+                            let t_table = "<tr>";
                             subUser.typeList.forEach(
-                                function (type) {
-                                    if (type !== undefined)
-                                        types += type.subscribeType + '</br>'
+                                function (type, index) {
+                                    if (type !== undefined) {
+                                        console.log(index)
+                                        if (index % 5 === 0 && index !== 0) {
+                                            t_table += '<td>' + type.subscribeType + '</td>' + '</tr><tr>'
+                                        } else {
+                                            t_table += '<td>' + type.subscribeType + '</td>'
+                                        }
+                                    }
                                 }
                             )
+                            types += t_table + '</table>'
                             actions.push('<tr><td>' + subUser.userName + '</td><td>' + subUser.userId + '</td><td>' + types
-                                + '</td><td> <a class="btn btn-warning btn-xs " href="javascript:void(0)"\n' +
-                                '                                     onClick="$.operate.remove(' + row.userId + ',' + 300 + ',' + 450 + ')"><i\n' +
+                                + '</td></tr>'/*'</td><td> <a class="btn btn-warning btn-xs " href="javascript:void(0)"\n' +
+                                '                                     onClick="$.operate.detail(' + subUser.msUid + ',' + 300 + ',' + 450 + ')"><i\n' +
                                 '                                    class="fa fa-remove"></i>移除订阅</a>'
-                                + '</td></tr>')
+                                + '</td></tr>'*/)
                         })
 
                         actions.push('</tbody></table>')
@@ -105,6 +116,7 @@
                     align: 'center',
                     formatter: function (value, row) {
                         const actions = [];
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.detail(' + row.subGroup + ',' + 300 + ',' + 450 + ')"><i class="fa fa-deaf"></i>详情</a> ');
                         actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="$.operate.edit(' + row.subGroup + ',' + 300 + ',' + 450 + ')"><i class="fa fa-edit"></i>修改</a> ');
                         actions.push('<a class="btn btn-warning btn-xs " href="javascript:void(0)" onclick="$.operate.remove(' + row.subGroup + ',' + 300 + ',' + 450 + ')"><i class="fa fa-remove"></i>移除订阅</a> ');
                         return actions.join('');

@@ -49,6 +49,7 @@ public enum Codes {
     WARFRAME_OPEN_RELICS_PLUGIN("^开核桃|^砸核桃", PermissionsEnums.USER),
     WARFRAME_RIVEN_ANALYSE("^紫卡分析|^分析紫卡", PermissionsEnums.USER),
     WARFRAME_SUBSCRIBE("^订阅 ?([0-9]+)? ?-? ?([0-9]+)?", PermissionsEnums.USER),
+    WARFRAME_CANCEL_SUBSCRIBE("^取消订阅 ?([0-9]+)? ?-? ?([0-9]+)?",PermissionsEnums.USER),
     ;
 
     private final PermissionsEnums permissions;
