@@ -2,6 +2,7 @@ package com.nyx.bot.res;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,6 +26,7 @@ public class GlobalStates {
      * 仲裁
      */
     @JsonProperty("arbitration")
+    @JsonIgnore
     private Arbitration arbitration;
     /**
      * 魔胎之境
