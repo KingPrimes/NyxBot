@@ -43,12 +43,16 @@ public class CacheUtils {
                         .findFirst().orElse(null);
                 if (arbitrationPre != null){
                     GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
-                    arbitration.setNode(arbitrationPre.getNode()+" ("+arbitrationPre.getPlanet()+")");
-                    arbitration.setType(arbitrationPre.getType());
-                    arbitration.setEnemy(arbitrationPre.getEnemy());
+                    arbitration.setActivation(arbitrationPre.getActivation());
                     LocalDateTime localDateTime = LocalDateTime.ofInstant(arbitrationPre.getActivation().toInstant(), ZoneOffset.ofHours(8));
                     Instant instant = localDateTime.plusHours(1).toInstant(ZoneOffset.ofHours(8));
                     arbitration.setExpiry(Date.from(instant));
+                    arbitration.setNode(arbitrationPre.getNode()+" ("+arbitrationPre.getPlanet()+")");
+                    arbitration.setType(arbitrationPre.getType());
+                    arbitration.setEnemy(arbitrationPre.getEnemy());
+                    arbitration.setArchwing(false);
+                    arbitration.setSharkwing(false);
+                    arbitration.setEtc(DateUtils.getDiff(Date.from(instant), new Date(), true));
                     state.setArbitration(arbitration);
                 }
             }
