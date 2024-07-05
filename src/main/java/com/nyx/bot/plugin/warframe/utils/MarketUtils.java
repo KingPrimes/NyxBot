@@ -61,6 +61,17 @@ public class MarketUtils {
                 return market;
             }
 
+            if (!key.contains("prime") && key.contains("p")) {
+                key = key.replace("p", "Prime");
+            }
+
+            items = itemsRepository.findByItemNameLike(key);
+            if(items!=null){
+                market.setKey(items.getUrlName());
+                market.setItemName(items.getItemName());
+                return market;
+            }
+
             String header = key.substring(0, key.length() - 1);
 
             String end = key.substring(key.length() - 1);
@@ -83,13 +94,6 @@ public class MarketUtils {
                 }
             }
 
-            if (!key.contains("prime") && key.contains("p")) {
-                key = key.replace("p", "Prime");
-            }
-
-            items = itemsRepository.findByItemNameLike(key);
-            market.setKey(items.getUrlName());
-            market.setItemName(items.getItemName());
             return market;
         } catch (Exception e) {
             //查询用户可能想要查询的物品
