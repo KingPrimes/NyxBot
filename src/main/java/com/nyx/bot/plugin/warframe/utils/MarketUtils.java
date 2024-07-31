@@ -66,7 +66,7 @@ public class MarketUtils {
             }
 
             items = itemsRepository.findByItemNameLike(key);
-            if(items!=null){
+            if (items != null) {
                 market.setKey(items.getUrlName());
                 market.setItemName(items.getItemName());
                 return market;
@@ -226,33 +226,19 @@ public class MarketUtils {
         }
     }
 
-    @Data
-    public static class Market {
-        String key;
-        String itemName;
-        List<String> possibleItems;
-
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                    .append("key", key)
-                    .append("itemName", itemName)
-                    .append("possibleItems", possibleItems)
-                    .toString();
-        }
-    }
-
-
     /**
      * 获取紫卡武器信息 如果遇到为查询到的物品则返回可能要查询的物品列表
      * RivenItems.items 可能要查询的物品列表
      */
     static RivenItems getRiveItems(String key) {
+        log.debug("------紫卡查询--查询数据库------");
+        log.debug("原始数据：{}", key);
         // 假设用户输入的是正确值，直接查询数据库
         var repository = SpringUtils.getBean(RivenItemsRepository.class);
         RivenItems items = new RivenItems();
         items.setItemName(key);
         items = repository.findByItemName(key);
+        log.debug("假设正确:{}", items);
         if (items != null) {
             return items;
         }
@@ -266,6 +252,7 @@ public class MarketUtils {
         Alias a = alias.findByCn(key);
         if (a != null) {
             items = repository.findByItemName(a.getEn());
+            log.debug("别名:{}", items);
             if (items != null) {
                 return items;
             }
@@ -275,6 +262,7 @@ public class MarketUtils {
         String start = String.valueOf(key.charAt(0));
         String end = String.valueOf(key.charAt(key.length() - 1));
         items = repository.findByItemNameRegex("^" + start + ".*?" + end + ".*?");
+        log.debug("正则查询:{}", items);
         if (items != null) {
             return items;
         }
@@ -283,17 +271,22 @@ public class MarketUtils {
         List<RivenItems> itemsList = repository.itemNameLikes(start);
         RivenItems finalItems = new RivenItems();
         finalItems.setItems(itemsList);
+        log.debug("可能存在的值：{}", finalItems);
+        log.debug("------数据库查询结束------");
         return finalItems;
     }
 
     public static MarketRiven marketRivenParameter(String key) {
+        log.debug("------紫卡查询--构建请求地址------");
         MarketRiven marketRiven = new MarketRiven();
         RivenItems riveItems;
         if (!key.contains("-")) {
-            riveItems = getRiveItems(key);
+            log.debug("------无词条参数状态------");
+            riveItems = getRiveItems(key.trim());
             // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
             if (riveItems.getItems() != null) {
                 marketRiven.setPossibleItems(riveItems.getItems());
+                log.debug("------未查询到匹配的物品------");
                 return marketRiven;
             }
             // 构建请求url
@@ -308,19 +301,24 @@ public class MarketUtils {
                     MarketRivenParameter.Policy.ANY,
                     MarketRivenParameter.SortBy.PRICE_ASC
             ).getUrl();
+            log.debug("请求的URL:{}", url);
             HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.debug("获取数据失败：{}", body.getCode().getMessage());
                 return marketRiven;
             }
+            var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+            log.debug("获取到的数据：\n{}", mr);
             // 解析返回数据
-            return stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+            return mr;
         }
-
+        log.debug("------有词条参数状态------");
         // 有请求参数 以-分割
         List<String> list = Arrays.stream(key.split("-")).toList();
-        riveItems = getRiveItems(list.get(0));
+        riveItems = getRiveItems(list.get(0).trim());
         // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
         if (riveItems.getItems() != null) {
+            log.debug("------未查询到匹配的物品------");
             marketRiven.setPossibleItems(riveItems.getItems());
             return marketRiven;
         }
@@ -352,6 +350,7 @@ public class MarketUtils {
         if (list.size() > 2) {
             not = list.get(2).replace("有", "has").replace("无", "none");
         }
+        log.debug("正面词条：{} ---- 负面词条:{}", statBuilder, not);
         // 构建请求url
         String url = new MarketRivenParameter(
                 riveItems.getUrlName(),
@@ -364,13 +363,17 @@ public class MarketUtils {
                 MarketRivenParameter.Policy.ANY,
                 MarketRivenParameter.SortBy.PRICE_ASC
         ).getUrl();
+        log.debug("请求的URL:{}", url);
         HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
 
         if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            log.debug("获取数据失败：{}", body.getCode().getMessage());
             return marketRiven;
         }
+        var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+        log.debug("获取到的数据：\n{}", mr);
         // 解析返回数据
-        return stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+        return mr;
     }
 
     /**
@@ -415,13 +418,28 @@ public class MarketUtils {
         return marketRiven;
     }
 
-
     public static Ducats getDucats() {
         HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
         if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             return null;
         }
         return JSONObject.parseObject(body.getBody(), Ducats.class, JSONReader.Feature.SupportSmartMatch);
+    }
+
+    @Data
+    public static class Market {
+        String key;
+        String itemName;
+        List<String> possibleItems;
+
+        @Override
+        public String toString() {
+            return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                    .append("key", key)
+                    .append("itemName", itemName)
+                    .append("possibleItems", possibleItems)
+                    .toString();
+        }
     }
 
 }
