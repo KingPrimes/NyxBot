@@ -407,7 +407,7 @@ public class Msg {
     private ArrayMsg getJsonData(String type, Consumer<Map<String, String>> consumer) {
         HashMap<String, String> data = new HashMap<>();
         consumer.accept(data);
-        return new ArrayMsg().setRowType(type).setData(data);
+        return new ArrayMsg().setRawType(type).setData(data);
     }
 
     /**
