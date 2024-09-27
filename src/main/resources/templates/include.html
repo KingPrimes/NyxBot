@@ -15,7 +15,14 @@
     <link rel="stylesheet" th:href="@{/css/animate.min.css}"/>
     <link rel="stylesheet" th:href="@{/css/style.min.css}"/>
     <link rel="stylesheet" th:href="@{/nyx/css/nyx-ui.css}"/>
+
 </head>
+
+<div th:fragment="foundation">
+    <link rel="stylesheet" href="https://cdn.staticfile.net/foundation/5.5.3/css/foundation.min.css">
+    <script src="https://cdn.staticfile.net/foundation/5.5.3/js/foundation.min.js"></script>
+    <script src="https://cdn.staticfile.net/foundation/5.5.3/js/vendor/modernizr.js"></script>
+</div>
 
 <!-- 通用JS -->
 <div th:fragment="footer">
@@ -46,6 +53,10 @@
     <script th:src="@{/nyx/js/common.js}"></script>
 </div>
 
+<div th:fragment="jquery">
+    <script th:src="@{/js/jquery.min.js}"></script>
+</div>
+
 <!-- select2下拉框插件 -->
 <div th:fragment="select2-css">
     <link rel="stylesheet" th:href="@{/ajax/libs/select2/select2.min.css}"/>
@@ -61,6 +72,16 @@
 </div>
 <div th:fragment="bootstrap-select-js">
     <script th:src="@{/ajax/libs/bootstrap-select/bootstrap-select.min.js}"></script>
+</div>
+
+<!-- bootstrap-twitter 折叠插件 -->
+<div th:fragment="bootstrap-twitter-css">
+    <!--  <link rel="stylesheet" href="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/css/bootstrap.min.css">-->
+    <link rel="stylesheet" th:href="@{/ajax/libs/bootstrap-twitter/bootstrap-twitter.min.css}"/>
+</div>
+<div th:fragment="bootstrap-twitter-js">
+    <script th:src="@{/ajax/libs/bootstrap-twitter/bootstrap-twitter.min.js}"></script>
+    <!--  <script src="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
 </div>
 
 <!-- datetimepicker日期和时间插件 -->

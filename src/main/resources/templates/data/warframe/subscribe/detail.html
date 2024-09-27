@@ -1,8 +1,52 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <th:block th:insert="~{include :: header('订阅详细')}"/>
+<th:block th:insert="~{include :: jquery}"/>
 <th:block th:insert="~{include :: bootstrap-select-css}"/>
-<body th:text="${group}">
+<th:block th:insert="~{include :: bootstrap-twitter-css}"/>
+<th:block th:insert="~{include :: bootstrap-twitter-js}"/>
+<body>
+<div class="form-group">
+    <label class="col-sm-3 control-label is-required">订阅的群组：<span th:text="${group.subGroup}+ '---' + ${group.groupName}"></span></label>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label is-required">用于发信的机器人：<span th:text="${group.subBotUid}"></span></label>
+</div>
+
+<div class="form-group">
+    <div>
+        <label class="col-sm-3 control-label" for="groupType">群组开启的订阅： </label>
+        <div id="groupType">
+            <label class="col-sm-3 control-label" for="groupType" th:each="type:${group.checkTypes}">
+                <span th:text="${type.subscribe +'--' + type.checkType}"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="subUsers">订阅的用户： </label>
+    <ul id="subUsers" class="accordion" data-accordion>
+        <li th:each="user:${group.subUsers}" class="accordion-navigation">
+            <a data-toggle="collapse"
+               th:href="${'#'+user.userId}" th:text="${'用户QQ：' + user.userId + ' -- 用户昵称：'+user.userName}"></a>
+            <ul th:id="${user.userId}" class="panel-collapse collapse">
+                <li>
+                    用户订阅内容：
+                    <ul th:each="type:${user.typeList}">
+                        <li th:text="'订阅类型：'+${type.subscribe}"></li>
+                        <li th:text="${'任务类型：'+type.missionTypeEnum}"></li>
+                        <li th:text="${'遗物等级：'+type.tierNum}"></li>
+                        <li th:text="${''+type.subscribeType}"></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+</div>
+
 
 </body>
 </html>
