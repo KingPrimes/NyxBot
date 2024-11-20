@@ -44,7 +44,9 @@
    
    java -jar NyxBot.jar --server.port = 8080
    ```
-8. [云服务器推荐](#推广链接)
+   
+8. [详细部署文档](https://kingprimes.top/archives/bot_deploy_doc)
+9. [云服务器推荐](#推广链接)
 
 # 配置
 
