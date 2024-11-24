@@ -21,6 +21,12 @@ public class ArbitrationPre {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date activation;
     /**
+     * 结束时间
+     */
+    @JsonProperty("expiry")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date expiry;
+    /**
      * 代号
      */
     @JsonProperty("id")
@@ -43,7 +49,7 @@ public class ArbitrationPre {
     /**
      * 任务类型
      */
-    @JsonProperty("type")
+    @JsonProperty("missionType")
     private String type;
 
 }

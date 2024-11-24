@@ -1,8 +1,16 @@
 package com.nyx.bot.core;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
+import com.nyx.bot.res.ArbitrationPre;
+import com.nyx.bot.res.GlobalStates;
+import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import okhttp3.Headers;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ApiUrl {
@@ -57,6 +65,8 @@ public class ApiUrl {
      */
     public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v1/sister/weapons";
 
+    public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
+
 
     /**
      * Market 物品查询
@@ -68,6 +78,29 @@ public class ApiUrl {
     public static HttpUtils.Body marketOrders(String key, String from) {
         String url = "https://api.warframe.market/v1/items/" + key + "/orders?include=item";
         return HttpUtils.sendGet(url, Headers.of("platform", from));
+    }
+
+    /**
+     * 获取仲裁信息
+     *
+     * @return 仲裁
+     */
+    public static GlobalStates.Arbitration arbitrationPre() {
+        List<ArbitrationPre> arbitrationPres = JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.ofHours(8));
+        String format = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00:00"));
+        ArbitrationPre arbitrationPre = arbitrationPres.stream()
+                .filter(i -> DateUtils.format(i.getActivation(), "yyyy-MM-dd HH:mm:ss")
+                        .equalsIgnoreCase(format))
+                .findFirst().orElse(null);
+        if (arbitrationPre == null) return null;
+        GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
+        arbitration.setActivation(arbitrationPre.getActivation());
+        arbitration.setExpiry(arbitrationPre.getExpiry());
+        arbitration.setNode(arbitrationPre.getNode());
+        arbitration.setType(arbitrationPre.getType());
+        arbitration.setEnemy(arbitrationPre.getEnemy());
+        return arbitration;
     }
 
 }
