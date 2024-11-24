@@ -42,9 +42,9 @@ public class HttpUtils {
             //忽略SSL校验
             .sslSocketFactory(HttpUtils.getSocketFactory(manager), manager)
             //忽略校验
-            .hostnameVerifier(HttpUtils.getHostnameVerifier())
+            //.hostnameVerifier(HttpUtils.getHostnameVerifier())
             //连接池
-            .connectionPool(new ConnectionPool(10, 20, TimeUnit.MINUTES))
+            //.connectionPool(new ConnectionPool(10, 20, TimeUnit.MINUTES))
             .build();
 
 
