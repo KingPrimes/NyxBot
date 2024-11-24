@@ -1,0 +1,52 @@
+name: BUG 提交
+description: 提交一个bug报告
+body:
+  - type: markdown
+    attributes:
+      value: "## 环境信息"
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的JDK版本？OpenJDK-17？OracleJDK-17？
+      label: 使用的JDK版本？
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么系统？Windows？Linux？macOS？
+      label: 使用的什么系统？Windows？Linux？macOS？
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: NyxBot 使用的那个版本？
+      label: NyxBot 使用的那个版本？
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么OneBot客户端？ LLOneBot? NapCat?
+      label: 使用的什么OneBot客户端？ LLOneBot? NapCat?
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么OneBot协议？ OneBot-v11? OneBot-v12?
+      label: 使用的什么OneBot协议？ OneBot-v11? OneBot-v12?
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么命令发生了错误？例如：HELP, 突击, wm 牛？
+      label: 使用的什么命令发生了错误？
+  - type: markdown
+    attributes:
+      value: "## 错误描述"
+  - type: textarea
+    attributes:
+      placeholder: 请详细描述你遇到的bug，包括：
+        什么情况下出现的？
+        具体的错误信息是什么？
+        重现步骤是什么？
+      label: 请详细描述你遇到的bug，包括：
