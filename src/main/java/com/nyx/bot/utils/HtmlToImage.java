@@ -39,8 +39,7 @@ public class HtmlToImage {
      */
     private static BufferedImage renderToImageAutoSize(String url, int width) {
         try {
-            Graphics2DRenderer g2r = new Graphics2DRenderer();
-            g2r.setDocument(url);
+            Graphics2DRenderer g2r = new Graphics2DRenderer(url);
             SharedContext sharedContext = g2r.getSharedContext();
             //设置图片清晰度
             sharedContext.setDPI(72);
@@ -100,7 +99,6 @@ public class HtmlToImage {
         if (!doc.getElementsByTag("w").isEmpty()) {
             String num = doc.getElementsByTag("w").text();
             if (MatcherUtils.isNumber(num)) width = Integer.parseInt(num);
-
         }
         return width;
     }
@@ -136,15 +134,14 @@ public class HtmlToImage {
         if (str.indexOf("</body>") > 1) {
             if (hint != null) {
                 str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
-                        "\tPosted by:KingPrimes<br/>\n" +
+                        "\tPosted by:KingPrimes\n" +
                         "\t" +
                         hint.getHint() +
                         "\n</div>\n");
             } else {
                 str.insert(str.indexOf("</body>"), """
                         <div class="foot-by">
-                        \tPosted by:KingPrimes<br/>
-                        \t
+                        \tPosted by:KingPrimes
                         </div>
                         """);
             }
