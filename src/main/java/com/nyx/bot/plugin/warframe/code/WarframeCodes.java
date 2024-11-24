@@ -46,6 +46,21 @@ public class WarframeCodes {
     }
 
     /**
+     * 警报
+     */
+    public static void alerts(Bot bot, AnyMessageEvent event) {
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "getAlertsImage",
+                bot, event);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        }
+        sendErrorMsg(bot, event, body);
+    }
+
+
+    /**
      * 平原
      */
     public static void allCycle(Bot bot, AnyMessageEvent event) {

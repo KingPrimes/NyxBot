@@ -21,6 +21,7 @@ public enum Codes {
     UPDATE_WARFRAME_TAR("^更新翻译$", PermissionsEnums.SUPER_ADMIN),
     UPDATE_JAR("^自动更新$|^更新版本$|^版本更新$", PermissionsEnums.SUPER_ADMIN),
 
+    WARFRAME_ALERTS_PLUGIN("^警报$", PermissionsEnums.USER),
     WARFRAME_ASSAULT_PLUGIN("^突击$", PermissionsEnums.USER),
     WARFRAME_ARSON_HUNT_PLUGIN("^执刑官猎杀$|^猎杀$|^执行官$|^执政官$|^执刑官$", PermissionsEnums.USER),
     WARFRAME_VOID_PLUGIN("^奸商$", PermissionsEnums.USER),
@@ -49,7 +50,7 @@ public enum Codes {
     WARFRAME_OPEN_RELICS_PLUGIN("^开核桃|^砸核桃", PermissionsEnums.USER),
     WARFRAME_RIVEN_ANALYSE("^紫卡分析|^分析紫卡", PermissionsEnums.USER),
     WARFRAME_SUBSCRIBE("^订阅 ?([0-9]+)? ?-? ?([0-9]+)?", PermissionsEnums.USER),
-    WARFRAME_CANCEL_SUBSCRIBE("^取消订阅 ?([0-9]+)? ?-? ?([0-9]+)?",PermissionsEnums.USER),
+    WARFRAME_CANCEL_SUBSCRIBE("^取消订阅 ?([0-9]+)? ?-? ?([0-9]+)?", PermissionsEnums.USER),
     ;
 
     private final PermissionsEnums permissions;

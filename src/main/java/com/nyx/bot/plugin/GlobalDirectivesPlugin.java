@@ -69,6 +69,8 @@ public class GlobalDirectivesPlugin {
                 }
 
                 //Warframe
+                //警报
+                case WARFRAME_ALERTS_PLUGIN -> WarframeCodes.alerts(bot, event);
                 //突击
                 case WARFRAME_ASSAULT_PLUGIN -> WarframeCodes.assault(bot, event);
                 //双衍王境
@@ -114,7 +116,7 @@ public class GlobalDirectivesPlugin {
                 // 佩兰
                 case WARFRAME_SISTER_PLUGIN -> not(bot, event);
                 //金银垃圾
-                case WARFRAME_MARKET_GOD_DUMP,WARFRAME_MARKET_SILVER_DUMP -> WarframeCodes.ducat(bot, event, codes);
+                case WARFRAME_MARKET_GOD_DUMP, WARFRAME_MARKET_SILVER_DUMP -> WarframeCodes.ducat(bot, event, codes);
                 //核桃
                 case WARFRAME_RELICS_PLUGIN -> not(bot, event);
                 //开核桃
@@ -122,8 +124,8 @@ public class GlobalDirectivesPlugin {
                 //紫卡分析
                 case WARFRAME_RIVEN_ANALYSE -> WarframeCodes.ocrRivenCompute(bot, event, codes);
                 //订阅
-                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event,codes);
-                case WARFRAME_CANCEL_SUBSCRIBE -> WarframeCodes.cancelSubscribe(bot,event,codes);
+                case WARFRAME_SUBSCRIBE -> WarframeCodes.subscribe(bot, event, codes);
+                case WARFRAME_CANCEL_SUBSCRIBE -> WarframeCodes.cancelSubscribe(bot, event, codes);
             }
         });
     }

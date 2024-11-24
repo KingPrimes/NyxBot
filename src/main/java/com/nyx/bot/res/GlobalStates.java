@@ -750,78 +750,158 @@ public class GlobalStates {
     @Data
     @EqualsAndHashCode(of = {"mission", "expired", "rewardTypes"}, callSuper = false)
     public static class Alerts extends BaseStatus {
+        /**
+         * 任务与奖励
+         */
         @JsonProperty("mission")
         private Mission mission;
+        /**
+         * 结束时间
+         */
         @JsonProperty("expired")
         private Boolean expired;
         @JsonProperty("eta")
         private String eta;
+        /**
+         * 奖励类型
+         */
         @JsonProperty("rewardTypes")
         private List<String> rewardTypes;
 
         @NoArgsConstructor
         @Data
         public static class Mission {
+            /**
+             * 奖励
+             */
             @JsonProperty("reward")
             private Reward reward;
+            /**
+             * 任务地点
+             */
             @JsonProperty("node")
             private String node;
+            /**
+             * 所属派系
+             */
             @JsonProperty("faction")
             private String faction;
+            /**
+             * 敌人最高等级
+             */
             @JsonProperty("maxEnemyLevel")
             private Integer maxEnemyLevel;
+            /**
+             * 敌人最低等级
+             */
             @JsonProperty("minEnemyLevel")
             private Integer minEnemyLevel;
+
             @JsonProperty("maxWaveNum")
             private Integer maxWaveNum;
+            /**
+             * 任务类型
+             */
             @JsonProperty("type")
             private String type;
+            /**
+             * 是否噩梦模式
+             */
             @JsonProperty("nightmare")
             private Boolean nightmare;
+            /**
+             * 是否需要翅膀
+             */
             @JsonProperty("archwingRequired")
             private Boolean archwingRequired;
+            /**
+             * 是否是空战
+             */
             @JsonProperty("isSharkwing")
             private Boolean isSharkwing;
+            /**
+             * 地图类型
+             */
             @JsonProperty("enemySpec")
             private String enemySpec;
+            /**
+             * 地图与任务类型
+             */
             @JsonProperty("levelOverride")
             private String levelOverride;
+
             @JsonProperty("advancedSpawners")
             private List<String> advancedSpawners;
+
             @JsonProperty("requiredItems")
             private List<String> requiredItems;
+
             @JsonProperty("consumeRequiredItems")
             private Boolean consumeRequiredItems;
+
             @JsonProperty("leadersAlwaysAllowed")
             private Boolean leadersAlwaysAllowed;
+
             @JsonProperty("levelAuras")
             private List<String> levelAuras;
 
             @NoArgsConstructor
             @Data
             public static class Reward {
+                /**
+                 * 奖励列表
+                 */
                 @JsonProperty("countedItems")
                 private List<CountedItems> countedItems;
+                /**
+                 * 缩略图
+                 */
                 @JsonProperty("thumbnail")
                 private String thumbnail;
+                /**
+                 * 主题颜色
+                 */
                 @JsonProperty("color")
                 private Integer color;
+                /**
+                 * 奖励星币
+                 */
                 @JsonProperty("credits")
                 private Integer credits;
+                /**
+                 * 奖励字符串
+                 */
                 @JsonProperty("asString")
                 private String asString;
+                /**
+                 * 奖励物品
+                 */
                 @JsonProperty("items")
                 private List<String> items;
+                /**
+                 * 奖励物品字符串
+                 */
                 @JsonProperty("itemString")
                 private String itemString;
 
                 @NoArgsConstructor
                 @Data
                 public static class CountedItems {
+                    /**
+                     * 奖励数量
+                     */
                     @JsonProperty("count")
                     private Integer count;
+                    /**
+                     * 奖励类型
+                     */
                     @JsonProperty("type")
                     private String type;
+                    /**
+                     * 具体奖励
+                     */
+                    @JsonProperty("key")
+                    private String key;
                 }
             }
         }
