@@ -12,4 +12,5 @@ public class GitHubUserProvider {
     Long id;
     String userName;
     String passWord;
+    String gitUrl;
 }

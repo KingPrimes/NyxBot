@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
+import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +32,9 @@ public class GitHubUserProviderController extends BaseController {
         } else {
             model.addAttribute("git", new GitHubUserProvider());
         }
+
+        model.addAttribute("gitUrl", JgitUtil.getOriginUrl(JgitUtil.lockPath));
+
         return prefix + "github";
     }
 
@@ -39,6 +43,7 @@ public class GitHubUserProviderController extends BaseController {
     @ResponseBody
     public AjaxResult save(GitHubUserProvider gitHubUserProvider) {
         gitRepository.save(gitHubUserProvider);
+        JgitUtil.restOriginUrl(gitHubUserProvider.getGitUrl(), JgitUtil.lockPath);
         return success();
     }
 

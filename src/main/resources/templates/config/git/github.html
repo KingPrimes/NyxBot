@@ -7,20 +7,29 @@
         <form class="form-horizontal m" id="form-git" th:object="${git}">
             <input id="id" name="id" th:field="*{id}" type="hidden">
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="userName">Git账户：</label>
+                <label class="col-sm-3 control-label is-required" for="userName">Git账户：</label>
                 <div class="col-sm-8">
-                    <div class="input-group">
+                    <div>
                         <input class="form-control" id="userName" name="userName" placeholder="Git账户邮箱"
                                th:field="*{userName}" type="email">
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="passWord">Git令牌：</label>
+                <label class="col-sm-3 control-label is-required" for="passWord">Git令牌：</label>
                 <div class="col-sm-8">
-                    <div class="input-group">
-                        <input class="form-control" id="passWord" name="passWord" placeholder="Git令牌"
-                               th:field="*{passWord}" type="text">
+                    <div>
+                        <textarea class="form-control" id="passWord" name="passWord" placeholder="Git令牌"
+                                  th:field="*{passWord}" type="text"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="passWord">DataSource仓库地址：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <input class="form-control" id="gitUrl" name="gitUrl" placeholder="gitUrl"
+                               th:value="${gitUrl}" type="text">
                     </div>
                 </div>
             </div>

@@ -12,13 +12,11 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.RefSpec;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.transport.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -62,6 +60,34 @@ public class JgitUtil {
      */
     public static JgitUtil Build() throws Exception {
         return Build("https://github.com/KingPrimes/DataSource", "").pull();
+    }
+
+    /**
+     * 获取远端仓库地址
+     *
+     * @param localPath  本地仓库路径
+     * @return 远端仓库地址
+     */
+    public static String getOriginUrl(String localPath) {
+        try (Git git = Git.open(new File(localPath))) {
+            return git.getRepository().getConfig().getString("remote", "origin", "url");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 更改本地仓库的远端地址
+     *
+     * @param originUrl 远端地址
+     * @param localPath 本地仓库路径
+     */
+    public static void restOriginUrl(String originUrl, String localPath) {
+        try (Git git = Git.open(new File(localPath))) {
+            git.remoteSetUrl().setRemoteName("origin").setRemoteUri(new URIish(originUrl)).call();
+        } catch (IOException | GitAPIException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Git openRpo(String path) {
@@ -154,6 +180,10 @@ public class JgitUtil {
         }
     }
 
+    /*
+     * ===============================分支操作=============================
+     */
+
     /**
      * 状态(status) git status
      */
@@ -172,10 +202,6 @@ public class JgitUtil {
         map.put("UntrackedFolders", status.getUntrackedFolders().toString());
         return map;
     }
-
-    /*
-     * ===============================分支操作=============================
-     */
 
     /**
      * 创建分支(Create Branch) git branch dev
@@ -281,7 +307,6 @@ public class JgitUtil {
                 .call().iterator();
     }
 
-
     /**
      * 创建分支推送
      *
@@ -292,7 +317,6 @@ public class JgitUtil {
     public Iterator<PushResult> pushBranchCheckout(String commit, String branchName, String files) throws GitAPIException {
         return branch(branchName).checkoutBranch(branchName).add(files).commit(commit).push(branchName);
     }
-
 
     /**
      * 拉取(Pull) git pull origin
@@ -317,7 +341,6 @@ public class JgitUtil {
                 .call();
         return this;
     }
-
 
     /**
      * 拉取(Pull) git pull
