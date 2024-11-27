@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('推送别名')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form form-horizontal m-t" id="form-alias-push">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="commit">提交消息：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="commit" name="commit" placeholder="提交消息" type="text">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "data/warframe/alias";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/push", $('#form-alias-push').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>

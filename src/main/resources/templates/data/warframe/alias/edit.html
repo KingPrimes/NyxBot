@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{include :: header('修改别名')}"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-alias-edit" th:object="${alias}">
+        <input id="id" name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required" for="en">EN：</label>
+            <div class="col-sm-9">
+                <div class="input-group">
+                    <input id="en" name="en" placeholder="英文" required th:field="*{en}" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required" for="cn">ZH：</label>
+            <div class="col-sm-9">
+                <div class="input-group">
+                    <input id="cn" name="cn" placeholder="中文"
+                           required th:field="*{cn}" type="text">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "data/warframe/alias";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-alias-edit').serialize());
+        }
+    }
+</script>
+</body>
+</html>

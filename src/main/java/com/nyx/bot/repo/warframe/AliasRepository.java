@@ -20,4 +20,7 @@ public interface AliasRepository extends JpaRepository<Alias, Long>, JpaSpecific
 
 
     Alias findByCn(String cn);
+
+    @Query("select a from Alias a where a.cn =:cn and a.en = :en")
+    Alias findByCnAndEn(String cn, String en);
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('新增别名')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form form-horizontal m-t" id="form-alias-add">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="en">EN：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="en" name="en" placeholder="英文,原本的名称" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" for="cn">ZH：</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input id="cn" name="cn" placeholder="中文，用来叫做别的名称"
+                               type="text">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "data/warframe/alias";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-alias-add').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>
