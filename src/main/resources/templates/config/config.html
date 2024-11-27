@@ -71,7 +71,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="serverPort">端口：</label>
                 <div class="col-sm-8">
-                    <div class="input-group">
+                    <div>
                         <input class="form-control" id="serverPort" name="serverPort" placeholder="端口号"
                                th:field="*{serverPort}" type="number">
                     </div>
@@ -90,7 +90,7 @@
             <div class="form-group" id="wsServerUrlDiv">
                 <label class="col-sm-3 control-label" for="wsServerUrl">服务端URL：</label>
                 <div class="col-sm-8">
-                    <div class="input-group">
+                    <div>
                         <input class="form-control" id="wsServerUrl" name="wsServerUrl" placeholder="WebSocket服务端反向链接URL"
                                th:field="*{wsServerUrl}" type="text">
                     </div>
@@ -99,7 +99,7 @@
             <div class="form-group" id="wsClientDiv" style="display: none">
                 <label class="col-sm-3 control-label" for="wsClientUrl">客户端URL：</label>
                 <div class="col-sm-8">
-                    <div class="input-group">
+                    <div>
                         <input class="form-control" id="wsClientUrl" name="wsClientUrl" placeholder="WebSocket服务端正向链接URL"
                                th:field="*{wsClientUrl}" type="text">
                     </div>
