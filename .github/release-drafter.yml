@@ -8,20 +8,31 @@ template: |
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 categories:
+    #重大变更
   - title: 'Breaking'
     label: 'type: breaking'
+    # 新功能
   - title: 'New'
-    label: 'type: feature'
+    label: 'type: feat'
+    # bug修复
   - title: 'Bug Fixes'
-    label: 'type: bug'
+    label: 'type: fix'
+    # 维护
   - title: 'Maintenance'
     label: 'type: maintenance'
+    # 文档
   - title: 'Documentation'
     label: 'type: docs'
+    # 其他变更
   - title: 'Other changes'
+    label: 'type: *'
+    # 依赖更新
   - title: 'Dependency Updates'
     label: 'type: dependencies'
     collapse-after: 5
+    # 版本变更
+  - title: 'Version Changes'
+    label: 'type: version'
 
 version-resolver:
   major:
@@ -40,3 +51,37 @@ version-resolver:
 
 exclude-labels:
   - 'skip-changelog'
+# 自动生成的发布草稿是否为预发布版本
+prerelease: false
+
+commitish: main
+
+autolabeler:
+    - label: 'bug'
+      branch:
+        - '/fix\/.+/'
+    - label: 'docs'
+      branch:
+        - '/docs\/.+/'
+      files:
+        - '*.md'
+    - label: 'dependencies'
+      branch:
+        - '/deps\/.+/'
+      files:
+        - 'pom.xml'
+    - label: 'breaking'
+      branch:
+       - '/breaking\/.+/'
+    - label: 'feature'
+      branch:
+        - '/feat\/.+/'
+    - label: 'maintenance'
+      branch:
+        - '/maintenance\/.+/'
+    - label: 'security'
+      branch:
+        - '/security\/.+/'
+    - label: 'skip-changelog'
+      branch:
+        - '/skip-changelog\/.+/'
