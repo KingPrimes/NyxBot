@@ -8,9 +8,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.TextProgressMonitor;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.*;
 
@@ -18,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -65,7 +65,7 @@ public class JgitUtil {
     /**
      * 获取远端仓库地址
      *
-     * @param localPath  本地仓库路径
+     * @param localPath 本地仓库路径
      * @return 远端仓库地址
      */
     public static String getOriginUrl(String localPath) {
@@ -91,24 +91,25 @@ public class JgitUtil {
     }
 
     private Git openRpo(String path) {
-        Git git = null;
-        try {
-            Repository repository = new FileRepositoryBuilder()
-                    .setGitDir(Paths.get(path, ".git").toFile())
-                    .build();
+        Git git;
+        try (Repository repository = new FileRepositoryBuilder()
+                .setGitDir(Paths.get(path, ".git").toFile())
+                .build()
+        ) {
             git = new Git(repository);
+            return git;
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
-        return git;
     }
 
     /**
      * 初始化(init)——git init
      */
     public JgitUtil init() throws GitAPIException {
-        Git.init().setDirectory(new File(localPath)).call();
-        return this;
+        try (Git ignored = Git.init().setDirectory(new File(localPath)).call()) {
+            return this;
+        }
     }
 
     /**
@@ -176,7 +177,7 @@ public class JgitUtil {
                 log.error("文件移动异常！");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -330,14 +331,14 @@ public class JgitUtil {
         if (provider == null) {
             openRpo(localPath).pull()
                     .setRemoteBranchName("main")
-                    .setProgressMonitor(new TextProgressMonitor())
+                    .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
             return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName("main")
                 .setCredentialsProvider(provider)
-                .setProgressMonitor(new TextProgressMonitor())
+                .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
         return this;
     }
@@ -356,14 +357,14 @@ public class JgitUtil {
         if (provider == null) {
             openRpo(localPath).pull()
                     .setRemoteBranchName("main")
-                    .setProgressMonitor(new TextProgressMonitor())
+                    .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
             return this;
         }
         openRpo(localPath).pull()
                 .setRemoteBranchName(branch)
                 .setCredentialsProvider(provider)
-                .setProgressMonitor(new TextProgressMonitor())
+                .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
         return this;
     }
@@ -382,7 +383,7 @@ public class JgitUtil {
                     .setCloneSubmodules(true)
                     //设置克隆分支
                     .setBranch(branch)
-                    .setProgressMonitor(new TextProgressMonitor())
+                    .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
             //关闭源，以释放本地仓库锁
             git.getRepository().close();
@@ -396,7 +397,7 @@ public class JgitUtil {
                 .setCloneSubmodules(true)
                 //设置克隆分支
                 .setBranch(branch)
-                .setProgressMonitor(new TextProgressMonitor())
+                .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
@@ -413,10 +414,71 @@ public class JgitUtil {
                 .setDirectory(new File(localPath))
                 //设置是否克隆子仓库
                 .setCloneSubmodules(true)
-                .setProgressMonitor(new TextProgressMonitor())
+                .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
         git.close();
+    }
+}
+
+
+@Slf4j
+class LoggingProgressMonitor extends BatchingProgressMonitor {
+
+    private Instant startTime;
+    private int lastLoggedPercent = -10; // 初始化为-10，确保第一次输出为0%
+    private String currentTaskName; // 添加一个变量来存储当前任务的名称
+
+    @Override
+    public void beginTask(String title, int work) {
+        super.beginTask(title, work);
+        startTime = Instant.now(); // 记录任务开始时间
+        currentTaskName = Translator.translate(title);// 存储当前任务的名称
+        log.info("开始: {}", currentTaskName); // 输出开始克隆的日志
+    }
+
+    @Override
+    protected void onUpdate(String taskName, int workCurr, Duration duration) {
+        // 不再每次更新都输出日志
+    }
+
+    @Override
+    protected void onEndTask(String taskName, int workCurr, Duration duration) {
+        Duration elapsed = Duration.between(startTime, Instant.now()); // 计算已用时间
+        long seconds = elapsed.getSeconds();
+        log.info("任务: {} 完成, 用时: {}秒", taskName, seconds);
+    }
+
+    @Override
+    protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
+        if (percentDone / 10 > lastLoggedPercent / 10) { // 检查是否达到下一个10%的里程碑
+            lastLoggedPercent = percentDone; // 更新最后记录的百分比
+            log.info("任务: {}, 完成: {}% ({} / {})", taskName, percentDone, workCurr, workTotal);
+        }
+    }
+
+    @Override
+    protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
+        log.info("任务: {} 完成, 总工作量: {}", currentTaskName, workTotal);
+    }
+}
+
+class Translator {
+    private static final Map<String, String> translations = new HashMap<>();
+
+    static {
+        // 添加翻译映射
+        translations.put("remote: Enumerating objects", "远程：枚举对象");
+        translations.put("remote: Counting objects", "远程：计数对象");
+        translations.put("remote: Compressing objects", "远程：压缩对象");
+        translations.put("Receiving objects", "接收对象");
+        translations.put("Resolving deltas", "解决差异");
+        translations.put("Updating references", "更新引用");
+        translations.put("Checking out files", "检出文件");
+    }
+
+    public static String translate(String title) {
+        return translations.getOrDefault(title, title);
     }
 }
