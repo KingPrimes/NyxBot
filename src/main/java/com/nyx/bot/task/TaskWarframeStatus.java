@@ -3,6 +3,7 @@ package com.nyx.bot.task;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.plugin.warframe.utils.WarframeSubscribe;
@@ -30,9 +31,22 @@ public class TaskWarframeStatus {
     }
 
     @Async("taskExecutor")
-    @Scheduled(cron = "0 0 0 1,11,21,31 * ? ")
+    @Scheduled(cron = "0 0 0 1/5 * ? ")
     public void executeRivenTrend() {
-        new RivenDispositionUpdates().upRivenTrend();
+        if (Math.random() < 0.5) {
+            new RivenDispositionUpdates().upRivenTrend();
+        }
+    }
+
+    /**
+     * 定时更新数据
+     */
+    @Async("taskExecutor")
+    @Scheduled(cron = "0 0 0 1/3 * ? ")
+    public void executeDataSourcePullRandom() {
+        if (Math.random() < 0.5) {
+            WarframeDataSource.init();
+        }
     }
 
 }
