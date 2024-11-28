@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Slf4j
@@ -38,6 +39,20 @@ public class FileUtils {
             stream.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("write file error:{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 写入文件
+     *
+     * @param bytes 字节数组
+     * @param path  文件路径
+     */
+    public static void writeToFile(byte[] bytes, String path) {
+        try {
+            Files.write(Paths.get(path), bytes);
+        } catch (IOException e) {
+            log.error("写入文件失败:{}", e.getMessage());
         }
     }
 
