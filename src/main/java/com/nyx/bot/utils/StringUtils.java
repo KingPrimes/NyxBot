@@ -599,6 +599,18 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return result;
     }
 
+
+    /**
+     * 截取字符串
+     * @param str 源文本 比如：源文本 = 12345
+     * @param left 前字符串
+     * @param right 后字符串
+     * @return 返回 String 不包括前后文本 返回的文本:3
+     */
+    public static String substring(String str, String left, String right) {
+        return substring(str, str.indexOf(left) + 1, str.indexOf(right, str.indexOf(right) + 1));
+    }
+
     /**
      * 取两个文本之间的文本值
      *
