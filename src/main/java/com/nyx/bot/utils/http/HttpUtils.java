@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -174,6 +175,7 @@ public class HttpUtils {
      * @return byte[] 文件
      */
     public static Body sendGetForFile(String url) {
+        log.debug("发送请求 Url:{}", url);
         InputStream inputStream = null;
         Request req = new Request.Builder()
                 .url(url)
@@ -183,17 +185,19 @@ public class HttpUtils {
         try {
             response = new OkHttpClient().newCall(req).execute();
             if (!response.isSuccessful()) {
-                log.error("【调用HTTP请求异常】 code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
+                log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
                 return null;
             }
-            inputStream = response.body().byteStream();
-            return new Body(inputToByte(inputStream), HttpCodeEnum.getCode(response.code()), response.headers());
-        } catch (IOException e) {
+            inputStream = Objects.requireNonNull(response.body()).byteStream();
+            return new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()), response.headers());
+        } catch (Exception e) {
             log.error("发起请求出现异常:", e);
             return new Body(HttpCodeEnum.ERROR);
         } finally {
             try {
-                inputStream.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             } catch (IOException var12) {
                 log.error("【关闭流异常】");
             }
@@ -219,14 +223,14 @@ public class HttpUtils {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
                 return null;
             }
-            inputStream = response.body().byteStream();
+            inputStream = Objects.requireNonNull(response.body()).byteStream();
             return inputStream;
         } catch (IOException e) {
             log.error("发起请求出现异常:", e);
             return inputStream;
         } finally {
             try {
-                inputStream.close();
+                if (inputStream != null) inputStream.close();
             } catch (IOException var12) {
                 log.error("【关闭流异常】");
             }
@@ -242,29 +246,29 @@ public class HttpUtils {
      */
     public static Body sendPostForFile(String url, String json) {
         InputStream inputStream = null;
+        Response response = null;
         try {
             RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
             Request request = new Request.Builder()
                     .url(url)
                     .post(requestBody)
                     .build();
-            Response response = new OkHttpClient().newCall(request).execute();
+            response = new OkHttpClient().newCall(request).execute();
             if (!response.isSuccessful()) {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
-            inputStream = response.body().byteStream();
+            inputStream = Objects.requireNonNull(response.body()).byteStream();
 
-            return new Body(inputToByte(inputStream), HttpCodeEnum.getCode(response.code()));
+            return new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()));
 
         } catch (IOException var13) {
             log.error("发起请求出现异常:{}", var13.getMessage());
             return new Body(HttpCodeEnum.ERROR);
         } finally {
             try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
+                if (inputStream != null) inputStream.close();
+                if (response != null) response.close();
             } catch (IOException var12) {
                 log.error("【关闭流异常】:{}", var12.getMessage());
             }
@@ -272,17 +276,29 @@ public class HttpUtils {
         }
     }
 
-    private static byte[] inputToByte(InputStream inputStream) throws IOException {
+    private static byte[] inputToByte(InputStream inputStream, long lines) throws IOException {
         //创建一个字节数组输出流
         ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
         //创建一个字节数组
         byte[] buff = new byte[1024];
+        long downloadLength = 0;
         //创建一个输入流
         int rc;
+        double tip = 0.0;
         //循环读取字节数组
         while ((rc = inputStream.read(buff, 0, 1024)) > 0) {
             //将读取的字节数组写入字节数组输出流
             swapStream.write(buff, 0, rc);
+            //累加已下载的长度
+            downloadLength += rc;
+            //计算下载进度
+            double progress = Math.round(downloadLength * 100.0 / lines);
+            //如果下载进度大于提示进度
+            if (tip < progress) {
+                tip = progress;
+                log.info("文件下载进度: {}%", tip);
+            }
+
         }
         //返回字节数组输出流
         return swapStream.toByteArray();
