@@ -326,7 +326,7 @@ public class JgitUtil {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            gitClone("main");
+            return gitClone("main");
         }
         if (provider == null) {
             openRpo(localPath).pull()
@@ -352,7 +352,7 @@ public class JgitUtil {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            gitClone(branch);
+            return gitClone(branch);
         }
         if (provider == null) {
             openRpo(localPath).pull()
@@ -401,7 +401,6 @@ public class JgitUtil {
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
-        git.close();
         return this;
     }
 
@@ -418,7 +417,6 @@ public class JgitUtil {
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
-        git.close();
     }
 }
 
