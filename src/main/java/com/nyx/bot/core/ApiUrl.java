@@ -35,6 +35,19 @@ public class ApiUrl {
             "https://gitee.com/KingPrime/DataSource"
     );
 
+
+    /**
+     * 国内 GIT HUB　加速
+     */
+    public static final List<String> GIT_HUB_SPEED = List.of(
+            "https://gh.api.99988866.xyz/",
+            "https://ghproxy.github.io/",
+            "https://gh.jasonzeng.dev/",
+            "https://github.moeyy.xyz/",
+            "https://github.geekery.cn/"
+    );
+
+
     /**
      * 赤毒幻纹
      */
