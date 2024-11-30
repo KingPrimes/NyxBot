@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
@@ -48,11 +49,18 @@ public class FileUtils {
      * @param bytes 字节数组
      * @param path  文件路径
      */
-    public static void writeToFile(byte[] bytes, String path) {
+    public static boolean writeToFile(byte[] bytes, String path) {
         try {
-            Files.write(Paths.get(path), bytes);
+            //判断目录是否存在不存在则创建
+            File file = new File(path);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+            }
+            Path write = Files.write(Paths.get(path), bytes);
+            return Files.size(write) == bytes.length;
         } catch (IOException e) {
             log.error("写入文件失败:{}", e.getMessage());
+            return false;
         }
     }
 
@@ -169,7 +177,6 @@ public class FileUtils {
 
         }
     }
-
 
 
 }
