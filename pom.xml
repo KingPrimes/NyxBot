@@ -98,11 +98,13 @@
             <artifactId>okhttp</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.aayushatharva.brotli4j/brotli4j -->
         <dependency>
-            <groupId>org.brotli</groupId>
-            <artifactId>dec</artifactId>
-            <version>0.1.2</version>
+            <groupId>com.aayushatharva.brotli4j</groupId>
+            <artifactId>brotli4j</artifactId>
+            <version>1.17.0</version>
         </dependency>
+
 
         <!--内存缓存-->
         <dependency>
