@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('修改管理员')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bot-admin-edit" th:object="${ba}">
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">机器人账号：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <select class="form-control" name="botUid" id="botUid" th:if="${bots != null}" required
+                                th:field="*{botUid}">
+                            <option th:each="b:${bots}" th:text="${b}"
+                                    th:value="${b}"></option>
+                        </select>
+                        <input class="form-control" type="text" th:if="${bots == null}" name="botUid" required
+                               th:field="*{botUid}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">管理员账号：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <input type="hidden" th:field="*{adminUid}" id="uid">
+                        <select class="form-control" name="adminUid" id="adminUid" th:if="${bots != null}" required
+                                th:field="*{adminUid}">
+
+                        </select>
+                        <input class="form-control" type="text" th:if="${bots == null}" name="adminUid" required
+                               th:field="*{adminUid}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">权限等级：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <select class="form-control" name="permissions" required th:field="*{permissions}">
+                            <option th:each="p:${pe}" th:text="${p.getStr()}"
+                                    th:value="${p}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script type="text/javascript">
+    const prefix = ctx + "config/bot/admin";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/update", $('#form-bot-admin-edit').serialize());
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const botUidSelect = document.getElementById('botUid');
+        const adminUidSelect = document.getElementById('adminUid');
+        const uid = document.getElementById('uid');
+        botUidSelect.addEventListener('change', function () {
+            const selectedBotUid = this.value;
+            $.ajax({
+                url: prefix + "/friend",
+                type: 'GET',
+                data: {botUid: selectedBotUid},
+                dataType: 'json',
+                success: function (result) {
+                    const adminList = result.data;
+                    // 清空管理员账号选择框
+                    adminUidSelect.innerHTML = '';
+                    if (adminList) {
+                        adminList.forEach(admin => {
+                            const option = document.createElement('option');
+                            if (uid.value == admin.userId) {
+                                option.selected = true;
+                            }
+                            option.value = admin.userId;
+                            option.text = admin.nickname + '-' + admin.userId;
+                            adminUidSelect.appendChild(option);
+                        });
+                    }
+                }
+            })
+
+        });
+        const event = new Event('change');
+        botUidSelect.dispatchEvent(event);
+    });
+</script>
+</body>
+</html>

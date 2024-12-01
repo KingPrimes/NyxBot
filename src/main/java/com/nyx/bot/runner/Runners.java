@@ -1,11 +1,18 @@
 package com.nyx.bot.runner;
 
+import com.mikuac.shiro.core.Bot;
+import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.data.WarframeDataSource;
+import com.nyx.bot.entity.bot.BotAdmin;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.AsyncBeanName;
+import com.nyx.bot.enums.PermissionsEnums;
+import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.repo.sys.SysUserRepository;
 import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.IoUtils;
+import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +21,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -65,6 +75,38 @@ public class Runners {
             if (!test) {
                 IoUtils.index();
             }
+        };
+    }
+
+    @Bean
+    public ApplicationRunner updateOver() {
+        return args -> {
+            File folder = new File("./backup");
+            File[] listOfFiles = folder.listFiles();
+            boolean fileExists = false;
+
+            if (listOfFiles != null) {
+                for (File file : listOfFiles) {
+                    if (file.isFile() && file.getName().contains(DateUtils.getDate(new Date(), DateUtils.NOT_HMS))) {
+                        fileExists = true;
+                        break;
+                    }
+                }
+            }
+            if (fileExists) {
+                Map<Long, Bot> robots = SpringUtils.getBean(BotContainer.class).robots;
+                if (robots != null) {
+                    BotAdmin byPermissions = SpringUtils.getBean(BotAdminRepository.class).findByPermissions(PermissionsEnums.SUPER_ADMIN);
+                    for (Bot bot : robots.values()) {
+                        if (byPermissions.getBotUid().equals(bot.getSelfId())) {
+                            bot.sendPrivateMsg(byPermissions.getAdminUid(), "更新完毕！", false);
+                        }
+
+                    }
+                }
+            }
+
+
         };
     }
 }

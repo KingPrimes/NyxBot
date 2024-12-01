@@ -25,7 +25,7 @@ public class Permissions {
             return false;
         }
         PermissionsEnums permissions = byAdminUid.getPermissions();
-        return Objects.requireNonNull(permissions) == PermissionsEnums.ADMIN || isAdmin(bot, event);
+        return Objects.requireNonNull(permissions) == PermissionsEnums.ADMIN || isAdmin(bot, event) || Objects.requireNonNull(permissions) == PermissionsEnums.SUPER_ADMIN;
     }
 
     /**
@@ -39,12 +39,7 @@ public class Permissions {
             return false;
         }
         PermissionsEnums permissions = byAdminUid.getPermissions();
-        switch (permissions) {
-            case SUPER_ADMIN, MANAGE -> {
-                return true;
-            }
-        }
-        return false;
+        return Objects.requireNonNull(permissions) == PermissionsEnums.SUPER_ADMIN;
     }
 
     /**
@@ -56,16 +51,15 @@ public class Permissions {
         if (isAdmin(bot, event)) {
             return PermissionsEnums.ADMIN;
         }
-        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
-        if (byAdminUid == null) {
-            return PermissionsEnums.USER;
+        if (checkSuperAdmin(event.getUserId())) {
+            return PermissionsEnums.SUPER_ADMIN;
         }
-        return byAdminUid.getPermissions();
+        return PermissionsEnums.USER;
     }
 
 
     /**
-     * 判断用户是否是管理员或者群主 或系统管理员
+     * 判断用户是否是管理员或者群主
      *
      * @param bot   bot
      * @param event event

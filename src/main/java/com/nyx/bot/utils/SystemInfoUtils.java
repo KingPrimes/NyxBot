@@ -111,6 +111,10 @@ public class SystemInfoUtils {
         JSONArray sysFiles = new JSONArray();
         FileSystem fileSystem = operatingSystem.getFileSystem();
         List<OSFileStore> fsArray = fileSystem.getFileStores();
+        //限制获取盘符
+        if (fsArray.size() >= 10) {
+            fsArray = fsArray.subList(0, 10);
+        }
         for (OSFileStore fs : fsArray) {
             cpuInfo = new JSONObject();
             //盘符路径
@@ -165,6 +169,7 @@ public class SystemInfoUtils {
         info.put("memInfo", getMemInfo());
         info.put("sysInfo", getSysInfo());
         info.put("sysFileInfo", getSysFileInfo());
+        info.put("jarVersion", getJarVersion());
         return info;
     }
 

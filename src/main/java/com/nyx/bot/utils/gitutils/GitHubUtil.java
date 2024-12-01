@@ -59,6 +59,16 @@ public class GitHubUtil {
     }
 
     /**
+     * 判断是否为最新版本
+     *
+     * @param version 版本号
+     * @return Boolean
+     */
+    public static Boolean isLatestVersion(String version) {
+        return getLatestTagName().equals("v" + version);
+    }
+
+    /**
      * 获取最新版本压缩包
      *
      * @return byte[]
@@ -77,6 +87,15 @@ public class GitHubUtil {
             }
         }
         return body.getFile();
+    }
+
+    /**
+     * 获取最新版本更新日志
+     *
+     * @return String
+     */
+    public static String getBody() {
+        return getReleasesLatestVersion().getBody();
     }
 
     @Data

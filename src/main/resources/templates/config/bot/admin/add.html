@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<th:block th:insert="~{include :: header('添加管理员')}"/>
+<body>
+<div class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-bot-admin-add">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">机器人账号：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <select class="form-control" id="botUid" name="botUid" th:if="${bots != null}" required>
+                            <option th:each="b:${bots}" th:text="${b}"
+                                    th:value="${b}"></option>
+                        </select>
+                        <input class="form-control" type="text" th:if="${bots == null}" name="botUid" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">管理员账号：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <select class="form-control" id="adminUid" name="adminUid" th:if="${bots != null}" required>
+                            <!-- <option th:each="a:${ad}" th:text="${a.nickname + '-' + a.userId}"
+                                     th:value="${a.userId}"></option>-->
+                        </select>
+                        <input class="form-control" type="text" name="adminUid" th:if="${bots == null}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">权限等级：</label>
+                <div class="col-sm-8">
+                    <div>
+                        <select class="form-control" name="permissions" required>
+                            <option th:each="p:${pe}" th:text="${p.getStr()}"
+                                    th:value="${p}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:insert="~{include :: footer}"/>
+<script th:inline="javascript">
+    const prefix = ctx + "config/bot/admin";
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/save", $('#form-bot-admin-add').serialize());
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const botUidSelect = document.getElementById('botUid');
+        const adminUidSelect = document.getElementById('adminUid');
+        botUidSelect.addEventListener('change', function () {
+            const selectedBotUid = this.value;
+            $.ajax({
+                url: prefix + "/friend",
+                type: 'GET',
+                data: {botUid: selectedBotUid},
+                dataType: 'json',
+                success: function (result) {
+                    const adminList = result.data;
+                    // 清空管理员账号选择框
+                    adminUidSelect.innerHTML = '';
+                    if (adminList) {
+                        adminList.forEach(admin => {
+                            const option = document.createElement('option');
+                            option.value = admin.userId;
+                            option.text = admin.nickname + '-' + admin.userId;
+                            adminUidSelect.appendChild(option);
+                        });
+                    }
+                }
+            })
+
+        });
+        const event = new Event('change');
+        botUidSelect.dispatchEvent(event);
+    });
+
+</script>
+</body>
+</html>

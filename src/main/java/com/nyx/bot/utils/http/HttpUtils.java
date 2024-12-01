@@ -7,15 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +25,7 @@ public class HttpUtils {
     public static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("text/plain");
     public static final String CONTENT_TYPE_FORM_DATA = "multipart/form-data";
 
-    private static final X509TrustManager manager = HttpUtils.getX509TrustManager();
+
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
             .addInterceptor(new BrotliInterceptor())
             //调用超时
@@ -40,12 +34,6 @@ public class HttpUtils {
             .connectTimeout(30, TimeUnit.SECONDS)
             //读取超时
             .readTimeout(30, TimeUnit.SECONDS)
-            //忽略SSL校验
-            .sslSocketFactory(HttpUtils.getSocketFactory(manager), manager)
-            //忽略校验
-            //.hostnameVerifier(HttpUtils.getHostnameVerifier())
-            //连接池
-            //.connectionPool(new ConnectionPool(10, 20, TimeUnit.MINUTES))
             .build();
 
 
@@ -95,7 +83,9 @@ public class HttpUtils {
                 Response response = client.newCall(send(url, param, headers)).execute()
         ) {
             //返回体
-            return getBody(response);
+            Body body = getBody(response);
+            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
+            return body;
         } catch (IOException e) {
             log.error(e.getMessage());
             return new Body(HttpCodeEnum.ERROR);
@@ -113,7 +103,9 @@ public class HttpUtils {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
-            return getBody(response);
+            Body body = getBody(response);
+            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
+            return body;
         } catch (IOException e) {
             log.error(e.getMessage());
             return new Body(HttpCodeEnum.ERROR);
@@ -134,11 +126,11 @@ public class HttpUtils {
             body.setCode(HttpCodeEnum.getCode(response.code()));
             //响应头
             body.setHeaders(response.headers());
+            //响应时间
+            body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
 
             response.close();
-        }, () -> {
-            body.setCode(HttpCodeEnum.getCode(response.code()));
-        });
+        }, () -> body.setCode(HttpCodeEnum.getCode(response.code())));
         response.close();
         return body;
     }
@@ -176,7 +168,6 @@ public class HttpUtils {
      */
     public static Body sendGetForFile(String url) {
         log.debug("发送请求 Url:{}", url);
-        InputStream inputStream = null;
         Request req = new Request.Builder()
                 .url(url)
                 .get()
@@ -188,52 +179,12 @@ public class HttpUtils {
                 log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
                 return null;
             }
-            inputStream = Objects.requireNonNull(response.body()).byteStream();
-            return new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()), response.headers());
+            Body body = getBodyForFile(response);
+            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
+            return body;
         } catch (Exception e) {
             log.error("发起请求出现异常:", e);
             return new Body(HttpCodeEnum.ERROR);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException var12) {
-                log.error("【关闭流异常】");
-            }
-        }
-    }
-
-    /**
-     * 根据URL网址获取文件
-     *
-     * @param url - url
-     * @return byte[] 文件
-     */
-    public static InputStream sendGetForFileInputStream(String url) {
-        InputStream inputStream = null;
-        Request req = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-        Response response;
-        try {
-            response = new OkHttpClient().newCall(req).execute();
-            if (!response.isSuccessful()) {
-                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
-                return null;
-            }
-            inputStream = Objects.requireNonNull(response.body()).byteStream();
-            return inputStream;
-        } catch (IOException e) {
-            log.error("发起请求出现异常:", e);
-            return inputStream;
-        } finally {
-            try {
-                if (inputStream != null) inputStream.close();
-            } catch (IOException var12) {
-                log.error("【关闭流异常】");
-            }
         }
     }
 
@@ -245,8 +196,7 @@ public class HttpUtils {
      * @return byte[] 文件
      */
     public static Body sendPostForFile(String url, String json) {
-        InputStream inputStream = null;
-        Response response = null;
+        Response response;
         try {
             RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
             Request request = new Request.Builder()
@@ -258,22 +208,22 @@ public class HttpUtils {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
-            inputStream = Objects.requireNonNull(response.body()).byteStream();
-
-            return new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()));
+            Body body = getBodyForFile(response);
+            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
+            return body;
 
         } catch (IOException var13) {
             log.error("发起请求出现异常:{}", var13.getMessage());
             return new Body(HttpCodeEnum.ERROR);
-        } finally {
-            try {
-                if (inputStream != null) inputStream.close();
-                if (response != null) response.close();
-            } catch (IOException var12) {
-                log.error("【关闭流异常】:{}", var12.getMessage());
-            }
-
         }
+    }
+
+    @NotNull
+    private static Body getBodyForFile(Response response) throws IOException {
+        InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
+        Body body = new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()), response.headers());
+        body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
+        return body;
     }
 
     private static byte[] inputToByte(InputStream inputStream, long lines) throws IOException {
@@ -304,48 +254,13 @@ public class HttpUtils {
         return swapStream.toByteArray();
     }
 
-    private static SSLSocketFactory getSocketFactory(TrustManager manager) {
-        SSLSocketFactory factory = null;
-        try {
-            SSLContext context = SSLContext.getInstance("SSL");
-            context.init(null, new TrustManager[]{manager}, new SecureRandom());
-            factory = context.getSocketFactory();
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new RuntimeException(e);
-        }
-        return factory;
-    }
-
-    public static X509TrustManager getX509TrustManager() {
-        return new X509TrustManager() {
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
-            }
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
-        };
-    }
-
-    private static HostnameVerifier getHostnameVerifier() {
-        return (s, sslSession) -> true;
-    }
-
-
     @Data
     public static class Body {
         String body;
         byte[] file;
         HttpCodeEnum code;
         Headers headers;
+        Long takeTime;
 
         public Body() {
         }
