@@ -1,7 +1,6 @@
 package com.nyx.bot.controller.config.admin;
 
 import com.mikuac.shiro.core.BotContainer;
-import com.mikuac.shiro.dto.action.response.FriendInfoResp;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.bot.BotAdmin;
@@ -17,9 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Controller
@@ -65,16 +62,9 @@ public class BotAdminController extends BaseController {
     @ResponseBody
     public AjaxResult getFriendList(Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-        //好友列表
-       AtomicReference<List<FriendInfoResp>> ad = new AtomicReference<>();
-
-        container.robots.forEach((aLong, bot) -> {
-            if(aLong.equals(botUid)){
-                ad.set(bot.getFriendList().getData());
-            }
-
-        });
-        return new AjaxResult(HttpCodeEnum.SUCCESS, "", ad.get());
+        return container.robots.containsKey(botUid)
+                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData())
+                : new AjaxResult(HttpCodeEnum.ERROR, "Bot not found", null);
     }
 
     @PostMapping("/save")
