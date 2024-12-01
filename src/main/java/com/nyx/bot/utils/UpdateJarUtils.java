@@ -35,7 +35,7 @@ public class UpdateJarUtils {
         File update = new File(path + "/update.sh");
         FileWriter writer = new FileWriter(update);
         writer.write("#!/bin/bash\n");
-        writer.write("cp " + fileName + " ./backup/baka_$(date +%Y%m%d%H%M%S)_"
+        writer.write("cp " + fileName + " ./backup/baka_" + DateUtils.getDate() + "_"
                 + fileName + "\n");
         writer.write("cp -r ./tmp/* ./" + fileName + "\n");
         writer.write("./run.sh\n");

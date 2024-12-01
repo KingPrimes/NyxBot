@@ -6,6 +6,8 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.permissions.Permissions;
+import com.nyx.bot.plugin.admin.UpdatePlugin;
 import com.nyx.bot.plugin.help.HelpCode;
 import com.nyx.bot.plugin.warframe.code.WarframeCodes;
 import com.nyx.bot.utils.CodeUtils;
@@ -65,7 +67,13 @@ public class GlobalDirectivesPlugin {
                         UPDATE_WARFRAME_SISTER,
                         UPDATE_WARFRAME_TAR,
                         UPDATE_JAR -> {
-
+                    switch (Permissions.checkAdmin(bot, event)) {
+                        case SUPER_ADMIN -> UpdatePlugin.updatePlugin(bot, event, codes);
+                        case ADMIN -> {
+                            bot.sendMsg(event, "权限不足！", false);
+                        }
+                        default -> bot.sendMsg(event, "权限不足！", false);
+                    }
                 }
 
                 //Warframe
