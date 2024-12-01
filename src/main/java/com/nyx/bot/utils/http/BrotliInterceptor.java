@@ -1,6 +1,6 @@
 package com.nyx.bot.utils.http;
 
-import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -9,6 +9,7 @@ import okhttp3.internal.http.HttpHeaders;
 import okio.BufferedSource;
 import okio.GzipSource;
 import okio.Okio;
+import org.brotli.dec.BrotliInputStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
