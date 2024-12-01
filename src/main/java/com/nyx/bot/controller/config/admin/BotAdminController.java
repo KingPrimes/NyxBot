@@ -65,16 +65,9 @@ public class BotAdminController extends BaseController {
     @ResponseBody
     public AjaxResult getFriendList(Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-        //好友列表
-       AtomicReference<List<FriendInfoResp>> ad = new AtomicReference<>();
-
-        container.robots.forEach((aLong, bot) -> {
-            if(aLong.equals(botUid)){
-                ad.set(bot.getFriendList().getData());
-            }
-
-        });
-        return new AjaxResult(HttpCodeEnum.SUCCESS, "", ad.get());
+        return container.robots.containsKey(botUid)
+                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData())
+                : new AjaxResult(HttpCodeEnum.ERROR, "Bot not found", null);
     }
 
     @PostMapping("/save")
