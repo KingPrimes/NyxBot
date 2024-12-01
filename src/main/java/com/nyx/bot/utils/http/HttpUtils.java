@@ -77,14 +77,13 @@ public class HttpUtils {
      * @return 返回的文本
      */
     public static Body sendGet(String url, String param, Headers.Builder headers) {
-        log.debug("发送请求\nUrl:{}\n参数:{}\n请求头:{}", url, param, headers.build());
         try (
 
                 Response response = client.newCall(send(url, param, headers)).execute()
         ) {
             //返回体
             Body body = getBody(response);
-            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
+            log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
             log.error(e.getMessage());
