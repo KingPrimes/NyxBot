@@ -1,10 +1,12 @@
-package com.nyx.bot.utils;
+package com.nyx.bot.plugin.warframe.utils;
 
+import com.nyx.bot.utils.RivenMatcherUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class TestRivenMatcherUtil {
+
     @Test
     public void testRivenWeaponsName() {
         log.info("是否是武器名称：{}", RivenMatcherUtil.isWeaponsName("信条·集议"));
