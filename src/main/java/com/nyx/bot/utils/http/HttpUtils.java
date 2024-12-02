@@ -25,11 +25,10 @@ public class HttpUtils {
     public static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("text/plain");
     public static final String CONTENT_TYPE_FORM_DATA = "multipart/form-data";
 
-
     private static final OkHttpClient client = new OkHttpClient().newBuilder()
             .addInterceptor(new BrotliInterceptor())
             //调用超时
-            .callTimeout(30, TimeUnit.SECONDS)
+            .callTimeout(60, TimeUnit.SECONDS)
             //链接超时
             .connectTimeout(30, TimeUnit.SECONDS)
             //读取超时
