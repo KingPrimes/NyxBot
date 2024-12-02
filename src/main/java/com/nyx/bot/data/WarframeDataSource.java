@@ -411,13 +411,11 @@ public class WarframeDataSource {
                     flag = false;
                     break;
                 } catch (Exception ignored) {
-                    FileUtils.delAllFile(JgitUtil.lockPath);
                 }
             }
             if (flag) {
                 log.error("初始化数据模板，失败！请检查网络环境之后重启程序！");
-                FileUtils.delAllFile(JgitUtil.lockPath);
-                System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> 0));
+                System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
             }
             log.info("初始化数据模板！获取完毕!");
         }, AsyncBeanName.InitData);
