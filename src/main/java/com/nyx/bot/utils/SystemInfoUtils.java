@@ -15,8 +15,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
-import java.util.jar.Manifest;
 
 public class SystemInfoUtils {
 
@@ -24,8 +24,6 @@ public class SystemInfoUtils {
     private static final SystemInfo systemInfo = new SystemInfo();
     private static final HardwareAbstractionLayer hardware = systemInfo.getHardware();
     private static final OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
-
-    private static final Manifest manifestFromClasspath = JarManifest.getManifestFromClasspath();
 
     public static JSONObject getCpuInfo() {
         JSONObject cpuInfo = new JSONObject();
@@ -179,8 +177,7 @@ public class SystemInfoUtils {
      * @return 版本号
      */
     public static String getJarVersion() {
-        assert manifestFromClasspath != null;
-        return manifestFromClasspath.getMainAttributes().getValue("version");
+        return Objects.requireNonNull(JarManifest.manifestFromClasspath()).getMainAttributes().getValue("version");
     }
 
     /**
