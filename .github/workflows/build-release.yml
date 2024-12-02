@@ -45,9 +45,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           draft: true
-      - uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-docker:
     name: Docker

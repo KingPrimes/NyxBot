@@ -10,40 +10,41 @@ template: |
 categories:
     #重大变更
   - title: 'Breaking'
-    label:
+    labels:
       - 'breaking'
       - 'breaking change'
       - 'breaking changes'
     # 新功能
   - title: '🚀 New'
-    label:
+    labels:
      - 'feat'
      - 'feature'
      - 'new'
     # bug修复
   - title: '🐛 Bug Fixes'
-    label:
+    labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
     # 维护
   - title: '🧰 Maintenance'
-    label:
+    labels:
       - 'maintenance'
       - 'maintain'
       - 'maintained'
     # 文档
   - title: 'Documentation'
-    label:
+    labels:
       - 'docs'
       - 'documentation'
       - 'doc'
     # 其他变更
   - title: 'Other changes'
-    label: 'type: *'
+    labels:
+     - '*'
     # 依赖更新
   - title: 'Dependency Updates'
-    label:
+    labels:
       - 'dependencies'
       - 'dep'
       - 'depend'
@@ -51,7 +52,7 @@ categories:
     collapse-after: 5
     # 版本变更
   - title: 'Version Changes'
-    label:
+    labels:
       - 'version'
       - 'version change'
       - 'version changes'
