@@ -25,7 +25,7 @@ public class SystemInfoUtils {
     private static final HardwareAbstractionLayer hardware = systemInfo.getHardware();
     private static final OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
 
-    private static final Manifest manifestFromClasspath = JarManifest.getManifestFromClasspath(SystemInfoUtils.class);
+    private static final Manifest manifestFromClasspath = JarManifest.getManifestFromClasspath();
 
     public static JSONObject getCpuInfo() {
         JSONObject cpuInfo = new JSONObject();
