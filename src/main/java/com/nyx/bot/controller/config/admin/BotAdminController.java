@@ -82,7 +82,6 @@ public class BotAdminController extends BaseController {
         if (byAdminUid != null) {
             return error("已存在！");
         }
-        log.info(ba.toString());
         byAdminUid = botAdminRepository.findByPermissions(ba.getPermissions());
         if (byAdminUid != null) {
             if (byAdminUid.getPermissions().equals(PermissionsEnums.SUPER_ADMIN)) {
