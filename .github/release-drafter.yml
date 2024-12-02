@@ -1,4 +1,4 @@
-name-template: 'v$RESOLVED_VERSION'
+name-template: 'v$RESOLVED_VERSION 🌈'
 tag-template: 'v$RESOLVED_VERSION'
 template: |
   # What's Changed
@@ -10,45 +10,70 @@ template: |
 categories:
     #重大变更
   - title: 'Breaking'
-    label: 'type: breaking'
+    label:
+      - 'breaking'
+      - 'breaking change'
+      - 'breaking changes'
     # 新功能
-  - title: 'New'
-    label: 'type: feat'
+  - title: '🚀 New'
+    label:
+     - 'feat'
+     - 'feature'
+     - 'new'
     # bug修复
-  - title: 'Bug Fixes'
-    label: 'type: fix'
+  - title: '🐛 Bug Fixes'
+    label:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
     # 维护
-  - title: 'Maintenance'
-    label: 'type: maintenance'
+  - title: '🧰 Maintenance'
+    label:
+      - 'maintenance'
+      - 'maintain'
+      - 'maintained'
     # 文档
   - title: 'Documentation'
-    label: 'type: docs'
+    label:
+      - 'docs'
+      - 'documentation'
+      - 'doc'
     # 其他变更
   - title: 'Other changes'
     label: 'type: *'
     # 依赖更新
   - title: 'Dependency Updates'
-    label: 'type: dependencies'
+    label:
+      - 'dependencies'
+      - 'dep'
+      - 'depend'
+      - 'dependency'
     collapse-after: 5
     # 版本变更
   - title: 'Version Changes'
-    label: 'type: version'
+    label:
+      - 'version'
+      - 'version change'
+      - 'version changes'
+      - 'release'
 
 version-resolver:
   major:
     labels:
-      - 'type: breaking'
+      - 'breaking'
   minor:
     labels:
-      - 'type: feature'
+      - 'feature'
   patch:
     labels:
-      - 'type: bug'
-      - 'type: maintenance'
-      - 'type: docs'
-      - 'type: dependencies'
-      - 'type: security'
-
+      - 'bug'
+      - 'maintenance'
+      - 'docs'
+      - 'dependencies'
+      - 'security'
+  default: patch
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
 exclude-labels:
   - 'skip-changelog'
 # 自动生成的发布草稿是否为预发布版本
