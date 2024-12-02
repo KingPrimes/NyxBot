@@ -17,10 +17,10 @@
         </encoder>
     </appender>
 
-    <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/info/%d{yyyy-MM-dd}-%i-info.log</fileNamePattern>
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
             <!--日志文件最大文件大小-->
@@ -33,67 +33,18 @@
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <!-- 过滤的级别 -->
-            <level>INFO</level>
+            <level>DEBUG</level>
             <!-- 匹配时的操作：接收（记录） -->
             <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：拒绝（不记录） -->
-            <onMismatch>DENY</onMismatch>
-        </filter>
-    </appender>
-    <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/error/%d{yyyy-MM-dd}-%i-error.log</fileNamePattern>
-            <!-- 日志最大的历史 7天 -->
-            <maxHistory>7</maxHistory>
-            <!--日志文件最大文件大小-->
-            <maxFileSize>10MB</maxFileSize>
-            <!--重启清理日志文件-->
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${log.pattern}</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!-- 过滤的级别 -->
-            <level>ERROR</level>
-            <!-- 匹配时的操作：接收（记录） -->
-            <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：拒绝（不记录） -->
-            <onMismatch>DENY</onMismatch>
-        </filter>
-    </appender>
-    <appender name="file_warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/warn/%d{yyyy-MM-dd}-%i-warn.log</fileNamePattern>
-            <!-- 日志最大的历史 7天 -->
-            <maxHistory>7</maxHistory>
-            <!--日志文件最大文件大小-->
-            <maxFileSize>10MB</maxFileSize>
-            <!--重启清理日志文件-->
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${log.pattern}</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!-- 过滤的级别 -->
-            <level>WARN</level>
-            <!-- 匹配时的操作：接收（记录） -->
-            <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：拒绝（不记录） -->
-            <onMismatch>DENY</onMismatch>
+            <!-- 不匹配时的操作：接收（记录） -->
+            <onMismatch>ACCEPT</onMismatch>
         </filter>
     </appender>
 
     <!--  指定日志输出级别，以及启用的Appender，这里就使用了我们上面的ConsoleAppender  -->
     <root level="INFO">
         <appender-ref ref="console"/>
-        <appender-ref ref="file_info"/>
-        <appender-ref ref="file_warn"/>
-        <appender-ref ref="file_error"/>
-
+        <appender-ref ref="file"/>
     </root>
 
 </configuration>
