@@ -13,12 +13,21 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
-            Hello! Thank you for filing an issue.
-
-            If this is a bug report, please include relevant logs to help us debug the problem.
-          pr-message: |
-            Hello! Thank you for your contribution.
+          
+            你好！感谢您提交问题。
+            如果这是一个错误报告，请包含相关日志以帮助我们调试问题。使用 -DEBUG 标志启动可以获取更多日志。
             
+            Hello! Thank you for submitting your questions. 
+            If this is a bug report, please include the relevant logs to help us debug the issue. Start with the -DEBUG flag to get more logs.
+          pr-message: |
+            你好！感谢您的贡献。
+            
+            如果要修复错误，请在描述中引用问题编号。
+            
+            如果您正在实施功能请求，请与维护者确认该功能将首先被接受。
+              
+            Hello! Thank you for your contribution.
+              
             If you are fixing a bug, please reference the issue number in the description.
-
+              
             If you are implementing a feature request, please check with the maintainers that the feature will be accepted first.
