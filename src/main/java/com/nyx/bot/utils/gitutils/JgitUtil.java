@@ -210,7 +210,13 @@ public class JgitUtil {
      * @param branchName 分支名称
      */
     public JgitUtil branch(String branchName) throws GitAPIException {
-        openRpo(localPath).branchCreate()
+        Git git = openRpo(localPath);
+        //检测是否存在此分支
+        List<Ref> list = git.branchList().call().stream().filter(ref -> ref.getName().equals(branchName)).toList();
+        if (!list.isEmpty()) {
+            return this;
+        }
+        git.branchCreate()
                 .setName(branchName)
                 .call();
         return this;
