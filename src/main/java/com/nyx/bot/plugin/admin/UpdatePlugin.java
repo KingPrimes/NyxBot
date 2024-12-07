@@ -84,10 +84,16 @@ public class UpdatePlugin {
             bot.sendMsg(event, "当前版本：" + lodeVersion + "，最新版本：" + latestTagName + "，正在准备更新！", false);
             String body = GitHubUtil.getBody();
             bot.sendMsg(event, "最新版本更新日志：" + body, false);
-            bot.sendMsg(event, "正在更新，请稍后...", false);
+            bot.sendMsg(event, "正在更新，请稍后...\n若长时间没有反应，请手动更新或者回退版本。\n备份文件在backup目录中。", false);
             String path = "./tmp/NyxBot.jar";
-            FileUtils.writeToFile(GitHubUtil.getLatestZip(), path);
-            new UpdateJarUtils().restartUpdate("NyxBot.jar");
+            boolean b = FileUtils.writeToFile(GitHubUtil.getLatestZip(), path);
+            if (b) {
+                bot.sendMsg(event, "更新成功，正在重启！", false);
+                new UpdateJarUtils().restartUpdate("NyxBot.jar");
+            }else{
+                bot.sendMsg(event, "更新失败，请手动更新！", false);
+            }
+
         }
     }
 }

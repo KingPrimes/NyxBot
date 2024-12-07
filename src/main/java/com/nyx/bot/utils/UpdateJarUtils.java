@@ -26,7 +26,7 @@ public class UpdateJarUtils {
         File run = new File(path + "/run.sh");
         FileWriter runWriter = new FileWriter(run);
         runWriter.write("#!/bin/bash\n");
-        runWriter.write("java -jar " + fileName + "\n");
+        runWriter.write("nohup java -jar " + fileName + " >/dev/null 2>&1 &");
         runWriter.close();
         // 使脚本可执行
         Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
@@ -79,7 +79,7 @@ public class UpdateJarUtils {
         }
         File run = new File(path + "/run.sh");
         FileWriter runWriter = new FileWriter(run);
-        runWriter.write("java -jar " + fileName + "\nexit");
+        runWriter.write("nohup java -jar " + fileName + " >/dev/null 2>&1 &");
         runWriter.close();
         return getFileWriter(fileName, path);
     }
