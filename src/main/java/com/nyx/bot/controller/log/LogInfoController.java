@@ -26,6 +26,11 @@ public class LogInfoController extends BaseController {
         return prefix + "/info";
     }
 
+    @GetMapping("/log")
+    public String log() {
+        return "log/log";
+    }
+
     // 分页条件查询
     @PostMapping("/info/list")
     @ResponseBody

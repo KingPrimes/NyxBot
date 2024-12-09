@@ -43,10 +43,26 @@
                             class="nav-label">首页</span> </a>
                 </li>
                 <li>
-                    <a class="menuItem" th:href="@{/log/info}" data-refresh="true">
-                        <i class="fa fa-calendar"></i>
-                        <span class="nav-label">日志查看</span>
+                    <a data-refresh="false" href="#">
+                        <i class="fa fa-database"></i>
+                        <span class="nav-label">日志</span>
+                        <span class="fa arrow"></span>
                     </a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a class="menuItem" data-refresh="true" th:href="@{/log/log}">
+                                <i class="fa fa-calendar"></i>
+                                <span class="nav-label">实时日志</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="menuItem" data-refresh="true" th:href="@{/log/info}">
+                                <i class="fa fa-calendar"></i>
+                                <span class="nav-label">指令日志</span>
+                            </a>
+                        </li>
+                    </ul>
+
                 </li>
                 <li id="config">
                     <a href="#" data-refresh="false">

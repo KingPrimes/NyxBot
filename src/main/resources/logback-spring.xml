@@ -5,7 +5,7 @@
     <!-- 日志存放路径 -->
     <property name="log.path" value="./logs"/>
     <!-- 日志输出格式 -->
-    <property name="log.pattern"
+    <property name="LOG_PATTERN"
               value="%-5level %d{yyyy-MM-dd HH:mm:ss} [%thread - ${PID:- }]  %-40.40logger{39} : %msg%n"/>
 
     <property name="CONSOLE_LOG"
@@ -18,22 +18,20 @@
     </appender>
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}.log</fileNamePattern>
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
-            <!--日志文件最大文件大小-->
-            <maxFileSize>10MB</maxFileSize>
             <!--重启清理日志文件-->
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>
-            <pattern>${log.pattern}</pattern>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <!-- 过滤的级别 -->
-            <level>DEBUG</level>
+            <level>INFO</level>
             <!-- 匹配时的操作：接收（记录） -->
             <onMatch>ACCEPT</onMatch>
             <!-- 不匹配时的操作：接收（记录） -->
