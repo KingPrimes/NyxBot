@@ -8,6 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 public class FileUtils {
@@ -129,6 +133,20 @@ public class FileUtils {
             return true;
         }
         return flag;
+    }
+
+    /**
+     * 获取目录下所有的文件名
+     *
+     * @param path 路径
+     * @return 文件名数组
+     */
+    public static Optional<List<String>> getFilesName(String path) {
+        File file = new File(path);
+        if (file.isDirectory()) {
+            return Optional.of(Arrays.stream(Objects.requireNonNull(file.list())).toList());
+        }
+        return Optional.empty();
     }
 
     /**
