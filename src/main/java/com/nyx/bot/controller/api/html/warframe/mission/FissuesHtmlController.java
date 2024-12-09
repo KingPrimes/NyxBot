@@ -155,7 +155,7 @@ public class FissuesHtmlController {
     }
 
     @GetMapping("/getSubscribeFissuesHtml/{type}/tierNum")
-    public String getSubscribeFissuesHtml(Model model,String type,Long tierNum){
+    public String getSubscribeFissuesHtml(Model model, String type, Long tierNum) {
 
         return "html/subscribeFissues";
     }

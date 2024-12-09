@@ -36,6 +36,7 @@ public class Msg {
         builder.add(getJsonData("text", m -> m.put("text", text)));
         return this;
     }
+
     /**
      * 图片
      * 支持本地图片、网络图片、Base64 详见 <a href="https://misakatat.github.io/shiro-docs/advanced.html#">消息构建工具</a>

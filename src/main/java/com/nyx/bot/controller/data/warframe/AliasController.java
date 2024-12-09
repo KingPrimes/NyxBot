@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/data/warframe/alias")
@@ -69,8 +70,8 @@ public class AliasController extends BaseController {
         if (a.getEn().trim().isEmpty()) {
             return error("英文不能为空！");
         }
-        Alias byCnAndEn = repository.findByCnAndEn(a.getCn(), a.getEn());
-        if (byCnAndEn != null) {
+        Optional<Alias> alias = repository.findByCnAndEn(a.getCn(), a.getEn());
+        if (alias.isPresent()) {
             return error("该别名已存在！");
         }
         repository.save(a);

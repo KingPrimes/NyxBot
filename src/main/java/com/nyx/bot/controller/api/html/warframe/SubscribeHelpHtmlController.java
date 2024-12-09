@@ -12,8 +12,8 @@ public class SubscribeHelpHtmlController {
 
     @GetMapping("/getSubscribeHelp")
     public String getHtml(Model model) {
-        model.addAttribute("sub",WarframeSubscribeCheck.getSubscribeEnums());
-        model.addAttribute("type",WarframeSubscribeCheck.getSubscribeMissionTypeEnums());
+        model.addAttribute("sub", WarframeSubscribeCheck.getSubscribeEnums());
+        model.addAttribute("type", WarframeSubscribeCheck.getSubscribeMissionTypeEnums());
         return "html/subscriberHelp";
     }
 

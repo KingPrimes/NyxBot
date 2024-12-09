@@ -10,19 +10,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Resource
 public interface TranslationRepository extends JpaRepository<Translation, Long>, JpaSpecificationExecutor<Translation>, PagingAndSortingRepository<Translation, Long> {
-    Translation findByEn(String en);
+    Optional<Translation> findByEn(String en);
 
     List<Translation> findByEnLike(String en);
 
     /**
      * 查询最大ID的数据
      */
-    Translation findTopByOrderByIdDesc();
+    Optional<Translation> findTopByOrderByIdDesc();
 
-    Translation findByCn(String cn);
+    Optional<Translation> findByCn(String cn);
 
     @Query("select t from Translation t where (:cn is null or LOWER(t.cn) like LOWER(CONCAT('%',:cn,'%'))) and (:isPrime is null or t.isPrime = :isPrime) and (:isSet is null or t.isSet = :isSet)")
     Page<Translation> findAllPageable(String cn, Boolean isPrime, Boolean isSet, Pageable pageable);

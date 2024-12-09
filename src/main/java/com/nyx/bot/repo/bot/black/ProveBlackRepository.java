@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ProveBlackRepository extends JpaRepository<ProveBlack, Long>, JpaSpecificationExecutor<ProveBlack> {
-    ProveBlack findByProve(Long prove);
+    Optional<ProveBlack> findByProve(Long prove);
 
     @Query("select p from ProveBlack p where (:prove is null or p.prove = :prove)")
     Page<ProveBlack> findAllPageable(Long prove, Pageable pageable);

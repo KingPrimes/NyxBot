@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -78,13 +79,12 @@ public class BotAdminController extends BaseController {
                 return error("不可使用此权限！");
             }
         }
-        BotAdmin byAdminUid = botAdminRepository.findByAdminUid(ba.getAdminUid());
-        if (byAdminUid != null) {
+        if (botAdminRepository.findByAdminUid(ba.getAdminUid()).isPresent()) {
             return error("已存在！");
         }
-        byAdminUid = botAdminRepository.findByPermissions(ba.getPermissions());
-        if (byAdminUid != null) {
-            if (byAdminUid.getPermissions().equals(PermissionsEnums.SUPER_ADMIN)) {
+        Optional<BotAdmin> byPermissions = botAdminRepository.findByPermissions(ba.getPermissions());
+        if (byPermissions.isPresent()) {
+            if (byPermissions.get().getPermissions().equals(PermissionsEnums.SUPER_ADMIN)) {
                 return error("超级管理员已存在！且只能有一个。");
             }
         }
@@ -103,9 +103,6 @@ public class BotAdminController extends BaseController {
         botAdminRepository.findById(id).ifPresent(a -> model.addAttribute("ba", a));
         return prefix + "edit";
     }
-
-
-
 
 
 }

@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Slf4j
 @Service
 public class WhiteService {
@@ -22,11 +24,11 @@ public class WhiteService {
 
 
     public GroupWhite findByGroup(Long group) {
-        return groupWhiteRepository.findByGroupUid(group);
+        return groupWhiteRepository.findByGroupUid(group).orElse(new GroupWhite());
     }
 
     public ProveWhite findByProve(Long prove) {
-        return proveWhiteRepository.findByProve(prove);
+        return proveWhiteRepository.findByProve(prove).orElse(new ProveWhite());
     }
 
     public Page<GroupWhite> list(GroupWhite gw) {
@@ -50,18 +52,12 @@ public class WhiteService {
     }
 
     public GroupWhite save(GroupWhite gw) {
-        GroupWhite g = groupWhiteRepository.findByGroupUid(gw.getGroupUid());
-        if (g != null) {
-            gw.setId(g.getId());
-        }
+        groupWhiteRepository.findByGroupUid(gw.getGroupUid()).ifPresent(g -> gw.setId(g.getId()));
         return groupWhiteRepository.save(gw);
     }
 
     public ProveWhite save(ProveWhite pw) {
-        ProveWhite prove = proveWhiteRepository.findByProve(pw.getProve());
-        if (prove != null) {
-            pw.setId(prove.getId());
-        }
+        proveWhiteRepository.findByProve(pw.getProve()).ifPresent(p -> pw.setId(p.getId()));
         return proveWhiteRepository.save(pw);
     }
 
@@ -79,18 +75,12 @@ public class WhiteService {
     }
 
     public boolean isWhite(Long group, Long prove) {
-        boolean flag = false;
+        AtomicBoolean flag = new AtomicBoolean(false);
         if (group != null && group != 0L) {
-            GroupWhite byGroup = groupWhiteRepository.findByGroupUid(group);
-            if (byGroup != null) {
-                flag = true;
-            }
+            groupWhiteRepository.findByGroupUid(group).ifPresent(g -> flag.set(true));
         }
-        ProveWhite byProve = proveWhiteRepository.findByProve(prove);
-        if (byProve != null) {
-            flag = true;
-        }
-        return flag;
+        proveWhiteRepository.findByProve(prove).ifPresent(p -> flag.set(true));
+        return flag.get();
     }
 
 }

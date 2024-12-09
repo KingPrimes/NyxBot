@@ -50,10 +50,10 @@ public class RivenAnalyseTrendModel {
             return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                     .append("name", name)
                     .append("attr", attr)
-                    .append("attributeName",attributeName)
+                    .append("attributeName", attributeName)
                     .append("lowAttr", lowAttr)
                     .append("highAttr", highAttr)
-                    .append("attrDiff",attrDiff)
+                    .append("attrDiff", attrDiff)
                     .append("lowAttrDiff", lowAttrDiff)
                     .append("highAttrDiff", highAttrDiff)
                     .toString();

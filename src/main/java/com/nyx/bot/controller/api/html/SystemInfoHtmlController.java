@@ -14,7 +14,7 @@ public class SystemInfoHtmlController {
 
     @GetMapping("/getSystemInfoHtml")
     public String getHtml(Model model) throws UnknownHostException {
-        model.addAttribute("info",SystemInfoUtils.getInfo());
+        model.addAttribute("info", SystemInfoUtils.getInfo());
         return "html/systemInfo";
     }
 }

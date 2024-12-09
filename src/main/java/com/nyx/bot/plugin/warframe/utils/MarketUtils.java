@@ -43,7 +43,7 @@ public class MarketUtils {
         key = key.toLowerCase(Locale.ROOT).replace("总图", "蓝图");
 
         try {
-            OrdersItems items;
+            Optional<OrdersItems> items;
             //假设用户使用了别名
             //匹配是否使用了别名 查出所有的别名列表并迭代查询
             List<Alias> aliases = aliasRepository.findAll();
@@ -55,9 +55,9 @@ public class MarketUtils {
 
             //直接使用别名模糊查询
             items = itemsRepository.findByItemNameLike(key);
-            if (items != null) {
-                market.setItemName(items.getItemName());
-                market.setKey(items.getUrlName());
+            if (items.isPresent()) {
+                market.setItemName(items.get().getItemName());
+                market.setKey(items.get().getUrlName());
                 return market;
             }
 
@@ -66,9 +66,9 @@ public class MarketUtils {
             }
 
             items = itemsRepository.findByItemNameLike(key);
-            if (items != null) {
-                market.setKey(items.getUrlName());
-                market.setItemName(items.getItemName());
+            if (items.isPresent()) {
+                market.setKey(items.get().getUrlName());
+                market.setItemName(items.get().getItemName());
                 return market;
             }
 
@@ -77,9 +77,9 @@ public class MarketUtils {
             String end = key.substring(key.length() - 1);
             //正则查询
             items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
-            if (items != null) {
-                market.setItemName(items.getItemName());
-                market.setKey(items.getUrlName());
+            if (items.isPresent()) {
+                market.setItemName(items.get().getItemName());
+                market.setKey(items.get().getUrlName());
                 return market;
 
             } else {
@@ -87,9 +87,9 @@ public class MarketUtils {
                 end = key.substring(key.length() - 2);
                 //正则查询
                 items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
-                if (items != null) {
-                    market.setItemName(items.getItemName());
-                    market.setKey(items.getUrlName());
+                if (items.isPresent()) {
+                    market.setItemName(items.get().getItemName());
+                    market.setKey(items.get().getUrlName());
                     return market;
                 }
             }
@@ -235,12 +235,12 @@ public class MarketUtils {
         log.debug("原始数据：{}", key);
         // 假设用户输入的是正确值，直接查询数据库
         var repository = SpringUtils.getBean(RivenItemsRepository.class);
-        RivenItems items = new RivenItems();
-        items.setItemName(key);
+        Optional<RivenItems> items = Optional.of(new RivenItems());
+        items.get().setItemName(key);
         items = repository.findByItemName(key);
-        log.debug("假设正确:{}", items);
-        if (items != null) {
-            return items;
+        log.debug("假设正确:{}", items.orElse(new RivenItems()));
+        if (items.isPresent()) {
+            return items.get();
         }
 
         // 假设用户输入的是别名，查询数据库
@@ -249,12 +249,12 @@ public class MarketUtils {
         if (!key.contains("prime") && key.contains("p")) {
             key = key.replace("p", "Prime");
         }
-        Alias a = alias.findByCn(key);
-        if (a != null) {
-            items = repository.findByItemName(a.getEn());
+        Optional<Alias> a = alias.findByCn(key);
+        if (a.isPresent()) {
+            items = repository.findByItemName(a.get().getEn());
             log.debug("别名:{}", items);
-            if (items != null) {
-                return items;
+            if (items.isPresent()) {
+                return items.get();
             }
         }
 
@@ -263,8 +263,8 @@ public class MarketUtils {
         String end = String.valueOf(key.charAt(key.length() - 1));
         items = repository.findByItemNameRegex("^" + start + ".*?" + end + ".*?");
         log.debug("正则查询:{}", items);
-        if (items != null) {
-            return items;
+        if (items.isPresent()) {
+            return items.get();
         }
 
         //最后查询所有以该字符开头的物品，并返回
@@ -327,17 +327,17 @@ public class MarketUtils {
         // 正面词条 变量
         StringBuilder statBuilder = new StringBuilder();
         for (int i = 0; i < stats.length; i++) {
-            RivenTion tion = SpringUtils.getBean(RivenTionRepository.class).findByEffect(stats[i].trim());
-            if (tion != null) {
-                statBuilder.append(tion.getUrlName());
+            Optional<RivenTion> tion = SpringUtils.getBean(RivenTionRepository.class).findByEffect(stats[i].trim());
+            if (tion.isPresent()) {
+                statBuilder.append(tion.get().getUrlName());
                 // 判断后续还有没有词条，如果有则添加逗号
                 if (i < stats.length - 1) {
                     statBuilder.append(",");
                 }
             } else {
-                RivenTionAlias alias = SpringUtils.getBean(RivenTionAliasRepository.class).findByCn(stats[i].trim());
-                if (alias != null) {
-                    statBuilder.append(alias.getEn());
+                Optional<RivenTionAlias> alias = SpringUtils.getBean(RivenTionAliasRepository.class).findByCn(stats[i].trim());
+                if (alias.isPresent()) {
+                    statBuilder.append(alias.get().getEn());
                     // 判断后续还有没有词条，如果有则添加逗号
                     if (i < stats.length - 1) {
                         statBuilder.append(",");
@@ -411,7 +411,7 @@ public class MarketUtils {
                         // 取前10个
                         .limit(10)
                         .peek(m -> m.getItem().setAttributes(m.getItem().getAttributes().stream().peek(a ->
-                                a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).getEffect())).toList()
+                                a.setUrlName(SpringUtils.getBean(RivenTionRepository.class).findByUrlName(a.getUrlName()).orElse(new RivenTion()).getEffect())).toList()
                         ))
                         .toList());
         // 解析返回数据

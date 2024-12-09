@@ -90,7 +90,7 @@ public class UpdatePlugin {
             if (b) {
                 bot.sendMsg(event, "更新成功，正在重启！", false);
                 new UpdateJarUtils().restartUpdate("NyxBot.jar");
-            }else{
+            } else {
                 bot.sendMsg(event, "更新失败，请手动更新！", false);
             }
 

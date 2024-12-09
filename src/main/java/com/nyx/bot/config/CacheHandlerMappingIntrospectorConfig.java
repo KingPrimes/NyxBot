@@ -15,7 +15,7 @@ import java.util.EnumSet;
 @Configuration
 public class CacheHandlerMappingIntrospectorConfig {
     @Bean
-    static FilterRegistrationBean<Filter> handlerMappingIntrospectorCacheFilter(HandlerMappingIntrospector hmi){
+    static FilterRegistrationBean<Filter> handlerMappingIntrospectorCacheFilter(HandlerMappingIntrospector hmi) {
         Filter cacheFilter = hmi.createCacheFilter();
         FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>(cacheFilter);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);

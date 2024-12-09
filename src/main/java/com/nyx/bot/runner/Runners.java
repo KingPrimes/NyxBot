@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -96,12 +97,13 @@ public class Runners {
             if (fileExists) {
                 Map<Long, Bot> robots = SpringUtils.getBean(BotContainer.class).robots;
                 if (robots != null) {
-                    BotAdmin byPermissions = SpringUtils.getBean(BotAdminRepository.class).findByPermissions(PermissionsEnums.SUPER_ADMIN);
+                    Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByPermissions(PermissionsEnums.SUPER_ADMIN);
                     for (Bot bot : robots.values()) {
-                        if (byPermissions.getBotUid().equals(bot.getSelfId())) {
-                            bot.sendPrivateMsg(byPermissions.getAdminUid(), "更新完毕！", false);
-                        }
-
+                        admin.ifPresent(a -> {
+                            if (a.getBotUid().equals(bot.getSelfId())) {
+                                bot.sendPrivateMsg(a.getAdminUid(), "更新完毕！", false);
+                            }
+                        });
                     }
                 }
             }

@@ -98,7 +98,7 @@ public class WarframeSubscribe {
                 });
                 //钢铁轮换
                 Optional.ofNullable(states.getSteelPath()).ifPresent(steelPath -> {
-                    if(!steelPath.equals(data.getSteelPath())){
+                    if (!steelPath.equals(data.getSteelPath())) {
                         WarframeDataUpdateMission.updateSteelPath();
                     }
                 });
@@ -114,7 +114,7 @@ public class WarframeSubscribe {
                 });
                 //双衍王境
                 Optional.ofNullable(states.getDuviriCycle()).ifPresent(duviriCycle -> {
-                    if(!duviriCycle.equals(data.getDuviriCycle())){
+                    if (!duviriCycle.equals(data.getDuviriCycle())) {
                         WarframeDataUpdateMission.updateDuviriCycle();
                     }
                 });

@@ -141,12 +141,12 @@ public class WarframeSubscribeCheck {
     /**
      * 取消订阅
      *
-     * @param userUid   用户ID
-     * @param subGroup  订阅群组
-     * @param raw       源消息
+     * @param userUid  用户ID
+     * @param subGroup 订阅群组
+     * @param raw      源消息
      * @return 发送的信息
      */
-    public static String userCancelSubscribe(Long userUid,Long subGroup, String raw) {
+    public static String userCancelSubscribe(Long userUid, Long subGroup, String raw) {
         StringBuffer motion = new StringBuffer();
         MissionSubscribeRepository bean = SpringUtils.getBean(MissionSubscribeRepository.class);
         Optional<MissionSubscribe> missionSubscribe = bean.findById(subGroup);

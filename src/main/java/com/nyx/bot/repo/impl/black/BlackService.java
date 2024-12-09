@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -25,11 +24,11 @@ public class BlackService {
 
 
     public GroupBlack findByGroupId(Long id) {
-        return repository.findByGroupUid(id);
+        return repository.findByGroupUid(id).orElse(new GroupBlack());
     }
 
     public ProveBlack findByProveId(Long id) {
-        return proveBlackRepository.findByProve(id);
+        return proveBlackRepository.findByProve(id).orElse(new ProveBlack());
     }
 
 
@@ -44,10 +43,7 @@ public class BlackService {
     }
 
     public int save(GroupBlack gb) {
-        GroupBlack groupBlack = repository.findByGroupUid(gb.getGroupUid());
-        if (groupBlack != null) {
-            gb.setId(groupBlack.getGroupUid());
-        }
+        repository.findByGroupUid(gb.getGroupUid()).ifPresent(g -> gb.setId(g.getId()));
         repository.save(gb);
         return 1;
     }
@@ -73,10 +69,7 @@ public class BlackService {
     }
 
     public int save(ProveBlack pb) {
-        ProveBlack prove = proveBlackRepository.findByProve(pb.getProve());
-        if (prove != null) {
-            pb.setId(prove.getId());
-        }
+        proveBlackRepository.findByProve(pb.getProve()).ifPresent(p -> pb.setId(p.getId()));
         proveBlackRepository.save(pb);
         return 1;
     }
@@ -100,15 +93,9 @@ public class BlackService {
     public boolean isBlack(Long groupUid, Long userUid) {
         AtomicBoolean flag = new AtomicBoolean(true);
         if (groupUid != null && groupUid != 0L) {
-            GroupBlack byGroupUid = repository.findByGroupUid(groupUid);
-            Optional.ofNullable(byGroupUid).ifPresent(g -> {
-                flag.set(false);
-            });
+            repository.findByGroupUid(groupUid).ifPresent(g -> flag.set(false));
         }
-        ProveBlack byUserUid = proveBlackRepository.findByProve(userUid);
-        Optional.ofNullable(byUserUid).ifPresent(p -> {
-            flag.set(false);
-        });
+        proveBlackRepository.findByProve(userUid).ifPresent(p -> flag.set(false));
         return flag.get();
     }
 

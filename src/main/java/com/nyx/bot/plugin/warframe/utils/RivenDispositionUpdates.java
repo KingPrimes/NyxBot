@@ -149,16 +149,11 @@ public class RivenDispositionUpdates {
         if (rivenTrends.isEmpty()) {
             return;
         }
-        rivenTrends.forEach(rivenTrend -> {
-            RivenTrend byTrendName = bean.findByTrendName(rivenTrend.getTrendName());
-            if (byTrendName != null) {
-                rivenTrend.setId(byTrendName.getId());
-                rivenTrend.setType(byTrendName.getType());
-                bean.save(rivenTrend);
-            } else {
-                bean.save(rivenTrend);
-            }
-        });
+        rivenTrends.forEach(rivenTrend -> bean.findByTrendName(rivenTrend.getTrendName()).ifPresentOrElse(rt -> {
+            rivenTrend.setId(rt.getId());
+            rivenTrend.setType(rt.getType());
+            bean.save(rivenTrend);
+        }, () -> bean.save(rivenTrend)));
         log.info("更新完毕...");
     }
 

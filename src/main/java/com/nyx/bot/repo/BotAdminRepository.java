@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface BotAdminRepository extends JpaRepository<BotAdmin, Long>, JpaSpecificationExecutor<BotAdmin> {
-    BotAdmin findByAdminUid(Long adminUid);
+    Optional<BotAdmin> findByAdminUid(Long adminUid);
 
     @Query("select b from BotAdmin b where (b.permissions = :permissions)")
-    BotAdmin findByPermissions(PermissionsEnums permissions);
+    Optional<BotAdmin> findByPermissions(PermissionsEnums permissions);
 }

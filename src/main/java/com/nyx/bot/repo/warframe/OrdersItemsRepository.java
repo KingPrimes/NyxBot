@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * OrdersItem 用于查询Warframe.Market 上面的物品,
@@ -27,7 +28,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, String
      * @return 结果
      */
     @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ','')) and URL_NAME regexp '(.*set)?' group by ITEM_NAME limit 1", nativeQuery = true)
-    OrdersItems findByItemNameLike(@Param("i") String itemName);
+    Optional<OrdersItems> findByItemNameLike(@Param("i") String itemName);
 
     /**
      * 根据物品名称模糊查询
@@ -45,7 +46,7 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, String
      * @param regex 正则表达式
      */
     @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) regexp upper(replace(:#{#r},' ','')) limit 1", nativeQuery = true)
-    OrdersItems findByItemNameRegex(@Param("r") String regex);
+    Optional<OrdersItems> findByItemNameRegex(@Param("r") String regex);
 
     @Query("select o from OrdersItems o where (:itemName is null or LOWER(o.itemName) like LOWER(concat('%', :itemName, '%')))")
     Page<OrdersItems> findAllPageable(String itemName, Pageable pageable);

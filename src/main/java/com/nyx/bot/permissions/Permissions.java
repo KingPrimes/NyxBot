@@ -8,6 +8,7 @@ import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.utils.SpringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Permissions {
 
@@ -20,11 +21,11 @@ public class Permissions {
      * @return 是否是管理员
      */
     public static boolean checkPermissions(Bot bot, AnyMessageEvent event) {
-        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
-        if (byAdminUid == null) {
+        Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(event.getUserId());
+        if (admin.isEmpty()) {
             return false;
         }
-        PermissionsEnums permissions = byAdminUid.getPermissions();
+        PermissionsEnums permissions = admin.get().getPermissions();
         return Objects.requireNonNull(permissions) == PermissionsEnums.ADMIN || isAdmin(bot, event) || Objects.requireNonNull(permissions) == PermissionsEnums.SUPER_ADMIN;
     }
 
@@ -34,11 +35,11 @@ public class Permissions {
      * @param userId 用户ID
      */
     public static boolean checkSuperAdmin(Long userId) {
-        BotAdmin byAdminUid = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(userId);
-        if (byAdminUid == null) {
+        Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(userId);
+        if (admin.isEmpty()) {
             return false;
         }
-        PermissionsEnums permissions = byAdminUid.getPermissions();
+        PermissionsEnums permissions = admin.get().getPermissions();
         return Objects.requireNonNull(permissions) == PermissionsEnums.SUPER_ADMIN;
     }
 

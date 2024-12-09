@@ -14,7 +14,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     private static final String RAND_STR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
-    private static final Logger log = LoggerFactory.getLogger(StringUtils.class);
     /**
      * 空字符串
      */
@@ -511,7 +510,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             }
             retStr.append(str1).append(newStr);
         }
-        if (str2.length() > 0 && str2.length() <= maxLen) {
+        if (!str2.isEmpty() && str2.length() <= maxLen) {
             retStr.append(str2);
         } else if (str2.length() > maxLen) {
             StringBuilder result = new StringBuilder();
@@ -520,7 +519,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
                 result.append(newStr);
                 str2 = str2.substring(maxLen);
             }
-            if (str2.length() > 0) {
+            if (!str2.isEmpty()) {
                 result.append(str2);
             }
             retStr.append(new String(result));
@@ -541,7 +540,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         String str;
         for (int i = 0; i <= len; i++) {
             str = substring(note, x, maxLen);
-            if (!str.equals("") && str != null) {
+            if (!str.isEmpty()) {
                 strs.add(str);
             }
             x = maxLen;
@@ -560,7 +559,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         String tmpString = "";
         tmpString += chElemData;
         StringBuilder stringBuffer = new StringBuilder(sourceString);
-        int iFlag = -1;
+        int iFlag;
         do {
             iFlag = stringBuffer.indexOf(tmpString);
             if (iFlag != -1) {
@@ -579,7 +578,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 返回 String 不包括前后文本 返回的文本:3
      */
     public static String getSubString(String text, String left, String right) {
-        String result = "";
+        String result;
         int zLen;
         if (left == null || left.isEmpty()) {
             zLen = 0;
@@ -592,7 +591,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             }
         }
         int yLen = text.indexOf(right, zLen);
-        if (yLen < 0 || right == null || right.isEmpty()) {
+        if (yLen < 0 || right.isEmpty()) {
             yLen = text.length();
         }
         result = text.substring(zLen, yLen);
@@ -602,8 +601,9 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     /**
      * 截取字符串
-     * @param str 源文本 比如：源文本 = 12345
-     * @param left 前字符串
+     *
+     * @param str   源文本 比如：源文本 = 12345
+     * @param left  前字符串
      * @param right 后字符串
      * @return 返回 String 不包括前后文本 返回的文本:3
      */
@@ -620,7 +620,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 返回 String 包括前后文本  返回的文本:234
      */
     public static String getSubStringEx(String text, String left, String right) {
-        String result = "";
+        String result;
         int zLen;
         if (left == null || left.isEmpty()) {
             zLen = 0;
@@ -633,7 +633,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             }
         }
         int yLen = text.indexOf(right, zLen);
-        if (yLen < 0 || right == null || right.isEmpty()) {
+        if (yLen < 0 || right.isEmpty()) {
             yLen = text.length();
         }
         result = text.substring(zLen, yLen);
@@ -726,6 +726,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     /**
      * 在单词之间添加空格
+     *
      * @param str 字符串
      * @return 字符串
      */
@@ -733,8 +734,8 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return str.replaceAll("(?<=\\p{Ll})(?=\\p{Lu})", " ");
     }
 
-    public static String removeMatcher(String str){
-        return str.replace("^","").replace("$","").trim();
+    public static String removeMatcher(String str) {
+        return str.replace("^", "").replace("$", "").trim();
     }
 
 }

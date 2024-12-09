@@ -25,10 +25,11 @@ public interface MissionSubscribeRepository extends JpaRepository<MissionSubscri
 
 
     /**
-     *  Cacheable 设置缓存
+     * Cacheable 设置缓存
+     *
      * @param subGroup 群号
      */
-    @Cacheable(value = CacheUtils.SYSTEM,key = "#subGroup")
+    @Cacheable(value = CacheUtils.SYSTEM, key = "#subGroup")
     @Query("select m from MissionSubscribe m where (:subGroup is null or m.subGroup = :subGroup)")
     MissionSubscribe findByGroupId(Long subGroup);
 

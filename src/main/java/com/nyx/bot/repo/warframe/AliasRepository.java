@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * Warframe别名
  */
@@ -19,8 +21,8 @@ public interface AliasRepository extends JpaRepository<Alias, Long>, JpaSpecific
     Page<Alias> findByLikeCn(String cn, Pageable pageable);
 
 
-    Alias findByCn(String cn);
+    Optional<Alias> findByCn(String cn);
 
     @Query("select a from Alias a where a.cn =:cn and a.en = :en")
-    Alias findByCnAndEn(String cn, String en);
+    Optional<Alias> findByCnAndEn(String cn, String en);
 }

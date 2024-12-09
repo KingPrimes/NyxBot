@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface GroupWhiteRepository extends JpaRepository<GroupWhite, Long>, JpaSpecificationExecutor<GroupWhite> {
     /**
@@ -15,7 +17,7 @@ public interface GroupWhiteRepository extends JpaRepository<GroupWhite, Long>, J
      *
      * @param group 群号
      */
-    GroupWhite findByGroupUid(Long group);
+    Optional<GroupWhite> findByGroupUid(Long group);
 
     @Query("select g from GroupWhite g where (:groupUid is null or g.groupUid = :groupUid)")
     Page<GroupWhite> findAllPageable(Long groupUid, Pageable pageable);

@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface GroupBlackRepository extends JpaRepository<GroupBlack, Long>, JpaSpecificationExecutor<GroupBlack> {
-    GroupBlack findByGroupUid(Long groupUid);
+    Optional<GroupBlack> findByGroupUid(Long groupUid);
 
     /**
      * 分页查询

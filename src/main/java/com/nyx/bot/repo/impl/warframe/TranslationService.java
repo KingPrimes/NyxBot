@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @Slf4j
 @Service
 public class TranslationService {
@@ -20,7 +22,6 @@ public class TranslationService {
 
     @Resource
     NotTranslationRepository ntr;
-
 
 
     /**
@@ -39,31 +40,21 @@ public class TranslationService {
      * @return 中文
      */
     public String enToZh(String en) {
-        try {
-            String cn = repository.findByEn(en.trim()).getCn();
-            if (cn != null && !cn.isEmpty()) {
-                return cn;
+        AtomicReference<String> cn = new AtomicReference<>(en.trim());
+        repository.findByEn(cn.get()).ifPresent(t -> {
+            if (t.getCn().isEmpty()) {
+                cn.set(t.getCn());
             }
+        });
+        if (cn.get().equals(en.trim())) {
             if (!MatcherUtils.isChines(en.trim())) {
                 NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
                 if (byNotTranslation == null) {
                     ntr.save(new NotTranslation(en.trim()));
                 }
             }
-            return en.trim();
-        } catch (Exception e) {
-            try {
-                if (!MatcherUtils.isChines(en.trim())) {
-                    NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
-                    if (byNotTranslation == null) {
-                        ntr.save(new NotTranslation(en.trim()));
-                    }
-                }
-            } catch (Exception ignored) {
-                return en.trim();
-            }
-            return en.trim();
         }
+        return cn.get();
     }
 
     /**
@@ -85,16 +76,13 @@ public class TranslationService {
     }
 
     public String zhToEn(String zh_cn) {
-        try {
-            Translation byCn = repository.findByCn(zh_cn.trim());
-            if (!byCn.getEn().isEmpty()) {
-                return byCn.getEn();
-            } else {
-                return zh_cn;
+        AtomicReference<String> cn = new AtomicReference<>(zh_cn.trim());
+        repository.findByCn(zh_cn.trim()).ifPresent(t -> {
+            if (!t.getEn().isEmpty()) {
+                cn.set(t.getEn());
             }
-        } catch (Exception ignored) {
-            return zh_cn;
-        }
+        });
+        return cn.get();
     }
 
 

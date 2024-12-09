@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -151,48 +152,49 @@ public class RivenAttributeCompute {
                             int index = entry.getKey();
                             RivenAnalyseTrendCompute.Attribute attribute = entry.getValue();
                             String name = attribute.getName();
-                            RivenAnalyseTrend analyseTrend;
+                            Optional<RivenAnalyseTrend> analyseTrend;
+                            RivenAnalyseTrendRepository rivenTrendRepository = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
                             //判断词条是否包含 射速、攻击速度
                             if (name.contains("射速") || name.contains("攻击速度")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("射速/攻击速度");
+                                analyseTrend = rivenTrendRepository.findByName("射速/攻击速度");
                             } else if (name.equals("伤害") || name.equals("近战伤害")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("伤害/近战伤害");
+                                analyseTrend = rivenTrendRepository.findByName("伤害/近战伤害");
                             } else if (name.equals("武器后坐力")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("后坐力");
+                                analyseTrend = rivenTrendRepository.findByName("后坐力");
                             } else if (name.contains("Infested") || name.contains("lnfested")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Infested伤害");
+                                analyseTrend = rivenTrendRepository.findByName("对Infested伤害");
                             } else if (name.contains("Corpus")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Corpus伤害");
+                                analyseTrend = rivenTrendRepository.findByName("对Corpus伤害");
                             } else if (name.contains("Grinner") || name.contains("Grineer")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("对Grineer伤害");
+                                analyseTrend = rivenTrendRepository.findByName("对Grineer伤害");
                             } else if (name.contains("暴击几率") && !name.contains("滑行")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("暴击几率");
+                                analyseTrend = rivenTrendRepository.findByName("暴击几率");
                             } else if (name.contains("秒连击持续时间")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("连击持续时间");
+                                analyseTrend = rivenTrendRepository.findByName("连击持续时间");
                             } else if (name.contains("冰冻")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("冰冻伤害");
+                                analyseTrend = rivenTrendRepository.findByName("冰冻伤害");
                             } else if (name.contains("毒素")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("毒素伤害");
+                                analyseTrend = rivenTrendRepository.findByName("毒素伤害");
                             } else if (name.contains("电击")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("电击伤害");
+                                analyseTrend = rivenTrendRepository.findByName("电击伤害");
                             } else if (name.contains("火焰")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("火焰伤害");
+                                analyseTrend = rivenTrendRepository.findByName("火焰伤害");
                             } else if (name.contains("冲击")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("冲击伤害");
+                                analyseTrend = rivenTrendRepository.findByName("冲击伤害");
                             } else if (name.contains("切割")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("切割伤害");
+                                analyseTrend = rivenTrendRepository.findByName("切割伤害");
                             } else if (name.contains("穿刺")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("穿刺伤害");
+                                analyseTrend = rivenTrendRepository.findByName("穿刺伤害");
                             } else if (name.contains("投射物")) {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName("投射物飞行速度");
+                                analyseTrend = rivenTrendRepository.findByName("投射物飞行速度");
                             } else {
-                                analyseTrend = SpringUtils.getBean(RivenAnalyseTrendRepository.class).findByName(attribute.getName());
+                                analyseTrend = rivenTrendRepository.findByName(attribute.getName());
                             }
                             RivenAnalyseTrendModel.Attribute attributeModel = new RivenAnalyseTrendModel.Attribute();
                             attributeModel.setAttributeName(attribute.getAttributeName());
                             attributeModel.setAttr(attribute.getAttribute());
                             attributeModel.setName(attribute.getName());
-
+                            RivenAnalyseTrend analyseTrendT = analyseTrend.orElse(new RivenAnalyseTrend());
                             /*boolean isNag = attribute.getAttribute() < 0 *//*|| (MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) && attribute.getAttribute() > 0)*//*;*/
                             // 用于判断最后一个词条是否是歧视属性
                             boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) || attribute.getAttribute() < 0 : attribute.getAttribute() < 0;
@@ -206,7 +208,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
-                                                            analyseTrend.getMelle(),
+                                                            analyseTrendT.getMelle(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -217,7 +219,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setHighAttr(
                                             String.valueOf(
                                                     attribute.getHighAttribute(
-                                                            analyseTrend.getMelle(),
+                                                            analyseTrendT.getMelle(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -231,7 +233,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
-                                                            analyseTrend.getRifle(),
+                                                            analyseTrendT.getRifle(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -242,7 +244,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setHighAttr(
                                             String.valueOf(
                                                     attribute.getHighAttribute(
-                                                            analyseTrend.getRifle(),
+                                                            analyseTrendT.getRifle(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -257,7 +259,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
-                                                            analyseTrend.getPistol(),
+                                                            analyseTrendT.getPistol(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -268,7 +270,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setHighAttr(
                                             String.valueOf(
                                                     attribute.getHighAttribute(
-                                                            analyseTrend.getPistol(),
+                                                            analyseTrendT.getPistol(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -282,7 +284,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
-                                                            analyseTrend.getArchwing(),
+                                                            analyseTrendT.getArchwing(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -293,7 +295,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setHighAttr(
                                             String.valueOf(
                                                     attribute.getHighAttribute(
-                                                            analyseTrend.getArchwing(),
+                                                            analyseTrendT.getArchwing(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -307,7 +309,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
-                                                            analyseTrend.getShotgun(),
+                                                            analyseTrendT.getShotgun(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
@@ -318,7 +320,7 @@ public class RivenAttributeCompute {
                                     attributeModel.setHighAttr(
                                             String.valueOf(
                                                     attribute.getHighAttribute(
-                                                            analyseTrend.getShotgun(),
+                                                            analyseTrendT.getShotgun(),
                                                             rivenTrend.getNewNum(),
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),

@@ -13,7 +13,7 @@ public class JarManifest {
     /**
      * 通过读取读取classpath文件的方式获取Manifest
      */
-    public static Manifest manifestFromClasspath(){
+    public static Manifest manifestFromClasspath() {
         URL resourceUrl = JarManifest.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
         if (resourceUrl != null) {
             try (InputStream inputStream = resourceUrl.openStream()) {

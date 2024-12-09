@@ -26,7 +26,7 @@ public class CachingConfig {
                         //配置名称为 group-captcha 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.GROUP_CAPTCHA).expireAfterWrite(30, TimeUnit.SECONDS).entryCapacity(10000),
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10,TimeUnit.MINUTES));
+                        b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10, TimeUnit.MINUTES));
     }
 
 }

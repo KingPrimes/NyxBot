@@ -228,11 +228,8 @@ public class WarframeDataSource {
                         .toList();
                 //便利结果集合
                 list.forEach(item -> {
-                    //到数据库中查询是否有这个值
-                    RivenItems byRivenId = repository.findById(item.getId());
-                    //如果有这个值则把ID付给要保存的新值
-                    Optional.ofNullable(byRivenId).ifPresent(b ->
-                            item.setRivenId(b.getRivenId()));
+                    //到数据库中查询是否有这个值,如果有这个值则把ID付给要保存的新值
+                    repository.findById(item.getId()).ifPresent(b->item.setRivenId(b.getRivenId()));
                     //增加|修改值
                     repository.save(item);
                     //增加|修改值的数量

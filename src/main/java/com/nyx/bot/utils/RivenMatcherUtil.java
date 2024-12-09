@@ -43,6 +43,7 @@ public class RivenMatcherUtil {
     public static boolean isWeaponsName(String str) {
         return WEAPONS_NAME_.matcher(str.trim()).matches() || WEAPONS_NAME.matcher(str.trim()).matches();
     }
+
     public static String getRivenNameE(String str) {
         Matcher m = RIVEN_NAME.matcher(str);
         StringBuilder builder = new StringBuilder();

@@ -61,7 +61,7 @@ public class WarframeDataUpdateMission {
      * 裂隙
      */
     public static void updateFissures() {
-        sendGroupsToUser(SubscribeEnums.FISSURES,I18nUtils.message("warframe.up.newFissures"));
+        sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"));
     }
 
     /**
@@ -200,7 +200,7 @@ public class WarframeDataUpdateMission {
                     for (MissionSubscribeUser user : subUsers) {
                         //获取是否是裂隙类型的订阅
                         for (MissionSubscribeUserCheckType userCheckType : user.getTypeList()) {
-                            switch (userCheckType.getSubscribe()){
+                            switch (userCheckType.getSubscribe()) {
                                 case FISSURES -> {
 
                                 }
@@ -210,9 +210,8 @@ public class WarframeDataUpdateMission {
                                 case ARBITRATION -> {
 
                                 }
-                                case VOID,ALERTS,CETUS_CYCLE,DAILY_DEALS,STEEL_PATH,NEWS,NIGHTWAVE -> {
-                                    ConstructTheReturnInformation(msg, enums, l, user.getUserId(), subGroup);
-                                }
+                                case VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE ->
+                                        ConstructTheReturnInformation(msg, enums, l, user.getUserId(), subGroup);
 
                             }
                         }
@@ -227,7 +226,7 @@ public class WarframeDataUpdateMission {
 
     }
 
-    static void ConstructTheReturnInformation(Msg msg,SubscribeEnums enums,Long bot,Long user,Long group){
+    static void ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, Long bot, Long user, Long group) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 gestural(enums), new OneBotLogInfoData(
                         bot,
