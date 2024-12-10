@@ -3,6 +3,12 @@
 <th:block th:insert="~{include :: header('实时日志')}"/>
 <th:block th:insert="~{include :: bootstrap-select-css}"/>
 <style>
+    #loggingText {
+        scroll-behavior: smooth; /* 平滑滚动 */
+        overflow-y: auto; /* 添加垂直滚动条 */
+        height: 100vh; /* 设置高度为视口高度的100% */
+    }
+
     #loggingText ul {
         display: flex;
         align-items: center;
@@ -39,6 +45,9 @@
 
     #loggingText li[name="li-log"] {
         color: black;
+        word-wrap: break-word; /* 自动换行 */
+        overflow-wrap: break-word; /* 自动换行 */
+        flex-grow: 1; /* 占据最大宽度 */
     }
 </style>
 <body>
@@ -88,7 +97,7 @@
             ul.append(live, time, thread, pack, log);
             $loggingText.append(ul);
         }
-        $loggingText.scrollTop($loggingText[0].scrollHeight);
+        $loggingText.scrollTop($loggingText[$loggingText.length - 1].scrollHeight);
     };
 </script>
 </body>

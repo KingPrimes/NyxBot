@@ -21,7 +21,7 @@
             <!-- 匹配时的操作：接收（记录） -->
             <onMatch>ACCEPT</onMatch>
             <!-- 不匹配时的操作：接收（记录） -->
-            <onMismatch>DENY</onMismatch>
+            <onMismatch>ACCEPT</onMismatch>
         </filter>
     </appender>
 

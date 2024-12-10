@@ -87,6 +87,7 @@ server:
   shutdown: graceful
 logging:
   level:
+    com.nyx.bot: DEBUG
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF
