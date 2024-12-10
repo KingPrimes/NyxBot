@@ -67,7 +67,7 @@ public class RivenTrendController extends BaseController {
     @PostMapping("/list")
     @ResponseBody
     public ResponseEntity<?> list(RivenTrend rt) {
-        return getDataTable(repository.findAllPageable(rt.getTrendName(),
+        return getDataTable(repository.findAllPageable(rt.getTrendName().isEmpty() ? null : rt.getTrendName(),
                 PageRequest.of(
                         rt.getPageNum() - 1,
                         rt.getPageSize()

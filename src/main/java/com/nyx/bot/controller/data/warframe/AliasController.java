@@ -36,7 +36,7 @@ public class AliasController extends BaseController {
     @PostMapping("/list")
     @ResponseBody
     public ResponseEntity<?> list(Alias alias) {
-        return getDataTable(repository.findAll(PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
+        return getDataTable(repository.findByLikeCn(alias.getCn().isEmpty() ? null : alias.getCn(), PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
     }
 
     @PostMapping("/update")
