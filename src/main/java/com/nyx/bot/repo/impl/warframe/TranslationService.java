@@ -46,7 +46,6 @@ public class TranslationService {
                 cn.set(t.getCn());
             }
         });
-        log.debug("enToZh EN:{} - CH:{}", en, cn.get());
         if (cn.get().equals(en.trim())) {
             if (!MatcherUtils.isChines(en.trim())) {
                 NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
