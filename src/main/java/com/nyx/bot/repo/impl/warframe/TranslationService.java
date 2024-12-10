@@ -42,10 +42,11 @@ public class TranslationService {
     public String enToZh(String en) {
         AtomicReference<String> cn = new AtomicReference<>(en.trim());
         repository.findByEn(cn.get()).ifPresent(t -> {
-            if (t.getCn().isEmpty()) {
+            if (!t.getCn().isEmpty()) {
                 cn.set(t.getCn());
             }
         });
+        log.debug("enToZh EN:{} - CH:{}", en, cn.get());
         if (cn.get().equals(en.trim())) {
             if (!MatcherUtils.isChines(en.trim())) {
                 NotTranslation byNotTranslation = ntr.findByNotTranslation(en.trim());
