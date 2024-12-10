@@ -24,7 +24,8 @@ public interface RivenTrendRepository extends JpaRepository<RivenTrend, Long>, J
 
     Optional<RivenTrend> findByTrendName(String name);
 
-    @Query("select new com.nyx.bot.entity.warframe.RivenTrend(r.id,r.trendName,r.newDot,r.newNum,r.oldDot,r.oldNum,r.isDate,r.type,t.cn) from RivenTrend r left join Translation t on r.trendName = t.en where (:name is null or t.cn like concat('%',:name,'%'))")
+    //@Query("select new com.nyx.bot.entity.warframe.RivenTrend(r.id,r.trendName,r.newDot,r.newNum,r.oldDot,r.oldNum,r.isDate,r.type,t.cn) from RivenTrend r left join Translation t on r.trendName = t.en where (:name is null or t.cn like concat('%',:name,'%'))")
+    @Query("select new com.nyx.bot.entity.warframe.RivenTrend(r.id,r.trendName,r.newDot,r.newNum,r.oldDot,r.oldNum,r.isDate,r.type,t.cn) from RivenTrend r left join Translation t on r.trendName = t.en where (:name is null or t.cn = :name)")
     Page<RivenTrend> findAllPageable(String name, Pageable pageable);
 
     /**
