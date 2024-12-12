@@ -106,9 +106,9 @@ public class UpdatePlugin {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
         CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
             if (flag) {
-                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items -> {
-                    bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false);
-                });
+                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
+                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
+                );
             } else {
                 bot.sendMsg(event, "翻译数据，更新失败！", false);
             }

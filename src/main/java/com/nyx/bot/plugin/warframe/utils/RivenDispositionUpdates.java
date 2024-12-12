@@ -154,9 +154,7 @@ public class RivenDispositionUpdates {
                     rivenTrend.setType(rt.getType());
                     bean.save(rivenTrend);
                 },
-                () -> {
-                    bean.save(rivenTrend);
-                }
+                () -> bean.save(rivenTrend)
         ));
         log.info("更新完毕...");
         return rivenTrends.size();
