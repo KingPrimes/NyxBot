@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class GitHubUtil {
@@ -25,6 +26,7 @@ public class GitHubUtil {
     public static Release getReleasesLatestVersion(String repoName, String depot) {
         HttpUtils.Body latest = HttpUtils.sendGet("https://api.github.com/repos/" + repoName + "/" + depot + "/releases/latest");
         if (!latest.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            System.out.println(latest);
             return null;
         }
         return JSON.parseObject(latest.getBody(), Release.class);
@@ -75,8 +77,29 @@ public class GitHubUtil {
      */
     public static byte[] getLatestZip() {
         String url = getLatestDownLoadUrl();
-        HttpUtils.Body body = HttpUtils.sendGetForFile(url);
-        assert body != null;
+        CompletableFuture<HttpUtils.Body>[] list = ApiUrl.GIT_HUB_SPEED.stream()
+                .map(s -> CompletableFuture.supplyAsync(() -> HttpUtils.sendGet(s)))
+                .toArray(CompletableFuture[]::new);
+
+        Object join = CompletableFuture.anyOf(list).join();
+        //log.info("join :{}", join);
+        log.info("join instanceof CompletableFuture :{}", join instanceof HttpUtils.Body);
+        if (join instanceof HttpUtils.Body body) {
+            log.debug("使用：{} 进行下载Jar文件", body.getUrl());
+            body = HttpUtils.sendGetForFile(body.getUrl() + url);
+            log.info("body :{}", body);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                throw new RuntimeException("Failed to download the latest zip file.");
+            }
+            return body.getFile();
+        }
+        return new byte[]{};
+        // 获取任意一个完成的请求结果
+
+
+        // 获取文件内容
+
+        /*assert body != null;
         if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             for (String s : ApiUrl.GIT_HUB_SPEED) {
                 body = HttpUtils.sendGetForFile(s + url);
@@ -85,8 +108,8 @@ public class GitHubUtil {
                     break;
                 }
             }
-        }
-        return body.getFile();
+        }*/
+        //return body.getFile();
     }
 
     /**

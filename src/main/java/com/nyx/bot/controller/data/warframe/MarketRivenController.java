@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.concurrent.CompletableFuture;
+
 @Controller
 @RequestMapping("/data/warframe/market/riven")
 public class MarketRivenController extends BaseController {
@@ -45,7 +47,7 @@ public class MarketRivenController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.getRivenWeapons();
+        CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons);
         return success("已执行任务！");
     }
 

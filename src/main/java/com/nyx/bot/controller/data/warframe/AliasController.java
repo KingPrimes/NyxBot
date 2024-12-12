@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequestMapping("/data/warframe/alias")
@@ -42,8 +43,11 @@ public class AliasController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.cloneDataSource();
-        WarframeDataSource.getAlias();
+        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
+            if (flag) {
+                CompletableFuture.runAsync(WarframeDataSource::getAlias);
+            }
+        });
         return success("已执行任务！");
     }
 

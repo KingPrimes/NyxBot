@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.concurrent.CompletableFuture;
+
 @Controller
 @RequestMapping("/data/warframe/market")
 public class OrdersItemsController extends BaseController {
@@ -44,7 +46,7 @@ public class OrdersItemsController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.getMarket();
+        CompletableFuture.runAsync(WarframeDataSource::getMarket);
         return success("已执行更新操作！");
     }
 }

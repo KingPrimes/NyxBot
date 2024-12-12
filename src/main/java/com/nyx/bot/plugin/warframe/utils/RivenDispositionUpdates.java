@@ -142,19 +142,24 @@ public class RivenDispositionUpdates {
         return trends;
     }
 
-    public void upRivenTrend() {
+    public Integer upRivenTrend() {
         log.info("正在执行任务...");
         RivenTrendRepository bean = SpringUtils.getBean(RivenTrendRepository.class);
         List<RivenTrend> rivenTrends = getRivenDispositionUpdates();
         if (rivenTrends.isEmpty()) {
-            return;
+            return -1;
         }
         rivenTrends.forEach(rivenTrend -> bean.findByTrendName(rivenTrend.getTrendName()).ifPresentOrElse(rt -> {
-            rivenTrend.setId(rt.getId());
-            rivenTrend.setType(rt.getType());
-            bean.save(rivenTrend);
-        }, () -> bean.save(rivenTrend)));
+                    rivenTrend.setId(rt.getId());
+                    rivenTrend.setType(rt.getType());
+                    bean.save(rivenTrend);
+                },
+                () -> {
+                    bean.save(rivenTrend);
+                }
+        ));
         log.info("更新完毕...");
+        return rivenTrends.size();
     }
 
 

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.concurrent.CompletableFuture;
+
 @Controller
 @RequestMapping("/data/warframe/ephemeras")
 public class EphemerasController extends BaseController {
@@ -42,7 +44,7 @@ public class EphemerasController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public AjaxResult update() {
-        WarframeDataSource.getEphemeras();
+        CompletableFuture.runAsync(WarframeDataSource::getEphemeras);
         return success("已执行任务！");
     }
 }
