@@ -7,9 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
+import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -30,11 +35,10 @@ public class HttpUtils {
             //调用超时
             .callTimeout(60, TimeUnit.SECONDS)
             //链接超时
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
             //读取超时
-            .readTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
             .build();
-
 
     public static Body sendGet(String url) {
         return sendGet(url, "");
@@ -82,6 +86,7 @@ public class HttpUtils {
         ) {
             //返回体
             Body body = getBody(response);
+            body.setUrl(url);
             log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
@@ -172,12 +177,13 @@ public class HttpUtils {
                 .build();
         Response response;
         try {
-            response = new OkHttpClient().newCall(req).execute();
+            response = client.newCall(req).execute();
             if (!response.isSuccessful()) {
                 log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
-                return null;
+                return new Body(HttpCodeEnum.ERROR);
             }
             Body body = getBodyForFile(response);
+            body.setUrl(url);
             log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
             return body;
         } catch (Exception e) {
@@ -196,17 +202,21 @@ public class HttpUtils {
     public static Body sendPostForFile(String url, String json) {
         Response response;
         try {
+            Headers.Builder headers = new Headers.Builder();
+            headers.add("Accept-Encoding", "application/octet-stream");
             RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
             Request request = new Request.Builder()
                     .url(url)
                     .post(requestBody)
+                    .headers(headers.build())
                     .build();
-            response = new OkHttpClient().newCall(request).execute();
+            response = client.newCall(request).execute();
             if (!response.isSuccessful()) {
                 log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
             Body body = getBodyForFile(response);
+            body.setUrl(url);
             log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
             return body;
 
@@ -259,6 +269,7 @@ public class HttpUtils {
         HttpCodeEnum code;
         Headers headers;
         Long takeTime;
+        String url;
 
         public Body() {
         }
