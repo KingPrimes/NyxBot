@@ -8,7 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
-@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
+@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER,
+        properties = {
+                "spring.sendgrid.proxy.host=127.0.0.1",
+                "spring.sendgrid.proxy.port=7890"
+        })
 public class TestGitHubUtils {
 
     //测试下载最新的Jar文件

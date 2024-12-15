@@ -1,8 +1,10 @@
 package com.nyx.bot.utils.http;
 
+import com.nyx.bot.core.SpringValues;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.SpringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -10,10 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.*;
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class HttpUtils {
-
     public static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
     public static final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
     public static final MediaType MEDIA_TYPE_GIF = MediaType.parse("image/gif");
@@ -37,7 +39,6 @@ public class HttpUtils {
 
     static {
         try {
-
             final X509ExtendedTrustManager trustAllCerts = new X509ExtendedTrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {
@@ -76,9 +77,32 @@ public class HttpUtils {
             sslContext.init(null, new TrustManager[]{trustAllCerts}, new java.security.SecureRandom());
 
             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            String proxyHost = System.getProperty("proxyHost");
+            String proxyPort = System.getProperty("proxyPort");
+            Proxy proxy;
+            if (proxyHost != null && proxyPort != null) {
+                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+            } else {
 
+                try {
+                    // 仅在测试环境中生效
+                    var utils = SpringUtils.getBean(SpringValues.class);
+                    proxyHost = utils.proxyHost;
+                    proxyPort = utils.proxyPort;
+                    if (proxyHost.isEmpty() || proxyPort.isEmpty()) {
+                        proxy = Proxy.NO_PROXY;
+                    } else {
+                        proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                    }
+                } catch (Exception e) {
+                    //
+                    proxy = Proxy.NO_PROXY;
+                }
+            }
+            log.debug("proxyHost:{} --- proxyPort:{}", proxyHost, proxyPort);
             client = new OkHttpClient().newBuilder()
                     .addInterceptor(new BrotliInterceptor())
+                    .proxy(proxy)
                     //调用超时
                     .callTimeout(60, TimeUnit.SECONDS)
                     //链接超时
