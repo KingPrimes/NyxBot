@@ -33,6 +33,20 @@ public class FileUtils {
     }
 
     /**
+     * 创建目录如果目录不存在
+     *
+     * @param file 文件
+     */
+    public static void createDir(File file) {
+        if (!file.exists() || !file.isDirectory()) {
+            File dir = file.getParentFile();
+            if (dir != null && !dir.exists()) {
+                dir.mkdirs();
+            }
+        }
+    }
+
+    /**
      * 写入文件
      *
      * @param fileName 文件路径+文件名字
