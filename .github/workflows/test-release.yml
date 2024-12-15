@@ -38,14 +38,3 @@ jobs:
           retention-days: 30
           compression-level: 6
           overwrite: true
-      - name: Upload JAR to another repository
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/KingPrimes/kingprimes.github.io.git
-          mkdir -p kingprimes.github.io/static/data/nyxbot
-          cp target/NyxBot.jar kingprimes.github.io/static/data/nyxbot/
-          cd kingprimes.github.io
-          git add -f static/data/nyxbot/NyxBot.jar
-          git commit -m "Add NyxBot.jar to static/data/nyxbot"
-          git push
