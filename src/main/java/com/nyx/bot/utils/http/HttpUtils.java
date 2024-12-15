@@ -40,7 +40,7 @@ public class HttpUtils {
 
             final X509ExtendedTrustManager trustAllCerts = new X509ExtendedTrustManager() {
                 @Override
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {
 
                 }
 
@@ -58,16 +58,16 @@ public class HttpUtils {
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+                public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
                 }
 
                 @Override
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) {
 
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+                public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
                 }
             };
 
@@ -259,7 +259,8 @@ public class HttpUtils {
 
                     ResponseBody body = response.body();
                     if (body == null) {
-                        throw new IOException("Response body is null");
+                        log.error("文件下载异常： body is null");
+                        return;
                     }
                     long fileSize = body.contentLength();
                     long downloaded = 0;
@@ -275,16 +276,14 @@ public class HttpUtils {
                             // 输出进度
                             printDownloadProgress(fileSize, downloaded);
                         }
+                        future.complete(true);
                     }
-
-                    future.complete(true);
                 }
             });
         } catch (Exception e) {
             log.error("发起请求出现异常:", e);
             future.completeExceptionally(e);
         }
-
         return future.join();
     }
 
