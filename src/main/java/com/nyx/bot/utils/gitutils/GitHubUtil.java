@@ -3,14 +3,12 @@ package com.nyx.bot.utils.gitutils;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class GitHubUtil {
@@ -76,20 +74,7 @@ public class GitHubUtil {
      * @return Boolean 是否完成
      */
     public static Boolean getLatestZip(String path) {
-        String url = getLatestDownLoadUrl();
-        CompletableFuture<?>[] list = ApiUrl.GIT_HUB_SPEED.stream()
-                .map(s -> CompletableFuture.supplyAsync(() -> HttpUtils.sendGet(s)))
-                .toArray(CompletableFuture[]::new);
-
-        if (list.length == ApiUrl.GIT_HUB_SPEED.size()) {
-            Object join = CompletableFuture.anyOf(list).join();
-            log.info("join instanceof CompletableFuture :{}", join instanceof HttpUtils.Body);
-            if (join instanceof HttpUtils.Body body) {
-                log.debug("使用：{} 进行下载Jar文件", body.getUrl());
-                return HttpUtils.sendGetForFile(body.getUrl() + url, path);
-            }
-        }
-        return false;
+        return HttpUtils.sendGetForFile(getLatestDownLoadUrl(), path);
     }
 
     /**
