@@ -119,8 +119,6 @@ public class GlobalDirectivesPlugin {
                 case WARFRAME_CD_PLUGIN -> not(bot, event);
                 // XT
                 case WARFRAME_XT_PLUGIN -> not(bot, event);
-                // /WIKI
-                case WARFRAME_WIKI_PLUGIN -> not(bot, event);
                 // 佩兰
                 case WARFRAME_SISTER_PLUGIN -> not(bot, event);
                 //金银垃圾

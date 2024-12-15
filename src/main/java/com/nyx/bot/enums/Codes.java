@@ -42,7 +42,6 @@ public enum Codes {
     WARFRAME_RIVEN_MARKET_PLUGIN("^/RM|^RM", PermissionsEnums.USER),
     WARFRAME_CD_PLUGIN("^/CD|^CD|^赤毒", PermissionsEnums.USER),
     WARFRAME_XT_PLUGIN("^/XT|^XT|^信条", PermissionsEnums.USER),
-    WARFRAME_WIKI_PLUGIN("^/WIKI", PermissionsEnums.USER),
     WARFRAME_SISTER_PLUGIN("^佩兰$|^佩兰数列$|^信条武器$", PermissionsEnums.USER),
     WARFRAME_MARKET_GOD_DUMP("^金垃圾$", PermissionsEnums.USER),
     WARFRAME_MARKET_SILVER_DUMP("^银垃圾$", PermissionsEnums.USER),
