@@ -36,6 +36,8 @@ public class MatcherUtils {
 
     public static final Pattern IS_IPV4 = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 
+    public static final Pattern IS_IPV6 = Pattern.compile("([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}");
+
     /**
      * 正则判断
      *
@@ -168,4 +170,13 @@ public class MatcherUtils {
         return IS_IPV4.matcher(str).matches();
     }
 
+    /**
+     * 判断是否是一个合法的IPV6地址
+     *
+     * @param str 待匹配项
+     * @return true 合规
+     */
+    public static boolean isIPV6(String str) {
+        return IS_IPV6.matcher(str).matches();
+    }
 }
