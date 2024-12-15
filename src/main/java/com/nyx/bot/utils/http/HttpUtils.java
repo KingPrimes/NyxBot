@@ -2,16 +2,22 @@ package com.nyx.bot.utils.http;
 
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
+import com.nyx.bot.utils.FileUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.net.ssl.*;
+import java.io.*;
+import java.net.Socket;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -25,15 +31,70 @@ public class HttpUtils {
     public static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("text/plain");
     public static final String CONTENT_TYPE_FORM_DATA = "multipart/form-data";
 
-    private static final OkHttpClient client = new OkHttpClient().newBuilder()
-            .addInterceptor(new BrotliInterceptor())
-            //调用超时
-            .callTimeout(60, TimeUnit.SECONDS)
-            //链接超时
-            .connectTimeout(60, TimeUnit.SECONDS)
-            //读取超时
-            .readTimeout(60, TimeUnit.SECONDS)
-            .build();
+    private static final OkHttpClient client;
+
+    private static double lastProgress = -1;
+
+    static {
+        try {
+
+            final X509ExtendedTrustManager trustAllCerts = new X509ExtendedTrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
+
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[]{};
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
+
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+                }
+            };
+
+
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, new TrustManager[]{trustAllCerts}, new java.security.SecureRandom());
+
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            client = new OkHttpClient().newBuilder()
+                    .addInterceptor(new BrotliInterceptor())
+                    //调用超时
+                    .callTimeout(60, TimeUnit.SECONDS)
+                    //链接超时
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    //读取超时
+                    .readTimeout(60, TimeUnit.SECONDS)
+
+                    .sslSocketFactory(sslSocketFactory, trustAllCerts)
+
+                    .hostnameVerifier((home, seen) -> true)
+
+                    .build();
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static Body sendGet(String url) {
         return sendGet(url, "");
@@ -127,9 +188,11 @@ public class HttpUtils {
             //响应时间
             body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
 
+            r.close();
+        }, () -> {
+            body.setCode(HttpCodeEnum.getCode(response.code()));
             response.close();
-        }, () -> body.setCode(HttpCodeEnum.getCode(response.code())));
-        response.close();
+        });
         return body;
     }
 
@@ -158,32 +221,80 @@ public class HttpUtils {
 
     }
 
+
     /**
      * 根据URL网址获取文件
      *
-     * @param url - url
-     * @return byte[] 文件
+     * @param url  - url
+     * @param path - 文件输出路径
      */
-    public static Body sendGetForFile(String url) {
+    public static Boolean sendGetForFile(String url, String path) {
         log.debug("发送请求 Url:{}", url);
+        // 用于下载完成返回标志符
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        File outputFile = new File(path);
+        // 若目录不存在,创建目录
+        FileUtils.createDir(outputFile);
+        // 构建请求
         Request req = new Request.Builder()
                 .url(url)
                 .get()
                 .build();
-        Response response;
         try {
-            response = client.newCall(req).execute();
-            if (!response.isSuccessful()) {
-                log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
-                return new Body(HttpCodeEnum.ERROR);
-            }
-            Body body = getBodyForFile(response);
-            body.setUrl(url);
-            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
-            return body;
+            // 执行请求
+            client.newCall(req).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    log.error("文件下载异常：{}", e.getMessage());
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
+                        future.complete(false);
+                        return;
+                    }
+
+                    ResponseBody body = response.body();
+                    if (body == null) {
+                        throw new IOException("Response body is null");
+                    }
+                    long fileSize = body.contentLength();
+                    long downloaded = 0;
+                    // 获取数据流，创建文件
+                    try (InputStream in = body.byteStream();
+                         FileOutputStream out = new FileOutputStream(outputFile)) {
+
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, bytesRead);
+                            downloaded += bytesRead;
+                            // 输出进度
+                            printDownloadProgress(fileSize, downloaded);
+                        }
+                    }
+
+                    future.complete(true);
+                }
+            });
         } catch (Exception e) {
             log.error("发起请求出现异常:", e);
-            return new Body(HttpCodeEnum.ERROR);
+            future.completeExceptionally(e);
+        }
+
+        return future.join();
+    }
+
+    private static void printDownloadProgress(long fileSize, long downloaded) {
+        double progress = (double) downloaded / fileSize * 100;
+        progress = Math.floor(progress); // Round down to nearest integer
+
+        if (progress - lastProgress >= 1) {
+            log.info("文件下载进度:{}%", String.format("%.2f", progress));
+            lastProgress = progress;
         }
     }
 
@@ -226,6 +337,7 @@ public class HttpUtils {
         InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
         Body body = new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()), response.headers());
         body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
+        response.close();
         return body;
     }
 
