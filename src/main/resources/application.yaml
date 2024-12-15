@@ -13,6 +13,8 @@ async:
         prefix: async-
 
 spring:
+  profiles:
+    active: server
   main:
     allow-circular-references: true
   mvc:
