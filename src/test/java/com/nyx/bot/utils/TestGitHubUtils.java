@@ -2,6 +2,7 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +14,7 @@ public class TestGitHubUtils {
     //测试下载最新的Jar文件
     @Test
     void testGithubGetLatestZip() {
-        log.info("testGithubGetLatestZip:{}", GitHubUtil.getLatestZip().length);
+        log.info("testGithubGetLatestZip:{}", HttpUtils.sendGetForFile(GitHubUtil.getLatestDownLoadUrl(), "./tmp/NyxBot.jar"));
     }
 
     //测试获取最新版本的下载链接

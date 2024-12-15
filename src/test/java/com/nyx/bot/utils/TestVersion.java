@@ -4,6 +4,7 @@ package com.nyx.bot.utils;
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
 import com.nyx.bot.utils.gitutils.JgitUtil;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,8 +15,7 @@ public class TestVersion {
 
     @Test
     void testGetJarVersion() {
-        byte[] latestZip = GitHubUtil.getLatestZip();
-        FileUtils.writeToFile(latestZip, "./tmp/NyxBot.jar");
+        log.info("testGithubGetLatestZip:{}", HttpUtils.sendGetForFile(GitHubUtil.getLatestDownLoadUrl(), "./tmp/NyxBot.jar"));
     }
 
     @Test
