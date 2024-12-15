@@ -5,7 +5,6 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
-import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.UpdateJarUtils;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
@@ -128,13 +127,7 @@ public class UpdatePlugin {
             String body = GitHubUtil.getBody();
             bot.sendMsg(event, "最新版本更新日志：" + body, false);
             bot.sendMsg(event, "正在更新，请稍后...\n若长时间没有反应，请手动更新或者回退版本。\n备份文件在backup目录中。", false);
-            String path = "./tmp/NyxBot.jar";
-            byte[] latestZip = GitHubUtil.getLatestZip();
-            if (latestZip.length == 0) {
-                bot.sendMsg(event, "更新失败，请手动更新！", false);
-            }
-            boolean b = FileUtils.writeToFile(latestZip, path);
-            if (b) {
+            if (GitHubUtil.getLatestZip("./tmp/NyxBot.jar")) {
                 bot.sendMsg(event, "更新成功，正在重启！", false);
                 new UpdateJarUtils().restartUpdate("NyxBot.jar");
             } else {
