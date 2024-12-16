@@ -12,6 +12,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -62,6 +64,17 @@ public class TestInitRelics {
     @Test
     void testSelectRelicsByRewardsName() {
         rewardsRepository.findByItemName("Zakti Prime Receiver").forEach(System.out::println);
+    }
+
+    @Test
+    void testFindAllPageable() {
+        Page<Relics> page = repository.findAllPageable(new Relics(), PageRequest.of(
+                10,
+                20
+        ));
+        log.info("getTotalPages:{}", page.getTotalPages());
+        log.info("getTotalElements:{}", page.getTotalElements());
+        log.info("getContent:{}", page.getContent());
     }
 
 }

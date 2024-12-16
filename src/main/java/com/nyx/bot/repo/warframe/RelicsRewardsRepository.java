@@ -7,7 +7,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface RelicsRewardsRepository extends JpaRepository<RelicsRewards, Long>, JpaSpecificationExecutor<RelicsRewards>, PagingAndSortingRepository<RelicsRewards, Long> {

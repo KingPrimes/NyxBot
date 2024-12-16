@@ -52,7 +52,6 @@ public class BaseController {
     /**
      * 响应请求分页数据
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     protected TableDataInfo getDataTable(List<?> list, Long totalElements) {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(200);
@@ -151,7 +150,7 @@ public class BaseController {
         return StringUtils.format("redirect:{}", url);
     }
 
-    public String pushJson(List all) {
+    public String pushJson(List<?> all) {
         SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
         Set<String> set = new HashSet<>();
         set.add("pageNum");
