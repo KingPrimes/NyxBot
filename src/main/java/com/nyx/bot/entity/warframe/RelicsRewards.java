@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -33,8 +34,9 @@ public class RelicsRewards {
             targetEntity = Relics.class
     )
     @JoinColumn(name = "relics", referencedColumnName = "relicsId", nullable = false)
+    // JSON 被管理端 用于双向链接，解决嵌套过度的问题
+    @JsonBackReference
     Relics relics;
-
 
     @Override
     public String toString() {

@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
@@ -26,6 +27,8 @@ public class Relics extends BaseEntity {
             referencedColumnName = "relicsId",
             nullable = false
     )
+    // JSON 管理端 用于双向链接，解决嵌套过度的问题
+    @JsonManagedReference
     @JsonProperty("rewards")
     List<RelicsRewards> rewards;
 
@@ -45,11 +48,11 @@ public class Relics extends BaseEntity {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                .append("rewards", rewards)
                 .append("relicsId", relicsId)
                 .append("relicName", relicName)
                 .append("state", state)
                 .append("tier", tier)
+                .append("rewards", rewards)
                 .toString();
     }
 }
