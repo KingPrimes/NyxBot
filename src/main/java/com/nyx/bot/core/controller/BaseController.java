@@ -53,11 +53,13 @@ public class BaseController {
      * 响应请求分页数据
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected TableDataInfo getDataTable(List<?> list, Long total) {
+    protected TableDataInfo getDataTable(List<?> list, Long totalElements) {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(200);
-        rspData.setRows(list);
-        rspData.setTotal(total);
+        TableDataInfo.Data data = new TableDataInfo.Data();
+        data.setContent(list);
+        data.setTotalElements(totalElements);
+        rspData.setData(data);
         return rspData;
     }
 
