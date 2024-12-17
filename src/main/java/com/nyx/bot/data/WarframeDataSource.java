@@ -58,6 +58,7 @@ public class WarframeDataSource {
                         .thenRunAsync(WarframeDataSource::getMarket)
                         .thenRunAsync(WarframeDataSource::getWeapons)
                         .thenRunAsync(WarframeDataSource::getRivenWeapons)
+                        .thenRunAsync(WarframeDataSource::getRelics)
         ).thenRun(() -> log.info("数据初始化完成！"));
     }
 
@@ -243,6 +244,18 @@ public class WarframeDataSource {
             log.info("共更新Warframe.Market紫卡武器 {} 条数据！", rivenItems.size());
             return rivenItems.size();
         }
+    }
+
+    // 遗物
+    public static Integer getRelics() {
+        log.info("开始初始化Relics数据！");
+        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_RELICS_DATA);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            List<Relics> relics = JSON.parseObject(body.getBody()).getJSONArray("relics").toJavaList(Relics.class).stream().filter(r -> r.getState().equals("Intact")).toList();
+            relics = relics.stream().peek(r -> r.setRewards(r.getRewards().stream().peek(w -> w.setRelics(r)).toList())).toList();
+            return SpringUtils.getBean(RelicsRepository.class).saveAll(relics).size();
+        }
+        return -1;
     }
 
     //别名
