@@ -253,7 +253,24 @@ public class WarframeDataSource {
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             List<Relics> relics = JSON.parseObject(body.getBody()).getJSONArray("relics").toJavaList(Relics.class).stream().filter(r -> r.getState().equals("Intact")).toList();
             relics = relics.stream().peek(r -> r.setRewards(r.getRewards().stream().peek(w -> w.setRelics(r)).toList())).toList();
-            return SpringUtils.getBean(RelicsRepository.class).saveAll(relics).size();
+            RelicsRepository repository = SpringUtils.getBean(RelicsRepository.class);
+            if (!repository.findAll().isEmpty()) {
+                List<Relics> all = repository.findAll();
+                List<Relics> list = relics.stream().filter(item ->
+                                !all.stream()
+                                        .collect(Collectors.toMap(Relics::toString, value -> value))
+                                        .containsKey(item.toString())
+                        )
+                        .toList();
+                relics = repository.saveAll(list);
+                log.info("共更新Warframe 遗物表 {} 条数据！", relics.size());
+                return relics.size();
+            } else {
+                relics = repository.saveAll(relics);
+                log.info("共初始化Warframe 遗物表 {} 条数据！", relics.size());
+                return relics.size();
+            }
+
         }
         return -1;
     }
