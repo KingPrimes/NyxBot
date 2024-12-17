@@ -43,7 +43,8 @@ public class HtmlToImage {
             SharedContext sharedContext = g2r.getSharedContext();
             //设置图片清晰度
             sharedContext.setDPI(72);
-            sharedContext.setDotsPerPixel(3);
+
+            sharedContext.setDotsPerPixel(2);
 
             //设置字体
             getFontInputStream().forEach(sharedContext::setFontMapping);

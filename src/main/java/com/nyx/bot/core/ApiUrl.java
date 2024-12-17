@@ -65,6 +65,8 @@ public class ApiUrl {
      */
     public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v1/sister/weapons";
 
+    public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
+
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
 
 

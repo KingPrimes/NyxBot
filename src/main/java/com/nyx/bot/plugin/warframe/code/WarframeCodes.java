@@ -425,4 +425,15 @@ public class WarframeCodes {
     }
 
 
+    public static void relics(Bot bot, AnyMessageEvent event) {
+        OneBotLogInfoData data = getLogInfoData(bot, event, Codes.WARFRAME_RELICS_PLUGIN);
+        data.setData(event.getRawMessage().replaceAll(Codes.WARFRAME_RELICS_PLUGIN.getStr(), "").trim());
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postRelicsImage", data);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        } else {
+            sendErrorMsg(bot, event, body);
+        }
+    }
 }
