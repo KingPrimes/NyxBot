@@ -24,6 +24,15 @@ public interface RelicsRepository extends JpaRepository<Relics, String>, JpaSpec
     List<Relics> findByRelicName(String name);
 
     /**
+     * 根据名称和纪元查询
+     *
+     * @param name 遗物名称
+     * @param tier 纪元
+     * @return 列表
+     */
+    List<Relics> findByRelicNameAndTier(String name, String tier);
+
+    /**
      * 根据纪元查询
      * @param tier 纪元
      * @return 列表

@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = false)
+
 @Data
 @Entity
 @Table(name = "relics")
@@ -54,5 +55,21 @@ public class Relics extends BaseEntity {
                 .append("tier", tier)
                 .append("rewards", rewards)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Relics relics = (Relics) o;
+
+        return new EqualsBuilder().appendSuper(super.equals(o)).append(relicsId, relics.relicsId).append(relicName, relics.relicName).append(state, relics.state).append(tier, relics.tier).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(relicsId).append(relicName).append(state).append(tier).toHashCode();
     }
 }

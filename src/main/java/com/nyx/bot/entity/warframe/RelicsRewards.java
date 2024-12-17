@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -48,5 +50,21 @@ public class RelicsRewards {
                 .append("chance", chance)
                 .append("relics", relics)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RelicsRewards that = (RelicsRewards) o;
+
+        return new EqualsBuilder().append(id, that.id).append(rewardId, that.rewardId).append(itemName, that.itemName).append(rarity, that.rarity).append(chance, that.chance).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(id).append(rewardId).append(itemName).append(rarity).append(chance).toHashCode();
     }
 }
