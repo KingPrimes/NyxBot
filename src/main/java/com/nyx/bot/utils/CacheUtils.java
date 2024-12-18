@@ -23,14 +23,11 @@ public class CacheUtils {
         if (data == null) {
             throw new DataNotInfoException(I18nUtils.message("error.warframe.data.null"));
         }
+        GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
         if (data.getArbitration() == null) {
-            GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
-            if (arbitration != null) {
-                data.setArbitration(arbitration);
-            }
+            data.setArbitration(arbitration);
         } else {
-            GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
-            if (arbitration != null && !data.getArbitration().equals(arbitration)) {
+            if (!data.getArbitration().equals(arbitration)) {
                 data.setArbitration(arbitration);
             }
         }
