@@ -72,7 +72,6 @@ public class ApiUrl {
 
     /**
      * Market 物品查询
-     *
      * @param key  物品名称
      * @param from 平台
      * @return 返回信息
@@ -96,7 +95,7 @@ public class ApiUrl {
                 //判断两个时间相差的秒数，为负数则是正确数据
                 .filter(i -> DateUtils.getDateSecond(i.getActivation(), date) < 0)
                 .findFirst().orElse(null);
-        if (arbitrationPre == null) return null;
+        if (arbitrationPre == null) return arbitrationPre();
         GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
         arbitration.setActivation(arbitrationPre.getActivation());
         arbitration.setExpiry(arbitrationPre.getExpiry());
