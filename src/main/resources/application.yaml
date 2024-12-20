@@ -22,7 +22,8 @@ spring:
     allow-circular-references: true
   mvc:
     static-path-pattern: /static/**
-
+    pathmatch:
+      matching-strategy: ant_path_matcher
   thymeleaf:
     mode: HTML
     encoding: UTF-8
@@ -76,6 +77,9 @@ spring:
 
   lifecycle:
     timeout-per-shutdown-phase: 10s
+  web:
+    resources:
+      static-locations: classpath:/static/
 
 # OneBot
 shiro:

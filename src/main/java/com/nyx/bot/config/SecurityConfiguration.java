@@ -72,14 +72,13 @@ public class SecurityConfiguration {
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                new AntPathRequestMatcher("/h2-console/**"),
-                                new AntPathRequestMatcher("/img/**"),
-                                new AntPathRequestMatcher("/css/**"),
-                                new AntPathRequestMatcher("/js/**"),
-                                new AntPathRequestMatcher("/nyx/**"),
+                                new AntPathRequestMatcher("/"),
+                                new AntPathRequestMatcher("/index.html"),
                                 new AntPathRequestMatcher("/static/**"),
-                                new AntPathRequestMatcher("/private/**"),
+                                new AntPathRequestMatcher("/assets/**"),
                                 new AntPathRequestMatcher("/api/**"),
+                                new AntPathRequestMatcher("/private/**"),
+                                //new AntPathRequestMatcher("/**"),
                                 new AntPathRequestMatcher(shiro)
                         ).permitAll()
                         .requestMatchers("/login").permitAll()

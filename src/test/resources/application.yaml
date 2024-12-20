@@ -5,7 +5,6 @@ jwt:
   expiration: 86400000
   secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
 
-
 #线程池
 async:
   executor:
@@ -18,12 +17,13 @@ async:
 
 spring:
   profiles:
-    active: dev
+    active: server
   main:
     allow-circular-references: true
   mvc:
     static-path-pattern: /static/**
-
+    pathmatch:
+      matching-strategy: ant_path_matcher
   thymeleaf:
     mode: HTML
     encoding: UTF-8
@@ -77,6 +77,10 @@ spring:
 
   lifecycle:
     timeout-per-shutdown-phase: 10s
+  web:
+    resources:
+      static-locations: classpath:/static/
+
 # OneBot
 shiro:
   ws:
@@ -94,7 +98,6 @@ server:
 logging:
   level:
     com.nyx.bot: DEBUG
-    com.mikuac.shiro: INFO
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF
