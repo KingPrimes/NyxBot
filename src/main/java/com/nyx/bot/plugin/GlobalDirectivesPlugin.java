@@ -96,11 +96,11 @@ public class GlobalDirectivesPlugin {
                 //入侵
                 case WARFRAME_INVASIONS_PLUGIN -> WarframeCodes.invasions(bot, event);
                 //裂缝
-                case WARFRAME_FISSURES_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
+                case WARFRAME_FISSURES_PLUGIN -> WarframeCodes.fissures(bot, event, codes);
                 //九重天
-                case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
+                case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> WarframeCodes.fissures(bot, event, codes);
                 //钢铁
-                case WARFRAME_FISSURES_PATH_PLUGIN -> WarframeCodes.fissues(bot, event, codes);
+                case WARFRAME_FISSURES_PATH_PLUGIN -> WarframeCodes.fissures(bot, event, codes);
                 //平原
                 case WARFRAME_ALL_CYCLE_PLUGIN -> WarframeCodes.allCycle(bot, event);
                 //电波

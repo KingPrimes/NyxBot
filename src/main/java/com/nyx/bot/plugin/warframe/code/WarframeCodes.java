@@ -144,9 +144,9 @@ public class WarframeCodes {
     /**
      * 裂隙
      */
-    public static void fissues(Bot bot, AnyMessageEvent event, Codes code) {
+    public static void fissures(Bot bot, AnyMessageEvent event, Codes code) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getFissuesImage",
+                "postFissuresImage",
                 getLogInfoData(bot, event, code));
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,

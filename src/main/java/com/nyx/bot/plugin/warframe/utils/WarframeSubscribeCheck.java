@@ -59,7 +59,7 @@ public class WarframeSubscribeCheck {
         }
         SubscribeEnums subscribeEnums = SubscribeEnums.values()[i];
         WarframeMissionTypeEnum missionTypeEnum;
-        long tierNum;
+        int tierNum;
         if (split.length >= 2) {
             int te = Integer.parseInt(split[1]);
             if (te <= 0 || te > WarframeMissionTypeEnum.values().length - 1) {
@@ -70,9 +70,9 @@ public class WarframeSubscribeCheck {
             missionTypeEnum = WarframeMissionTypeEnum.ERROR;
         }
         if (split.length >= 3) {
-            tierNum = Long.parseLong(split[2]);
+            tierNum = Integer.parseInt(split[2]);
         } else {
-            tierNum = 0L;
+            tierNum = 0;
         }
 
         MissionSubscribeRepository bean = SpringUtils.getBean(MissionSubscribeRepository.class);
@@ -157,7 +157,7 @@ public class WarframeSubscribeCheck {
         }
         SubscribeEnums subscribeEnums = SubscribeEnums.values()[i];
         WarframeMissionTypeEnum missionTypeEnum;
-        long tierNum;
+        int tierNum;
         if (split.length >= 2) {
             int te = Integer.parseInt(split[1]);
             if (te <= 0 || te > WarframeMissionTypeEnum.values().length - 1) {
@@ -168,9 +168,9 @@ public class WarframeSubscribeCheck {
             missionTypeEnum = WarframeMissionTypeEnum.ERROR;
         }
         if (split.length >= 3) {
-            tierNum = Long.parseLong(split[2]);
+            tierNum = Integer.parseInt(split[2]);
         } else {
-            tierNum = 0L;
+            tierNum = 0;
         }
         missionSubscribe.ifPresentOrElse(m -> {
             List<MissionSubscribeUser> subUsers = m.getSubUsers();
@@ -198,7 +198,7 @@ public class WarframeSubscribeCheck {
         return motion.toString();
     }
 
-    private static MissionSubscribeUser saveUser(Long userUid, String userName, SubscribeEnums subscribeEnums, WarframeMissionTypeEnum missionTypeEnum, long tierNum) {
+    private static MissionSubscribeUser saveUser(Long userUid, String userName, SubscribeEnums subscribeEnums, WarframeMissionTypeEnum missionTypeEnum, Integer tierNum) {
         MissionSubscribeUser user = new MissionSubscribeUser();
         user.setUserName(userName);
         user.setUserId(userUid);
