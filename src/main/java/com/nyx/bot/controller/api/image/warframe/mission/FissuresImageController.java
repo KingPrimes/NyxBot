@@ -19,11 +19,11 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/api")
-public class FissuesImageController {
+public class FissuresImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_FISSURES_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getFissuesImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postFissuresImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+    public void postFissuresImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         int i = 0;
         switch (data.getCodes()) {
@@ -32,19 +32,19 @@ public class FissuesImageController {
         }
         response.getOutputStream().write(
                 HtmlToImage.converse(
-                        Constants.LOCALHOST + "private/getFissuesHtml/" + i
+                        Constants.LOCALHOST + "private/getFissuresHtml/" + i
                 ).toByteArray()
         );
     }
 
     @LogInfo(title = "Api订阅", codes = Codes.WARFRAME_FISSURES_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getSubscribeFissuesImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postSubscribeFissuresImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public void getSubscribeImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+    public void postSubscribeFissuresImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.conversePost(
-                        Constants.LOCALHOST + "private/getSubscribeFissuesHtml",
+                        Constants.LOCALHOST + "private/postSubscribeFissuresHtml",
                         data.getData()
                 ).toByteArray()
         );

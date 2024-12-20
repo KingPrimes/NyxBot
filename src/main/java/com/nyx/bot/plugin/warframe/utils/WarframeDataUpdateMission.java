@@ -1,5 +1,6 @@
 package com.nyx.bot.plugin.warframe.utils;
 
+import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.core.OneBotLogInfoData;
@@ -10,7 +11,11 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.enums.SubscribeEnums;
+import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
+import com.nyx.bot.res.GlobalStates;
+import com.nyx.bot.utils.CacheUtils;
+import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -18,6 +23,7 @@ import com.nyx.bot.utils.onebot.ImageUrlUtils;
 import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -104,26 +110,36 @@ public class WarframeDataUpdateMission {
      * 电波
      */
     public static void updateNightwave() {
+        sendGroupsToUser(SubscribeEnums.NIGHTWAVE, I18nUtils.message("warframe.up.night-wave"));
     }
 
     /**
      * 突击
      */
     public static void updateSortie() {
+        sendGroupsToUser(SubscribeEnums.SORTIE, I18nUtils.message("warframe.up.sortie"));
     }
 
     /**
      * 执政官突击
      */
     public static void updateArchonHunt() {
+        sendGroupsToUser(SubscribeEnums.ARCHON_HUNT, I18nUtils.message("warframe.up.archonHunt"));
     }
 
     /**
      * 双衍王境
      */
     public static void updateDuviriCycle() {
+        sendGroupsToUser(SubscribeEnums.DUVIRI_CYCLE, I18nUtils.message("warframe.up.duviriCycle"));
     }
 
+    /**
+     * 根据订阅类型返回图片Url后缀地址
+     *
+     * @param enums 订阅类型
+     * @return 图片Url后缀地址
+     */
     static String gestural(SubscribeEnums enums) {
         switch (enums) {
             case ARBITRATION -> {
@@ -149,6 +165,15 @@ public class WarframeDataUpdateMission {
             }
             case SORTIE -> {
                 return "getAssaultImage";
+            }
+            case ARCHON_HUNT -> {
+                return "getArsonHuntImage";
+            }
+            case DUVIRI_CYCLE -> {
+                return "getDuviriCycleImage";
+            }
+            case FISSURES -> {
+                return "postSubscribeFissuresImage";
             }
             default -> {
                 return "";
@@ -198,34 +223,53 @@ public class WarframeDataUpdateMission {
                                             .filter(t -> t.getSubscribe().equals(enums))
                                             .count() > 1).toList();
                     for (MissionSubscribeUser user : subUsers) {
+                        boolean flag = false;
+                        List<MissionSubscribeUserCheckType> msucts = new ArrayList<>();
                         //获取是否是裂隙类型的订阅
                         for (MissionSubscribeUserCheckType userCheckType : user.getTypeList()) {
                             switch (userCheckType.getSubscribe()) {
                                 case FISSURES -> {
-
+                                    msucts.add(userCheckType);
                                 }
                                 case INVASIONS -> {
-
+                                    flag = true;
                                 }
                                 case ARBITRATION -> {
 
                                 }
-                                case VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE ->
-                                        ConstructTheReturnInformation(msg, enums, l, user.getUserId(), subGroup);
-
+                                case VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE, SORTIE, ARCHON_HUNT, DUVIRI_CYCLE ->
+                                        flag = true;
                             }
                         }
-                        bots.get(l).sendGroupMsg(subGroup, msg.build(), false);
+                        if (flag) {
+                            ConstructTheReturnInformation(msg, enums, l, user.getUserId(), subGroup);
+                            continue;
+                        }
+                        if (!msucts.isEmpty()) {
+                            flag = ConstructTheReturnInformation(msg, enums, msucts, l, user.getUserId(), subGroup);
+                        }
+                        if (flag) {
+                            bots.get(l).sendGroupMsg(subGroup, msg.at(user.getUserId()).text("您订阅的 " + enums.getNAME() + " 更新了！").build(), false);
+                        }
                     }
 
                 }
             }
         } catch (Exception e) {
-            log.error("发送订阅消息失败：{}", e.getMessage());
+            log.error("发送订阅消息失败：{}", e.getMessage(), e.getCause());
         }
 
     }
 
+    /**
+     * 发送更新提醒
+     *
+     * @param msg   消息体
+     * @param enums 订阅类型
+     * @param bot   机器人
+     * @param user  用户
+     * @param group 群组
+     */
     static void ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, Long bot, Long user, Long group) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 gestural(enums), new OneBotLogInfoData(
@@ -233,15 +277,39 @@ public class WarframeDataUpdateMission {
                         user,
                         group,
                         "",
-                        "",
+                        DateUtils.getDate(),
                         PermissionsEnums.MANAGE,
                         Codes.WARFRAME_SUBSCRIBE,
                         "")
         );
-        msg.at(user).text("您订阅的 " + enums.getNAME() + " 更新了！");
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             msg.imgBase64(body.getFile());
         }
+    }
+
+    static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group) throws DataNotInfoException {
+        var json = FissuresUtils.getFissures(msuct);
+        List<GlobalStates.Fissures> t = CacheUtils.get(CacheUtils.GROUP_CAPTCHA, user.toString(), List.class);
+        if (t != null && WarframeSubscribe.areListsEqual(json, t)) {
+            return false;
+        }
+        CacheUtils.set(CacheUtils.GROUP_CAPTCHA, user.toString(), json);
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                gestural(enums), new OneBotLogInfoData(
+                        bot,
+                        user,
+                        group,
+                        "",
+                        DateUtils.getDate(),
+                        PermissionsEnums.MANAGE,
+                        Codes.WARFRAME_SUBSCRIBE,
+                        JSON.toJSONString(json)
+                )
+        );
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            msg.imgBase64(body.getFile());
+        }
+        return true;
     }
 
 

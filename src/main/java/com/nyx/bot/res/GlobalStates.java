@@ -131,6 +131,7 @@ public class GlobalStates {
     private DuviriCycle duviriCycle;
 
     @Data
+    @EqualsAndHashCode(of = {"id"})
     public static class BaseStatus {
         @JsonProperty("id")
         private String id;
@@ -147,7 +148,7 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"node", "tierNum", "missionType"}, callSuper = false)
+    @EqualsAndHashCode(of = {"node", "missionType"}, callSuper = true)
     public static class Fissures extends BaseStatus {
         @JsonProperty("node")
         private String node;

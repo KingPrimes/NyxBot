@@ -8,8 +8,10 @@ import com.nyx.bot.utils.I18nUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class WarframeSubscribe {
@@ -29,14 +31,14 @@ public class WarframeSubscribe {
                 Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
                     //判断数据是否有更新
                     if (!f.equals(data.getAlerts())) {
-                        WarframeDataUpdateMission.updateAlerts();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateAlerts);
                     }
                 });
 
                 //检查仲裁信息是否为空值
                 Optional.ofNullable(states.getArbitration()).ifPresentOrElse(f -> {
                     if (!f.equals(data.getArbitration())) {
-                        WarframeDataUpdateMission.updateArbitration();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateArbitration);
                     }
                 }, () -> {
                     //为空则使用缓存中的仲裁信息覆盖
@@ -46,76 +48,89 @@ public class WarframeSubscribe {
                 //每日特惠
                 Optional.ofNullable(states.getDailyDeals()).ifPresent(r -> {
                     if (!r.equals(data.getDailyDeals())) {
-                        WarframeDataUpdateMission.updateDailyDeals();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateDailyDeals);
                     }
                 });
 
                 //活动
                 Optional.ofNullable(states.getEvents()).ifPresent(events -> {
                     if (!events.equals(data.getEvents())) {
-                        WarframeDataUpdateMission.updateEvents();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateEvents);
                     }
                 });
 
                 //裂隙
                 Optional.ofNullable(states.getFissures()).ifPresent(fissures -> {
-                    if (!fissures.equals(data.getFissures())) {
-                        WarframeDataUpdateMission.updateFissures();
-                    }
+                    CompletableFuture
+                            .supplyAsync(() -> areListsEqual(fissures, data.getFissures()))
+                            .thenAccept(f -> {
+                                log.debug("深度比较：{} -- 新数据:{} -- 缓存:{}", f, fissures.size(), data.getFissures().size());
+                                if (!f) {
+                                    WarframeDataUpdateMission.updateFissures();
+                                }
+                            });
                 });
 
                 //入侵
                 Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> {
-                    if (!invasions.equals(data.getInvasions())) {
-                        WarframeDataUpdateMission.updateInvasions();
-                    }
+                    CompletableFuture
+                            .supplyAsync(() -> areListsEqual(invasions, data.getInvasions()))
+                            .thenAccept(f -> {
+                                if (!f) {
+                                    WarframeDataUpdateMission.updateInvasions();
+                                }
+                            });
                 });
 
                 //新闻
                 Optional.ofNullable(states.getNews()).ifPresent(news -> {
-                    if (!news.equals(data.getNews())) {
-                        WarframeDataUpdateMission.updateNews();
-                    }
+                    CompletableFuture
+                            .supplyAsync(() -> areListsEqual(news, data.getNews()))
+                            .thenAccept(f -> {
+                                if (!f) {
+                                    WarframeDataUpdateMission.updateNews();
+                                }
+                            });
                 });
 
                 //电波
                 Optional.ofNullable(states.getNightwave()).ifPresent(nightwave -> {
                     if (!nightwave.equals(data.getNightwave())) {
-                        WarframeDataUpdateMission.updateNightwave();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateNightwave);
                     }
                 });
                 //突击
                 Optional.ofNullable(states.getSortie()).ifPresent(sortie -> {
                     if (!sortie.equals(data.getSortie())) {
-                        WarframeDataUpdateMission.updateSortie();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateSortie);
                     }
                 });
                 //执政官突击
                 Optional.ofNullable(states.getArchonHunt()).ifPresent(archonHunt -> {
                     if (!archonHunt.equals(data.getArchonHunt())) {
-                        WarframeDataUpdateMission.updateArchonHunt();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateArchonHunt);
                     }
                 });
                 //钢铁轮换
                 Optional.ofNullable(states.getSteelPath()).ifPresent(steelPath -> {
                     if (!steelPath.equals(data.getSteelPath())) {
-                        WarframeDataUpdateMission.updateSteelPath();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateSteelPath);
                     }
                 });
                 //虚空商人
                 Optional.ofNullable(states.getVoidTrader()).ifPresent(voidTrader -> {
                     if (!voidTrader.equals(data.getVoidTrader())) {
                         if (voidTrader.getInventory().isEmpty() && !voidTrader.getActive()) {
-                            WarframeDataUpdateMission.updateVoidTrader(I18nUtils.message("warframe.up.voidOut"));
+                            CompletableFuture.runAsync(() -> WarframeDataUpdateMission.updateVoidTrader(I18nUtils.message("warframe.up.voidOut")));
                         } else {
-                            WarframeDataUpdateMission.updateVoidTrader(I18nUtils.message("warframe.up.voidIn"));
+                            CompletableFuture.runAsync(() -> WarframeDataUpdateMission.updateVoidTrader(I18nUtils.message("warframe.up.voidIn")));
                         }
                     }
                 });
                 //双衍王境
                 Optional.ofNullable(states.getDuviriCycle()).ifPresent(duviriCycle -> {
                     if (!duviriCycle.equals(data.getDuviriCycle())) {
-                        WarframeDataUpdateMission.updateDuviriCycle();
+                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateDuviriCycle);
                     }
                 });
 
@@ -130,13 +145,12 @@ public class WarframeSubscribe {
                             //相差13分钟的时候发送提醒
                             if (date == 13) {
                                 //发送提醒
-                                WarframeDataUpdateMission.updateCetusCycle(DateUtils.getDiff(states.getCetusCycle().getExpiry(), new Date()));
+                                CompletableFuture.runAsync(() -> WarframeDataUpdateMission.updateCetusCycle(DateUtils.getDiff(states.getCetusCycle().getExpiry(), new Date())));
                             }
                         }
                     }
                 });
-                //更新数据
-                CacheUtils.setGlobalState(states);
+
             }, () -> {
                 //更新数据
                 CacheUtils.setGlobalState(states);
@@ -146,5 +160,30 @@ public class WarframeSubscribe {
             CacheUtils.setGlobalState(states);
         }
 
+    }
+
+    /**
+     * 深度比较List集合
+     *
+     * @param list1 第一个List
+     * @param list2 第二个List
+     * @param <T>   泛型
+     * @return true表示两个List相等，false表示不相等
+     */
+    public static <T> boolean areListsEqual(List<T> list1, List<T> list2) {
+        if (list1 == list2) {
+            log.debug("list1 == list2");
+            return true;
+        }
+        if (list1 == null || list2 == null || list1.size() != list2.size()) {
+            log.debug("list1 == null || list2 == null || list1.size() != list2.size()");
+            return false;
+        }
+        for (T t : list1) {
+            if (!list2.contains(t)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

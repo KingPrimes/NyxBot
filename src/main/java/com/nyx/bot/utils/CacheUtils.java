@@ -16,6 +16,7 @@ public class CacheUtils {
     public static final String SYSTEM = "system";
     public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
     public static final String GROUP_CAPTCHA = "group-captcha";
+    public static final String WARFRAME_GLOBAL_STATES = "global-states";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
@@ -23,18 +24,18 @@ public class CacheUtils {
         if (data == null) {
             throw new DataNotInfoException(I18nUtils.message("error.warframe.data.null"));
         }
-        GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
-        if (data.getArbitration() == null) {
-            data.setArbitration(arbitration);
-        } else {
-            if (!data.getArbitration().equals(arbitration)) {
-                data.setArbitration(arbitration);
-            }
-        }
         return data;
     }
 
     public static void setGlobalState(GlobalStates state) {
+        GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
+        if (state.getArbitration() == null) {
+            state.setArbitration(arbitration);
+        } else {
+            if (!state.getArbitration().equals(arbitration)) {
+                state.setArbitration(arbitration);
+            }
+        }
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
         FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
     }

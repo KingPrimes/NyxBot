@@ -26,7 +26,7 @@ public class MissionSubscribeUserCheckType {
     WarframeMissionTypeEnum missionTypeEnum;
 
     //遗物纪元
-    Long tierNum;
+    Integer tierNum;
 
     @Transient
     String subscribeType;

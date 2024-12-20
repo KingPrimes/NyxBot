@@ -38,7 +38,8 @@
                         <li th:text="'订阅类型：'+${type.subscribe}"></li>
                         <li th:text="${'任务类型：'+type.missionTypeEnum}"></li>
                         <li th:text="${'遗物等级：'+type.tierNum}"></li>
-                        <li th:text="${''+type.subscribeType}"></li>
+                        <li th:if="${type.subscribeType != null}" th:text="${''+type.subscribeType}"></li>
+                        <li></li>
                     </ul>
                 </li>
             </ul>

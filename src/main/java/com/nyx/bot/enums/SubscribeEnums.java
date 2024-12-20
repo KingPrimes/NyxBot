@@ -55,6 +55,10 @@ public enum SubscribeEnums {
      */
     SORTIE("突击"),
 
+    ARCHON_HUNT("执政官突击"),
+
+    DUVIRI_CYCLE("双衍王境")
+
     ;
     private final String NAME;
 
