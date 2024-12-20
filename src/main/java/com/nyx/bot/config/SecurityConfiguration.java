@@ -82,7 +82,7 @@ public class SecurityConfiguration {
                                 new AntPathRequestMatcher("/api/**"),
                                 new AntPathRequestMatcher(shiro)
                         ).permitAll()
-                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/login").permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
                 //禁用默认的登录表单
