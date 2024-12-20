@@ -1,6 +1,9 @@
 #是否调试模式
 test:
   isTest: false
+jwt:
+  expiration: 86400000
+  secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
 
 #线程池
 async:
@@ -73,6 +76,7 @@ spring:
 
   lifecycle:
     timeout-per-shutdown-phase: 10s
+
 # OneBot
 shiro:
   ws:

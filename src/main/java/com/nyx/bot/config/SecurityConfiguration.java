@@ -1,6 +1,6 @@
 package com.nyx.bot.config;
 
-import com.nyx.bot.handler.LoginHandler;
+import com.nyx.bot.filter.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,15 +12,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -55,6 +61,12 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, PersistentTokenRepository tokenRepository) throws Exception {
         return http
+                // 禁用csrf
+                .csrf(AbstractHttpConfigurer::disable)
+                // 配置跨域资源共享
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // 配置无状态的会话管理
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> {
                     auth
@@ -64,7 +76,7 @@ public class SecurityConfiguration {
                                     new AntPathRequestMatcher("/css/**"),
                                     new AntPathRequestMatcher("/js/**"),
                                     new AntPathRequestMatcher("/nyx/**"),
-                                    new AntPathRequestMatcher("/ajax/**"),
+                                    new AntPathRequestMatcher("/static/**"),
                                     new AntPathRequestMatcher("/private/**"),
                                     new AntPathRequestMatcher("/api/**"),
                                     new AntPathRequestMatcher(shiro)
@@ -72,16 +84,20 @@ public class SecurityConfiguration {
                             //其余请求路径都需要权限才可以访问
                             .anyRequest().authenticated();
                 })
-                //配置登录
-                .formLogin(conf -> {
-                    //登录页面
-                    conf
-                            .loginPage("/login")
-                            //登录接口
-                            .loginProcessingUrl("/login").permitAll()
-                            .successHandler(new LoginHandler())
-                            .failureHandler(new LoginHandler());
-                })
+                //禁用默认的登录表单
+                .formLogin(AbstractHttpConfigurer::disable)
+                // 配置JWT过滤器（需要在你的应用中实现）
+                .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class)
+//                .formLogin(conf -> {
+//                    //登录页面
+//                    conf
+//                            .loginPage("/login")
+//                            //登录接口
+//                            .loginProcessingUrl("/login").permitAll()
+//                            .successHandler(new LoginHandler())
+//                            .failureHandler(new LoginHandler());
+//                })
+
                 //配置退出
                 .logout(out -> {
                     out.logoutUrl("/logout");
@@ -101,8 +117,7 @@ public class SecurityConfiguration {
                 .passwordManagement(pass -> {
                     pass.changePasswordPage("/password");
                 })
-                // 禁用csrf
-                .csrf(AbstractHttpConfigurer::disable)
+
                 //跨域设置，仅允许同路径下的 iframe 页面
                 .headers(headers -> {
                     headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
@@ -125,6 +140,23 @@ public class SecurityConfiguration {
         return new ProviderManager(daoAuthenticationProvider);
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*")); // 设置允许的前端域名
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 设置允许的HTTP方法
+        configuration.setAllowedHeaders(List.of("*")); // 设置允许的请求头
+        configuration.setAllowCredentials(true); // 允许携带身份验证信息
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    // 配置JWT过滤器（示例，需要根据你的应用实现）
+    @Bean
+    public JwtRequestFilter jwtRequestFilter() {
+        return new JwtRequestFilter();
+    }
 }
 
 

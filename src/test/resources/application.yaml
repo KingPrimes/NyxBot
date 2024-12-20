@@ -1,6 +1,9 @@
 #是否调试模式
 test:
   isTest: true
+jwt:
+  expiration: 86400000
+  secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
 
 
 #线程池

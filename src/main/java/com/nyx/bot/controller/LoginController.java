@@ -1,12 +1,41 @@
 package com.nyx.bot.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.nyx.bot.core.JwtUtil;
+import com.nyx.bot.entity.sys.SysUser;
+import jakarta.annotation.Resource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
+@CrossOrigin
 public class LoginController {
-    @GetMapping("/login")
-    public String login() {
-        return "login";
+    @Resource
+    private AuthenticationManager authenticationManager;
+
+    @Resource
+    private JwtUtil jwtUtil;
+
+    @Resource
+    private UserDetailsService userDetailsService;
+
+    @PostMapping("/login")
+    public String createAuthenticationToken(@RequestBody SysUser authRequest) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUserName());
+
+        return jwtUtil.generateToken(userDetails.getUsername());
     }
 }

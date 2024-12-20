@@ -102,6 +102,12 @@
             <artifactId>spring-messaging</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.12.3</version>
+        </dependency>
+
         <!--Http请求-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
