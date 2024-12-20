@@ -11,7 +11,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -81,12 +80,13 @@ public class SecurityConfiguration {
                                     new AntPathRequestMatcher("/api/**"),
                                     new AntPathRequestMatcher(shiro)
                             ).permitAll()
+                            .requestMatchers("/auth/login").permitAll()
                             //其余请求路径都需要权限才可以访问
                             .anyRequest().authenticated();
                 })
                 //禁用默认的登录表单
                 .formLogin(AbstractHttpConfigurer::disable)
-                // 配置JWT过滤器（需要在你的应用中实现）
+                // 配置JWT过滤器
                 .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class)
 //                .formLogin(conf -> {
 //                    //登录页面
@@ -99,29 +99,29 @@ public class SecurityConfiguration {
 //                })
 
                 //配置退出
-                .logout(out -> {
-                    out.logoutUrl("/logout");
-                    out.logoutSuccessUrl("/login");
-                })
-                .rememberMe(me -> {
-                    //设置记住我的 name 默认为 remember-me
-                    me.rememberMeParameter("remember");
-                    // 设置token
-                    me.tokenRepository(tokenRepository);
-                    // 设置token存活时常
-                    me.tokenValiditySeconds(3600 * 24 * 7);
-                    // 只能通过HTTPS请求
-                    me.useSecureCookie(false);
-
-                })
-                .passwordManagement(pass -> {
-                    pass.changePasswordPage("/password");
-                })
+//                .logout(out -> {
+//                    out.logoutUrl("/logout");
+//                    out.logoutSuccessUrl("/login");
+//                })
+//                .rememberMe(me -> {
+//                    //设置记住我的 name 默认为 remember-me
+//                    me.rememberMeParameter("remember");
+//                    // 设置token
+//                    me.tokenRepository(tokenRepository);
+//                    // 设置token存活时常
+//                    me.tokenValiditySeconds(3600 * 24 * 7);
+//                    // 只能通过HTTPS请求
+//                    me.useSecureCookie(false);
+//
+//                })
+//                .passwordManagement(pass -> {
+//                    pass.changePasswordPage("/password");
+//                })
 
                 //跨域设置，仅允许同路径下的 iframe 页面
-                .headers(headers -> {
-                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
-                })
+//                .headers(headers -> {
+//                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+//                })
                 .build();
     }
 
