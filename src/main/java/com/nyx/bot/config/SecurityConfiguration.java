@@ -1,6 +1,7 @@
 package com.nyx.bot.config;
 
 import com.nyx.bot.filter.JwtRequestFilter;
+import com.nyx.bot.handler.LoginHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,6 +32,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final UserDetailsService userDetailService;
@@ -59,7 +61,7 @@ public class SecurityConfiguration {
 
     //注册过滤器并配置
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, PersistentTokenRepository tokenRepository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 // 禁用csrf
                 .csrf(AbstractHttpConfigurer::disable)
@@ -68,26 +70,26 @@ public class SecurityConfiguration {
                 // 配置无状态的会话管理
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 //配置拦截规则
-                .authorizeHttpRequests(auth -> {
-                    auth
-                            .requestMatchers(
-                                    new AntPathRequestMatcher("/h2-console/**"),
-                                    new AntPathRequestMatcher("/img/**"),
-                                    new AntPathRequestMatcher("/css/**"),
-                                    new AntPathRequestMatcher("/js/**"),
-                                    new AntPathRequestMatcher("/nyx/**"),
-                                    new AntPathRequestMatcher("/static/**"),
-                                    new AntPathRequestMatcher("/private/**"),
-                                    new AntPathRequestMatcher("/api/**"),
-                                    new AntPathRequestMatcher(shiro)
-                            ).permitAll()
-                            //其余请求路径都需要权限才可以访问
-                            .anyRequest().authenticated();
-                })
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/h2-console/**"),
+                                new AntPathRequestMatcher("/img/**"),
+                                new AntPathRequestMatcher("/css/**"),
+                                new AntPathRequestMatcher("/js/**"),
+                                new AntPathRequestMatcher("/nyx/**"),
+                                new AntPathRequestMatcher("/static/**"),
+                                new AntPathRequestMatcher("/private/**"),
+                                new AntPathRequestMatcher("/api/**"),
+                                new AntPathRequestMatcher(shiro)
+                        ).permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        //其余请求路径都需要权限才可以访问
+                        .anyRequest().authenticated())
                 //禁用默认的登录表单
                 .formLogin(AbstractHttpConfigurer::disable)
-                // 配置JWT过滤器（需要在你的应用中实现）
+                // 配置JWT过滤器
                 .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.accessDeniedHandler(new LoginHandler()).authenticationEntryPoint(new LoginHandler()))
 //                .formLogin(conf -> {
 //                    //登录页面
 //                    conf
@@ -99,29 +101,29 @@ public class SecurityConfiguration {
 //                })
 
                 //配置退出
-                .logout(out -> {
-                    out.logoutUrl("/logout");
-                    out.logoutSuccessUrl("/login");
-                })
-                .rememberMe(me -> {
-                    //设置记住我的 name 默认为 remember-me
-                    me.rememberMeParameter("remember");
-                    // 设置token
-                    me.tokenRepository(tokenRepository);
-                    // 设置token存活时常
-                    me.tokenValiditySeconds(3600 * 24 * 7);
-                    // 只能通过HTTPS请求
-                    me.useSecureCookie(false);
-
-                })
-                .passwordManagement(pass -> {
-                    pass.changePasswordPage("/password");
-                })
+//                .logout(out -> {
+//                    out.logoutUrl("/logout");
+//                    out.logoutSuccessUrl("/login");
+//                })
+//                .rememberMe(me -> {
+//                    //设置记住我的 name 默认为 remember-me
+//                    me.rememberMeParameter("remember");
+//                    // 设置token
+//                    me.tokenRepository(tokenRepository);
+//                    // 设置token存活时常
+//                    me.tokenValiditySeconds(3600 * 24 * 7);
+//                    // 只能通过HTTPS请求
+//                    me.useSecureCookie(false);
+//
+//                })
+//                .passwordManagement(pass -> {
+//                    pass.changePasswordPage("/password");
+//                })
 
                 //跨域设置，仅允许同路径下的 iframe 页面
-                .headers(headers -> {
-                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
-                })
+//                .headers(headers -> {
+//                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+//                })
                 .build();
     }
 

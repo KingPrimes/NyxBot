@@ -1,6 +1,8 @@
 package com.nyx.bot.controller;
 
+import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.JwtUtil;
+import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.sys.SysUser;
 import jakarta.annotation.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-public class LoginController {
+public class LoginController extends BaseController {
     @Resource
     private AuthenticationManager authenticationManager;
 
@@ -27,7 +29,7 @@ public class LoginController {
     private UserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public String createAuthenticationToken(@RequestBody SysUser authRequest) {
+    public AjaxResult createAuthenticationToken(@RequestBody SysUser authRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
@@ -36,6 +38,6 @@ public class LoginController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUserName());
 
-        return jwtUtil.generateToken(userDetails.getUsername());
+        return AjaxResult.success(jwtUtil.generateToken(userDetails.getUsername()));
     }
 }

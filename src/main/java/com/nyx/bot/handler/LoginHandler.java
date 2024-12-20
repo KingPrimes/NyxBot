@@ -5,8 +5,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -15,7 +18,7 @@ import java.io.IOException;
 /**
  * 登录成功与失败的返回值，返回JSON信息
  */
-public class LoginHandler implements AuthenticationSuccessHandler, AuthenticationFailureHandler {
+public class LoginHandler implements AuthenticationSuccessHandler, AuthenticationFailureHandler, AuthenticationEntryPoint, AccessDeniedHandler {
     /**
      * Called when a user has been successfully authenticated.
      *
@@ -62,5 +65,21 @@ public class LoginHandler implements AuthenticationSuccessHandler, Authenticatio
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.getWriter().write(AjaxResult.error(exception.getMessage()).toJsonString());
+    }
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.getWriter().write(AjaxResult.error(authException.getMessage()).toJsonString());
+    }
+
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.getWriter().write(AjaxResult.error(accessDeniedException.getMessage()).toJsonString());
     }
 }
