@@ -44,8 +44,8 @@ public class BotAdminController extends BaseController {
         return ar;
     }
 
-    @GetMapping("/friend")
-    public AjaxResult getFriendList(@RequestBody Long botUid) {
+    @GetMapping("/friend/{botUid}")
+    public AjaxResult getFriendList(@PathVariable Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
         return container.robots.containsKey(botUid)
                 ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData())
@@ -61,9 +61,6 @@ public class BotAdminController extends BaseController {
             case MANAGE, OTHER -> {
                 return error("不可使用此权限！");
             }
-        }
-        if (botAdminRepository.findByAdminUid(ba.getAdminUid()).isPresent()) {
-            return error("已存在！");
         }
         Optional<BotAdmin> byPermissions = botAdminRepository.findByPermissions(ba.getPermissions());
         if (byPermissions.isPresent()) {

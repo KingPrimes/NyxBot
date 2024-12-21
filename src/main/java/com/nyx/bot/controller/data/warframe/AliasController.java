@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -76,14 +77,14 @@ public class AliasController extends BaseController {
     }
 
     @PostMapping("/push")
-    public AjaxResult push(@RequestBody String commit) {
+    public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<Alias> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/alias.json", jsonString);
             String branchName = DateUtils.getDate(new Date(), DateUtils.NOT_HMS);
-            build.pushBranchCheckout(commit, branchName, "warframe/alias.json");
+            build.pushBranchCheckout(commit.get("commit"), branchName, "warframe/alias.json");
             return toAjax(true);
         } catch (Exception e) {
             return error(e.getMessage());

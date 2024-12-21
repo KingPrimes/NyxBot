@@ -25,8 +25,8 @@ public class MarketRivenController extends BaseController {
     public ResponseEntity<?> list(@RequestBody RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
-                        rivenItems.getItemName(),
-                        rivenItems.getRivenType(),
+                        rivenItems.getItemName().isEmpty() ? null : rivenItems.getItemName(),
+                        rivenItems.getRivenType().isEmpty() ? null : rivenItems.getRivenType(),
                         PageRequest.of(
                                 rivenItems.getPageNum() - 1,
                                 rivenItems.getPageSize())

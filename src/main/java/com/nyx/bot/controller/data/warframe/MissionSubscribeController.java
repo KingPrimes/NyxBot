@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/data/warframe/subscribe")
 public class MissionSubscribeController extends BaseController {
@@ -20,7 +23,7 @@ public class MissionSubscribeController extends BaseController {
 
     @GetMapping
     public AjaxResult subscribe() {
-        return success().put("sub", SubscribeEnums.values());
+        return success().put("sub", Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME)));
     }
 
     @GetMapping("/detail/{subGroup}")

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -78,14 +79,14 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/push")
-    public AjaxResult push(@RequestBody String commit) {
+    public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<RivenTrend> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/riven_trend.json", jsonString);
             String branchName = DateUtils.getDate(new Date(), DateUtils.NOT_HMS);
-            build.pushBranchCheckout(commit, branchName, "warframe/riven_trend.json");
+            build.pushBranchCheckout(commit.get("commit"), branchName, "warframe/riven_trend.json");
             return toAjax(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
