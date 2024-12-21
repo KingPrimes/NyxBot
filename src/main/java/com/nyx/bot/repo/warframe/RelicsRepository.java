@@ -34,6 +34,7 @@ public interface RelicsRepository extends JpaRepository<Relics, String>, JpaSpec
 
     /**
      * 根据纪元查询
+     *
      * @param tier 纪元
      * @return 列表
      */

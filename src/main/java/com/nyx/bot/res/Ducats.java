@@ -15,6 +15,13 @@ public class Ducats {
 
     Previous payload;
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("payload", payload)
+                .toString();
+    }
+
     @Data
     public static class Ducat {
         /**
@@ -144,12 +151,5 @@ public class Ducats {
                     .append("previousHour", previousHour)
                     .toString();
         }
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                .append("payload", payload)
-                .toString();
     }
 }
