@@ -52,7 +52,7 @@ public class JwtUtil {
     // 解析所有的claims
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parser().decryptWith(key).build().parseSignedClaims(token).getPayload();
+            return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
         } catch (JwtException e) {
             // 这里可以处理令牌解析失败的情况，例如令牌过期、签名无效等
             throw new RuntimeException("Invalid JWT token", e);
