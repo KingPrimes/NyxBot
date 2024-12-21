@@ -2,6 +2,7 @@ package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.GlobalStates;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ public class CacheUtils {
     public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
     public static final String GROUP_CAPTCHA = "group-captcha";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
+
+    public static final String USER = "user";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
@@ -38,6 +41,18 @@ public class CacheUtils {
         }
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
         FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
+    }
+
+    public static void setUser(String token, SysUser user) {
+        set(USER, token, user);
+    }
+
+    public static SysUser getUser(String token) {
+        return get(USER, token, SysUser.class);
+    }
+
+    public static void delUser(String token) {
+        Objects.requireNonNull(cm.getCache(USER)).evict(token);
     }
 
     /**

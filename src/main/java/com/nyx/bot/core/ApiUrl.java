@@ -72,6 +72,7 @@ public class ApiUrl {
 
     /**
      * Market 物品查询
+     *
      * @param key  物品名称
      * @param from 平台
      * @return 返回信息

@@ -1,7 +1,9 @@
 package com.nyx.bot.config;
 
 import com.nyx.bot.filter.JwtRequestFilter;
-import com.nyx.bot.handler.LoginHandler;
+import com.nyx.bot.handler.AuthenticationEntryPointImpl;
+import com.nyx.bot.handler.LogoutSuccessHandler;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,11 +37,16 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    private final UserDetailsService userDetailService;
-
     @Value("${shiro.ws.server.url}")
     String shiro;
-
+    @Resource
+    private UserDetailsService userDetailService;
+    @Resource
+    private AuthenticationEntryPointImpl unauthorizedHandler;
+    @Resource
+    private LogoutSuccessHandler logoutSuccessHandler;
+    @Resource
+    private JwtRequestFilter jwtRequestFilter;
 
     /**
      * 配置持久化Token
@@ -73,60 +80,30 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 new AntPathRequestMatcher("/"),
-                                new AntPathRequestMatcher("/index.html"),
-                                new AntPathRequestMatcher("/static/**"),
+                                new AntPathRequestMatcher("/index"),
                                 new AntPathRequestMatcher("/assets/**"),
+                                new AntPathRequestMatcher("/login"),
+                                // 用于生成图片的接口
                                 new AntPathRequestMatcher("/api/**"),
+                                // 用于生成图片的接口
                                 new AntPathRequestMatcher("/private/**"),
-                                //new AntPathRequestMatcher("/**"),
+                                // 机器人链接接口
                                 new AntPathRequestMatcher(shiro)
                         ).permitAll()
-                        .requestMatchers("/login").permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
+                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 //禁用默认的登录表单
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 配置JWT过滤器
-                .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.accessDeniedHandler(new LoginHandler()).authenticationEntryPoint(new LoginHandler()))
-//                .formLogin(conf -> {
-//                    //登录页面
-//                    conf
-//                            .loginPage("/login")
-//                            //登录接口
-//                            .loginProcessingUrl("/login").permitAll()
-//                            .successHandler(new LoginHandler())
-//                            .failureHandler(new LoginHandler());
-//                })
-
-                //配置退出
-//                .logout(out -> {
-//                    out.logoutUrl("/logout");
-//                    out.logoutSuccessUrl("/login");
-//                })
-//                .rememberMe(me -> {
-//                    //设置记住我的 name 默认为 remember-me
-//                    me.rememberMeParameter("remember");
-//                    // 设置token
-//                    me.tokenRepository(tokenRepository);
-//                    // 设置token存活时常
-//                    me.tokenValiditySeconds(3600 * 24 * 7);
-//                    // 只能通过HTTPS请求
-//                    me.useSecureCookie(false);
-//
-//                })
-//                .passwordManagement(pass -> {
-//                    pass.changePasswordPage("/password");
-//                })
-
-                //跨域设置，仅允许同路径下的 iframe 页面
-//                .headers(headers -> {
-//                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
-//                })
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    //设置密码加密方式
+    /**
+     * 验证身份
+     */
     @Bean
     AuthenticationManager authenticationManager() {
         // 创建DaoAuthenticationProvider实例
@@ -153,11 +130,6 @@ public class SecurityConfiguration {
         return source;
     }
 
-    // 配置JWT过滤器（示例，需要根据你的应用实现）
-    @Bean
-    public JwtRequestFilter jwtRequestFilter() {
-        return new JwtRequestFilter();
-    }
 }
 
 

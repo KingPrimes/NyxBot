@@ -16,49 +16,34 @@ import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Controller
+@RestController
 @RequestMapping("/data/warframe/rivenTrend")
 public class RivenTrendController extends BaseController {
-    String prefix = "data/warframe/rivenTrend/";
 
     @Resource
     RivenTrendRepository repository;
 
-
-    @GetMapping
-    public String index() {
-        return prefix + "rivenTrend";
-    }
-
     @GetMapping("/add")
-    public String add(Model model) {
-        model.addAttribute("types", Arrays.stream(RivenTrendTypeEnum.values()).toList());
-        return prefix + "add";
-    }
-
-    @GetMapping("/push")
-    public String push() {
-        return prefix + "push";
+    public AjaxResult add() {
+        return success().put("types", RivenTrendTypeEnum.values());
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
-        model.addAttribute("types", RivenTrendTypeEnum.values());
-        model.addAttribute("translation", repository.findById(id));
-        return prefix + "edit";
+    public AjaxResult edit(@PathVariable Long id) {
+        AjaxResult ar = success().put("types", RivenTrendTypeEnum.values());
+        if (ar != null) {
+            ar.put("translation", repository.findById(id));
+        }
+        return ar;
     }
 
     @PostMapping("/save")
-    @ResponseBody
     public AjaxResult save(RivenTrend t) {
         t.setOldDot(RivenTrendEnum.getRivenTrendDot(t.getOldNum()));
         t.setNewDot(RivenTrendEnum.getRivenTrendDot(t.getNewNum()));
@@ -66,7 +51,6 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(RivenTrend rt) {
         return getDataTable(repository.findAllPageable(rt.getTrendName().isEmpty() ? null : rt.getTrendName(),
                 PageRequest.of(
@@ -78,7 +62,6 @@ public class RivenTrendController extends BaseController {
 
 
     @PostMapping("/init")
-    @ResponseBody
     public AjaxResult init() {
         CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
             if (flag) {
@@ -89,14 +72,12 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/update")
-    @ResponseBody
     public AjaxResult update() {
         AsyncUtils.me().execute(() -> new RivenDispositionUpdates().upRivenTrend(), AsyncBeanName.InitData);
         return success("已执行任务！");
     }
 
     @PostMapping("/push")
-    @ResponseBody
     public AjaxResult push(String commit) {
         try {
             JgitUtil build = JgitUtil.Build();

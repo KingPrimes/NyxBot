@@ -11,7 +11,6 @@ import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,24 +19,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/config/bot/admin")
 public class BotAdminController extends BaseController {
-
-
-    String prefix = "config/bot/admin/";
 
     @Resource
     BotAdminRepository botAdminRepository;
 
-    @GetMapping
-    public String loading(Model model) {
-        model.addAttribute("pe", getPe());
-        return prefix + "index";
-    }
 
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(BotAdmin ba) {
         return getDataTable(botAdminRepository.findAll(PageRequest.of(ba.getPageNum() - 1, ba.getPageSize())));
     }
@@ -47,20 +37,15 @@ public class BotAdminController extends BaseController {
     }
 
     @GetMapping("/add")
-    public String add(Model model) {
-        //添加权限列表
-        model.addAttribute("pe", PermissionsEnums.values());
-
+    public AjaxResult add() {
+        AjaxResult ar = AjaxResult.success();
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-
-        //获取机器人列表
-        model.addAttribute("bots", container.robots.keySet());
-
-        return prefix + "add";
+        ar.put("permissions", getPe());
+        ar.put("bots", container.robots.keySet());
+        return ar;
     }
 
     @GetMapping("/friend")
-    @ResponseBody
     public AjaxResult getFriendList(Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
         return container.robots.containsKey(botUid)
@@ -69,7 +54,6 @@ public class BotAdminController extends BaseController {
     }
 
     @PostMapping("/save")
-    @ResponseBody
     public AjaxResult save(BotAdmin ba) {
         if (ba == null) {
             return error("参数错误！");
@@ -93,15 +77,17 @@ public class BotAdminController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
+    public AjaxResult edit(@PathVariable Long id, Model model) {
+        AjaxResult ar = AjaxResult.success();
         model.addAttribute("pe", PermissionsEnums.values());
         //获取好友列表
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-        container.robots.forEach((aLong, bot) -> model.addAttribute("ab", bot.getFriendList().getData()));
+        container.robots.forEach((aLong, bot) -> ar.put(String.valueOf(aLong), bot.getFriendList().getData()));
         //获取机器人列表
-        model.addAttribute("bots", container.robots.keySet());
-        botAdminRepository.findById(id).ifPresent(a -> model.addAttribute("ba", a));
-        return prefix + "edit";
+        ar.put("permissions", getPe());
+        ar.put("bots", container.robots.keySet());
+        botAdminRepository.findById(id).ifPresent(a -> ar.put("botAdmin", a));
+        return ar;
     }
 
 

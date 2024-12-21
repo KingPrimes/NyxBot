@@ -14,5 +14,7 @@ public class GroupBlack extends BaseEntity {
     @GeneratedValue
     Long id;
 
+    Long bot;
+
     Long groupUid;
 }

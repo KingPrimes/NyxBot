@@ -3,6 +3,7 @@ package com.nyx.bot.entity.sys;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 /**
@@ -16,5 +17,9 @@ public class SysUser {
     @Id
     Long userId;
     String userName;
+
     String password;
+
+    @Transient
+    String token;
 }

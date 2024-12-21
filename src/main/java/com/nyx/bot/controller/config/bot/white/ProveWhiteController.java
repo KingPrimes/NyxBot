@@ -8,64 +8,39 @@ import com.nyx.bot.entity.bot.white.ProveWhite;
 import com.nyx.bot.repo.impl.white.WhiteService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/config/bot/white/prove")
 public class ProveWhiteController extends BaseController {
-    String prefix = "config/bot/white/prove";
 
     @Resource
     WhiteService whiteService;
 
-    @GetMapping
-    public String prove() {
-        return prefix + "/prove";
-    }
-
-
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(ProveWhite proveWhite) {
         return getDataTable(whiteService.list(proveWhite));
     }
 
-    @GetMapping("/add")
-    public String add() {
-        return prefix + "/add";
-    }
-
-    @PostMapping("/add")
-    @ResponseBody
+    @PostMapping("/save")
     public AjaxResult add(ProveWhite white) {
-        whiteService.save(white);
-        return success();
+        if (white == null) return error();
+        return toAjax(whiteService.save(white) != null);
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, Model map) {
-        map.addAttribute("white", whiteService.findByProve(id));
-        return prefix + "/edit";
+    public AjaxResult edit(@PathVariable("id") Long id) {
+        return success().put("white", whiteService.findByProve(id));
     }
 
-    @PostMapping("/update")
-    @ResponseBody
-    public AjaxResult edit(ProveWhite white) {
-        whiteService.save(white);
-        return success();
-    }
 
     @PostMapping("/remove/{id}")
-    @ResponseBody
     public AjaxResult remove(@PathVariable("id") Long id) {
         whiteService.removeProve(id);
         return success();
     }
 
     @PostMapping("/handoff")
-    @ResponseBody
     public AjaxResult handoff() {
         NyxConfig nyxConfig = HandOff.getConfig();
         nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());

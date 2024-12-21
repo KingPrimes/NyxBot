@@ -11,47 +11,31 @@ import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Controller
+@RestController
 @RequestMapping("/data/warframe/translation")
 public class TranslationController extends BaseController {
-    String prefix = "data/warframe/translation/";
 
     @Resource
     TranslationRepository repository;
 
-
-    @GetMapping
-    public String html() {
-        return prefix + "translation";
-    }
-
-    @GetMapping("/add")
-    public String add() {
-        return prefix + "add";
-    }
-
-    @GetMapping("/push")
-    public String push() {
-        return prefix + "push";
-    }
-
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
-        repository.findById(id).ifPresent(t -> model.addAttribute("translation", t));
-        return prefix + "edit";
+    public AjaxResult edit(@PathVariable Long id) {
+        AjaxResult ar = success();
+        repository.findById(id).ifPresent(t -> ar.put("translation", t));
+        return ar;
     }
 
     @PostMapping("/save")
-    @ResponseBody
     public AjaxResult save(Translation t) {
+        if (t == null) return error();
+        if (t.getEn().trim().isEmpty()) return error("英文不可为空");
+        if (t.getCn().trim().isEmpty()) return error("中文不可为空");
         repository.save(t);
         return success();
     }
@@ -62,7 +46,6 @@ public class TranslationController extends BaseController {
      * @param t 查询条件
      */
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(Translation t) {
         return getDataTable(repository.findAllPageable(
                 t.getCn(),
@@ -76,7 +59,6 @@ public class TranslationController extends BaseController {
      * 更新词典
      */
     @PostMapping("/update")
-    @ResponseBody
     public AjaxResult update() {
         CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
             if (flag) {
@@ -87,7 +69,6 @@ public class TranslationController extends BaseController {
     }
 
     @PostMapping("/push")
-    @ResponseBody
     public AjaxResult push(String commit) {
         try {
             JgitUtil build = JgitUtil.Build();

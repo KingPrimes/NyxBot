@@ -10,67 +10,48 @@ import com.nyx.bot.repo.impl.white.WhiteService;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/config/bot/white/group")
 public class GroupWhiteController extends BaseController {
-
-    String prefix = "config/bot/white/group";
 
     @Resource
     WhiteService whiteService;
 
-    @GetMapping
-    public String group() {
-        return prefix + "/group";
-    }
-
 
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(GroupWhite white) {
         return getDataTable(whiteService.list(white));
     }
 
 
     @GetMapping("/add")
-    public String add(Model map) {
-        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.addAttribute("group", bot.getGroupList().getData()));
-        return prefix + "/add";
+    public AjaxResult add() {
+        AjaxResult ar = AjaxResult.success();
+        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> ar.put(String.valueOf(aLong), bot.getGroupList().getData()));
+        return ar;
     }
 
-    @PostMapping("/add")
-    @ResponseBody
+    @PostMapping("/save")
     public AjaxResult add(GroupWhite white) {
-        whiteService.save(white);
-        return success();
+        if (white == null) return error();
+        return toAjax(whiteService.save(white) != null);
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, Model map) {
-        map.addAttribute("white", whiteService.findByGroup(id));
-        return prefix + "/edit";
+    public AjaxResult edit(@PathVariable("id") Long id) {
+        return success().put("white", whiteService.findByGroup(id));
     }
 
-    @PostMapping("/update")
-    @ResponseBody
-    public AjaxResult edit(GroupWhite white) {
-        whiteService.save(white);
-        return success();
-    }
 
     @PostMapping("/remove/{id}")
-    @ResponseBody
     public AjaxResult remove(@PathVariable("id") Long id) {
         whiteService.remove(id);
         return success();
     }
 
     @PostMapping("/handoff")
-    @ResponseBody
     public AjaxResult handoff() {
         NyxConfig nyxConfig = HandOff.getConfig();
         nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());

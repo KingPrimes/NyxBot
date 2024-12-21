@@ -8,31 +8,22 @@ import com.nyx.bot.repo.warframe.EphemerasRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
-@Controller
+@RestController
 @RequestMapping("/data/warframe/ephemeras")
 public class EphemerasController extends BaseController {
-    String prefix = "data/warframe/";
-
     @Resource
     EphemerasRepository ephemerasRepository;
 
-
-    @GetMapping
-    public String alias() {
-        return prefix + "ephemeras";
-    }
-
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity list(Ephemeras e) {
+    public ResponseEntity<?> list(Ephemeras e) {
         return getDataTable(ephemerasRepository.findAllPageable(
                 e.getItemName(),
                 PageRequest.of(
@@ -42,7 +33,6 @@ public class EphemerasController extends BaseController {
     }
 
     @PostMapping("/update")
-    @ResponseBody
     public AjaxResult update() {
         CompletableFuture.runAsync(WarframeDataSource::getEphemeras);
         return success("已执行任务！");

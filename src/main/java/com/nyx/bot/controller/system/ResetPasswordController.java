@@ -10,12 +10,10 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class ResetPasswordController extends BaseController {
 
     @Resource
@@ -24,13 +22,7 @@ public class ResetPasswordController extends BaseController {
     @Resource
     SysUserRepository repository;
 
-    @GetMapping("/resetPwd")
-    public String resetPwd() {
-        return "password";
-    }
-
     @PostMapping("/password")
-    @ResponseBody
     public AjaxResult restPwd(HttpServletRequest request, String oldPassword, String newPassword) {
         UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

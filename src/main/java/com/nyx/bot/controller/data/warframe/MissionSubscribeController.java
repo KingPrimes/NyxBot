@@ -1,5 +1,6 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
@@ -7,41 +8,34 @@ import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/data/warframe/subscribe")
 public class MissionSubscribeController extends BaseController {
-    String prefix = "data/warframe/subscribe/";
 
     @Resource
     MissionSubscribeRepository repository;
 
 
     @GetMapping
-    public String subscribe(Model model) {
-        model.addAttribute("sub", SubscribeEnums.values());
-        return prefix + "subscribe";
+    public AjaxResult subscribe() {
+        return success().put("sub", SubscribeEnums.values());
     }
 
     @GetMapping("/detail/{subGroup}")
-    public String detail(@PathVariable Long subGroup, Model model) {
+    public AjaxResult detail(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        model.addAttribute("group", group);
-        return prefix + "detail";
+        return success().put("group", group);
     }
 
     @GetMapping("/edit/{subGroup}")
-    public String edit(@PathVariable Long subGroup, Model model) {
+    public AjaxResult edit(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        model.addAttribute("group", group);
-        return prefix + "edit";
+        return success().put("group", group);
     }
 
     @PostMapping("/list")
-    @ResponseBody
     public ResponseEntity<?> list(MissionSubscribe ms) {
 
         return getDataTable(

@@ -1,5 +1,6 @@
 package com.nyx.bot.filter;
 
+import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.JwtUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
@@ -35,7 +36,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer_")) {
+        if (authorizationHeader != null && authorizationHeader.startsWith(Constants.TOKEN_PREFIX)) {
             jwt = authorizationHeader.substring(7);
             username = jwtUtil.extractUsername(jwt);
         }
