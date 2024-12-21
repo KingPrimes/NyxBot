@@ -37,7 +37,7 @@ public class NotTranslationController extends BaseController {
      * @param t 查询条件
      */
     @PostMapping("/list")
-    public ResponseEntity<?> list(NotTranslation t) {
+    public ResponseEntity<?> list(@RequestBody NotTranslation t) {
         ExampleMatcher notTranslation = ExampleMatcher.matching().withMatcher("notTranslation", ExampleMatcher.GenericPropertyMatcher::contains)
                 .withIgnoreCase();
         Example<NotTranslation> notTranslationExample = Example.of(t, notTranslation);
@@ -51,7 +51,7 @@ public class NotTranslationController extends BaseController {
      * @param t 词典内容
      */
     @PostMapping("/save")
-    public AjaxResult save(Translation t) {
+    public AjaxResult save(@RequestBody Translation t) {
         notTranslationRepository.deleteById(t.getId());
         Translation translation = new Translation();
         translation.setCn(t.getCn());

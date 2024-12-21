@@ -9,6 +9,7 @@ import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping("/data/warframe/alias")
 public class AliasController extends BaseController {
@@ -26,8 +28,9 @@ public class AliasController extends BaseController {
     AliasRepository repository;
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(Alias alias) {
-        return getDataTable(repository.findByLikeCn(alias.getCn().isEmpty() ? null : alias.getCn(), PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
+    public ResponseEntity<?> list(@RequestBody Alias alias) {
+        log.debug("Alias:{}", alias);
+        return getDataTable(repository.findByLikeCn(alias == null ? null : alias.getCn() == null ? null : alias.getCn().isEmpty() ? null : alias.getCn(), PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
     }
 
     @PostMapping("/update")
@@ -41,7 +44,7 @@ public class AliasController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(Alias a) {
+    public AjaxResult save(@RequestBody Alias a) {
         if (a == null) {
             return error("参数错误！");
         }
@@ -73,7 +76,7 @@ public class AliasController extends BaseController {
     }
 
     @PostMapping("/push")
-    public AjaxResult push(String commit) {
+    public AjaxResult push(@RequestBody String commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<Alias> all = repository.findAll();

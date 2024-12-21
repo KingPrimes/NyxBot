@@ -21,7 +21,7 @@ public class GroupBlackController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(GroupBlack gb) {
+    public ResponseEntity<?> list(@RequestBody GroupBlack gb) {
         return getDataTable(bs.list(gb));
     }
 
@@ -34,7 +34,7 @@ public class GroupBlackController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult add(GroupBlack gb) {
+    public AjaxResult add(@RequestBody GroupBlack gb) {
         if (gb == null) return AjaxResult.error("请先链接机器人");
         return toAjax(bs.save(gb));
     }

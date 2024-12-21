@@ -18,12 +18,12 @@ public class ProveBlackController extends BaseController {
     BlackService bs;
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(ProveBlack pb) {
+    public ResponseEntity<?> list(@RequestBody ProveBlack pb) {
         return getDataTable(bs.list(pb));
     }
 
     @PostMapping("/save")
-    public AjaxResult add(ProveBlack pb) {
+    public AjaxResult add(@RequestBody ProveBlack pb) {
         if (pb == null) return error();
         return toAjax(bs.save(pb));
     }

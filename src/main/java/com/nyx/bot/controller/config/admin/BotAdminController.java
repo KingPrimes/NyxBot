@@ -11,7 +11,6 @@ import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -28,7 +27,7 @@ public class BotAdminController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(BotAdmin ba) {
+    public ResponseEntity<?> list(@RequestBody BotAdmin ba) {
         return getDataTable(botAdminRepository.findAll(PageRequest.of(ba.getPageNum() - 1, ba.getPageSize())));
     }
 
@@ -46,7 +45,7 @@ public class BotAdminController extends BaseController {
     }
 
     @GetMapping("/friend")
-    public AjaxResult getFriendList(Long botUid) {
+    public AjaxResult getFriendList(@RequestBody Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
         return container.robots.containsKey(botUid)
                 ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData())
@@ -54,7 +53,7 @@ public class BotAdminController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(BotAdmin ba) {
+    public AjaxResult save(@RequestBody BotAdmin ba) {
         if (ba == null) {
             return error("参数错误！");
         }
@@ -77,9 +76,8 @@ public class BotAdminController extends BaseController {
     }
 
     @GetMapping("/edit/{id}")
-    public AjaxResult edit(@PathVariable Long id, Model model) {
+    public AjaxResult edit(@PathVariable Long id) {
         AjaxResult ar = AjaxResult.success();
-        model.addAttribute("pe", PermissionsEnums.values());
         //获取好友列表
         BotContainer container = SpringUtils.getBean(BotContainer.class);
         container.robots.forEach((aLong, bot) -> ar.put(String.valueOf(aLong), bot.getFriendList().getData()));

@@ -7,6 +7,7 @@ import com.nyx.bot.repo.impl.warframe.RelicsService;
 import com.nyx.bot.repo.warframe.RelicsRewardsRepository;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class RelicsController extends BaseController {
 
 
     @PostMapping("/list")
-    public TableDataInfo list(Relics relics) {
+    public TableDataInfo list(@RequestBody Relics relics) {
         return rs.findAllPageable(relics);
     }
 

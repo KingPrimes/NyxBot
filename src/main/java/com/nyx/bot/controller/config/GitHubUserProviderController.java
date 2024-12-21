@@ -6,10 +6,7 @@ import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,7 +34,7 @@ public class GitHubUserProviderController extends BaseController {
 
 
     @PostMapping("/save")
-    public AjaxResult save(GitHubUserProvider gitHubUserProvider) {
+    public AjaxResult save(@RequestBody GitHubUserProvider gitHubUserProvider) {
         gitRepository.save(gitHubUserProvider);
         JgitUtil.restOriginUrl(gitHubUserProvider.getGitUrl(), JgitUtil.lockPath);
         return success();

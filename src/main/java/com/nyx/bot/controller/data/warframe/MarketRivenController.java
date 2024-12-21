@@ -9,6 +9,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +22,7 @@ public class MarketRivenController extends BaseController {
     RivenItemsRepository repository;
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(RivenItems rivenItems) {
+    public ResponseEntity<?> list(@RequestBody RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
                         rivenItems.getItemName(),

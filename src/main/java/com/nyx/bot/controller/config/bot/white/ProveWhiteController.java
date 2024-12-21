@@ -18,12 +18,12 @@ public class ProveWhiteController extends BaseController {
     WhiteService whiteService;
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(ProveWhite proveWhite) {
+    public ResponseEntity<?> list(@RequestBody ProveWhite proveWhite) {
         return getDataTable(whiteService.list(proveWhite));
     }
 
     @PostMapping("/save")
-    public AjaxResult add(ProveWhite white) {
+    public AjaxResult add(@RequestBody ProveWhite white) {
         if (white == null) return error();
         return toAjax(whiteService.save(white) != null);
     }

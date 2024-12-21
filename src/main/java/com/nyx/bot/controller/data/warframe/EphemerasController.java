@@ -8,10 +8,7 @@ import com.nyx.bot.repo.warframe.EphemerasRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -23,7 +20,7 @@ public class EphemerasController extends BaseController {
 
     @PostMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> list(Ephemeras e) {
+    public ResponseEntity<?> list(@RequestBody Ephemeras e) {
         return getDataTable(ephemerasRepository.findAllPageable(
                 e.getItemName(),
                 PageRequest.of(

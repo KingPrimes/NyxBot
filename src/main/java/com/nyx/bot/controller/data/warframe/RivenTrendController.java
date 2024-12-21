@@ -44,14 +44,14 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(RivenTrend t) {
+    public AjaxResult save(@RequestBody RivenTrend t) {
         t.setOldDot(RivenTrendEnum.getRivenTrendDot(t.getOldNum()));
         t.setNewDot(RivenTrendEnum.getRivenTrendDot(t.getNewNum()));
         return toAjax(Math.toIntExact(repository.save(t).getId()));
     }
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(RivenTrend rt) {
+    public ResponseEntity<?> list(@RequestBody RivenTrend rt) {
         return getDataTable(repository.findAllPageable(rt.getTrendName().isEmpty() ? null : rt.getTrendName(),
                 PageRequest.of(
                         rt.getPageNum() - 1,
@@ -78,7 +78,7 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/push")
-    public AjaxResult push(String commit) {
+    public AjaxResult push(@RequestBody String commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<RivenTrend> all = repository.findAll();

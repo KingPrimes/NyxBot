@@ -21,7 +21,7 @@ public class GroupWhiteController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(GroupWhite white) {
+    public ResponseEntity<?> list(@RequestBody GroupWhite white) {
         return getDataTable(whiteService.list(white));
     }
 
@@ -34,7 +34,7 @@ public class GroupWhiteController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult add(GroupWhite white) {
+    public AjaxResult add(@RequestBody GroupWhite white) {
         if (white == null) return error();
         return toAjax(whiteService.save(white) != null);
     }

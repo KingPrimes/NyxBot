@@ -8,7 +8,6 @@ import com.nyx.bot.repo.sys.LogInfoRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,13 +19,13 @@ public class LogInfoController extends BaseController {
 
 
     @GetMapping("/info")
-    public AjaxResult info(Model model) {
+    public AjaxResult info() {
         return success().put("codes", Codes.values());
     }
 
     // 分页条件查询
     @PostMapping("/info/list")
-    public ResponseEntity<?> list(LogInfo info) {
+    public ResponseEntity<?> list(@RequestBody LogInfo info) {
         return getDataTable(repository.findAllPageable(
                 info.getCodes() == null ? null : info.getCodes(),
                 info.getGroupUid(),

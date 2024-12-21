@@ -4,10 +4,7 @@ import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.controller.BaseController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/config/loading")
@@ -19,7 +16,7 @@ public class ConfigLoadingController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(NyxConfig config) {
+    public AjaxResult save(@RequestBody NyxConfig config) {
         return toAjax(HandOff.handoff(config));
 
     }

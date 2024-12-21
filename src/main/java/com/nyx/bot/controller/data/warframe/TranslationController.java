@@ -32,7 +32,7 @@ public class TranslationController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(Translation t) {
+    public AjaxResult save(@RequestBody Translation t) {
         if (t == null) return error();
         if (t.getEn().trim().isEmpty()) return error("英文不可为空");
         if (t.getCn().trim().isEmpty()) return error("中文不可为空");
@@ -46,7 +46,7 @@ public class TranslationController extends BaseController {
      * @param t 查询条件
      */
     @PostMapping("/list")
-    public ResponseEntity<?> list(Translation t) {
+    public ResponseEntity<?> list(@RequestBody Translation t) {
         return getDataTable(repository.findAllPageable(
                 t.getCn(),
                 t.getIsPrime(),
@@ -69,7 +69,7 @@ public class TranslationController extends BaseController {
     }
 
     @PostMapping("/push")
-    public AjaxResult push(String commit) {
+    public AjaxResult push(@RequestBody String commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<Translation> all = repository.findAll();

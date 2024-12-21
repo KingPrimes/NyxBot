@@ -36,7 +36,7 @@ public class MissionSubscribeController extends BaseController {
     }
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(MissionSubscribe ms) {
+    public ResponseEntity<?> list(@RequestBody MissionSubscribe ms) {
 
         return getDataTable(
                 repository.findAllPageable(
