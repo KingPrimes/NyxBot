@@ -53,7 +53,7 @@ public class HandlerException {
     }
 
     @ResponseBody
-    @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     public Object HttpRequestMethodNotSupportedException() {
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, "请求方式错误");
     }
