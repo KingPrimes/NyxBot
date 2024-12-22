@@ -1,5 +1,7 @@
 package com.nyx.bot.core.page;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.Views;
 import lombok.Data;
 
 import java.io.Serial;
@@ -10,6 +12,7 @@ import java.util.List;
  * 表格分页数据对象
  */
 @Data
+@JsonView(Views.View.class)
 public class TableDataInfo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -33,26 +36,22 @@ public class TableDataInfo implements Serializable {
     public TableDataInfo() {
     }
 
-    public TableDataInfo(int code, long totalElements, long totalPages, long size, List<?> content) {
+    public TableDataInfo(int code, long total, long size, List<?> content) {
         this.code = code;
         this.data = new Data();
-        this.data.setTotalElements(totalElements);
-        this.data.setTotalPages(totalPages);
+        this.data.setTotal(total);
         this.data.setSize(size);
-        this.data.setContent(content);
+        this.data.setRecords(content);
     }
 
     @lombok.Data
+    @JsonView(Views.View.class)
     public static class Data {
+
         /**
          * 总记录数
          */
-        private long totalElements;
-
-        /**
-         * 总页数
-         */
-        private long totalPages;
+        private long total;
 
         /**
          * 每页记录数
@@ -60,9 +59,13 @@ public class TableDataInfo implements Serializable {
         private long size;
 
         /**
+         * 当前页数
+         */
+        private long current;
+        /**
          * 列表数据
          */
-        private List<?> content;
+        private List<?> records;
 
     }
 }

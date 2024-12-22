@@ -35,8 +35,8 @@ public class WhiteService {
         return groupWhiteRepository.findAllPageable(
                 gw.getGroupUid(),
                 PageRequest.of(
-                        gw.getPageNum() - 1,
-                        gw.getPageSize()
+                        gw.getCurrent() - 1,
+                        gw.getSize()
                 )
         );
     }
@@ -45,8 +45,8 @@ public class WhiteService {
         return proveWhiteRepository.findAllPageable(
                 pw.getProve(),
                 PageRequest.of(
-                        pw.getPageNum() - 1,
-                        pw.getPageSize()
+                        pw.getCurrent() - 1,
+                        pw.getSize()
                 )
         );
     }

@@ -1,15 +1,17 @@
 package com.nyx.bot.controller.config.bot.black;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.NyxConfig;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.GroupBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +23,8 @@ public class GroupBlackController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody GroupBlack gb) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody GroupBlack gb) {
         return getDataTable(bs.list(gb));
     }
 

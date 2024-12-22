@@ -1,7 +1,10 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.NotTranslation;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
@@ -10,7 +13,6 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,12 +39,13 @@ public class NotTranslationController extends BaseController {
      * @param t 查询条件
      */
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody NotTranslation t) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody NotTranslation t) {
         ExampleMatcher notTranslation = ExampleMatcher.matching().withMatcher("notTranslation", ExampleMatcher.GenericPropertyMatcher::contains)
                 .withIgnoreCase();
         Example<NotTranslation> notTranslationExample = Example.of(t, notTranslation);
 
-        return getDataTable(notTranslationRepository.findAll(notTranslationExample, PageRequest.of(t.getPageNum() - 1, t.getPageSize())));
+        return getDataTable(notTranslationRepository.findAll(notTranslationExample, PageRequest.of(t.getCurrent() - 1, t.getSize())));
     }
 
     /**

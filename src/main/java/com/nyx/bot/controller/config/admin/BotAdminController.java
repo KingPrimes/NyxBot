@@ -1,8 +1,11 @@
 package com.nyx.bot.controller.config.admin;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.BotAdmin;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.PermissionsEnums;
@@ -10,7 +13,6 @@ import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -27,8 +29,9 @@ public class BotAdminController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody BotAdmin ba) {
-        return getDataTable(botAdminRepository.findAll(PageRequest.of(ba.getPageNum() - 1, ba.getPageSize())));
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody BotAdmin ba) {
+        return getDataTable(botAdminRepository.findAll(PageRequest.of(ba.getCurrent() - 1, ba.getSize())));
     }
 
     private Map<String, String> getPe() {

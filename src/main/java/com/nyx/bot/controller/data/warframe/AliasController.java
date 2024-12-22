@@ -1,7 +1,10 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Alias;
 import com.nyx.bot.repo.warframe.AliasRepository;
@@ -11,7 +14,6 @@ import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -29,9 +31,9 @@ public class AliasController extends BaseController {
     AliasRepository repository;
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody Alias alias) {
-        log.debug("Alias:{}", alias);
-        return getDataTable(repository.findByLikeCn(alias == null ? null : alias.getCn() == null ? null : alias.getCn().isEmpty() ? null : alias.getCn(), PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody Alias alias) {
+        return getDataTable(repository.findByLikeCn(alias.getCn(), PageRequest.of(alias.getCurrent() - 1, alias.getSize())));
     }
 
     @PostMapping("/update")

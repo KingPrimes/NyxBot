@@ -1,13 +1,15 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -39,14 +41,15 @@ public class MissionSubscribeController extends BaseController {
     }
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody MissionSubscribe ms) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody MissionSubscribe ms) {
 
         return getDataTable(
                 repository.findAllPageable(
                         ms.getSubGroup(),
                         PageRequest.of(
-                                ms.getPageNum() - 1,
-                                ms.getPageSize()
+                                ms.getCurrent() - 1,
+                                ms.getSize()
                         )
                 ).map(subscribe -> {
                     subscribe.setSubUsers(

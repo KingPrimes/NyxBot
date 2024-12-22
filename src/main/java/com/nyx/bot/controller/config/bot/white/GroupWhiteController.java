@@ -1,15 +1,17 @@
 package com.nyx.bot.controller.config.bot.white;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.NyxConfig;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.white.GroupWhite;
 import com.nyx.bot.repo.impl.white.WhiteService;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +23,8 @@ public class GroupWhiteController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody GroupWhite white) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody GroupWhite white) {
         return getDataTable(whiteService.list(white));
     }
 

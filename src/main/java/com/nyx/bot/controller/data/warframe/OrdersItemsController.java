@@ -1,13 +1,16 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.OrdersItems;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping("/data/warframe/market")
 public class OrdersItemsController extends BaseController {
@@ -24,12 +28,14 @@ public class OrdersItemsController extends BaseController {
 
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody OrdersItems oi) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody OrdersItems oi) {
+        log.info("查询订单数据:{}", oi);
         return getDataTable(
                 repository.findAllPageable(
                         oi.getItemName(),
                         PageRequest.of(
-                                oi.getPageNum() - 1, oi.getPageSize()
+                                oi.getCurrent() - 1, oi.getSize()
                         )
                 )
         );

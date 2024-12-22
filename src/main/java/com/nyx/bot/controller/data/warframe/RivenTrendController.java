@@ -1,7 +1,10 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.AsyncBeanName;
@@ -15,7 +18,6 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -52,11 +54,12 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/list")
-    public ResponseEntity<?> list(@RequestBody RivenTrend rt) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody RivenTrend rt) {
         return getDataTable(repository.findAllPageable(rt.getTrendName().isEmpty() ? null : rt.getTrendName(),
                 PageRequest.of(
-                        rt.getPageNum() - 1,
-                        rt.getPageSize()
+                        rt.getCurrent() - 1,
+                        rt.getSize()
                 )
         ));
     }

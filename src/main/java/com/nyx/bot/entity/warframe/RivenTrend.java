@@ -1,6 +1,8 @@
 package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import jakarta.persistence.*;
@@ -20,6 +22,7 @@ import java.sql.Timestamp;
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "trendName"))
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonView(Views.View.class)
 public class RivenTrend extends BaseEntity {
 
     @Id

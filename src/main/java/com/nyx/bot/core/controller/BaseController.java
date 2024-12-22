@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
@@ -56,15 +55,24 @@ public class BaseController {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(200);
         TableDataInfo.Data data = new TableDataInfo.Data();
-        data.setContent(list);
-        data.setTotalElements(totalElements);
+        data.setRecords(list);
+        data.setTotal(totalElements);
         rspData.setData(data);
         return rspData;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected ResponseEntity getDataTable(Page page) {
-        return ResponseEntity.ok(AjaxResult.success(page));
+
+    protected TableDataInfo getDataTable(Page<?> page) {
+        TableDataInfo td = new TableDataInfo();
+        TableDataInfo.Data data = new TableDataInfo.Data();
+        data.setTotal(page.getTotalElements());
+        data.setSize(page.getSize());
+        data.setRecords(page.getContent());
+        data.setCurrent(page.getNumber() + 1);
+        td.setData(data);
+        td.setMsg("操作成功");
+        td.setCode(HttpCodeEnum.SUCCESS.getCode());
+        return td;
     }
 
     /**

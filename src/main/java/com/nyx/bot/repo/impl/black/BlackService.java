@@ -36,8 +36,8 @@ public class BlackService {
         return repository.findAllPageable(
                 gb.getGroupUid(),
                 PageRequest.of(
-                        gb.getPageNum() - 1,
-                        gb.getPageSize()
+                        gb.getCurrent() - 1,
+                        gb.getSize()
                 )
         );
     }
@@ -62,8 +62,8 @@ public class BlackService {
         return proveBlackRepository.findAllPageable(
                 pb.getProve(),
                 PageRequest.of(
-                        pb.getPageNum() - 1,
-                        pb.getPageSize()
+                        pb.getCurrent() - 1,
+                        pb.getSize()
                 )
         );
     }

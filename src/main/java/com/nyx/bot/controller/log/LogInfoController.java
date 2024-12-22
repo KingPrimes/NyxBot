@@ -1,13 +1,15 @@
 package com.nyx.bot.controller.log;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.repo.sys.LogInfoRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,11 +27,12 @@ public class LogInfoController extends BaseController {
 
     // 分页条件查询
     @PostMapping("/info/list")
-    public ResponseEntity<?> list(@RequestBody LogInfo info) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody LogInfo info) {
         return getDataTable(repository.findAllPageable(
                 info.getCodes() == null ? null : info.getCodes(),
                 info.getGroupUid(),
-                PageRequest.of(info.getPageNum() - 1, info.getPageSize())));
+                PageRequest.of(info.getCurrent() - 1, info.getSize())));
     }
 
     @GetMapping("/info/detail/{logId}")
