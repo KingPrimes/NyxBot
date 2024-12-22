@@ -6,14 +6,19 @@ import com.nyx.bot.core.SecurityUtils;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.sys.SysUser;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+@Slf4j
 @RestController
 @CrossOrigin
 public class LoginController extends BaseController {
@@ -28,15 +33,18 @@ public class LoginController extends BaseController {
 
     @PostMapping("/login")
     public AjaxResult login(@RequestBody SysUser authRequest) {
-        AjaxResult ajax = AjaxResult.success();
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUserName());
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUserName());
 
-        return ajax.put("token", jwtUtil.generateToken(userDetails.getUsername()));
+            return success("登录成功", Map.of("token", jwtUtil.generateToken(userDetails.getUsername())));
+        } catch (UsernameNotFoundException e) {
+            return error(e.getMessage());
+        }
     }
 
     @GetMapping("/info")

@@ -3,10 +3,13 @@ package com.nyx.bot.core;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.exception.ServiceException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@Slf4j
 public class SecurityUtils {
     /**
      * 用户ID
@@ -36,7 +39,12 @@ public class SecurityUtils {
      **/
     public static SysUser getLoginUser() {
         try {
-            return (SysUser) getAuthentication().getPrincipal();
+            Object object = getAuthentication().getPrincipal();
+            SysUser user = new SysUser();
+            if (object instanceof User) {
+                user.setUserName(((User) object).getUsername());
+            }
+            return user;
         } catch (Exception e) {
             throw new ServiceException("获取用户信息异常", HttpCodeEnum.UNAUTHORIZED.getCode());
         }

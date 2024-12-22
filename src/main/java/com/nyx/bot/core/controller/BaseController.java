@@ -129,6 +129,10 @@ public class BaseController {
         return AjaxResult.success(message);
     }
 
+    public AjaxResult success(String msg, Object data) {
+        return new AjaxResult(HttpCodeEnum.SUCCESS, msg, data);
+    }
+
     /**
      * 返回失败消息
      */

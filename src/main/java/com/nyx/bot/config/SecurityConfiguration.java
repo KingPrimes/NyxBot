@@ -124,7 +124,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of("*")); // 设置允许的前端域名
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 设置允许的HTTP方法
         configuration.setAllowedHeaders(List.of("*")); // 设置允许的请求头
-        configuration.setAllowCredentials(true); // 允许携带身份验证信息
+        configuration.setAllowCredentials(false); // 允许携带身份验证信息
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
