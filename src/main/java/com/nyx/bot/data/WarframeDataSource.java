@@ -256,12 +256,14 @@ public class WarframeDataSource {
             RelicsRepository repository = SpringUtils.getBean(RelicsRepository.class);
             if (!repository.findAll().isEmpty()) {
                 List<Relics> all = repository.findAll();
+                log.debug("Relics数据正在进行过滤！");
                 List<Relics> list = relics.stream().filter(item ->
                                 !all.stream()
-                                        .collect(Collectors.toMap(Relics::toString, value -> value))
-                                        .containsKey(item.toString())
+                                        .collect(Collectors.toMap(re -> re.getRelicsId() + re.getRewards().stream().map(RelicsRewards::getRewardId).toList(), value -> value))
+                                        .containsKey(item.getRelicsId() + item.getRewards().stream().map(RelicsRewards::getRewardId).toList())
                         )
                         .toList();
+                log.debug("Relics数据过滤完成！{}", list.size());
                 relics = repository.saveAll(list);
                 log.info("共更新Warframe 遗物表 {} 条数据！", relics.size());
                 return relics.size();
@@ -444,7 +446,8 @@ public class WarframeDataSource {
                 git.pull();
                 flag = false;
                 break;
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.error("初始化数据模板错误:{}", e.getMessage(), e.getCause());
             }
         }
         return flag;
