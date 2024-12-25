@@ -104,7 +104,7 @@ public class RivenTrendController extends BaseController {
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/riven_trend.json", jsonString);
             String branchName = DateUtils.getDate(new Date(), DateUtils.NOT_HMS);
-            build.pushBranchCheckout(commit, branchName, "warframe/riven_trend.json");
+            build.pushBranchCheckout(commit, branchName, JgitUtil.lockPath + "/warframe/riven_trend.json");
             return toAjax(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
