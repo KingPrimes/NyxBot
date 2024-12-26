@@ -31,7 +31,7 @@ public class LoginController extends BaseController {
     @Resource
     private UserDetailsService userDetailsService;
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public AjaxResult login(@RequestBody SysUser authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -47,11 +47,11 @@ public class LoginController extends BaseController {
         }
     }
 
-    @GetMapping("/info")
+    @GetMapping("/auth/info")
     public AjaxResult getInfo() {
         SysUser loginUser = SecurityUtils.getLoginUser();
         AjaxResult ajax = AjaxResult.success();
-        ajax.put("userName", loginUser.getUserName());
+        ajax.put("userInfo", Map.of("userName", loginUser.getUserName()));
         return ajax;
     }
 }

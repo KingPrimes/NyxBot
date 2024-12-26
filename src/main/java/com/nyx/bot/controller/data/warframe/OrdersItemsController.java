@@ -30,7 +30,6 @@ public class OrdersItemsController extends BaseController {
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody OrdersItems oi) {
-        log.info("查询订单数据:{}", oi);
         return getDataTable(
                 repository.findAllPageable(
                         oi.getItemName(),

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -56,6 +57,12 @@ public class HandlerException {
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     public Object HttpRequestMethodNotSupportedException() {
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, "请求方式错误");
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = BadCredentialsException.class)
+    public Object BadCredentialsException(BadCredentialsException e) {
+        return AjaxResult.error(HttpCodeEnum.FAIL, e.getMessage());
     }
 
     @ResponseBody
