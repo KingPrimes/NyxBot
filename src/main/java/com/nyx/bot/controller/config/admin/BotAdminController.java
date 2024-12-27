@@ -38,13 +38,16 @@ public class BotAdminController extends BaseController {
         return Arrays.stream(PermissionsEnums.values()).collect(Collectors.toMap(PermissionsEnums::name, PermissionsEnums::getStr));
     }
 
-    @GetMapping("/add")
-    public AjaxResult add() {
-        AjaxResult ar = AjaxResult.success();
+    @GetMapping("/permissions")
+    public AjaxResult getPermissions() {
+        return success(getPe());
+    }
+
+    @GetMapping("/bots")
+    public AjaxResult getBots() {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-        ar.put("permissions", getPe());
-        ar.put("bots", container.robots.keySet());
-        return ar;
+        if (container.robots == null) return error("请链接机器人后操作！\n注意：官方机器人无法获取好友列表。");
+        return success(container.robots.keySet());
     }
 
     @GetMapping("/friend/{botUid}")

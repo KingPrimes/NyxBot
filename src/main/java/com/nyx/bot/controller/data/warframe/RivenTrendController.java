@@ -56,7 +56,7 @@ public class RivenTrendController extends BaseController {
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody RivenTrend rt) {
-        return getDataTable(repository.findAllPageable(rt.getTrendName().isEmpty() ? null : rt.getTrendName(),
+        return getDataTable(repository.findAllPageable(rt.getTrendName(),
                 PageRequest.of(
                         rt.getCurrent() - 1,
                         rt.getSize()

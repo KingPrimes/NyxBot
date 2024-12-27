@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,19 +26,19 @@ public class MissionSubscribeController extends BaseController {
 
     @GetMapping
     public AjaxResult subscribe() {
-        return success().put("sub", Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME)));
+        return success().put("data", Map.of("sub", Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME))));
     }
 
     @GetMapping("/detail/{subGroup}")
     public AjaxResult detail(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        return success().put("group", group);
+        return success().put("data", Map.of("group", group));
     }
 
     @GetMapping("/edit/{subGroup}")
     public AjaxResult edit(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        return success().put("group", group);
+        return success().put("data", Map.of("group", group));
     }
 
     @PostMapping("/list")

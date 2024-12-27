@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
@@ -50,6 +51,7 @@ public class RivenTrend extends BaseEntity {
 
     //此次更新得时间
     @JsonProperty("isDate")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp isDate;
 
     //武器中文名称
