@@ -69,9 +69,11 @@ public class ApiUrl {
 
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
 
+    private static final String WARFRAME_PROFILE = "https://content.warframe.com/dynamic/getProfileViewingData.php?n=%s";
 
     /**
      * Market 物品查询
+     *
      * @param key  物品名称
      * @param from 平台
      * @return 返回信息
@@ -103,6 +105,16 @@ public class ApiUrl {
         arbitration.setType(arbitrationPre.getType());
         arbitration.setEnemy(arbitrationPre.getEnemy());
         return arbitration;
+    }
+
+    /**
+     * 获取Warframe的个人信息
+     *
+     * @param name ID
+     * @return 个人信息
+     */
+    public static HttpUtils.Body getProfile(String name) {
+        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE, name));
     }
 
 }
