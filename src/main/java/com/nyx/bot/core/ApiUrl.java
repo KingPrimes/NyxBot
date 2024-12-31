@@ -69,7 +69,9 @@ public class ApiUrl {
 
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
 
-    private static final String WARFRAME_PROFILE = "https://content.warframe.com/dynamic/getProfileViewingData.php?n=%s";
+    private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
+
+    private static final String WARFRAME_PROFILE_STATS = "https://api.warframestat.us/profile/%s/stats";
 
     /**
      * Market 物品查询
@@ -115,6 +117,16 @@ public class ApiUrl {
      */
     public static HttpUtils.Body getProfile(String name) {
         return HttpUtils.sendGet(String.format(WARFRAME_PROFILE, name));
+    }
+
+    /**
+     * 获取Warframe的个人统计信息
+     *
+     * @param name ID
+     * @return 统计信息
+     */
+    public static HttpUtils.Body getProfileStats(String name) {
+        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE_STATS, name));
     }
 
 }
