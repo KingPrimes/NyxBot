@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Msg {
 
@@ -403,6 +404,10 @@ public class Msg {
 
     public List<ArrayMsg> build() {
         return builder;
+    }
+
+    public String buildCQ() {
+        return this.builder.stream().map(ArrayMsg::toCQCode).collect(Collectors.joining());
     }
 
     private ArrayMsg getJsonData(String type, Consumer<Map<String, String>> consumer) {

@@ -3,14 +3,9 @@ package com.nyx.bot.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
-import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import okhttp3.Headers;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 public class ApiUrl {
@@ -90,23 +85,8 @@ public class ApiUrl {
      *
      * @return 仲裁
      */
-    public static GlobalStates.Arbitration arbitrationPre() {
-        List<ArbitrationPre> arbitrationPres = JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
-        // 指定获取东八区日期
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.ofHours(8));
-        Date date = new Date(now.toEpochSecond(ZoneOffset.ofHours(8)) * 1000L);
-        ArbitrationPre arbitrationPre = arbitrationPres.stream()
-                //判断两个时间相差的秒数，为负数则是正确数据
-                .filter(i -> DateUtils.getDateSecond(i.getActivation(), date) < 0)
-                .findFirst().orElse(null);
-        if (arbitrationPre == null) return arbitrationPre();
-        GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
-        arbitration.setActivation(arbitrationPre.getActivation());
-        arbitration.setExpiry(arbitrationPre.getExpiry());
-        arbitration.setNode(arbitrationPre.getNode());
-        arbitration.setType(arbitrationPre.getType());
-        arbitration.setEnemy(arbitrationPre.getEnemy());
-        return arbitration;
+    public static List<ArbitrationPre> arbitrationPreList() {
+        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
     }
 
     /**

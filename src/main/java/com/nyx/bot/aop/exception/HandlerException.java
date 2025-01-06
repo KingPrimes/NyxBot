@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.thymeleaf.exceptions.TemplateInputException;
 
 @Slf4j
@@ -42,9 +43,14 @@ public class HandlerException {
     }
 
     @ResponseBody
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public void handlerNoResourceFoundException() {
+    }
+
+    @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Object Exception(Exception e) {
-        log.error("出现未知错误信息：{}", e.getMessage());
+        log.error("出现未知错误信息：{} {}", e.getMessage(), e.getClass());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("出现未知错误信息：" + e.getMessage());
     }

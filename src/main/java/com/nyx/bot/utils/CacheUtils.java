@@ -3,13 +3,20 @@ package com.nyx.bot.utils;
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.exception.DataNotInfoException;
+import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.res.GlobalStates;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.annotation.Nullable;
 import org.springframework.cache.CacheManager;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class CacheUtils {
@@ -17,6 +24,8 @@ public class CacheUtils {
     public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
     public static final String GROUP_CAPTCHA = "group-captcha";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
+
+    public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
@@ -28,16 +37,47 @@ public class CacheUtils {
     }
 
     public static void setGlobalState(GlobalStates state) {
-        GlobalStates.Arbitration arbitration = ApiUrl.arbitrationPre();
-        if (state.getArbitration() == null) {
-            state.setArbitration(arbitration);
-        } else {
-            if (!state.getArbitration().equals(arbitration)) {
-                state.setArbitration(arbitration);
-            }
-        }
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
         FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
+    }
+
+    /**
+     * 获取仲裁
+     *
+     * @return 当前数据
+     */
+    public static GlobalStates.Arbitration getArbitration() {
+        List<?> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitration", List.class);
+        log.debug("获取仲裁数据列表: {}", JSON.toJSONString(arbitrationList));
+        if (arbitrationList == null || arbitrationList.isEmpty()) {
+            arbitrationList = ApiUrl.arbitrationPreList();
+            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitration", arbitrationList);
+        }
+        AtomicReference<GlobalStates.Arbitration> arbitration = new AtomicReference<>(new GlobalStates.Arbitration());
+        arbitrationList.stream()
+                // 类型转换
+                .filter(i -> i instanceof ArbitrationPre)
+                .map(i -> (ArbitrationPre) i)
+                //判断两个时间相差的毫秒数，并取最小值的元素
+                .min(Comparator.comparingLong(obj -> ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli()))
+                // 赋值
+                .ifPresentOrElse(a -> {
+                    arbitration.get().setActivation(a.getActivation());
+                    arbitration.get().setExpiry(a.getExpiry());
+                    arbitration.get().setNode(a.getNode());
+                    arbitration.get().setType(a.getType());
+                    arbitration.get().setEnemy(a.getEnemy());
+                }, () -> {
+                    // 设置为空，说明缓存中没有匹配的值了
+                    arbitration.set(null);
+                });
+        // 如何没有匹配的值则获取新的数据
+        if (arbitration.get() == null) {
+            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitration", ApiUrl.arbitrationPreList());
+            // 迭代返回数据
+            return getArbitration();
+        }
+        return arbitration.get();
     }
 
     /**
