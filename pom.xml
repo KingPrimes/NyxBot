@@ -14,7 +14,7 @@
     <artifactId>NxyBot</artifactId>
 
 
-    <version>0.1.7</version>
+    <version>0.1.8</version>
 
     <name>NxyBot</name>
 
@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <oneSdk.version>2.3.3</oneSdk.version>
+        <oneSdk.version>2.3.5</oneSdk.version>
         <fastJson2.version>2.0.53</fastJson2.version>
         <xhtmlrenderer.version>9.11.0</xhtmlrenderer.version>
         <rhino.version>1.7.15</rhino.version>
