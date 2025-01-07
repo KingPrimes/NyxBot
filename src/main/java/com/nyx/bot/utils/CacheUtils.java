@@ -48,18 +48,20 @@ public class CacheUtils {
      */
     public static GlobalStates.Arbitration getArbitration() {
         List<?> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitration", List.class);
-        log.debug("获取仲裁数据列表: {}", JSON.toJSONString(arbitrationList));
         if (arbitrationList == null || arbitrationList.isEmpty()) {
             arbitrationList = ApiUrl.arbitrationPreList();
             Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitration", arbitrationList);
         }
         AtomicReference<GlobalStates.Arbitration> arbitration = new AtomicReference<>(new GlobalStates.Arbitration());
+        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
         arbitrationList.stream()
                 // 类型转换
                 .filter(i -> i instanceof ArbitrationPre)
                 .map(i -> (ArbitrationPre) i)
+                //过滤掉过期的数据
+                .filter(a -> a.getExpiry().getTime() - milli > 0)
                 //判断两个时间相差的毫秒数，并取最小值的元素
-                .min(Comparator.comparingLong(obj -> ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli()))
+                .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
                 // 赋值
                 .ifPresentOrElse(a -> {
                     arbitration.get().setActivation(a.getActivation());
