@@ -29,6 +29,23 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
+      - name: Generate release notes
+        id: generate_release_notes
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter.yml
+
+      - name: Upload JAR to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/NyxBot.jar
+          asset-name: application.jar
+          tag: ${{ github.ref }}
+          overwrite: true
+          draft: true
+          body: ${{ steps.generate_release_notes.outputs.notes
+
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
         with:
