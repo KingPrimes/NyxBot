@@ -44,7 +44,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           draft: true
-          body: ${{ steps.generate_release_notes.outputs.notes
+          body: ${{ steps.generate_release_notes.outputs.notes }}
 
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
