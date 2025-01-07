@@ -41,6 +41,7 @@ jobs:
         uses: release-drafter/release-drafter@v6
         with:
           config-name: release-drafter.yml
+          publish: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # 将JAR文件上传到GitHub Release
@@ -51,8 +52,9 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           draft: true
+          release_name: ${{ steps.generate_release_notes.outputs.name }}
           # 设置正文为 release-drafter/release-drafter@v6 步骤中生成的 release notes
-          body: ${{ steps.generate_release_notes.outputs.notes }}
+          body: ${{ steps.generate_release_notes.outputs.body }}
 
   build-docker:
     name: Docker
