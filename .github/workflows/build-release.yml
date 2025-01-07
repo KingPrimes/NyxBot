@@ -35,16 +35,24 @@ jobs:
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
-
+      # 获取Commits信息 并将其存储到 generate_release_notes.outputs.notes 变量中
+      - name: Generate release notes
+        id: generate_release_notes
+        uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 将JAR文件上传到GitHub Release
       - name: Upload JAR to Release
         uses: svenstaro/upload-release-action@v2
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
           file: target/NyxBot.jar
-          asset-name: application.jar
           tag: ${{ github.ref }}
           overwrite: true
           draft: true
+          # 设置正文为 release-drafter/release-drafter@v6 步骤中生成的 release notes
+          body: ${{ steps.generate_release_notes.outputs.notes }}
 
   build-docker:
     name: Docker
