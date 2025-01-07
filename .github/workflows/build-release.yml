@@ -44,6 +44,7 @@ jobs:
           publish: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ github.ref }}
       # 将JAR文件上传到GitHub Release
       - name: Upload JAR to Release
         uses: svenstaro/upload-release-action@v2
