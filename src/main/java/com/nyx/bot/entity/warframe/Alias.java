@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -24,9 +25,9 @@ public class Alias extends BaseEntity {
 
     Long id;
     @JsonProperty("cn")
-
+    @NotEmpty(message = "中文不能为空")
     String cn;
     @JsonProperty("en")
-
+    @NotEmpty(message = "英文不能为空")
     String en;
 }

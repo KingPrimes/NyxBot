@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -67,8 +68,14 @@ public class HandlerException {
 
     @ResponseBody
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
-    public Object HttpMessageNotReadableException() {
-        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, "请求地址错误");
+    public Object HttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public Object MethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getBindingResult().getFieldError().getDefaultMessage());
     }
 
     @ResponseBody

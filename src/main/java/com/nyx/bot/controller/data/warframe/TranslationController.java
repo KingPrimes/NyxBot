@@ -13,6 +13,7 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -35,10 +36,7 @@ public class TranslationController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody Translation t) {
-        if (t == null) return error();
-        if (t.getEn().trim().isEmpty()) return error("英文不可为空");
-        if (t.getCn().trim().isEmpty()) return error("中文不可为空");
+    public AjaxResult save(@Validated @RequestBody Translation t) {
         repository.save(t);
         return success();
     }
@@ -83,7 +81,7 @@ public class TranslationController extends BaseController {
             build.pushBranchCheckout(commit.get("commit"), branchName, "warframe/translation.json");
             return toAjax(true);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return error(e.getMessage());
         }
     }
 

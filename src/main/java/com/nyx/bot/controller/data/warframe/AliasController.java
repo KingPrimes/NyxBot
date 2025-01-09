@@ -14,6 +14,7 @@ import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -47,22 +48,7 @@ public class AliasController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody Alias a) {
-        if (a == null) {
-            return error("参数错误！");
-        }
-        if (a.getCn() == null) {
-            return error("中文不能为空！");
-        }
-        if (a.getEn() == null) {
-            return error("英文不能为空！");
-        }
-        if (a.getCn().trim().isEmpty()) {
-            return error("中文不能为空！");
-        }
-        if (a.getEn().trim().isEmpty()) {
-            return error("英文不能为空！");
-        }
+    public AjaxResult save(@Validated @RequestBody Alias a) {
         Optional<Alias> alias = repository.findByCnAndEn(a.getCn(), a.getEn());
         if (alias.isPresent()) {
             return error("该别名已存在！");

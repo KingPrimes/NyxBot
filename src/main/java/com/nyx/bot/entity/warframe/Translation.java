@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,9 +24,11 @@ public class Translation extends BaseEntity {
     Long id;
     //中文名称
     @JsonProperty("cn")
+    @NotEmpty(message = "中文不能为空")
     String cn;
     //英文名称
     @JsonProperty("en")
+    @NotEmpty(message = "英文不能为空")
     String en;
     //是否是 Prime 版本
     @JsonProperty("is_prime")

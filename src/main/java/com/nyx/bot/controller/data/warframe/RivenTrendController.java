@@ -18,6 +18,7 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -47,7 +48,7 @@ public class RivenTrendController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody RivenTrend t) {
+    public AjaxResult save(@Validated @RequestBody RivenTrend t) {
         t.setOldDot(RivenTrendEnum.getRivenTrendDot(t.getOldNum()));
         t.setNewDot(RivenTrendEnum.getRivenTrendDot(t.getNewNum()));
         return toAjax(Math.toIntExact(repository.save(t).getId()));

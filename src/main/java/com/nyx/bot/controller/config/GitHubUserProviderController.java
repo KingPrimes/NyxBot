@@ -6,6 +6,7 @@ import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,20 +22,21 @@ public class GitHubUserProviderController extends BaseController {
     public AjaxResult html() {
         AjaxResult ar = success();
         List<GitHubUserProvider> all = gitRepository.findAll();
+        GitHubUserProvider provider = new GitHubUserProvider();
         if (!all.isEmpty()) {
-            ar.put("git", all.get(0));
-        } else {
-            ar.put("git", new GitHubUserProvider());
+            provider = all.get(0);
         }
-
-        ar.put("gitUrl", JgitUtil.getOriginUrl(JgitUtil.lockPath));
-
+        provider.setGitUrl(JgitUtil.getOriginUrl(JgitUtil.lockPath));
+        ar.put("data", provider);
         return ar;
     }
 
 
-    @PostMapping("/save")
-    public AjaxResult save(@RequestBody GitHubUserProvider gitHubUserProvider) {
+    @PostMapping
+    public AjaxResult save(@Validated @RequestBody GitHubUserProvider gitHubUserProvider) {
+        if (!gitHubUserProvider.isValidGitUrl()) {
+            return AjaxResult.error("仓库地址不符合规范");
+        }
         gitRepository.save(gitHubUserProvider);
         JgitUtil.restOriginUrl(gitHubUserProvider.getGitUrl(), JgitUtil.lockPath);
         return success();

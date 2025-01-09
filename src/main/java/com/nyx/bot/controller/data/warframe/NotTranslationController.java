@@ -13,6 +13,7 @@ import jakarta.annotation.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -54,7 +55,7 @@ public class NotTranslationController extends BaseController {
      * @param t 词典内容
      */
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody Translation t) {
+    public AjaxResult save(@Validated @RequestBody Translation t) {
         notTranslationRepository.deleteById(t.getId());
         Translation translation = new Translation();
         translation.setCn(t.getCn());
