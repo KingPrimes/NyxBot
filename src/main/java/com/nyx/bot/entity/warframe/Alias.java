@@ -30,4 +30,8 @@ public class Alias extends BaseEntity {
     @JsonProperty("en")
     @NotEmpty(message = "英文不能为空")
     String en;
+
+    public boolean isValidEnglish() {
+        return en.matches("^[a-zA-Z0-9_&]+$");
+    }
 }

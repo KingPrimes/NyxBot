@@ -13,9 +13,11 @@ import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,46 +33,44 @@ public class BotAdminController extends BaseController {
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody BotAdmin ba) {
-        return getDataTable(botAdminRepository.findAll(PageRequest.of(ba.getCurrent() - 1, ba.getSize())));
+        return getDataTable(botAdminRepository.findAllByBotUid(ba.getBotUid(), PageRequest.of(ba.getCurrent() - 1, ba.getSize())));
     }
 
-    private Map<String, String> getPe() {
-        return Arrays.stream(PermissionsEnums.values()).collect(Collectors.toMap(PermissionsEnums::name, PermissionsEnums::getStr));
+    private List<Map<String, String>> getPe() {
+        return Arrays.stream(PermissionsEnums.values())
+                .filter(enums -> enums != PermissionsEnums.MANAGE && enums != PermissionsEnums.OTHER)
+                .map(e -> Map.of("label", e.getStr(), "value", e.name()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/permissions")
     public AjaxResult getPermissions() {
-        return success(getPe());
+        return success().put("data", getPe());
     }
 
     @GetMapping("/bots")
     public AjaxResult getBots() {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
-        if (container.robots == null) return error("请链接机器人后操作！\n注意：官方机器人无法获取好友列表。");
-        return success(container.robots.keySet());
+        if (container.robots.isEmpty()) return error("请链接机器人后操作！\n注意：官方机器人无法获取好友列表。");
+        return success().put("data", container.robots.keySet().stream().map(k -> Map.of("label", container.robots.get(k).getLoginInfo().getData().getNickname(), "value", k)).collect(Collectors.toList()));
     }
 
     @GetMapping("/friend/{botUid}")
     public AjaxResult getFriendList(@PathVariable Long botUid) {
         BotContainer container = SpringUtils.getBean(BotContainer.class);
         return container.robots.containsKey(botUid)
-                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData())
+                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
                 : new AjaxResult(HttpCodeEnum.ERROR, "Bot not found", null);
     }
 
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody BotAdmin ba) {
-        if (ba == null) {
-            return error("参数错误！");
-        }
-        switch (ba.getPermissions()) {
-            case MANAGE, OTHER -> {
-                return error("不可使用此权限！");
-            }
+    public AjaxResult save(@Validated @RequestBody BotAdmin ba) {
+        if (ba.isValidatePermissions()) {
+            return error("不可使用此权限！");
         }
         Optional<BotAdmin> byPermissions = botAdminRepository.findByPermissions(ba.getPermissions());
         if (byPermissions.isPresent()) {
-            if (byPermissions.get().getPermissions().equals(PermissionsEnums.SUPER_ADMIN)) {
+            if (byPermissions.get().getPermissions().equals(PermissionsEnums.SUPER_ADMIN) && ba.getBotUid().equals(byPermissions.get().getBotUid())) {
                 return error("超级管理员已存在！且只能有一个。");
             }
         }
@@ -81,15 +81,7 @@ public class BotAdminController extends BaseController {
     @GetMapping("/edit/{id}")
     public AjaxResult edit(@PathVariable Long id) {
         AjaxResult ar = AjaxResult.success();
-        //获取好友列表
-        BotContainer container = SpringUtils.getBean(BotContainer.class);
-        container.robots.forEach((aLong, bot) -> ar.put(String.valueOf(aLong), bot.getFriendList().getData()));
-        //获取机器人列表
-        ar.put("permissions", getPe());
-        ar.put("bots", container.robots.keySet());
-        botAdminRepository.findById(id).ifPresent(a -> ar.put("botAdmin", a));
+        botAdminRepository.findById(id).ifPresent(a -> ar.put("data", a));
         return ar;
     }
-
-
 }

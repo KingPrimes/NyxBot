@@ -1,5 +1,9 @@
 package com.nyx.bot.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 
@@ -7,6 +11,8 @@ import lombok.Data;
 public class NyxConfig {
 
     // server 端口
+    @Min(value = 1, message = "端口号不能小于1")
+    @Max(value = 65535, message = "端口号不能大于65535")
     Integer serverPort = 8080;
 
     // bot blacklist or whitelist
@@ -18,8 +24,21 @@ public class NyxConfig {
     Boolean isServerOrClient = true;
 
     // websocket client url
+    @NotEmpty(message = "客户端地址不能为空")
     String wsClientUrl = "ws://localhost:3001";
 
     // websocket server url
+    @NotEmpty(message = "服务端地址不能为空")
     String wsServerUrl = "/ws/shiro";
+
+    // 不进行序列化
+    @JsonIgnore
+    public boolean isValidateClientUrl() {
+        return wsClientUrl.matches("^(ws|wss)://[\\w.-]+(:\\d+)?(/([\\w/_.-]*(\\?\\S+)?)?)?$");
+    }
+
+    @JsonIgnore
+    public boolean isValidateServerUrl() {
+        return wsServerUrl.matches("^/([A-z]+)/?([A-z]+)?");
+    }
 }
