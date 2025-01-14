@@ -1,7 +1,6 @@
 package com.nyx.bot.core;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,12 @@ public class JwtUtil {
         return doGenerateToken(claims, username);
     }
 
-    // 从JWT令牌中解析用户名
+    /**
+     * 从JWT令牌中解析用户名
+     *
+     * @param token JWT令牌
+     * @return 用户名
+     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -51,13 +55,9 @@ public class JwtUtil {
 
     // 解析所有的claims
     private Claims extractAllClaims(String token) {
-        try {
-            return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
-        } catch (JwtException e) {
-            // 这里可以处理令牌解析失败的情况，例如令牌过期、签名无效等
-            throw new RuntimeException("Invalid JWT token", e);
-        }
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
+
 
     // 生成token
     private String doGenerateToken(Map<String, Object> claims, String subject) {
@@ -66,7 +66,7 @@ public class JwtUtil {
                 .subject(subject)
                 .issuer("NyxBot")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .expiration(new Date(System.currentTimeMillis() + (expiration * 1000)))
                 .signWith(key)
                 .compact();
     }

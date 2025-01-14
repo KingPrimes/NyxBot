@@ -52,7 +52,8 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
     }
 
     /**
-     * 判断以给定名字注册的bean定义是一个singleton还是一个prototype。 如果与给定名字相应的bean定义没有被找到，将会抛出一个异常（NoSuchBeanDefinitionException）
+     * 判断以给定名字注册的bean定义是一个singleton还是一个prototype。
+     * 如果与给定名字相应的bean定义没有被找到，将会抛出一个异常（NoSuchBeanDefinitionException）
      *
      * @return boolean
      * @throws NoSuchBeanDefinitionException
@@ -112,6 +113,13 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      */
     public static String getPort() {
         return SpringUtils.getBean(Environment.class).getProperty("local.server.port");
+    }
+
+    /**
+     * 获取服务器地址
+     */
+    public static String getHost() {
+        return SpringUtils.getBean(Environment.class).getProperty("local.server.host");
     }
 
     @Override

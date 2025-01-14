@@ -2,6 +2,7 @@ package com.nyx.bot.filter;
 
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,7 +39,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith(Constants.TOKEN_PREFIX)) {
             jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            try {
+                username = jwtUtil.extractUsername(jwt);
+            } catch (Exception e) {
+                if (e instanceof ExpiredJwtException) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token已过期");
+                }
+                if (e instanceof IllegalArgumentException) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "无效Token");
+                }
+                return;
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -51,7 +62,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
         }

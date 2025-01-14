@@ -29,7 +29,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.sql.DataSource;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -92,6 +91,7 @@ public class SecurityConfiguration {
                         ).permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 //禁用默认的登录表单
@@ -121,9 +121,6 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        //configuration.setAllowedOrigins(List.of("http://*")); // 设置允许的前端域名
-        configuration.setAllowedMethods(List.of("GET", "POST")); // 设置允许的HTTP方法
-        configuration.setAllowedHeaders(List.of("connection:keep-aive")); // 设置允许的请求头
         configuration.setAllowCredentials(true); // 允许携带身份验证信息
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

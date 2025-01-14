@@ -8,9 +8,14 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.repo.sys.LogInfoRepository;
+import com.nyx.bot.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/log")
@@ -20,25 +25,28 @@ public class LogInfoController extends BaseController {
     LogInfoRepository repository;
 
 
-    @GetMapping("/info")
+    @GetMapping("/codes")
     public AjaxResult info() {
-        return success().put("codes", Codes.values());
+        return success().put("data", Arrays.stream(Codes.values())
+                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getStr()), "value", c.name()))
+                .collect(Collectors.toList())
+        );
     }
 
     // 分页条件查询
-    @PostMapping("/info/list")
+    @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody LogInfo info) {
         return getDataTable(repository.findAllPageable(
-                info.getCodes() == null ? null : info.getCodes(),
+                info.getCodes(),
                 info.getGroupUid(),
                 PageRequest.of(info.getCurrent() - 1, info.getSize())));
     }
 
-    @GetMapping("/info/detail/{logId}")
+    @GetMapping("/detail/{logId}")
     public AjaxResult detail(@PathVariable("logId") Long logId) {
         AjaxResult ar = success();
-        repository.findById(logId).ifPresent(l -> ar.put("info", l));
+        repository.findById(logId).ifPresent(l -> ar.put("data", l));
         return ar;
     }
 }
