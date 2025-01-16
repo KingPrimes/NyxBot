@@ -2,6 +2,7 @@ package com.nyx.bot.filter;
 
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.JwtUtil;
+import com.nyx.bot.utils.CacheUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
@@ -32,12 +33,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain)
             throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
-
         String username = null;
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith(Constants.TOKEN_PREFIX)) {
+        String requestHeader = request.getHeader("sec-websocket-protocol");
+        String authorizationHeader = request.getHeader("authorization");
+        if (requestHeader != null && !requestHeader.isEmpty()) {
+            try {
+                jwt = requestHeader;
+                CacheUtils.set(CacheUtils.SYSTEM, "sec-websocket-protocol", requestHeader);
+                username = jwtUtil.extractUsername(jwt);
+            } catch (Exception e) {
+                if (e instanceof ExpiredJwtException) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token已过期");
+                }
+                if (e instanceof IllegalArgumentException) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "无效Token");
+                }
+                return;
+            }
+        } else if (authorizationHeader != null && authorizationHeader.startsWith(Constants.TOKEN_PREFIX)) {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt);

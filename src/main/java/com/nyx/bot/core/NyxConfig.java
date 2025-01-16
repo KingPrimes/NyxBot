@@ -15,10 +15,6 @@ public class NyxConfig {
     @Max(value = 65535, message = "端口号不能大于65535")
     Integer serverPort = 8080;
 
-    // bot blacklist or whitelist
-    // true for whitelist, false for blacklist
-    Boolean isBlackOrWhite = true;
-
     // websocket server or client
     // true for server, false for client
     Boolean isServerOrClient = true;

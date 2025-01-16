@@ -2,9 +2,7 @@ package com.nyx.bot.controller.config.bot.white;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mikuac.shiro.core.BotContainer;
-import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
@@ -52,13 +50,6 @@ public class GroupWhiteController extends BaseController {
     public AjaxResult remove(@PathVariable("id") Long id) {
         whiteService.remove(id);
         return success();
-    }
-
-    @PostMapping("/handoff")
-    public AjaxResult handoff() {
-        NyxConfig nyxConfig = HandOff.getConfig();
-        nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());
-        return toAjax(HandOff.handoff(nyxConfig));
     }
 
 }

@@ -38,6 +38,10 @@ public class SecurityConfiguration {
 
     @Value("${shiro.ws.server.url}")
     String shiro;
+
+    @Value("${test.isTest}")
+    Boolean test;
+
     @Resource
     private UserDetailsService userDetailService;
     @Resource
@@ -121,7 +125,12 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true); // 允许携带身份验证信息
+        configuration.setAllowCredentials(!test); // 允许携带身份验证信息
+        if (test) {
+            configuration.addExposedHeader("test-token");
+            configuration.addAllowedOrigin("*");
+            configuration.addAllowedMethod("*");
+        }
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

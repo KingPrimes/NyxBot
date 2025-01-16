@@ -30,7 +30,6 @@ public class HandOff {
                 load = o;
             }
             load.put("serverPort", config.getServerPort() == null ? 8080 : config.getServerPort());
-            load.put("isBlackOrWhite", config.getIsBlackOrWhite() == null || config.getIsBlackOrWhite());
             load.put("isServerOrClient", config.getIsServerOrClient() == null || config.getIsServerOrClient());
             load.put("wsServerUrl", config.getWsServerUrl() == null ? "/ws/shiro" : config.getWsServerUrl());
             load.put("wsClientUrl", config.getWsClientUrl() == null ? "ws://localhost:3001" : config.getWsClientUrl());
@@ -44,17 +43,6 @@ public class HandOff {
         }
     }
 
-    public static Boolean isBW() {
-        try {
-            Yaml yaml = new Yaml();
-            Map<String, Object> load = yaml.load(new FileInputStream(file));
-            return (Boolean) load.get("isBlackOrWhite");
-        } catch (Exception e) {
-            handoff(new NyxConfig());
-            return true;
-        }
-    }
-
     public static NyxConfig getConfig() {
         NyxConfig config = new NyxConfig();
         Yaml yaml = new Yaml();
@@ -62,7 +50,6 @@ public class HandOff {
         try {
             load = yaml.load(new FileInputStream(file));
             config.setServerPort((Integer) load.get("serverPort"));
-            config.setIsBlackOrWhite((Boolean) load.get("isBlackOrWhite"));
             config.setIsServerOrClient((Boolean) load.get("isServerOrClient"));
             config.setWsServerUrl((String) load.get("wsServerUrl"));
             config.setWsClientUrl((String) load.get("wsClientUrl"));

@@ -1,11 +1,11 @@
 package com.nyx.bot.controller.log;
 
 import com.alibaba.fastjson2.JSON;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import com.nyx.bot.utils.CacheUtils;
+import jakarta.websocket.*;
+import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-@ServerEndpoint("/ws/log")
+@ServerEndpoint(value = "/ws/log-now", configurator = LogInfoWebSocket.CustomConfigurator.class)
 public class LogInfoWebSocket {
 
     private static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
@@ -30,7 +30,7 @@ public class LogInfoWebSocket {
     //用于匹配日志格式的正则表达式
     private static final String LOG_PATTERN = "(\\w+)\\s+(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\s+\\[(.*?)\\]\\s+(.*?)\\s*:\\s*(.*)";
 
-    public static LogInfoWebSocketForStr parseLogLine(String logLine) {
+    private static LogInfoWebSocketForStr parseLogLine(String logLine) {
         Pattern pattern = Pattern.compile(LOG_PATTERN);
         Matcher matcher = pattern.matcher(logLine);
         if (matcher.matches()) {
@@ -141,6 +141,20 @@ public class LogInfoWebSocket {
                     .append("pack", pack)
                     .append("log", log)
                     .toString();
+        }
+    }
+
+    public static class CustomConfigurator extends ServerEndpointConfig.Configurator {
+        @Override
+        public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+            Object o = CacheUtils.get(CacheUtils.SYSTEM, "sec-websocket-protocol");
+            String protocol = "";
+            if (o != null) {
+                protocol = o.toString();
+            }
+            // 设置自定义的配置
+            response.getHeaders().put("Sec-WebSocket-Protocol", Collections.singletonList(protocol));
+            super.modifyHandshake(sec, request, response);
         }
     }
 }

@@ -5,8 +5,8 @@ import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.GlobalStates;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.cache2k.annotation.Nullable;
 import org.springframework.cache.CacheManager;
 
 import java.util.Map;
@@ -98,7 +98,7 @@ public class CacheUtils {
      * @return Object
      */
     public static Object get(String name, Object key) {
-        return Objects.requireNonNull(Objects.requireNonNull(cm.getCache(name)).get(key)).get();
+        return cm.getCache(name).get(key).get();
     }
 
     /**
@@ -109,7 +109,7 @@ public class CacheUtils {
      * @param type 缓存的类
      * @return type参数的类
      */
-    public static <T> T get(String name, Object key, @Nullable Class<T> type) {
-        return Objects.requireNonNull(cm.getCache(name)).get(key, type);
+    public static <T> T get(String name, Object key, @NotNull Class<T> type) {
+        return cm.getCache(name).get(key, type);
     }
 }
