@@ -8,6 +8,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.OrdersItems;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,6 @@ public class OrdersItemsController extends BaseController {
     @PostMapping("/update")
     public AjaxResult update() {
         CompletableFuture.runAsync(WarframeDataSource::getMarket);
-        return success("已执行更新操作！");
+        return success(I18nUtils.RequestTaskRun());
     }
 }

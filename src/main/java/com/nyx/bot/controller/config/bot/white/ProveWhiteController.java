@@ -6,8 +6,12 @@ import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.white.ProveWhite;
+import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.repo.impl.white.WhiteService;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +21,9 @@ public class ProveWhiteController extends BaseController {
     @Resource
     WhiteService whiteService;
 
+    @Resource
+    BlackService bs;
+
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody ProveWhite proveWhite) {
@@ -24,18 +31,14 @@ public class ProveWhiteController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult add(@RequestBody ProveWhite white) {
-        if (white == null) return error();
-        return toAjax(whiteService.save(white) != null);
+    public AjaxResult add(@Validated @RequestBody ProveWhite white) {
+        if (bs.isBlack(null, white.getProveUid())) {
+            return toAjax(whiteService.save(white) != null);
+        }
+        return error(HttpCodeEnum.FAIL, I18nUtils.BWBlackExist());
     }
 
-    @GetMapping("/edit/{id}")
-    public AjaxResult edit(@PathVariable("id") Long id) {
-        return success().put("white", whiteService.findByProve(id));
-    }
-
-
-    @PostMapping("/remove/{id}")
+    @DeleteMapping("/remove/{id}")
     public AjaxResult remove(@PathVariable("id") Long id) {
         whiteService.removeProve(id);
         return success();

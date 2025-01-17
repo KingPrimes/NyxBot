@@ -8,6 +8,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.black.ProveBlack;
 import com.nyx.bot.repo.impl.black.BlackService;
 import jakarta.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,17 +25,11 @@ public class ProveBlackController extends BaseController {
     }
 
     @PostMapping("/save")
-    public AjaxResult add(@RequestBody ProveBlack pb) {
-        if (pb == null) return error();
+    public AjaxResult add(@Validated @RequestBody ProveBlack pb) {
         return toAjax(bs.save(pb));
     }
 
-    @GetMapping("/edit/{id}")
-    public AjaxResult edit(@PathVariable("id") Long id) {
-        return AjaxResult.success().put("black", bs.findByProveId(id));
-    }
-
-    @PostMapping("/remove/{id}")
+    @DeleteMapping("/remove/{id}")
     public AjaxResult remove(@PathVariable("id") Long id) {
         return toAjax(bs.removeProve(id));
     }

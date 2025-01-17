@@ -19,9 +19,9 @@ public class BotAdmin extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @NotNull(message = "机器人uid不能为空")
+    @NotNull(message = "{bot.not.empty}")
     Long botUid;
-    @NotNull(message = "管理员uid不能为空")
+    @NotNull(message = "{admin.not.empty}")
     Long adminUid;
     PermissionsEnums permissions;
 

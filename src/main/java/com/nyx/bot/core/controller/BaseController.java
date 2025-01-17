@@ -7,6 +7,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.DateUtils;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.ServletUtils;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class BaseController {
      * 返回成功数据
      */
     public static AjaxResult success(Object data) {
-        return AjaxResult.success("操作成功", data);
+        return AjaxResult.success(I18nUtils.message("result.success"), data);
     }
 
     /**
@@ -70,7 +71,7 @@ public class BaseController {
         data.setRecords(page.getContent());
         data.setCurrent(page.getNumber() + 1);
         td.setData(data);
-        td.setMsg("操作成功");
+        td.setMsg(I18nUtils.message("result.success"));
         td.setCode(HttpCodeEnum.SUCCESS.getCode());
         return td;
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,9 +17,9 @@ public class GroupBlack extends BaseEntity {
     @Id
     @GeneratedValue
     Long id;
-
-    Long bot;
-
+    @NotNull(message = "{bot.not.empty}")
+    Long botUid;
+    @NotNull(message = "{group.not.empty}")
     Long groupUid;
 
 }

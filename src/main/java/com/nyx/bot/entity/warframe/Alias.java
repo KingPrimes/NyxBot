@@ -25,10 +25,10 @@ public class Alias extends BaseEntity {
 
     Long id;
     @JsonProperty("cn")
-    @NotEmpty(message = "中文不能为空")
+    @NotEmpty(message = "{alias.cn.not.empty}")
     String cn;
     @JsonProperty("en")
-    @NotEmpty(message = "英文不能为空")
+    @NotEmpty(message = "{alias.en.not.empty}")
     String en;
 
     public boolean isValidEnglish() {

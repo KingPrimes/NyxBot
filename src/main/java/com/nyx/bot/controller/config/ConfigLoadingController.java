@@ -4,6 +4,7 @@ import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.utils.I18nUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +20,10 @@ public class ConfigLoadingController extends BaseController {
     @PostMapping
     public AjaxResult save(@Validated @RequestBody NyxConfig config) {
         if (!config.isValidateServerUrl()) {
-            return error("服务端地址不符合规范！");
+            return error(I18nUtils.RequestValidServerUrl());
         }
         if (!config.isValidateClientUrl()) {
-            return error("客户端地址不符合规范！");
+            return error(I18nUtils.RequestValidClientUrl());
         }
         return toAjax(HandOff.handoff(config));
     }

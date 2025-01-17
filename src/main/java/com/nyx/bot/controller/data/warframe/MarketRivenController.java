@@ -8,6 +8,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.RivenItems;
 import com.nyx.bot.repo.warframe.RivenItemsRepository;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +41,7 @@ public class MarketRivenController extends BaseController {
     @PostMapping("/update")
     public AjaxResult update() {
         CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons);
-        return success("已执行任务！");
+        return success(I18nUtils.RequestTaskRun());
     }
 
 }

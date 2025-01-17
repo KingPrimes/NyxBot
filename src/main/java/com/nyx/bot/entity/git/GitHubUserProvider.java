@@ -13,13 +13,13 @@ public class GitHubUserProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @NotEmpty(message = "Git账户不能为空")
+    @NotEmpty(message = "{git.name.not.empty}")
     @Column(nullable = false)
     String userName;
-    @NotEmpty(message = "GitToken不能为空")
+    @NotEmpty(message = "{git.token.not.empty}")
     @Column(nullable = false)
     String passWord;
-    @NotEmpty(message = "仓库地址不能为空")
+    @NotEmpty(message = "{git.url.not.empty}")
     @Column(nullable = false)
     String gitUrl;
 

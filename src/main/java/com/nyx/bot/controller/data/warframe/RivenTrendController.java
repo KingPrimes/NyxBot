@@ -15,6 +15,7 @@ import com.nyx.bot.repo.warframe.RivenTrendRepository;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -73,13 +74,13 @@ public class RivenTrendController extends BaseController {
                 CompletableFuture.runAsync(WarframeDataSource::getRivenTrend);
             }
         });
-        return success("已执行任务！");
+        return success(I18nUtils.RequestTaskRun());
     }
 
     @PostMapping("/update")
     public AjaxResult update() {
         AsyncUtils.me().execute(() -> new RivenDispositionUpdates().upRivenTrend(), AsyncBeanName.InitData);
-        return success("已执行任务！");
+        return success(I18nUtils.RequestTaskRun());
     }
 
     @PostMapping("/push")

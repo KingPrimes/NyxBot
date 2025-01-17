@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +36,7 @@ public class GitHubUserProviderController extends BaseController {
     @PostMapping
     public AjaxResult save(@Validated @RequestBody GitHubUserProvider gitHubUserProvider) {
         if (!gitHubUserProvider.isValidGitUrl()) {
-            return AjaxResult.error("仓库地址不符合规范");
+            return AjaxResult.error(I18nUtils.RequestValidGitUrl());
         }
         gitRepository.save(gitHubUserProvider);
         JgitUtil.restOriginUrl(gitHubUserProvider.getGitUrl(), JgitUtil.lockPath);

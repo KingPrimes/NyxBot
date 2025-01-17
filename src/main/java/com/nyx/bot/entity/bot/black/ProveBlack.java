@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,5 +18,8 @@ public class ProveBlack extends BaseEntity {
     @GeneratedValue
     Long id;
 
-    Long prove;
+    @NotNull(message = "{bot.not.empty}")
+    Long botUid;
+    @NotNull(message = "{prove.not.empty}")
+    Long proveUid;
 }

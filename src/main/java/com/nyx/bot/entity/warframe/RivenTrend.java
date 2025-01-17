@@ -33,33 +33,33 @@ public class RivenTrend extends BaseEntity {
     Long id;
     //武器名称
     @JsonProperty("trend_name")
-    @NotEmpty(message = "武器名称不能为空")
+    @NotEmpty(message = "{riven.trend.name.not.empty}")
     String trendName;
     //新的倾向 字符串
     @JsonProperty("new_dot")
-    @NotEmpty(message = "新的倾向不能为空")
+    @NotEmpty(message = "{riven.trend.new.not.empty}")
     String newDot;
     //新的倾向 浮点
     @JsonProperty("new_num")
-    @NotEmpty(message = "新的倾向不能为空")
+    @NotEmpty(message = "{riven.trend.new.not.empty}")
     Double newNum;
     //旧的倾向 字符串
     @JsonProperty("old_dot")
-    @NotEmpty(message = "旧的倾向不能为空")
+    @NotEmpty(message = "{riven.trend.old.not.empty}")
     String oldDot;
     //旧的倾向 浮点
     @JsonProperty("old_num")
-    @NotEmpty(message = "旧的倾向不能为空")
+    @NotEmpty(message = "{riven.trend.old.not.empty}")
     Double oldNum;
     //武器类型
     @JsonProperty("type")
-    @NotEmpty(message = "武器类型不能为空")
+    @NotEmpty(message = "{riven.trend.type.not.empty}")
     RivenTrendTypeEnum type;
 
     //此次更新得时间
     @JsonProperty("isDate")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @NotEmpty(message = "时间不能为空")
+    @NotEmpty(message = "{riven.trend.time.not.empty}")
     private Timestamp isDate;
 
     //武器中文名称

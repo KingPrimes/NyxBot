@@ -29,17 +29,17 @@ public class ResetPasswordController extends BaseController {
 
     @PostMapping("/auth/restorePassword")
     public AjaxResult restPwd(HttpServletRequest request, @Validated @RequestBody ResetPassword params) {
-        if (params.isValidOld()) return error("新密码不可与旧密码相同");
-        if (!params.isValid()) return error("两次密码输入不一致");
+        if (params.isValidOld()) return error(I18nUtils.ControllerRestPassWordON());
+        if (!params.isValid()) return error(I18nUtils.ControllerRestPassWordONError());
 
 
         UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if (!encoder.matches(params.getOldPassword(), userDetails.getPassword())) {
-            return AjaxResult.error(I18nUtils.message("controller.rest.password.old.error"));
+            return AjaxResult.error(I18nUtils.ControllerRestPassWordOldError());
         }
         if (encoder.matches(params.getNewPassword(), userDetails.getPassword())) {
-            return AjaxResult.error(I18nUtils.message("controller.rest.password.o.n"));
+            return AjaxResult.error(I18nUtils.ControllerRestPassWordON());
         }
         SysUser sysUser = repository.findSysUsersByUserName(userDetails.getUsername());
         sysUser.setPassword(encoder.encode(params.getNewPassword()));
@@ -50,12 +50,12 @@ public class ResetPasswordController extends BaseController {
 
     @Data
     public static class ResetPassword {
-        @NotEmpty(message = "旧密码不可为空")
+        @NotEmpty(message = "{controller.rest.password.old.not.empty}")
         private String oldPassword;
-        @NotEmpty(message = "新密码不可为空")
-        @Min(value = 6, message = "密码长度不可小于6位")
+        @NotEmpty(message = "{controller.rest.password.new.not.empty}")
+        @Min(value = 6, message = "{controller.rest.password.length}")
         private String newPassword;
-        @NotEmpty(message = "确认密码不可为空")
+        @NotEmpty(message = "{controller.rest.password.confirm.not.empty}")
         private String confirmPassword;
 
         public boolean isValid() {

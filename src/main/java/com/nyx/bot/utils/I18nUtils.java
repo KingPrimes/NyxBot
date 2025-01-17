@@ -40,4 +40,77 @@ public class I18nUtils {
     public String getMessage(String msgKey) {
         return messageSource.getMessage(msgKey, null, LocaleContextHolder.getLocale());
     }
+
+    /**
+     * 成功
+     */
+    public static String Success() {
+        return message("result.success");
+    }
+
+    /**
+     * 请求错误
+     */
+    public static String RequestError() {
+        return message("request.error");
+    }
+
+    /**
+     * 请求方法错误
+     */
+    public static String RequestErrorMethod() {
+        return message("request.error.method");
+    }
+
+    public static String RequestValidServerUrl() {
+        return message("request.valid.server.url");
+    }
+
+    /**
+     * 请求客户端地址不符合规范
+     */
+    public static String RequestValidClientUrl() {
+        return message("request.valid.client.url");
+    }
+
+    /**
+     * 请求git地址不符合规范
+     */
+    public static String RequestValidGitUrl() {
+        return message("request.valid.git.url");
+    }
+
+    /**
+     * 超级管理员已存在且只能有一个
+     */
+    public static String PermissionsOne() {
+        return message("permissions.one");
+    }
+
+    /**
+     * 不可使用此权限
+     */
+    public static String PermissionsBan() {
+        return message("permissions.ban");
+    }
+
+    public static String BWBlackExist() {
+        return message("bw.black.exist");
+    }
+
+    public static String RequestTaskRun() {
+        return message("request.task.run");
+    }
+
+    public static String ControllerRestPassWordOldError() {
+        return message("controller.rest.password.old.error");
+    }
+
+    public static String ControllerRestPassWordONError() {
+        return message("controller.rest.password.o.n.same");
+    }
+
+    public static String ControllerRestPassWordON() {
+        return message("controller.rest.password.o.n");
+    }
 }

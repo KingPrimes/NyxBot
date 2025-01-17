@@ -16,11 +16,11 @@ public interface ProveWhiteRepository extends JpaRepository<ProveWhite, Long>, J
     /**
      * 根据QQ查询
      *
-     * @param prove QQ账号
+     * @param proveUid QQ账号
      */
-    Optional<ProveWhite> findByProve(Long prove);
+    Optional<ProveWhite> findByProveUid(Long proveUid);
 
 
-    @Query("select p from ProveWhite p where (:prove is null or p.prove = :prove)")
-    Page<ProveWhite> findAllPageable(Long prove, Pageable pageable);
+    @Query("select p from ProveWhite p where (:proveUid is null or p.proveUid = :proveUid)")
+    Page<ProveWhite> findAllPageable(Long proveUid, Pageable pageable);
 }

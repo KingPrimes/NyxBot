@@ -10,6 +10,7 @@ import com.nyx.bot.entity.warframe.Alias;
 import com.nyx.bot.repo.warframe.AliasRepository;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class AliasController extends BaseController {
                 CompletableFuture.runAsync(WarframeDataSource::getAlias);
             }
         });
-        return success("已执行任务！");
+        return success(I18nUtils.RequestTaskRun());
     }
 
     @PostMapping("/save")

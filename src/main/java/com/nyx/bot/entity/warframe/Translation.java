@@ -24,11 +24,11 @@ public class Translation extends BaseEntity {
     Long id;
     //中文名称
     @JsonProperty("cn")
-    @NotEmpty(message = "中文不能为空")
+    @NotEmpty(message = "{translation.cn.not.empty}")
     String cn;
     //英文名称
     @JsonProperty("en")
-    @NotEmpty(message = "英文不能为空")
+    @NotEmpty(message = "{translation.en.not.empty}")
     String en;
     //是否是 Prime 版本
     @JsonProperty("is_prime")

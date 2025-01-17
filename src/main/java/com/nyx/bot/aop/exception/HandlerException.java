@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.exception.HtmlToImageException;
+import com.nyx.bot.utils.I18nUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +58,9 @@ public class HandlerException {
 
     @ResponseBody
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
-    public Object HttpRequestMethodNotSupportedException() {
-        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, "请求方式错误");
+    public Object HttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        log.error("{}：{}", I18nUtils.RequestErrorMethod(), e.getMessage());
+        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, I18nUtils.RequestErrorMethod());
     }
 
     @ResponseBody
@@ -78,6 +80,7 @@ public class HandlerException {
     public Object ExpiredJwtException() {
         return AjaxResult.error(HttpCodeEnum.INVALID_PARAM, HttpCodeEnum.INVALID_PARAM.getMessage());
     }
+
     @ResponseBody
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public Object HttpMessageNotReadableException(HttpMessageNotReadableException e) {

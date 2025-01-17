@@ -8,6 +8,7 @@ import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Ephemeras;
 import com.nyx.bot.repo.warframe.EphemerasRepository;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,6 @@ public class EphemerasController extends BaseController {
     @PostMapping("/update")
     public AjaxResult update() {
         CompletableFuture.runAsync(WarframeDataSource::getEphemeras);
-        return success("已执行任务！");
+        return success(I18nUtils.RequestTaskRun());
     }
 }
