@@ -32,15 +32,22 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Get latest run-id
+        id: get_run_id
+        run: |
+            latest_run_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/KingPrimes/NyxBot-WebUI/actions/runs?per_page=1" \
+              | jq -r '.workflow_runs[0].id')
+            echo "LATEST_RUN_ID=$latest_run_id" >> $GITHUB_ENV
+    
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
-        with:
-          name: webui-build
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        with:        
+          github-token: ${{ secrets.NYX_WEBUI }}
           repository: KingPrimes/NyxBot-WebUI
-          path: ./resources
-          run: |
-            cp -r ./resources/* src/main/resources/
+          run-id: ${{ env.LATEST_RUN_ID }}
+          name: webui-build
+          path: ./src/main/resources
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -68,16 +75,23 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Get latest run-id
+        id: get_run_id
+        run: |
+            latest_run_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/KingPrimes/NyxBot-WebUI/actions/runs?per_page=1" \
+              | jq -r '.workflow_runs[0].id')
+            echo "LATEST_RUN_ID=$latest_run_id" >> $GITHUB_ENV
+
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
-        with:
-          name: webui-build
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        with:        
+          github-token: ${{ secrets.NYX_WEBUI }}
           repository: KingPrimes/NyxBot-WebUI
-          path: ./resources
-          run: |
-            cp -r ./resources/* src/main/resources/
-            
+          run-id: ${{ env.LATEST_RUN_ID }}
+          name: webui-build
+          path: ./src/main/resources
+              
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 

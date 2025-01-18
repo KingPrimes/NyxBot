@@ -25,6 +25,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
       - name: Get latest run-id
         id: get_run_id
         run: |
@@ -41,9 +42,6 @@ jobs:
           run-id: ${{ env.LATEST_RUN_ID }}
           name: webui-build
           path: ./src/main/resources
-
-      - name: List downloaded files
-        run: ls -R ./src/main/resources
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
