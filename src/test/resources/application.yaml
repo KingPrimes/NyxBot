@@ -93,6 +93,7 @@ server:
 logging:
   level:
     com.nyx.bot: DEBUG
+    # com.mikuac.shiro: DEBUG
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF

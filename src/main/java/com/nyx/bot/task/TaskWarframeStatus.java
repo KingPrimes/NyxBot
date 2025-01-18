@@ -20,17 +20,17 @@ public class TaskWarframeStatus {
 
 //    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    @Async("taskExecutor")
-    @Scheduled(cron = "0/60 * * * * ?")
-    public void execute() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            WarframeSubscribe.isUpdated(states);
-        } else {
-            log.info("获取数据失败！");
-        }
-    }
+//    @Async("taskExecutor")
+//    @Scheduled(cron = "0/60 * * * * ?")
+//    public void execute() {
+//        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
+//        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+//            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
+//            WarframeSubscribe.isUpdated(states);
+//        } else {
+//            log.info("获取数据失败！");
+//        }
+//    }
 
     @Async("taskExecutor")
     @Scheduled(cron = "0 0 0 1/5 * ? ")

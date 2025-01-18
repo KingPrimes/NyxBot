@@ -1,7 +1,6 @@
 package com.nyx.bot;
 
 import com.nyx.bot.controller.config.bot.HandOff;
-import com.nyx.bot.data.WarframeDataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -16,8 +15,7 @@ public class NyxBotApplicationTest {
         SpringApplication app = new SpringApplication(NyxBotApplicationTest.class);
         app.setEnvironment(HandOff.getEnv());
         app.run(args);
-        WarframeDataSource.initWarframeStatus();
+        // WarframeDataSource.initWarframeStatus();
     }
-
 
 }
