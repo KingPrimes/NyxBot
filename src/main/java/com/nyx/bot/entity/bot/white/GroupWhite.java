@@ -1,10 +1,10 @@
 package com.nyx.bot.entity.bot.white;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.annotation.InternationalizedNotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,8 +18,8 @@ public class GroupWhite extends BaseEntity {
     @GeneratedValue
     Long id;
 
-    @NotNull(message = "{bot.not.empty}")
+    @InternationalizedNotEmpty(message = "bot.not.empty")
     Long botUid;
-    @NotNull(message = "{group.not.empty}")
+    @InternationalizedNotEmpty(message = "group.not.empty")
     Long groupUid;
 }

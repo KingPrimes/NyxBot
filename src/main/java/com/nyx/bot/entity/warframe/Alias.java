@@ -2,10 +2,10 @@ package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.annotation.InternationalizedNotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,13 +25,17 @@ public class Alias extends BaseEntity {
 
     Long id;
     @JsonProperty("cn")
-    @NotEmpty(message = "{alias.cn.not.empty}")
+    @InternationalizedNotEmpty(message = "alias.cn.not.empty")
     String cn;
     @JsonProperty("en")
-    @NotEmpty(message = "{alias.en.not.empty}")
+    @InternationalizedNotEmpty(message = "alias.en.not.empty")
     String en;
 
     public boolean isValidEnglish() {
-        return en.matches("^[a-zA-Z0-9_&]+$");
+        return en.matches("^([a-zA-Z]+)(_&)?([0-9]+)?([a-zA-Z]+)?$");
+    }
+
+    public boolean isValidChinese() {
+        return cn.matches("^[\\u4e00-\\u9fa5]+$");
     }
 }

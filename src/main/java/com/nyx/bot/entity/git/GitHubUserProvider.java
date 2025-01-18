@@ -1,7 +1,7 @@
 package com.nyx.bot.entity.git;
 
+import com.nyx.bot.annotation.InternationalizedNotEmpty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.regex.Pattern;
@@ -13,13 +13,13 @@ public class GitHubUserProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @NotEmpty(message = "{git.name.not.empty}")
+    @InternationalizedNotEmpty(message = "git.name.not.empty")
     @Column(nullable = false)
     String userName;
-    @NotEmpty(message = "{git.token.not.empty}")
+    @InternationalizedNotEmpty(message = "git.token.not.empty")
     @Column(nullable = false)
     String passWord;
-    @NotEmpty(message = "{git.url.not.empty}")
+    @InternationalizedNotEmpty(message = "git.url.not.empty")
     @Column(nullable = false)
     String gitUrl;
 

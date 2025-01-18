@@ -51,11 +51,14 @@ public class AliasController extends BaseController {
     @PostMapping("/save")
     public AjaxResult save(@Validated @RequestBody Alias a) {
         if (!a.isValidEnglish()) {
-            return error("英文只能是字母数字下划线和&符号！");
+            return error(I18nUtils.message("request.valid.alias.en"));
+        }
+        if (!a.isValidChinese()) {
+            return error(I18nUtils.message("request.valid.alias.ch"));
         }
         Optional<Alias> alias = repository.findByCnAndEn(a.getCn(), a.getEn());
         if (alias.isPresent()) {
-            return error("该别名已存在！");
+            return error(I18nUtils.message("request.error.data.already.exists"));
         }
         repository.save(a);
         return success();

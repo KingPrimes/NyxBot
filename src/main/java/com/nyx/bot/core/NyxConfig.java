@@ -1,9 +1,9 @@
 package com.nyx.bot.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nyx.bot.annotation.InternationalizedNotEmpty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 
@@ -20,11 +20,11 @@ public class NyxConfig {
     Boolean isServerOrClient = true;
 
     // websocket client url
-    @NotEmpty(message = "客户端地址不能为空")
+    @InternationalizedNotEmpty(message = "config.client.url.not.empty")
     String wsClientUrl = "ws://localhost:3001";
 
     // websocket server url
-    @NotEmpty(message = "服务端地址不能为空")
+    @InternationalizedNotEmpty(message = "config.server.url.not.empty")
     String wsServerUrl = "/ws/shiro";
 
     // 不进行序列化
