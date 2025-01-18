@@ -26,7 +26,7 @@ public class OcrUtil {
         File file = new File("./" + uuid + ".png");
         URI uri = URI.create(url);
         try (InputStream is = uri.toURL().openStream();
-             FileOutputStream fos = new FileOutputStream(file);
+             FileOutputStream fos = new FileOutputStream(file)
         ) {
             byte[] byteArray = toByteArray(is);
             fos.write(byteArray);

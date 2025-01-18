@@ -29,10 +29,10 @@ public class TestArbitration {
         Date date = new Date(now.toEpochSecond(ZoneOffset.ofHours(8)) * 1000L);
         log.debug("now:{}", date);
         arbitrationPres.forEach(arbitrationPre -> {
-            long dateHour = DateUtils.getDateSecond(arbitrationPre.getActivation(),date);
+            long dateHour = DateUtils.getDateSecond(arbitrationPre.getActivation(), date);
             String dateFormat = DateUtils.format(date, DateUtils.YYYY);
             String activationFormat = DateUtils.format(arbitrationPre.getActivation(), DateUtils.YYYY);
-            log.debug("dateHour:{} - {} = {}", dateFormat,activationFormat,  dateHour);
+            log.debug("dateHour:{} - {} = {}", dateFormat, activationFormat, dateHour);
         });
     }
 }

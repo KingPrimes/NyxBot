@@ -1,6 +1,9 @@
 package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,6 +16,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"cn", "en"}))
+@JsonView(Views.View.class)
 public class Translation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +24,11 @@ public class Translation extends BaseEntity {
     Long id;
     //中文名称
     @JsonProperty("cn")
+    @InternationalizedNotEmpty(message = "translation.cn.not.empty")
     String cn;
     //英文名称
     @JsonProperty("en")
+    @InternationalizedNotEmpty(message = "translation.en.not.empty")
     String en;
     //是否是 Prime 版本
     @JsonProperty("is_prime")

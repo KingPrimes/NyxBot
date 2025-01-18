@@ -2,11 +2,12 @@ package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.res.GlobalStates;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.cache2k.annotation.Nullable;
 import org.springframework.cache.CacheManager;
 
 import java.time.LocalDateTime;
@@ -25,7 +26,10 @@ public class CacheUtils {
     public static final String GROUP_CAPTCHA = "group-captcha";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
 
+    public static final String USER = "user";
+
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
+
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
@@ -39,6 +43,18 @@ public class CacheUtils {
     public static void setGlobalState(GlobalStates state) {
         Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
         FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
+    }
+
+    public static void setUser(String token, SysUser user) {
+        set(USER, token, user);
+    }
+
+    public static SysUser getUser(String token) {
+        return get(USER, token, SysUser.class);
+    }
+
+    public static void delUser(String token) {
+        Objects.requireNonNull(cm.getCache(USER)).evict(token);
     }
 
     /**
@@ -125,7 +141,7 @@ public class CacheUtils {
      * @return Object
      */
     public static Object get(String name, Object key) {
-        return Objects.requireNonNull(Objects.requireNonNull(cm.getCache(name)).get(key)).get();
+        return cm.getCache(name).get(key).get();
     }
 
     /**
@@ -136,7 +152,7 @@ public class CacheUtils {
      * @param type 缓存的类
      * @return type参数的类
      */
-    public static <T> T get(String name, Object key, @Nullable Class<T> type) {
-        return Objects.requireNonNull(cm.getCache(name)).get(key, type);
+    public static <T> T get(String name, Object key, @NotNull Class<T> type) {
+        return cm.getCache(name).get(key, type);
     }
 }

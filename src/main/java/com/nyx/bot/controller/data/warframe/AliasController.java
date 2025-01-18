@@ -1,103 +1,85 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Alias;
 import com.nyx.bot.repo.warframe.AliasRepository;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Controller
+@Slf4j
+@RestController
 @RequestMapping("/data/warframe/alias")
 public class AliasController extends BaseController {
 
-    String prefix = "data/warframe/alias/";
     @Resource
     AliasRepository repository;
 
-
-    @GetMapping
-    public String alias() {
-        return prefix + "alias";
-    }
-
     @PostMapping("/list")
-    @ResponseBody
-    public ResponseEntity<?> list(Alias alias) {
-        return getDataTable(repository.findByLikeCn(alias.getCn().isEmpty() ? null : alias.getCn(), PageRequest.of(alias.getPageNum() - 1, alias.getPageSize())));
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody Alias alias) {
+        return getDataTable(repository.findByLikeCn(alias.getCn(), PageRequest.of(alias.getCurrent() - 1, alias.getSize())));
     }
 
     @PostMapping("/update")
-    @ResponseBody
     public AjaxResult update() {
         CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
             if (flag) {
                 CompletableFuture.runAsync(WarframeDataSource::getAlias);
             }
         });
-        return success("已执行任务！");
-    }
-
-    @GetMapping("/add")
-    public String add() {
-        return prefix + "add";
+        return success(I18nUtils.RequestTaskRun());
     }
 
     @PostMapping("/save")
-    @ResponseBody
-    public AjaxResult save(Alias a) {
-        if (a == null) {
-            return error("参数错误！");
+    public AjaxResult save(@Validated @RequestBody Alias a) {
+        if (!a.isValidEnglish()) {
+            return error(I18nUtils.message("request.valid.alias.en"));
         }
-        if (a.getCn() == null) {
-            return error("中文不能为空！");
-        }
-        if (a.getEn() == null) {
-            return error("英文不能为空！");
-        }
-        if (a.getCn().trim().isEmpty()) {
-            return error("中文不能为空！");
-        }
-        if (a.getEn().trim().isEmpty()) {
-            return error("英文不能为空！");
+        if (!a.isValidChinese()) {
+            return error(I18nUtils.message("request.valid.alias.ch"));
         }
         Optional<Alias> alias = repository.findByCnAndEn(a.getCn(), a.getEn());
         if (alias.isPresent()) {
-            return error("该别名已存在！");
+            return error(I18nUtils.message("request.error.data.already.exists"));
         }
         repository.save(a);
         return success();
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
-        repository.findById(id).ifPresent(a -> model.addAttribute("alias", a));
-        return prefix + "edit";
+    public AjaxResult edit(@PathVariable Long id) {
+        AjaxResult ar = success();
+        repository.findById(id).ifPresent(a -> ar.put("alias", a));
+        return ar;
     }
 
     @PostMapping("/push")
-    @ResponseBody
-    public AjaxResult push(String commit) {
+    public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
             List<Alias> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/alias.json", jsonString);
             String branchName = DateUtils.getDate(new Date(), DateUtils.NOT_HMS);
-            build.pushBranchCheckout(commit, branchName, "warframe/alias.json");
+            build.pushBranchCheckout(commit.get("commit"), branchName, "warframe/alias.json");
             return toAjax(true);
         } catch (Exception e) {
             return error(e.getMessage());

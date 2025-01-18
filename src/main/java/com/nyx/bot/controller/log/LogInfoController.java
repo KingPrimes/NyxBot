@@ -1,49 +1,52 @@
 package com.nyx.bot.controller.log;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.sys.LogInfo;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.repo.sys.LogInfoRepository;
+import com.nyx.bot.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
 @RequestMapping("/log")
 public class LogInfoController extends BaseController {
 
     @Resource
     LogInfoRepository repository;
 
-    String prefix = "log/info";
 
-    @GetMapping("/info")
-    public String info(Model model) {
-        model.addAttribute("code", Codes.values());
-        return prefix + "/info";
-    }
-
-    @GetMapping("/log")
-    public String log() {
-        return "log/log";
+    @GetMapping("/codes")
+    public AjaxResult info() {
+        return success().put("data", Arrays.stream(Codes.values())
+                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getStr()), "value", c.name()))
+                .collect(Collectors.toList())
+        );
     }
 
     // 分页条件查询
-    @PostMapping("/info/list")
-    @ResponseBody
-    public ResponseEntity<?> list(LogInfo info) {
+    @PostMapping("/list")
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody LogInfo info) {
         return getDataTable(repository.findAllPageable(
-                info.getCodes() == null ? null : info.getCodes(),
+                info.getCodes(),
                 info.getGroupUid(),
-                PageRequest.of(info.getPageNum() - 1, info.getPageSize())));
+                PageRequest.of(info.getCurrent() - 1, info.getSize())));
     }
 
-    @GetMapping("/info/detail/{logId}")
-    public String detail(@PathVariable("logId") Long logId, Model model) {
-        repository.findById(logId).ifPresent(l -> model.addAttribute("info", l));
-        return prefix + "/detail";
+    @GetMapping("/detail/{logId}")
+    public AjaxResult detail(@PathVariable("logId") Long logId) {
+        AjaxResult ar = success();
+        repository.findById(logId).ifPresent(l -> ar.put("data", l));
+        return ar;
     }
 }

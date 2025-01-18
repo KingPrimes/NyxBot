@@ -1,12 +1,17 @@
 package com.nyx.bot.core.dao;
 
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.Views;
 import lombok.Data;
 
+
 @Data
+
 public class BaseEntity {
-    protected Integer pageNum = 1;
-    protected Integer pageSize = 10;
-    protected Integer totalPage = 0;
-    protected Integer totalCount = 0;
+    @JsonView(Views.BaseView.class)
+    protected Integer current = 1;
+    @JsonView(Views.BaseView.class)
+    protected Integer size = 10;
+
 }

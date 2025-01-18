@@ -22,31 +22,22 @@ public class WhiteService {
     @Resource
     ProveWhiteRepository proveWhiteRepository;
 
-
-    public GroupWhite findByGroup(Long group) {
-        return groupWhiteRepository.findByGroupUid(group).orElse(new GroupWhite());
-    }
-
-    public ProveWhite findByProve(Long prove) {
-        return proveWhiteRepository.findByProve(prove).orElse(new ProveWhite());
-    }
-
     public Page<GroupWhite> list(GroupWhite gw) {
         return groupWhiteRepository.findAllPageable(
                 gw.getGroupUid(),
                 PageRequest.of(
-                        gw.getPageNum() - 1,
-                        gw.getPageSize()
+                        gw.getCurrent() - 1,
+                        gw.getSize()
                 )
         );
     }
 
     public Page<ProveWhite> list(ProveWhite pw) {
         return proveWhiteRepository.findAllPageable(
-                pw.getProve(),
+                pw.getProveUid(),
                 PageRequest.of(
-                        pw.getPageNum() - 1,
-                        pw.getPageSize()
+                        pw.getCurrent() - 1,
+                        pw.getSize()
                 )
         );
     }
@@ -57,7 +48,7 @@ public class WhiteService {
     }
 
     public ProveWhite save(ProveWhite pw) {
-        proveWhiteRepository.findByProve(pw.getProve()).ifPresent(p -> pw.setId(p.getId()));
+        proveWhiteRepository.findByProveUid(pw.getProveUid()).ifPresent(p -> pw.setId(p.getId()));
         return proveWhiteRepository.save(pw);
     }
 
@@ -79,7 +70,7 @@ public class WhiteService {
         if (group != null && group != 0L) {
             groupWhiteRepository.findByGroupUid(group).ifPresent(g -> flag.set(true));
         }
-        proveWhiteRepository.findByProve(prove).ifPresent(p -> flag.set(true));
+        proveWhiteRepository.findByProveUid(prove).ifPresent(p -> flag.set(true));
         return flag.get();
     }
 

@@ -1,80 +1,50 @@
 package com.nyx.bot.controller.config.bot.white;
 
-import com.mikuac.shiro.core.BotContainer;
-import com.nyx.bot.controller.config.bot.HandOff;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.NyxConfig;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.white.GroupWhite;
+import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.repo.impl.white.WhiteService;
-import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/config/bot/white/group")
 public class GroupWhiteController extends BaseController {
 
-    String prefix = "config/bot/white/group";
+    @Resource
+    WhiteService ws;
 
     @Resource
-    WhiteService whiteService;
-
-    @GetMapping
-    public String group() {
-        return prefix + "/group";
-    }
+    BlackService bs;
 
 
     @PostMapping("/list")
-    @ResponseBody
-    public ResponseEntity<?> list(GroupWhite white) {
-        return getDataTable(whiteService.list(white));
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody GroupWhite white) {
+        return getDataTable(ws.list(white));
     }
 
 
-    @GetMapping("/add")
-    public String add(Model map) {
-        SpringUtils.getBean(BotContainer.class).robots.forEach((aLong, bot) -> map.addAttribute("group", bot.getGroupList().getData()));
-        return prefix + "/add";
+    @PostMapping("/save")
+    public AjaxResult add(@Validated @RequestBody GroupWhite white) {
+        if (bs.isBlack(white.getGroupUid(), null)) {
+            return toAjax(ws.save(white) != null);
+        }
+        return error(HttpCodeEnum.FAIL, I18nUtils.BWBlackExist());
     }
 
-    @PostMapping("/add")
-    @ResponseBody
-    public AjaxResult add(GroupWhite white) {
-        whiteService.save(white);
-        return success();
-    }
 
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, Model map) {
-        map.addAttribute("white", whiteService.findByGroup(id));
-        return prefix + "/edit";
-    }
-
-    @PostMapping("/update")
-    @ResponseBody
-    public AjaxResult edit(GroupWhite white) {
-        whiteService.save(white);
-        return success();
-    }
-
-    @PostMapping("/remove/{id}")
-    @ResponseBody
+    @DeleteMapping("/remove/{id}")
     public AjaxResult remove(@PathVariable("id") Long id) {
-        whiteService.remove(id);
+        ws.remove(id);
         return success();
-    }
-
-    @PostMapping("/handoff")
-    @ResponseBody
-    public AjaxResult handoff() {
-        NyxConfig nyxConfig = HandOff.getConfig();
-        nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());
-        return toAjax(HandOff.handoff(nyxConfig));
     }
 
 }

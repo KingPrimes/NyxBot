@@ -10,31 +10,22 @@ import java.util.GregorianCalendar;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
-    private static final String[] parsePatterns = {
-            "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
-            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
-            "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
-
     public static final Long YEARS = 31536000000L;
-
     public static final Long MONTHS = 2592000000L;
-
     public static final Long DAYS = 86400000L;
-
     public static final Long HOURS = 3600000L;
-
     public static final Long MINUTES = 60000L;
-
     public static final Long SECONDS = 1000L;
-
     public static final String NOT_HMS = "yyyy-MM-dd";
-
     public static final String YYYY = "yyyy-MM-dd HH:mm:ss";
     public static final String MM = "MM-dd HH:mm:ss";
     public static final String DD = "dd HH:mm:ss";
     public static final String HH = "HH:mm:ss";
     public static final String mm = "mm:ss";
-
+    private static final String[] parsePatterns = {
+            "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
+            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
+            "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
 
     /**
      * 格式化日期 以 yyyy-MM-dd HH:mm:ss 格式

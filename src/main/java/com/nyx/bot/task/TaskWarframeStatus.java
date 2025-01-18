@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 public class TaskWarframeStatus {
 
 //    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
     @Async("taskExecutor")
     @Scheduled(cron = "0/60 * * * * ?")
     public void execute() {

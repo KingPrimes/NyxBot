@@ -38,14 +38,13 @@ public class RelicsService {
         if (relics.getRelicName().isEmpty()) relics.setRelicName(null);
         var page = repository.findAllPageable(relics,
                 PageRequest.of(
-                        relics.getPageNum() - 1,
-                        relics.getPageSize()
+                        relics.getCurrent() - 1,
+                        relics.getSize()
                 )
         );
         return new TableDataInfo(
                 200,
                 page.getTotalElements(),
-                page.getTotalPages(),
                 page.getSize(),
                 translate(page.getContent())
         );
@@ -60,18 +59,14 @@ public class RelicsService {
         var rws = rwrepository.findByItemName(name);
         if (!rws.isEmpty()) {
             List<Relics> rList = new ArrayList<>();
-            rws.forEach(w -> {
-                repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add);
-            });
+            rws.forEach(w -> repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add));
             return translate(rList);
         }
         // 如果精准查询为查询到，进行模糊查询
         rws = rwrepository.findByItemNameLike(name);
         if (!rws.isEmpty()) {
             List<Relics> rList = new ArrayList<>();
-            rws.forEach(w -> {
-                repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add);
-            });
+            rws.forEach(w -> repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add));
             return translate(rList);
         }
         if (name.toLowerCase().contains("prime")) {
@@ -92,26 +87,20 @@ public class RelicsService {
         rws = rwrepository.findByItemNameLike(key.get());
         if (!rws.isEmpty()) {
             List<Relics> rList = new ArrayList<>();
-            rws.forEach(w -> {
-                repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add);
-            });
+            rws.forEach(w -> repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add));
             return translate(rList);
         }
         rws = rwrepository.findByItemNameLike(tr.zhToEn(name));
         if (!rws.isEmpty()) {
             List<Relics> rList = new ArrayList<>();
-            rws.forEach(w -> {
-                repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add);
-            });
+            rws.forEach(w -> repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add));
             return translate(rList);
         }
 
         rws = rwrepository.findByItemNameLike(tr.zhToEn(name));
         if (!rws.isEmpty()) {
             List<Relics> rList = new ArrayList<>();
-            rws.forEach(w -> {
-                repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add);
-            });
+            rws.forEach(w -> repository.findById(w.getRelics().getRelicsId()).ifPresent(rList::add));
             return translate(rList);
         }
         return new ArrayList<>();
