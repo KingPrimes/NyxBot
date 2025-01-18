@@ -28,8 +28,7 @@ jobs:
       
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
-        with:
-          name: webui-build
+        with:        
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository: KingPrimes/NyxBot-WebUI
           path: ./resources
