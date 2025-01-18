@@ -28,17 +28,45 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - name: Cache Node.js modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-    
+
       - name: Install pnpm
         run: npm install -g pnpm
 
       - name: Clone NyxBot-WebUI repository
         run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
 
+      - name: Cache pnpm modules
+        id: cache-pnpm-modules
+        uses: actions/cache@v3
+        with:
+          path: ./NyxBot-WebUI/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('NyxBot-WebUI/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Build NyxBot-WebUI with pnpm
         working-directory: ./NyxBot-WebUI
+        if: steps.cache-pnpm-modules.outputs.cache-hit != 'true'
         run: |
           pnpm install
-          pnpm build  
+          pnpm run build 
+
+      - name: Cache WebUi Build Artifact
+        uses: actions/cache@v3
+        with:
+          path: NyxBot-WebUI/dist
+          key: ${{ runner.os }}-webui-build-${{ hashFiles('NyxBot-WebUI/**') }}
+          restore-keys: |
+            ${{ runner.os }}-webui-build-
+
       - name: Upload WebUi Build Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -62,12 +90,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: ./webui-build.zip
-
-      - name: Unzip WebUi Build Artifact
-        run: |
-          mkdir -p ./webui-build/resources
-          unzip ./webui-build.zip -d ./webui-build/resources
+          path: ./webui-build
 
       - name: Merge built resources into current project
         run: |
@@ -104,12 +127,6 @@ jobs:
         with:
           name: webui-build
           path: ./webui-build
-
-      - name: Unzip WebUi Build Artifact
-        run: |
-          mkdir -p ./webui-build/resources
-          unzip ./webui-build/webui-build -d ./webui-build/resources
-          ls
 
       - name: Merge built resources into current project
         run: |
