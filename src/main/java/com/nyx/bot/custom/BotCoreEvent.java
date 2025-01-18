@@ -26,7 +26,8 @@ public class BotCoreEvent extends CoreEvent {
     public void offline(long account) {
         try {
             session.close();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
         log.info("机器人 {} 已断开链接", account);
     }

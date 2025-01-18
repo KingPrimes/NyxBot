@@ -3,14 +3,9 @@ package com.nyx.bot.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
-import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import okhttp3.Headers;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 public class ApiUrl {
@@ -69,6 +64,9 @@ public class ApiUrl {
 
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
 
+    private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
+
+    private static final String WARFRAME_PROFILE_STATS = "https://api.warframestat.us/profile/%s/stats";
 
     /**
      * Market 物品查询
@@ -87,23 +85,28 @@ public class ApiUrl {
      *
      * @return 仲裁
      */
-    public static GlobalStates.Arbitration arbitrationPre() {
-        List<ArbitrationPre> arbitrationPres = JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
-        // 指定获取东八区日期
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.ofHours(8));
-        Date date = new Date(now.toEpochSecond(ZoneOffset.ofHours(8)) * 1000L);
-        ArbitrationPre arbitrationPre = arbitrationPres.stream()
-                //判断两个时间相差的秒数，为负数则是正确数据
-                .filter(i -> DateUtils.getDateSecond(i.getActivation(), date) < 0)
-                .findFirst().orElse(null);
-        if (arbitrationPre == null) return arbitrationPre();
-        GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
-        arbitration.setActivation(arbitrationPre.getActivation());
-        arbitration.setExpiry(arbitrationPre.getExpiry());
-        arbitration.setNode(arbitrationPre.getNode());
-        arbitration.setType(arbitrationPre.getType());
-        arbitration.setEnemy(arbitrationPre.getEnemy());
-        return arbitration;
+    public static List<ArbitrationPre> arbitrationPreList() {
+        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+    }
+
+    /**
+     * 获取Warframe的个人信息
+     *
+     * @param name ID
+     * @return 个人信息
+     */
+    public static HttpUtils.Body getProfile(String name) {
+        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE, name));
+    }
+
+    /**
+     * 获取Warframe的个人统计信息
+     *
+     * @param name ID
+     * @return 统计信息
+     */
+    public static HttpUtils.Body getProfileStats(String name) {
+        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE_STATS, name));
     }
 
 }

@@ -18,13 +18,13 @@ public class ArbitrationPre {
      * 时间
      */
     @JsonProperty("activation")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date activation;
     /**
      * 结束时间
      */
     @JsonProperty("expiry")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date expiry;
     /**
      * 代号

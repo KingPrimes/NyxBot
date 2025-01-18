@@ -325,6 +325,9 @@ public class JgitUtil {
      * @param files      推送文件
      */
     public Iterator<PushResult> pushBranchCheckout(String commit, String branchName, String files) throws GitAPIException {
+        if (listBranch().stream().anyMatch(ref -> ref.getName().contains(branchName))) {
+            return checkoutBranch(branchName).add(files).commit(commit).push(branchName);
+        }
         return branch(branchName).checkoutBranch(branchName).add(files).commit(commit).push(branchName);
     }
 
