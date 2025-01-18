@@ -20,84 +20,27 @@ on:
           - warning
           - error
 jobs:
-  build-webUi:
-    name: WebUi Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Cache Node.js modules
-        id: cache-node-modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-    
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Clone NyxBot-WebUI repository
-        run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
-
-      - name: Cache pnpm modules
-        id: cache-pnpm-modules
-        uses: actions/cache@v3
-        with:
-          path: ./NyxBot-WebUI/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('NyxBot-WebUI/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Build NyxBot-WebUI with pnpm
-        working-directory: ./NyxBot-WebUI
-        if: steps.cache-pnpm-modules.outputs.cache-hit != 'true'
-        run: |
-          pnpm install
-          pnpm run build 
-
-      - name: Cache WebUi Build Artifact
-        uses: actions/cache@v3
-        with:
-          path: NyxBot-WebUI/dist
-          key: ${{ runner.os }}-webui-build-${{ hashFiles('NyxBot-WebUI/**') }}
-          restore-keys: |
-            ${{ runner.os }}-webui-build-
-
-      - name: Upload WebUi Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webui-build
-          path: NyxBot-WebUI/resources
-
   build-release:
     name: Release
-    needs: build-webui
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 17 
+        uses: actions/setup-java@v4      
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      - name: Download WebUi Build Artifact
+      - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: ./webui-build
-
-      - name: Display structure of downloaded files
-        run: ls -R ./webui-build
-
-      - name: Merge built resources into current project
-        run: |
-          cp -r ./webui-build/resources/* src/main/resources/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          repository: KingPrimes/NyxBot-WebUI
+          path: ./resources
+          run: |
+            cp -r ./resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -125,16 +68,16 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Download WebUi Build Artifact
+      - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: ./webui-build
-
-      - name: Merge built resources into current project
-        run: |
-          cp -r ./webui-build/resources/* src/main/resources/
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          repository: KingPrimes/NyxBot-WebUI
+          path: ./resources
+          run: |
+            cp -r ./resources/* src/main/resources/
+            
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
