@@ -40,9 +40,10 @@ jobs:
           repository: KingPrimes/NyxBot-WebUI
           run-id: ${{ env.LATEST_RUN_ID }}
           name: webui-build
+          path: ./src/main/resources
 
       - name: List downloaded files
-        run: ls -R
+        run: ls -R ./src/main/resources
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
