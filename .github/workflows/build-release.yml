@@ -62,16 +62,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: ./webui-build
-
-      - name: List files in webui-build before unzip
-        run: ls -la ./webui-build
+          path: ./webui-build.zip
 
       - name: Unzip WebUi Build Artifact
         run: |
           mkdir -p ./webui-build/resources
-          unzip ./webui-build/webui-build -d ./webui-build/resources
-          ls -la ./webui-build/resources
+          unzip ./webui-build.zip -d ./webui-build/resources
 
       - name: Merge built resources into current project
         run: |
