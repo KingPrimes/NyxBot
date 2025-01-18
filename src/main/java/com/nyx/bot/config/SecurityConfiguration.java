@@ -84,7 +84,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/"),
                                 new AntPathRequestMatcher("/index"),
-                                new AntPathRequestMatcher("/assets/**"),
+                                new AntPathRequestMatcher("/static/**"),
                                 new AntPathRequestMatcher("/auth/login"),
                                 // 用于生成图片的接口
                                 new AntPathRequestMatcher("/api/**"),
