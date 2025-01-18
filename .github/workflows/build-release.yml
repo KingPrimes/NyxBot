@@ -75,7 +75,6 @@ jobs:
 
   build-docker:
     name: Docker
-    needs: build-webui
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
