@@ -18,22 +18,39 @@ public class UpdatePlugin {
      */
     public static void updatePlugin(Bot bot, AnyMessageEvent event, Codes codes) {
         switch (codes) {
-            case UPDATE_HTML:
+            case UPDATE_HTML: {
                 updateHtml(bot, event);
-            case UPDATE_WARFRAME_RES_MARKET_ITEMS:
+                return;
+            }
+            case UPDATE_WARFRAME_RES_MARKET_ITEMS: {
                 updateWarframeResMarketItems(bot, event);
-            case UPDATE_WARFRAME_RES_MARKET_RIVEN:
+                return;
+            }
+            case UPDATE_WARFRAME_RES_MARKET_RIVEN: {
                 updateWarframeResMarketRiven(bot, event);
-            case UPDATE_WARFRAME_RES_RM:
+                return;
+            }
+            case UPDATE_WARFRAME_RES_RM: {
                 updateWarframeResRm(bot, event);
-            case UPDATE_WARFRAME_RIVEN_CHANGES:
+                return;
+            }
+            case UPDATE_WARFRAME_RIVEN_CHANGES: {
                 updateWarframeRivenChanges(bot, event);
-            case UPDATE_WARFRAME_SISTER:
+                return;
+            }
+            case UPDATE_WARFRAME_SISTER: {
                 updateWarframeSister(bot, event);
-            case UPDATE_WARFRAME_TAR:
+                return;
+            }
+            case UPDATE_WARFRAME_TAR: {
                 updateWarframeTar(bot, event);
-            case UPDATE_JAR:
+                return;
+            }
+            case UPDATE_JAR: {
                 updateJar(bot, event);
+                return;
+            }
+            default:
         }
     }
 

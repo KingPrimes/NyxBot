@@ -8,7 +8,7 @@ template: |
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 categories:
-    #重大变更
+  # 重大变更
   - title: 'Breaking'
     labels:
       - 'breaking'
@@ -17,9 +17,9 @@ categories:
     # 新功能
   - title: '🚀 New'
     labels:
-     - 'feat'
-     - 'feature'
-     - 'new'
+      - 'feat'
+      - 'feature'
+      - 'new'
     # bug修复
   - title: '🐛 Bug Fixes'
     labels:
@@ -41,7 +41,7 @@ categories:
     # 其他变更
   - title: 'Other changes'
     labels:
-     - '*'
+      - '*'
     # 依赖更新
   - title: 'Dependency Updates'
     labels:
@@ -83,31 +83,31 @@ prerelease: false
 commitish: main
 
 autolabeler:
-    - label: 'bug'
-      branch:
-        - '/fix\/.+/'
-    - label: 'docs'
-      branch:
-        - '/docs\/.+/'
-      files:
-        - '*.md'
-    - label: 'dependencies'
-      branch:
-        - '/deps\/.+/'
-      files:
-        - 'pom.xml'
-    - label: 'breaking'
-      branch:
-       - '/breaking\/.+/'
-    - label: 'feature'
-      branch:
-        - '/feat\/.+/'
-    - label: 'maintenance'
-      branch:
-        - '/maintenance\/.+/'
-    - label: 'security'
-      branch:
-        - '/security\/.+/'
-    - label: 'skip-changelog'
-      branch:
-        - '/skip-changelog\/.+/'
+  - label: 'bug'
+    branch:
+      - '/fix\/.+/'
+  - label: 'docs'
+    branch:
+      - '/docs\/.+/'
+    files:
+      - '*.md'
+  - label: 'dependencies'
+    branch:
+      - '/deps\/.+/'
+    files:
+      - 'pom.xml'
+  - label: 'breaking'
+    branch:
+      - '/breaking\/.+/'
+  - label: 'feature'
+    branch:
+      - '/feat\/.+/'
+  - label: 'maintenance'
+    branch:
+      - '/maintenance\/.+/'
+  - label: 'security'
+    branch:
+      - '/security\/.+/'
+  - label: 'skip-changelog'
+    branch:
+      - '/skip-changelog\/.+/'

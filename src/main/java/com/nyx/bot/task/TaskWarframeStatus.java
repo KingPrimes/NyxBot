@@ -1,5 +1,6 @@
 package com.nyx.bot.task;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
@@ -8,6 +9,7 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.plugin.warframe.utils.WarframeSubscribe;
 import com.nyx.bot.res.GlobalStates;
+import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,18 +21,22 @@ import org.springframework.stereotype.Component;
 public class TaskWarframeStatus {
 
 //    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-//    @Async("taskExecutor")
-//    @Scheduled(cron = "0/60 * * * * ?")
-//    public void execute() {
-//        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
-//        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-//            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-//            WarframeSubscribe.isUpdated(states);
-//        } else {
-//            log.info("获取数据失败！");
-//        }
-//    }
+    @Async("taskExecutor")
+    @Scheduled(cron = "0/60 * * * * ?")
+    public void execute() {
+        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
+        GlobalStates.Arbitration arbitration = CacheUtils.getArbitration();
+        log.debug("GlobalStates.Arbitration:{}", JSON.toJSONString(arbitration));
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
+            if (arbitration != null) {
+                states.setArbitration(arbitration);
+            }
+            WarframeSubscribe.isUpdated(states);
+        } else {
+            log.info("获取数据失败！");
+        }
+    }
 
     @Async("taskExecutor")
     @Scheduled(cron = "0 0 0 1/5 * ? ")
