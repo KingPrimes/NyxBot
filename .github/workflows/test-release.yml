@@ -31,10 +31,10 @@ jobs:
         with:        
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository: KingPrimes/NyxBot-WebUI
-          path: ./src/main/resources
+          run-id: ${{ github.run_id }}
 
       - name: List downloaded files
-        run: ls -la ./src/main/resources
+        run: ls -R
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
