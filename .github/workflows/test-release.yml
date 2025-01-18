@@ -36,13 +36,13 @@ jobs:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:        
-          github_token: ${{ secrets.NYX_WEBUI }}
+          github-token: ${{ secrets.NYX_WEBUI }}
           repository: KingPrimes/NyxBot-WebUI
           run-id: ${{ env.LATEST_RUN_ID }}
-          path: ./resources
+          name: webui-build
 
       - name: List downloaded files
-        run: ls -R ./resources
+        run: ls -R
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
