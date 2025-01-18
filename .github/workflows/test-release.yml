@@ -25,6 +25,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Clone NyxBot-WebUI repository
+        run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
+
+      - name: Build NyxBot-WebUI with pnpm
+        working-directory: ./NyxBot-WebUI
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Merge built resources into current project
+        run: |
+          mkdir -p src/main/resources/webui
+          cp -r NyxBot-WebUI/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
