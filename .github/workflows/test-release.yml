@@ -32,8 +32,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository: KingPrimes/NyxBot-WebUI
           path: ./resources
-          run: |
-            cp -r ./resources/* src/main/resources/
+         
+      - name: Copy resources
+        run: cp -r ./resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
