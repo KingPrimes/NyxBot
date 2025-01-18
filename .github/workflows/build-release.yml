@@ -67,7 +67,7 @@ jobs:
       - name: Merge built resources into current project
         run: |
           mkdir -p src/main/resources/webui
-          cp -r NyxBot-WebUI/resources/* src/main/resources/
+          cp -r webui-build/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -104,7 +104,7 @@ jobs:
       - name: Merge built resources into current project
         run: |
           mkdir -p src/main/resources/webui
-          cp -r NyxBot-WebUI/resources/* src/main/resources/
+          cp -r webui-build/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
