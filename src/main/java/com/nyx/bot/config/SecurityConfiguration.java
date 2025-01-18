@@ -78,7 +78,7 @@ public class SecurityConfiguration {
                 // 配置跨域资源共享
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 配置无状态的会话管理
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -95,7 +95,6 @@ public class SecurityConfiguration {
                         ).permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 //禁用默认的登录表单
