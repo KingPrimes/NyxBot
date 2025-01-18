@@ -37,7 +37,7 @@ jobs:
         run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
 
       - name: Build NyxBot-WebUI with pnpm
-        working-directory: ./NyxBot-WebUI
+        working-directory: ./web-ui
         run: |
           pnpm install
           pnpm build
@@ -45,7 +45,7 @@ jobs:
       - name: Merge built resources into current project
         run: |
           mkdir -p src/main/resources/webui
-          cp -r NyxBot-WebUI/resources/* src/main/resources/
+          cp -r web-ui/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml

@@ -62,12 +62,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: src/main/resources/webui
+          path: ./webui-build
+
+      - name: Unzip WebUi Build Artifact
+        run: |
+          mkdir -p ./webui-build/resources
+          unzip ./webui-build/webui-build.zip -d ./webui-build/resources
+          ls
 
       - name: Merge built resources into current project
         run: |
-          mkdir -p src/main/resources/webui
-          cp -r webui-build/resources/* src/main/resources/
+          cp -r ./webui-build/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -99,12 +104,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webui-build
-          path: src/main/resources/webui
+          path: ./webui-build
+
+      - name: Unzip WebUi Build Artifact
+        run: |
+          mkdir -p ./webui-build/resources
+          unzip ./webui-build/webui-build.zip -d ./webui-build/resources
+          ls
 
       - name: Merge built resources into current project
         run: |
-          mkdir -p src/main/resources/webui
-          cp -r webui-build/resources/* src/main/resources/
+          cp -r ./webui-build/resources/* src/main/resources/
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
