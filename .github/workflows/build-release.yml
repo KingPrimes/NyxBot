@@ -92,6 +92,9 @@ jobs:
           name: webui-build
           path: ./webui-build
 
+      - name: Display structure of downloaded files
+        run: ls -R ./webui-build
+
       - name: Merge built resources into current project
         run: |
           cp -r ./webui-build/resources/* src/main/resources/
