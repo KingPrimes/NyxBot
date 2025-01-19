@@ -1,6 +1,6 @@
 package com.nyx.bot.controller.system;
 
-import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.sys.SysUser;
@@ -50,12 +50,12 @@ public class ResetPasswordController extends BaseController {
 
     @Data
     public static class ResetPassword {
-        @InternationalizedNotEmpty(message = "controller.rest.password.old.not.empty")
+        @NotEmpty(message = "controller.rest.password.old.not.empty")
         private String oldPassword;
-        @InternationalizedNotEmpty(message = "controller.rest.password.new.not.empty")
+        @NotEmpty(message = "controller.rest.password.new.not.empty")
         @Min(value = 6, message = "controller.rest.password.length")
         private String newPassword;
-        @InternationalizedNotEmpty(message = "controller.rest.password.confirm.not.empty")
+        @NotEmpty(message = "controller.rest.password.confirm.not.empty")
         private String confirmPassword;
 
         public boolean isValid() {

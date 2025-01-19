@@ -1,7 +1,7 @@
 package com.nyx.bot.entity.bot.white;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
@@ -18,9 +18,9 @@ public class ProveWhite extends BaseEntity {
     @GeneratedValue
     Long id;
 
-    @InternationalizedNotEmpty(message = "bot.not.empty")
+    @NotEmpty(message = "bot.not.empty")
     Long botUid;
 
-    @InternationalizedNotEmpty(message = "prove.not.empty")
+    @NotEmpty(message = "prove.not.empty")
     Long proveUid;
 }

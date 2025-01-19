@@ -25,4 +25,16 @@ public class RivenTionAlias extends BaseEntity {
     String en;
     //中文
     String cn;
+
+    public RivenTionAlias() {
+    }
+
+    public RivenTionAlias(RivenTionAlias ra) {
+        this.en = ra.en;
+        this.cn = ra.cn;
+    }
+
+    public String getEquation() {
+        return en + cn;
+    }
 }

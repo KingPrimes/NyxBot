@@ -1,7 +1,7 @@
 package com.nyx.bot.entity.bot.black;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
@@ -17,9 +17,9 @@ public class GroupBlack extends BaseEntity {
     @Id
     @GeneratedValue
     Long id;
-    @InternationalizedNotEmpty(message = "bot.not.empty")
+    @NotEmpty(message = "bot.not.empty")
     Long botUid;
-    @InternationalizedNotEmpty(message = "group.not.empty")
+    @NotEmpty(message = "group.not.empty")
     Long groupUid;
 
 }

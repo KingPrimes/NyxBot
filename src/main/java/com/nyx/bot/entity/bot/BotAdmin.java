@@ -2,7 +2,7 @@ package com.nyx.bot.entity.bot;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.PermissionsEnums;
@@ -19,9 +19,9 @@ public class BotAdmin extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @InternationalizedNotEmpty(message = "bot.not.empty")
+    @NotEmpty(message = "bot.not.empty")
     Long botUid;
-    @InternationalizedNotEmpty(message = "admin.not.empty")
+    @NotEmpty(message = "admin.not.empty")
     Long adminUid;
     PermissionsEnums permissions;
 

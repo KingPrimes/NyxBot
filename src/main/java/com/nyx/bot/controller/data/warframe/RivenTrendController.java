@@ -87,6 +87,7 @@ public class RivenTrendController extends BaseController {
     public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
+            build.pull();
             List<RivenTrend> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/riven_trend.json", jsonString);

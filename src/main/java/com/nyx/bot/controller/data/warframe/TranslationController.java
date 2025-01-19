@@ -75,6 +75,7 @@ public class TranslationController extends BaseController {
     public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
+            build.pull();
             List<Translation> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/translation.json", jsonString);

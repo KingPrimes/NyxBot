@@ -2,7 +2,7 @@ package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.annotation.InternationalizedNotEmpty;
+import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
@@ -24,11 +24,11 @@ public class Translation extends BaseEntity {
     Long id;
     //中文名称
     @JsonProperty("cn")
-    @InternationalizedNotEmpty(message = "translation.cn.not.empty")
+    @NotEmpty(message = "translation.cn.not.empty")
     String cn;
     //英文名称
     @JsonProperty("en")
-    @InternationalizedNotEmpty(message = "translation.en.not.empty")
+    @NotEmpty(message = "translation.en.not.empty")
     String en;
     //是否是 Prime 版本
     @JsonProperty("is_prime")
@@ -37,5 +37,17 @@ public class Translation extends BaseEntity {
     @JsonProperty("is_set")
     Boolean isSet;
 
+    public Translation() {
+    }
 
+    public Translation(Translation translation) {
+        this.cn = translation.cn;
+        this.en = translation.en;
+        this.isPrime = translation.isPrime;
+        this.isSet = translation.isSet;
+    }
+
+    public String getEquation() {
+        return cn + en + isPrime + isSet;
+    }
 }

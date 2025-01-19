@@ -52,4 +52,24 @@ public class RivenTion extends BaseEntity {
     //可用武器类型
     @JsonProperty("exclusive_to")
     String exclusiveTo;
+
+    public RivenTion() {
+    }
+
+    public RivenTion(RivenTion tr) {
+        this.effect = tr.effect;
+        this.group = tr.group;
+        this.negativeOnly = tr.negativeOnly;
+        this.positiveIsNegative = tr.positiveIsNegative;
+        this.prefix = tr.prefix;
+        this.searchOnly = tr.searchOnly;
+        this.suffix = tr.suffix;
+        this.units = tr.units;
+        this.urlName = tr.urlName;
+        this.exclusiveTo = tr.exclusiveTo;
+    }
+
+    public String getEquation() {
+        return this.effect + this.group + this.negativeOnly + this.positiveIsNegative + this.prefix + this.searchOnly + this.suffix + this.units + this.urlName + this.exclusiveTo;
+    }
 }

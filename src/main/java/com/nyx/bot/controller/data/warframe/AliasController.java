@@ -75,6 +75,7 @@ public class AliasController extends BaseController {
     public AjaxResult push(@RequestBody Map<String, String> commit) {
         try {
             JgitUtil build = JgitUtil.Build();
+            build.pull();
             List<Alias> all = repository.findAll();
             String jsonString = pushJson(all);
             FileUtils.writeFile(JgitUtil.lockPath + "/warframe/alias.json", jsonString);
