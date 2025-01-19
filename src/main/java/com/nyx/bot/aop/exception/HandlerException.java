@@ -94,11 +94,6 @@ public class HandlerException {
     }
 
     @ResponseBody
-    @ExceptionHandler(value = NoResourceFoundException.class)
-    public void handlerNoResourceFoundException() {
-    }
-
-    @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Object Exception(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
