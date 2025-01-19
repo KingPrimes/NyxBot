@@ -60,38 +60,31 @@ public class WarframeSubscribe {
                 });
 
                 //裂隙
-                Optional.ofNullable(states.getFissures()).ifPresent(fissures -> {
-                    CompletableFuture
-                            .supplyAsync(() -> areListsEqual(fissures, data.getFissures()))
-                            .thenAccept(f -> {
-                                log.debug("深度比较：{} -- 新数据:{} -- 缓存:{}", f, fissures.size(), data.getFissures().size());
-                                if (!f) {
-                                    WarframeDataUpdateMission.updateFissures();
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getFissures()).ifPresent(fissures -> CompletableFuture
+                        .supplyAsync(() -> areListsEqual(fissures, data.getFissures()))
+                        .thenAccept(f -> {
+                            if (!f) {
+                                WarframeDataUpdateMission.updateFissures();
+                            }
+                        }));
 
                 //入侵
-                Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> {
-                    CompletableFuture
-                            .supplyAsync(() -> areListsEqual(invasions, data.getInvasions()))
-                            .thenAccept(f -> {
-                                if (!f) {
-                                    WarframeDataUpdateMission.updateInvasions();
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> CompletableFuture
+                        .supplyAsync(() -> areListsEqual(invasions, data.getInvasions()))
+                        .thenAccept(f -> {
+                            if (!f) {
+                                WarframeDataUpdateMission.updateInvasions();
+                            }
+                        }));
 
                 //新闻
-                Optional.ofNullable(states.getNews()).ifPresent(news -> {
-                    CompletableFuture
-                            .supplyAsync(() -> areListsEqual(news, data.getNews()))
-                            .thenAccept(f -> {
-                                if (!f) {
-                                    WarframeDataUpdateMission.updateNews();
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getNews()).ifPresent(news -> CompletableFuture
+                        .supplyAsync(() -> areListsEqual(news, data.getNews()))
+                        .thenAccept(f -> {
+                            if (!f) {
+                                WarframeDataUpdateMission.updateNews();
+                            }
+                        }));
 
                 //电波
                 Optional.ofNullable(states.getNightwave()).ifPresent(nightwave -> {
@@ -172,11 +165,9 @@ public class WarframeSubscribe {
      */
     public static <T> boolean areListsEqual(List<T> list1, List<T> list2) {
         if (list1 == list2) {
-            log.debug("list1 == list2");
             return true;
         }
         if (list1 == null || list2 == null || list1.size() != list2.size()) {
-            log.debug("list1 == null || list2 == null || list1.size() != list2.size()");
             return false;
         }
         for (T t : list1) {

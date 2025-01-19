@@ -46,4 +46,21 @@ public class RivenAnalyseTrend extends BaseEntity {
     @JsonProperty("suffix")
     String suffix;
 
+    public RivenAnalyseTrend() {
+    }
+
+    public RivenAnalyseTrend(RivenAnalyseTrend rat) {
+        this.archwing = rat.archwing;
+        this.melle = rat.melle;
+        this.name = rat.name;
+        this.pistol = rat.pistol;
+        this.prefix = rat.prefix;
+        this.rifle = rat.rifle;
+        this.shotgun = rat.shotgun;
+        this.suffix = rat.suffix;
+    }
+
+    public String getEquation() {
+        return archwing + melle + name + pistol + prefix + rifle + shotgun + suffix;
+    }
 }

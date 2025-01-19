@@ -1,6 +1,5 @@
 package com.nyx.bot.task;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.core.ApiUrl;
@@ -26,7 +25,6 @@ public class TaskWarframeStatus {
     public void execute() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
         GlobalStates.Arbitration arbitration = CacheUtils.getArbitration();
-        log.debug("GlobalStates.Arbitration:{}", JSON.toJSONString(arbitration));
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
             if (arbitration != null) {

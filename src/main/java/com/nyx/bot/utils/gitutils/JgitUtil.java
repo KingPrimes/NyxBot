@@ -61,8 +61,8 @@ public class JgitUtil {
     /**
      * 构建 Jgit工具类 进行拉取操作
      */
-    public static JgitUtil Build() throws Exception {
-        return Build("https://github.com/KingPrimes/DataSource", "").pull();
+    public static JgitUtil Build() {
+        return Build("https://github.com/KingPrimes/DataSource", "");
     }
 
     /**
@@ -171,10 +171,10 @@ public class JgitUtil {
             File newFile = new File(newDir, file.getName());
             boolean success = file.renameTo(newFile);
             if (success) {
-                add(".");
-                rm(sourcePath);
-                commit("File moved to new directory");
-                push(localPath);
+                add(".")
+                        .rm(sourcePath)
+                        .commit("File moved to new directory")
+                        .push(localPath);
             } else {
                 // handle error
                 log.error("文件移动异常！");
@@ -334,25 +334,27 @@ public class JgitUtil {
     /**
      * 拉取(Pull) git pull origin
      */
-    public JgitUtil pull() throws GitAPIException {
+    public void pull() throws GitAPIException {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            return gitClone("main");
+            gitClone("main");
         }
+        Git git = openRpo(localPath);
         if (provider == null) {
-            openRpo(localPath).pull()
+            git.pull()
                     .setRemoteBranchName("main")
                     .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
-            return this;
+            git.close();
+            return;
         }
-        openRpo(localPath).pull()
+        git.pull()
                 .setRemoteBranchName("main")
                 .setCredentialsProvider(provider)
                 .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
-        return this;
+        git.close();
     }
 
     /**
@@ -360,25 +362,27 @@ public class JgitUtil {
      *
      * @param branch 分支
      */
-    public JgitUtil pull(String branch) throws Exception {
+    public void pull(String branch) throws Exception {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            return gitClone(branch);
+            gitClone(branch);
         }
+        Git git = openRpo(localPath);
         if (provider == null) {
-            openRpo(localPath).pull()
+            git.pull()
                     .setRemoteBranchName("main")
                     .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
-            return this;
+            git.close();
+            return;
         }
-        openRpo(localPath).pull()
+        git.pull()
                 .setRemoteBranchName(branch)
                 .setCredentialsProvider(provider)
                 .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
-        return this;
+        git.close();
     }
 
     /**
@@ -386,10 +390,11 @@ public class JgitUtil {
      *
      * @param branch 分支
      */
-    public JgitUtil gitClone(String branch) throws GitAPIException {
+    public void gitClone(String branch) throws GitAPIException {
         if (provider == null) {
             Git git = Git.cloneRepository()
                     .setURI(urlPath + ".git")
+                    .setTimeout(60)
                     .setDirectory(new File(localPath))
                     //设置是否克隆子仓库
                     .setCloneSubmodules(true)
@@ -399,7 +404,7 @@ public class JgitUtil {
                     .call();
             //关闭源，以释放本地仓库锁
             git.getRepository().close();
-            return this;
+            return;
         }
         Git git = Git.cloneRepository()
                 .setURI(urlPath + ".git")
@@ -413,7 +418,6 @@ public class JgitUtil {
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
-        return this;
     }
 
     /**
