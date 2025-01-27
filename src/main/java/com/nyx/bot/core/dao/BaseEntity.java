@@ -7,7 +7,6 @@ import lombok.Data;
 
 
 @Data
-
 public class BaseEntity {
     @JsonView(Views.BaseView.class)
     protected Integer current = 1;

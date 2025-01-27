@@ -166,10 +166,8 @@ public class BaseController {
     public String pushJson(List<?> all) {
         SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
         Set<String> set = new HashSet<>();
-        set.add("pageNum");
-        set.add("pageSize");
-        set.add("totalCount");
-        set.add("totalPage");
+        set.add("current");
+        set.add("size");
         spf.getExcludes().addAll(set);
         return JSON.toJSONString(all, spf);
     }

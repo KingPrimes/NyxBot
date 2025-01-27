@@ -11,6 +11,6 @@ public class testInitData {
 
     @Test
     void initAlias() {
-        WarframeDataSource.getAlias();
+        WarframeDataSource.getRivenTrend();
     }
 }

@@ -28,6 +28,7 @@ public class HandOff {
             Map<String, Object> o = yaml.load(new FileInputStream(file));
             if (o != null) {
                 load = o;
+                log.debug("Loaded config from file: {}", load);
             }
             load.put("serverPort", config.getServerPort() == null ? 8080 : config.getServerPort());
             load.put("isServerOrClient", config.getIsServerOrClient() == null || config.getIsServerOrClient());
@@ -37,6 +38,7 @@ public class HandOff {
             writer = new BufferedWriter(new FileWriter(file));
             writer.write(s);
             writer.close();
+            log.debug("Config written to file: {}", s);
             return true;
         } catch (IOException e) {
             return false;
@@ -53,6 +55,7 @@ public class HandOff {
             config.setIsServerOrClient((Boolean) load.get("isServerOrClient"));
             config.setWsServerUrl((String) load.get("wsServerUrl"));
             config.setWsClientUrl((String) load.get("wsClientUrl"));
+            log.debug("Config Init:{}", config);
             return config;
         } catch (Exception e) {
             handoff(new NyxConfig());
@@ -70,6 +73,7 @@ public class HandOff {
         map.put("shiro.ws.client.enable", config.getIsServerOrClient() != null && !config.getIsServerOrClient());
         map.put("shiro.ws.client.url", config.getWsClientUrl() == null ? "ws://localhost:3001" : config.getWsClientUrl());
         MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
+        log.debug("Env AddFirst:{}", propertySource);
         env.getPropertySources().addFirst(propertySource);
         return env;
     }

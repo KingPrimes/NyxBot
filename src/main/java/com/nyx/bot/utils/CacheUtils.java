@@ -33,7 +33,7 @@ public class CacheUtils {
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
-        GlobalStates data = Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).get("data", GlobalStates.class);
+        GlobalStates data = cm.getCache(WARFRAME_SOCKET_DATA).get("data", GlobalStates.class);
         if (data == null) {
             throw new DataNotInfoException(I18nUtils.message("error.warframe.data.null"));
         }

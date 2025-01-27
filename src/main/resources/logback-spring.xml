@@ -15,14 +15,6 @@
         <encoder>
             <pattern>${CONSOLE_LOG}</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!-- 过滤的级别 -->
-            <level>INFO</level>
-            <!-- 匹配时的操作：接收（记录） -->
-            <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：接收（记录） -->
-            <onMismatch>DENY</onMismatch>
-        </filter>
     </appender>
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -32,26 +24,16 @@
             <!-- 日志最大的历史 7天 -->
             <maxHistory>7</maxHistory>
             <!--重启清理日志文件-->
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <cleanHistoryOnStart>false</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!-- 过滤的级别 -->
-            <level>DEBUG</level>
-            <!-- 匹配时的操作：接收（记录） -->
-            <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：接收（记录） -->
-            <onMismatch>ACCEPT</onMismatch>
-        </filter>
     </appender>
 
     <!--  指定日志输出级别，以及启用的Appender，这里就使用了我们上面的ConsoleAppender  -->
-    <root level="INFO" additivity="false">
+    <root level="INFO" additivity="true">
         <appender-ref ref="console"/>
-    </root>
-    <root level="INFO" additivity="false">
         <appender-ref ref="file"/>
     </root>
 

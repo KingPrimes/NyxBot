@@ -1,6 +1,7 @@
 package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.annotation.NotEmpty;
@@ -88,10 +89,10 @@ public class RivenTrend extends BaseEntity {
         this.oldNum = rt.oldNum;
         this.type = rt.type;
         this.isDate = rt.isDate;
-        this.traCh = rt.traCh;
     }
 
+    @JsonIgnore
     public String getEquation() {
-        return this.trendName + this.newDot + this.newNum + this.oldDot + this.oldNum + this.type + this.isDate + this.traCh;
+        return this.trendName + this.newDot + this.newNum + this.oldDot + this.oldNum + this.type + this.isDate;
     }
 }
