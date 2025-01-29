@@ -29,6 +29,14 @@
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!-- 过滤的级别 -->
+            <level>ERROR</level>
+            <!-- 匹配时的操作：接收（记录） -->
+            <onMatch>ACCEPT</onMatch>
+            <!-- 不匹配时的操作：接收（记录） -->
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
     </appender>
 
     <!--  指定日志输出级别，以及启用的Appender，这里就使用了我们上面的ConsoleAppender  -->

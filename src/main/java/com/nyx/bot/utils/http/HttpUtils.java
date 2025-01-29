@@ -167,7 +167,7 @@ public class HttpUtils {
             //返回体
             Body body = getBody(response);
             body.setUrl(url);
-            log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
+            //log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
             log.warn("sendGet", e);
