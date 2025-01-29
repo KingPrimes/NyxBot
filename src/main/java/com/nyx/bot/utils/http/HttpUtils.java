@@ -167,10 +167,10 @@ public class HttpUtils {
             //返回体
             Body body = getBody(response);
             body.setUrl(url);
-            log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
+            //log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.warn("sendGet", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }
@@ -183,14 +183,14 @@ public class HttpUtils {
                 .build();
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
+                log.warn("Response Code Is Not Successful code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
             Body body = getBody(response);
             log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
             return body;
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.warn("sendPost", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }
@@ -253,7 +253,7 @@ public class HttpUtils {
      * @param path - 文件输出路径
      */
     public static Boolean sendGetForFile(String url, String path) {
-        log.debug("发送请求 Url:{}", url);
+        log.debug("sendGetForFile Url:{}", url);
         // 用于下载完成返回标志符
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         File outputFile = new File(path);
@@ -269,21 +269,21 @@ public class HttpUtils {
             client.newCall(req).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    log.error("文件下载异常：{}", e.getMessage());
+                    log.error("onFailure Error", e);
                     future.completeExceptionally(e);
                 }
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     if (!response.isSuccessful()) {
-                        log.error("文件下载异常： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
+                        log.warn("File Download： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
                         future.complete(false);
                         return;
                     }
 
                     ResponseBody body = response.body();
                     if (body == null) {
-                        log.error("文件下载异常： body is null");
+                        log.warn("File Download： body is null");
                         return;
                     }
                     long fileSize = body.contentLength();
@@ -305,7 +305,7 @@ public class HttpUtils {
                 }
             });
         } catch (Exception e) {
-            log.error("发起请求出现异常:", e);
+            log.warn("sendGetForFile An abnormality occurred:", e);
             future.completeExceptionally(e);
         }
         return future.join();
@@ -316,7 +316,7 @@ public class HttpUtils {
         progress = Math.floor(progress); // Round down to nearest integer
 
         if (progress - lastProgress >= 1) {
-            log.info("文件下载进度:{}%", String.format("%.2f", progress));
+            log.info("File download progress:{}%", String.format("%.2f", progress));
             lastProgress = progress;
         }
     }
@@ -341,7 +341,7 @@ public class HttpUtils {
                     .build();
             response = client.newCall(request).execute();
             if (!response.isSuccessful()) {
-                log.error("【调用HTTP请求异常】 code:{},message:{}", response.code(), response.message());
+                log.warn("Response Code Is Not Successful code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
             Body body = getBodyForFile(response);
@@ -349,8 +349,8 @@ public class HttpUtils {
             log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
             return body;
 
-        } catch (IOException var13) {
-            log.error("发起请求出现异常:{}", var13.getMessage());
+        } catch (IOException e) {
+            log.warn("An exception occurred in the initiation request", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }
@@ -384,7 +384,7 @@ public class HttpUtils {
             //如果下载进度大于提示进度
             if (tip < progress) {
                 tip = progress;
-                log.info("文件下载进度: {}%", tip);
+                log.info("File download progress: {}%", tip);
             }
 
         }

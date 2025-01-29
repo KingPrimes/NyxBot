@@ -28,24 +28,27 @@ public class HandlerException {
 
     @ResponseBody
     @ExceptionHandler(value = DataNotInfoException.class)
-    public Object handlerDataNotInfoException(DataNotInfoException dataNotInfoException) {
+    public Object handlerDataNotInfoException(DataNotInfoException e) {
+        log.error("DataNotInfoException", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .header("Content-Type", "text/html; charset=utf-8")
-                .body("<body>" + dataNotInfoException.getMessage() + "</body>");
+                .body("<body>" + e.getMessage() + "</body>");
     }
 
     @ResponseBody
     @ExceptionHandler(value = HtmlToImageException.class)
-    public Object handlerHtmlToImageException(HtmlToImageException html) {
+    public Object handlerHtmlToImageException(HtmlToImageException e) {
+        log.error("HtmlToImageException", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .header("Content-Type", "text/html; charset=utf-8")
-                .body(html.getMessage());
+                .body(e.getMessage());
     }
 
 
     @ResponseBody
     @ExceptionHandler(value = TemplateInputException.class)
     public Object handlerTemplateInputException(TemplateInputException html) {
+        log.error("TemplateInputException", html);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body(html.getMessage());
@@ -59,43 +62,49 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     public Object HttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.error("{}：{}", I18nUtils.RequestErrorMethod(), e.getMessage());
+        log.warn("HttpRequestMethodNotSupportedException", e);
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, I18nUtils.RequestErrorMethod());
     }
 
     @ResponseBody
     @ExceptionHandler(value = BadCredentialsException.class)
     public Object BadCredentialsException(BadCredentialsException e) {
+        log.warn("BadCredentialsException", e);
         return AjaxResult.error(HttpCodeEnum.FAIL, e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = IllegalArgumentException.class)
     public Object IllegalArgumentException(IllegalArgumentException e) {
+        log.warn("IllegalArgumentException", e);
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = ExpiredJwtException.class)
-    public Object ExpiredJwtException() {
+    public Object ExpiredJwtException(ExpiredJwtException e) {
+        log.warn("ExpiredJwtException", e);
         return AjaxResult.error(HttpCodeEnum.INVALID_PARAM, HttpCodeEnum.INVALID_PARAM.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public Object HttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.warn("HttpMessageNotReadableException", e);
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Object MethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.warn("MethodArgumentNotValidException", e);
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getBindingResult().getFieldError().getDefaultMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Object Exception(Exception e) {
+        log.error("Exception", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("出现未知错误信息：" + e.getMessage());
     }
