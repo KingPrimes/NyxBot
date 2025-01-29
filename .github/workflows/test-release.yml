@@ -26,6 +26,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Clone NyxBot-WebUI repository
         run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
 
