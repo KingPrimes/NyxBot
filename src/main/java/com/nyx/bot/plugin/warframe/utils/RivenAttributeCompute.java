@@ -102,6 +102,9 @@ public class RivenAttributeCompute {
                 } else if (s.contains("暴击几率（")) {
                     attribute.setAttributeName(s.replaceAll("（重?击?时?", "(").trim() + "重击时 x2)");
                     attribute.setName("暴击几率（重击时 x2）");
+                } else if (s.contains("滑行攻击")) {
+                    attribute.setAttributeName(s.replaceAll("滑.*+", "滑行攻击暴击几率"));
+                    attribute.setName("滑行攻击暴击几率");
                 } else {
                     attribute.setAttributeName(s);
                     attribute.setName(RivenMatcherUtil.getAttributeName(s));
@@ -133,7 +136,6 @@ public class RivenAttributeCompute {
             List<RivenAnalyseTrendModel> models = new ArrayList<>();
             //遍历查询到的所有武器
             for (RivenTrend rivenTrend : likeTrendName) {
-                log.debug("武器名称：{}", rivenTrend.getTraCh());
                 RivenAnalyseTrendModel model = new RivenAnalyseTrendModel();
                 RivenTrendTypeEnum weaponsType = rivenTrend.getType();
                 model.setWeaponName(rivenTrend.getTraCh());
@@ -198,6 +200,7 @@ public class RivenAttributeCompute {
                             /*boolean isNag = attribute.getAttribute() < 0 *//*|| (MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) && attribute.getAttribute() > 0)*//*;*/
                             // 用于判断最后一个词条是否是歧视属性
                             boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) || attribute.getAttribute() < 0 : attribute.getAttribute() < 0;
+                            log.debug("当前武器名称：{}", rivenTrend.getTraCh());
                             log.debug("当前下标是否大于等于2：{}", index >= 2);
                             log.debug("当前属性是否是歧视属性:{}", RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
                             log.debug("当前属性是否时负数：{}", attribute.getAttribute() < 0);
