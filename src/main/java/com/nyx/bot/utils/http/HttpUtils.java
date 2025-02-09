@@ -270,6 +270,7 @@ public class HttpUtils {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     log.error("onFailure Error", e);
+                    future.complete(false);
                     future.completeExceptionally(e);
                 }
 
@@ -306,6 +307,7 @@ public class HttpUtils {
             });
         } catch (Exception e) {
             log.warn("sendGetForFile An abnormality occurred:", e);
+            future.complete(false);
             future.completeExceptionally(e);
         }
         return future.join();
