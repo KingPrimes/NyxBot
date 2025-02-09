@@ -50,4 +50,11 @@ public class Translation extends BaseEntity {
     public String getEquation() {
         return cn + en + isPrime + isSet;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        if (id != null && id == 0) {
+            id = null;
+        }
+    }
 }

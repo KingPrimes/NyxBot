@@ -25,6 +25,7 @@ public enum Codes {
     WARFRAME_ASSAULT_PLUGIN("^突击$", PermissionsEnums.USER),
     WARFRAME_ARSON_HUNT_PLUGIN("^执刑官猎杀$|^猎杀$|^执行官$|^执政官$|^执刑官$", PermissionsEnums.USER),
     WARFRAME_VOID_PLUGIN("^奸商$", PermissionsEnums.USER),
+    WARFRAME_ARBITRATION_EX_PLUGIN("^仲裁Ex", PermissionsEnums.USER),
     WARFRAME_ARBITRATION_PLUGIN("^仲裁$", PermissionsEnums.USER),
     WARFRAME_DAILY_DEALS_PLUGIN("^每日特惠$|^特惠$", PermissionsEnums.USER),
     WARFRAME_INVASIONS_PLUGIN("^入侵$", PermissionsEnums.USER),

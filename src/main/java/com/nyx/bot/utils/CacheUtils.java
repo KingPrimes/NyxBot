@@ -99,6 +99,20 @@ public class CacheUtils {
     }
 
     /**
+     * 获取有价值的仲裁列表
+     *
+     * @return List<ArbitrationPre>
+     */
+    public static List<ArbitrationPre> getArbitrationList() {
+        List<ArbitrationPre> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitrationList", List.class);
+        if (arbitrationList == null || arbitrationList.isEmpty()) {
+            arbitrationList = ApiUrl.arbitrationPreList();
+            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitrationList", arbitrationList);
+        }
+        return arbitrationList;
+    }
+
+    /**
      * 设置缓存
      *
      * @param name 缓存名称

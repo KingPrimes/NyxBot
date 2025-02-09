@@ -1,7 +1,9 @@
 package com.nyx.bot.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -51,5 +53,16 @@ public class ArbitrationPre {
      */
     @JsonProperty("missionType")
     private String type;
+
+    @JsonProperty("etc")
+    private String etc;
+
+    @JsonIgnore
+    public Boolean isWorth() {
+        boolean isType = type.contains(WarframeMissionTypeEnum.Interception.get()) || type.contains(WarframeMissionTypeEnum.Defense.get());
+        boolean isNode = node.contains("谷神星") || node.contains("水星");
+        boolean isEnemy = enemy.contains("Grin") || enemy.contains("Infest");
+        return isType && isNode && isEnemy;
+    }
 
 }
