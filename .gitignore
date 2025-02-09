@@ -46,7 +46,5 @@ logs
 /DataSource
 /models
 locate.yaml
-src/resources/static/**
-src/resources/templates/**
-src/test/resources/static/**
-src/test/resources/templates/**
+/src/main/resources/templates/**
+/src/main/resources/static/**
