@@ -107,10 +107,7 @@ public class CacheUtils {
         List<ArbitrationPre> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitrationList", List.class);
         if (arbitrationList == null || arbitrationList.isEmpty()) {
             arbitrationList = ApiUrl.arbitrationPreList();
-            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitrationList",
-                    arbitrationList.stream()
-                            .filter(ArbitrationPre::isWorth)
-                            .toList());
+            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitrationList", arbitrationList);
         }
         return arbitrationList;
     }

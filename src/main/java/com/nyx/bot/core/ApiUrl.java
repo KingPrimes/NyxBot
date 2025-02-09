@@ -86,7 +86,9 @@ public class ApiUrl {
      * @return 仲裁
      */
     public static List<ArbitrationPre> arbitrationPreList() {
-        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch).stream()
+                .filter(ArbitrationPre::isWorth)
+                .toList();
     }
 
     /**
