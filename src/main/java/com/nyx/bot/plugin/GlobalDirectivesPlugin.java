@@ -20,7 +20,6 @@ import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Shiro
@@ -69,7 +68,7 @@ public class GlobalDirectivesPlugin {
                         UPDATE_WARFRAME_SISTER,
                         UPDATE_WARFRAME_TAR,
                         UPDATE_JAR -> {
-                    if (Objects.requireNonNull(Permissions.checkAdmin(bot, event)) == PermissionsEnums.SUPER_ADMIN) {
+                    if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
                         UpdatePlugin.updatePlugin(bot, event, codes);
                     } else {
                         bot.sendMsg(event, "权限不足！", false);
