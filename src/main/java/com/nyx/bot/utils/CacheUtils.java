@@ -15,7 +15,6 @@ import java.util.Objects;
 public class CacheUtils {
     public static final String SYSTEM = "system";
     public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
-    public static final String GROUP_CAPTCHA = "group-captcha";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 

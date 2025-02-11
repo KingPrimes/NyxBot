@@ -366,7 +366,7 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"message"})
+    @EqualsAndHashCode(of = {"message"}, callSuper = false)
     public static class News extends BaseStatus {
 
         @JsonProperty("date")
@@ -444,16 +444,10 @@ public class GlobalStates {
         }
     }
 
+    @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(exclude = {"activation", "expiry"})
-    public static class Arbitration {
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    public static class Arbitration extends BaseStatus {
         @JsonProperty("node")
         private String node;
         @JsonProperty("enemy")
@@ -466,6 +460,8 @@ public class GlobalStates {
         private Boolean sharkwing;
         @JsonProperty("etc")
         private String etc;
+
+
     }
 
     @NoArgsConstructor

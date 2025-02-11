@@ -18,7 +18,7 @@ public class GlobalStatesUtils {
         return now.stream()
                 // 过滤任务是否正在运行
                 .filter(GlobalStates.BaseStatus::getActive)
-                // 取新裂隙任务与就裂隙任务的差集
+                // 取新任务与旧任务的差值
                 .filter(item ->
                         !old.stream()
                                 //采用Map Key的方式对比多属性不同的值

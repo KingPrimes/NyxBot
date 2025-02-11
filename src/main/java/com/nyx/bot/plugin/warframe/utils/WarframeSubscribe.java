@@ -48,7 +48,7 @@ public class WarframeSubscribe {
 
                 //每日特惠
                 Optional.ofNullable(states.getDailyDeals()).ifPresent(r -> {
-                    if (!r.equals(data.getDailyDeals())) {
+                    if (!takeTheDifferenceSet(data.getDailyDeals(), r).isEmpty()) {
                         CompletableFuture.runAsync(WarframeDataUpdateMission::updateDailyDeals);
                     }
                 });
@@ -61,37 +61,31 @@ public class WarframeSubscribe {
                 });
 
                 //裂隙
-                Optional.ofNullable(states.getFissures()).ifPresent(fissures -> {
-                    CompletableFuture
-                            .supplyAsync(() -> takeTheDifferenceSet(data.getFissures(), fissures))
-                            .thenAccept(f -> {
-                                if (!f.isEmpty()) {
-                                    WarframeDataUpdateMission.updateFissures(f);
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getFissures()).ifPresent(fissures -> CompletableFuture
+                        .supplyAsync(() -> takeTheDifferenceSet(data.getFissures(), fissures))
+                        .thenAccept(f -> {
+                            if (!f.isEmpty()) {
+                                WarframeDataUpdateMission.updateFissures(f);
+                            }
+                        }));
 
                 //入侵
-                Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> {
-                    CompletableFuture
-                            .supplyAsync(() -> takeTheDifferenceSet(data.getInvasions(), invasions))
-                            .thenAccept(f -> {
-                                if (!f.isEmpty()) {
-                                    WarframeDataUpdateMission.updateInvasions();
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> CompletableFuture
+                        .supplyAsync(() -> takeTheDifferenceSet(data.getInvasions(), invasions))
+                        .thenAccept(f -> {
+                            if (!f.isEmpty()) {
+                                WarframeDataUpdateMission.updateInvasions();
+                            }
+                        }));
 
                 //新闻
-                Optional.ofNullable(states.getNews()).ifPresent(news -> {
-                    CompletableFuture
-                            .supplyAsync(() -> takeTheDifferenceSet(data.getNews(), news))
-                            .thenAccept(f -> {
-                                if (!f.isEmpty()) {
-                                    WarframeDataUpdateMission.updateNews();
-                                }
-                            });
-                });
+                Optional.ofNullable(states.getNews()).ifPresent(news -> CompletableFuture
+                        .supplyAsync(() -> takeTheDifferenceSet(data.getNews(), news))
+                        .thenAccept(f -> {
+                            if (!f.isEmpty()) {
+                                WarframeDataUpdateMission.updateNews();
+                            }
+                        }));
 
                 //电波
                 Optional.ofNullable(states.getNightwave()).ifPresent(nightwave -> {
