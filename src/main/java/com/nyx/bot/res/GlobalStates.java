@@ -143,6 +143,8 @@ public class GlobalStates {
         @JsonProperty("expiry")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
         private Date expiry;
+        @JsonProperty("active")
+        private Boolean active = true;
 
     }
 
@@ -174,8 +176,6 @@ public class GlobalStates {
         private Boolean isHard;
         @JsonProperty("isStorm")
         private Boolean isStorm;
-        @JsonProperty("active")
-        private Boolean active;
     }
 
     @NoArgsConstructor
@@ -367,7 +367,7 @@ public class GlobalStates {
     @NoArgsConstructor
     @Data
     @EqualsAndHashCode(of = {"message"})
-    public static class News {
+    public static class News extends BaseStatus {
 
         @JsonProperty("date")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -390,8 +390,7 @@ public class GlobalStates {
         private String link;
         @JsonProperty("update")
         private Boolean update;
-        @JsonProperty("id")
-        private String id;
+
         @JsonProperty("asString")
         private String asString;
         @JsonProperty("message")
@@ -474,7 +473,7 @@ public class GlobalStates {
     @EqualsAndHashCode(exclude = {"timeLeft"}, callSuper = false)
     public static class CambionCycle extends BaseStatus {
         @JsonProperty("active")
-        private String active;
+        private String dump;
         @JsonProperty("timeLeft")
         private String timeLeft;
     }

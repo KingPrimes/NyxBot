@@ -8,10 +8,11 @@ import com.nyx.bot.utils.I18nUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static com.nyx.bot.plugin.warframe.utils.GlobalStatesUtils.takeTheDifferenceSet;
 
 @Slf4j
 public class WarframeSubscribe {
@@ -30,7 +31,7 @@ public class WarframeSubscribe {
                 //检查警报是否不为空
                 Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
                     //判断数据是否有更新
-                    if (!f.equals(data.getAlerts())) {
+                    if (!takeTheDifferenceSet(data.getAlerts(), f).isEmpty()) {
                         CompletableFuture.runAsync(WarframeDataUpdateMission::updateAlerts);
                     }
                 });
@@ -54,7 +55,7 @@ public class WarframeSubscribe {
 
                 //活动
                 Optional.ofNullable(states.getEvents()).ifPresent(events -> {
-                    if (!events.equals(data.getEvents())) {
+                    if (!takeTheDifferenceSet(data.getEvents(), events).isEmpty()) {
                         CompletableFuture.runAsync(WarframeDataUpdateMission::updateEvents);
                     }
                 });
@@ -62,11 +63,10 @@ public class WarframeSubscribe {
                 //裂隙
                 Optional.ofNullable(states.getFissures()).ifPresent(fissures -> {
                     CompletableFuture
-                            .supplyAsync(() -> areListsEqual(fissures, data.getFissures()))
+                            .supplyAsync(() -> takeTheDifferenceSet(data.getFissures(), fissures))
                             .thenAccept(f -> {
-                                log.debug("深度比较：{} -- 新数据:{} -- 缓存:{}", f, fissures.size(), data.getFissures().size());
-                                if (!f) {
-                                    WarframeDataUpdateMission.updateFissures();
+                                if (!f.isEmpty()) {
+                                    WarframeDataUpdateMission.updateFissures(f);
                                 }
                             });
                 });
@@ -74,9 +74,9 @@ public class WarframeSubscribe {
                 //入侵
                 Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> {
                     CompletableFuture
-                            .supplyAsync(() -> areListsEqual(invasions, data.getInvasions()))
+                            .supplyAsync(() -> takeTheDifferenceSet(data.getInvasions(), invasions))
                             .thenAccept(f -> {
-                                if (!f) {
+                                if (!f.isEmpty()) {
                                     WarframeDataUpdateMission.updateInvasions();
                                 }
                             });
@@ -85,9 +85,9 @@ public class WarframeSubscribe {
                 //新闻
                 Optional.ofNullable(states.getNews()).ifPresent(news -> {
                     CompletableFuture
-                            .supplyAsync(() -> areListsEqual(news, data.getNews()))
+                            .supplyAsync(() -> takeTheDifferenceSet(data.getNews(), news))
                             .thenAccept(f -> {
-                                if (!f) {
+                                if (!f.isEmpty()) {
                                     WarframeDataUpdateMission.updateNews();
                                 }
                             });
@@ -158,32 +158,10 @@ public class WarframeSubscribe {
         } catch (Exception e) {
             //设置数据
             CacheUtils.setGlobalState(states);
+            log.error("WarframeDataSource.updateData error", e);
         }
 
     }
 
-    /**
-     * 深度比较List集合
-     *
-     * @param list1 第一个List
-     * @param list2 第二个List
-     * @param <T>   泛型
-     * @return true表示两个List相等，false表示不相等
-     */
-    public static <T> boolean areListsEqual(List<T> list1, List<T> list2) {
-        if (list1 == list2) {
-            log.debug("list1 == list2");
-            return true;
-        }
-        if (list1 == null || list2 == null || list1.size() != list2.size()) {
-            log.debug("list1 == null || list2 == null || list1.size() != list2.size()");
-            return false;
-        }
-        for (T t : list1) {
-            if (!list2.contains(t)) {
-                return false;
-            }
-        }
-        return true;
-    }
+
 }

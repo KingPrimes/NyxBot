@@ -1,6 +1,8 @@
 package com.nyx.bot.plugin.warframe.utils;
 
+import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.entity.warframe.MissionSubscribeUserCheckType;
+import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.res.GlobalStates;
@@ -98,6 +100,7 @@ public class FissuresUtils {
             f.setMissionType(trans.enToZh(f.getMissionType()));
             f.setMissionKey(trans.enToZh(f.getMissionKey()));
             f.setTier(trans.enToZh(f.getTier()));
+            log.debug("开始时间：{} -- 结束时间:{}", DateUtils.format(f.getActivation(), "yyyy-MM-dd HH:mm:ss"), DateUtils.format(f.getExpiry(), "yyyy-MM-dd HH:mm:ss"));
             f.setEta(DateUtils.getDiff(f.getExpiry(), new Date()));
         });
     }
@@ -107,16 +110,25 @@ public class FissuresUtils {
      *
      * @param types 订阅信息
      * @return 裂隙列表 JSON
-     * @throws DataNotInfoException 数据异常
      */
-    public static List<GlobalStates.Fissures> getFissures(List<MissionSubscribeUserCheckType> types) throws DataNotInfoException {
-        List<GlobalStates.Fissures> fissures = getFissures(-1);
-        List<GlobalStates.Fissures> list = new ArrayList<>(fissures.stream().filter(f ->
-                        types.stream().anyMatch(
-                                t -> f.getMissionType().toUpperCase().contains(t.getMissionTypeEnum().name().toUpperCase()) && (t.getTierNum() == 0 || t.getTierNum().equals(f.getTierNum()))))
-                .toList());
+    public static List<GlobalStates.Fissures> getSubFissures(List<MissionSubscribeUserCheckType> types, List<GlobalStates.Fissures> fissures) {
+        if (fissures.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<GlobalStates.Fissures> list = fissures;
+        if (!types.isEmpty()) {
+            list = new ArrayList<>(fissures.stream().filter(f ->
+                            types.stream().anyMatch(
+                                    t -> (t.getMissionTypeEnum() == WarframeMissionTypeEnum.ERROR || f.getMissionType().toUpperCase().contains(t.getMissionTypeEnum().name().toUpperCase()))
+                                            &&
+                                            (t.getTierNum() == 0 || t.getTierNum().equals(f.getTierNum()))
+                            )
+                    )
+                    .toList());
+        }
         SortForTierNum(list);
         TranslateFissures(list);
+        log.debug("订阅的裂隙任务列表：{}", JSON.toJSONString(list));
         return list;
     }
 }
