@@ -23,21 +23,12 @@ public class BlackService {
     ProveBlackRepository proveBlackRepository;
 
 
-    public GroupBlack findByGroupId(Long id) {
-        return repository.findByGroupUid(id).orElse(new GroupBlack());
-    }
-
-    public ProveBlack findByProveId(Long id) {
-        return proveBlackRepository.findByProve(id).orElse(new ProveBlack());
-    }
-
-
     public Page<GroupBlack> list(GroupBlack gb) {
         return repository.findAllPageable(
                 gb.getGroupUid(),
                 PageRequest.of(
-                        gb.getPageNum() - 1,
-                        gb.getPageSize()
+                        gb.getCurrent() - 1,
+                        gb.getSize()
                 )
         );
     }
@@ -60,16 +51,16 @@ public class BlackService {
 
     public Page<ProveBlack> list(ProveBlack pb) {
         return proveBlackRepository.findAllPageable(
-                pb.getProve(),
+                pb.getProveUid(),
                 PageRequest.of(
-                        pb.getPageNum() - 1,
-                        pb.getPageSize()
+                        pb.getCurrent() - 1,
+                        pb.getSize()
                 )
         );
     }
 
     public int save(ProveBlack pb) {
-        proveBlackRepository.findByProve(pb.getProve()).ifPresent(p -> pb.setId(p.getId()));
+        proveBlackRepository.findByProveUid(pb.getProveUid()).ifPresent(p -> pb.setId(p.getId()));
         proveBlackRepository.save(pb);
         return 1;
     }
@@ -95,7 +86,7 @@ public class BlackService {
         if (groupUid != null && groupUid != 0L) {
             repository.findByGroupUid(groupUid).ifPresent(g -> flag.set(false));
         }
-        proveBlackRepository.findByProve(userUid).ifPresent(p -> flag.set(false));
+        proveBlackRepository.findByProveUid(userUid).ifPresent(p -> flag.set(false));
         return flag.get();
     }
 

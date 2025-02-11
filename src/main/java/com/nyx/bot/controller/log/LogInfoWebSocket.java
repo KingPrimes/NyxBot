@@ -1,8 +1,11 @@
 package com.nyx.bot.controller.log;
 
 import com.alibaba.fastjson2.JSON;
+import com.nyx.bot.utils.CacheUtils;
 import jakarta.websocket.*;
+import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -19,7 +22,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-@ServerEndpoint("/ws/log")
+@ServerEndpoint(value = "/ws/log-now", configurator = LogInfoWebSocket.CustomConfigurator.class)
 public class LogInfoWebSocket {
 
     private static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
@@ -27,7 +30,7 @@ public class LogInfoWebSocket {
     //用于匹配日志格式的正则表达式
     private static final String LOG_PATTERN = "(\\w+)\\s+(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\s+\\[(.*?)\\]\\s+(.*?)\\s*:\\s*(.*)";
 
-    public static LogInfoWebSocketForStr parseLogLine(String logLine) {
+    private static LogInfoWebSocketForStr parseLogLine(String logLine) {
         Pattern pattern = Pattern.compile(LOG_PATTERN);
         Matcher matcher = pattern.matcher(logLine);
         if (matcher.matches()) {
@@ -58,10 +61,13 @@ public class LogInfoWebSocket {
                 String filePath = "./logs/" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".log";
                 try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
                     Object[] lines = reader.lines().toArray();
-
                     //只取从上次之后产生的日志
                     Object[] copyOfRange = Arrays.copyOfRange(lines, lengthMap.get(session.getId()), lines.length);
                     List<LogInfoWebSocketForStr> logInfoWebSocketForStrList = new ArrayList<>();
+                    if (copyOfRange.length > 500 && lengthMap.get(session.getId()) < 500) {
+                        // 分割数组，只取最后100行
+                        copyOfRange = Arrays.copyOfRange(copyOfRange, copyOfRange.length - 100, copyOfRange.length);
+                    }
                     // 对日志进行封装
                     for (Object o : copyOfRange) {
                         String line = (String) o;
@@ -79,9 +85,7 @@ public class LogInfoWebSocket {
                     }
                     //休眠一秒
                     Thread.sleep(1000);
-                } catch (Exception e) {
-                    //捕获但不处理
-                    log.error(e.getMessage());
+                } catch (Exception ignored) {
                 }
             }
         }).start();
@@ -137,6 +141,20 @@ public class LogInfoWebSocket {
                     .append("pack", pack)
                     .append("log", log)
                     .toString();
+        }
+    }
+
+    public static class CustomConfigurator extends ServerEndpointConfig.Configurator {
+        @Override
+        public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+            Object o = CacheUtils.get(CacheUtils.SYSTEM, "sec-websocket-protocol");
+            String protocol = "";
+            if (o != null) {
+                protocol = o.toString();
+            }
+            // 设置自定义的配置
+            response.getHeaders().put("Sec-WebSocket-Protocol", Collections.singletonList(protocol));
+            super.modifyHandshake(sec, request, response);
         }
     }
 }

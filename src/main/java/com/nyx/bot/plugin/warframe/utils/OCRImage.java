@@ -24,7 +24,7 @@ public class OCRImage {
                 images.add(OcrUtil.ocr(s));
             }
         } catch (Exception e) {
-            log.error("识别图片报错：{}", e.getMessage());
+            log.error("识别图片报错", e);
         }
         return images;
 

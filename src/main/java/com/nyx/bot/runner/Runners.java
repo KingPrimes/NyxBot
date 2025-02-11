@@ -9,10 +9,7 @@ import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.repo.sys.SysUserRepository;
-import com.nyx.bot.utils.AsyncUtils;
-import com.nyx.bot.utils.DateUtils;
-import com.nyx.bot.utils.IoUtils;
-import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,6 +62,7 @@ public class Runners {
                 //程序启动之后获取WarframeDataSource
                 WarframeDataSource.init();
                 //new WarframeSocket().connectServer(ApiUrl.WARFRAME_SOCKET);
+                CacheUtils.getArbitrationList();
             }
         };
     }
@@ -85,8 +83,8 @@ public class Runners {
             File folder = new File("./backup");
             File[] listOfFiles = folder.listFiles();
             boolean fileExists = false;
-
             if (listOfFiles != null) {
+                log.debug("./backup not null");
                 for (File file : listOfFiles) {
                     if (file.isFile() && file.getName().contains(DateUtils.getDate(new Date(), DateUtils.NOT_HMS))) {
                         fileExists = true;
@@ -95,13 +93,14 @@ public class Runners {
                 }
             }
             if (fileExists) {
+                log.debug("./backup/bake_{} exists", DateUtils.getDate(new Date(), DateUtils.NOT_HMS));
                 Map<Long, Bot> robots = SpringUtils.getBean(BotContainer.class).robots;
                 if (robots != null) {
                     Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByPermissions(PermissionsEnums.SUPER_ADMIN);
                     for (Bot bot : robots.values()) {
                         admin.ifPresent(a -> {
                             if (a.getBotUid().equals(bot.getSelfId())) {
-                                bot.sendPrivateMsg(a.getAdminUid(), "更新完毕！", false);
+                                bot.sendPrivateMsg(a.getAdminUid(), "Update complete!", false);
                             }
                         });
                     }

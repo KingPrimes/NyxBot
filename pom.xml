@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.1</version>
         <relativePath/>
     </parent>
 
@@ -14,7 +14,7 @@
     <artifactId>NxyBot</artifactId>
 
 
-    <version>0.1.7</version>
+    <version>0.2.3</version>
 
     <name>NxyBot</name>
 
@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <oneSdk.version>2.3.3</oneSdk.version>
+        <oneSdk.version>2.3.5</oneSdk.version>
         <fastJson2.version>2.0.53</fastJson2.version>
         <xhtmlrenderer.version>9.11.0</xhtmlrenderer.version>
         <rhino.version>1.7.15</rhino.version>
@@ -102,10 +102,17 @@
             <artifactId>spring-messaging</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.12.3</version>
+        </dependency>
+
         <!--Http请求-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
         </dependency>
 
         <dependency>
@@ -181,7 +188,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>7.0.0.202409031743-r</version>
+            <version>7.1.0.202411261347-r</version>
         </dependency>
 
         <!--YAML操作-->
@@ -214,6 +221,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
         </dependency>
 
         <!--图片识别-->

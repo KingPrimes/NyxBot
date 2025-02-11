@@ -52,7 +52,7 @@ public class IoUtils {
                     Runtime.getRuntime().exec(new String[]{browser, url});
             }
         } catch (Exception e) {
-            log.error("浏览器打开错误：{}", e.getMessage());
+            log.warn("Browser opening error", e);
         }
     }
 }

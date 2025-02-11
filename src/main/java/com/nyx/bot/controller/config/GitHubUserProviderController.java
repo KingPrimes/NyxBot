@@ -4,44 +4,40 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/config/git")
 public class GitHubUserProviderController extends BaseController {
-
-    String prefix = "config/git/";
 
     @Resource
     GitHubUserProviderRepository gitRepository;
 
-    @GetMapping("/html")
-    public String html(Model model) {
+    @GetMapping
+    public AjaxResult html() {
+        AjaxResult ar = success();
         List<GitHubUserProvider> all = gitRepository.findAll();
+        GitHubUserProvider provider = new GitHubUserProvider();
         if (!all.isEmpty()) {
-            model.addAttribute("git", all.get(0));
-        } else {
-            model.addAttribute("git", new GitHubUserProvider());
+            provider = all.get(0);
         }
-
-        model.addAttribute("gitUrl", JgitUtil.getOriginUrl(JgitUtil.lockPath));
-
-        return prefix + "github";
+        provider.setGitUrl(JgitUtil.getOriginUrl(JgitUtil.lockPath));
+        ar.put("data", provider);
+        return ar;
     }
 
 
-    @PostMapping("/save")
-    @ResponseBody
-    public AjaxResult save(GitHubUserProvider gitHubUserProvider) {
+    @PostMapping
+    public AjaxResult save(@Validated @RequestBody GitHubUserProvider gitHubUserProvider) {
+        if (!gitHubUserProvider.isValidGitUrl()) {
+            return AjaxResult.error(I18nUtils.RequestValidGitUrl());
+        }
         gitRepository.save(gitHubUserProvider);
         JgitUtil.restOriginUrl(gitHubUserProvider.getGitUrl(), JgitUtil.lockPath);
         return success();

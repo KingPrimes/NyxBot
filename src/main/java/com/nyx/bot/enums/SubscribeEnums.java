@@ -57,9 +57,7 @@ public enum SubscribeEnums {
 
     ARCHON_HUNT("执政官突击"),
 
-    DUVIRI_CYCLE("双衍王境")
-
-    ;
+    DUVIRI_CYCLE("双衍王境");
     private final String NAME;
 
 

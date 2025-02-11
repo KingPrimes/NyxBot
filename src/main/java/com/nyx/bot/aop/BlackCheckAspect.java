@@ -3,7 +3,6 @@ package com.nyx.bot.aop;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent;
-import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.repo.impl.white.WhiteService;
 import com.nyx.bot.utils.SpringUtils;
@@ -45,12 +44,23 @@ public class BlackCheckAspect {
         return 0;
     }
 
+    /**
+     * 黑白名单过滤, 白名单优先级高于黑名单
+     * 白名单中存在时，返回true
+     * 白名单中不存在时，黑名单中存在，则返回false
+     * 默认返回 true
+     *
+     * @param group group
+     * @param prove prove
+     * @return 是否存在名单中
+     */
     private boolean isCheck(Long group, Long prove) {
-        if (HandOff.isBW()) {
-            return SpringUtils.getBean(WhiteService.class).isWhite(group, prove);
-        } else {
-            return SpringUtils.getBean(BlackService.class).isBlack(group, prove);
-        }
+        // 白名单中存在时，返回true
+        if (SpringUtils.getBean(WhiteService.class).isWhite(group, prove)) return true;
+        // 黑名单中存在，则返回false
+        if (!SpringUtils.getBean(BlackService.class).isBlack(group, prove)) return false;
+        // 默认返回 true
+        return true;
     }
 
 }

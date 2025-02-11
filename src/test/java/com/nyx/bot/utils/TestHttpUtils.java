@@ -11,9 +11,9 @@ public class TestHttpUtils {
 
     @Test
     public void testGet() {
-       for (int i = 0; i < 10; i++) {
-           HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS+"/pc");
-       }
+        for (int i = 0; i < 10; i++) {
+            HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "/pc");
+        }
     }
 
 }

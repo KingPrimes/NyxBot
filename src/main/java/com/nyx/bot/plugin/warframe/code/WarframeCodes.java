@@ -100,6 +100,20 @@ public class WarframeCodes {
     }
 
     /**
+     * 仲裁Ex
+     */
+    public static void arbitrationEx(Bot bot, AnyMessageEvent event) {
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "getArbitrationExImage",
+                bot, event);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        }
+        sendErrorMsg(bot, event, body);
+    }
+
+    /**
      * 执政官突击
      */
     public static void arsonHun(Bot bot, AnyMessageEvent event) {

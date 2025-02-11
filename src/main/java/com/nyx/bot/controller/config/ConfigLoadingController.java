@@ -4,31 +4,28 @@ import com.nyx.bot.controller.config.bot.HandOff;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.NyxConfig;
 import com.nyx.bot.core.controller.BaseController;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.nyx.bot.utils.I18nUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/config/loading")
 public class ConfigLoadingController extends BaseController {
 
-    String prefix = "config/config";
-
-
-    @GetMapping()
-    public String loading(Model map) {
-        map.addAttribute("config", HandOff.getConfig());
-        return prefix;
+    @GetMapping
+    public AjaxResult loading() {
+        return success().put("data", HandOff.getConfig());
     }
 
-    @PostMapping("/save")
-    @ResponseBody
-    public AjaxResult save(NyxConfig config) {
+    @PostMapping
+    public AjaxResult save(@Validated @RequestBody NyxConfig config) {
+        if (!config.isValidateServerUrl()) {
+            return error(I18nUtils.RequestValidServerUrl());
+        }
+        if (!config.isValidateClientUrl()) {
+            return error(I18nUtils.RequestValidClientUrl());
+        }
         return toAjax(HandOff.handoff(config));
-
     }
 
 }

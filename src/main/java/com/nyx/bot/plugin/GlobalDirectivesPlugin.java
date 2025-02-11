@@ -6,6 +6,7 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.plugin.admin.UpdatePlugin;
 import com.nyx.bot.plugin.help.HelpCode;
@@ -67,12 +68,10 @@ public class GlobalDirectivesPlugin {
                         UPDATE_WARFRAME_SISTER,
                         UPDATE_WARFRAME_TAR,
                         UPDATE_JAR -> {
-                    switch (Permissions.checkAdmin(bot, event)) {
-                        case SUPER_ADMIN -> UpdatePlugin.updatePlugin(bot, event, codes);
-                        case ADMIN -> {
-                            bot.sendMsg(event, "权限不足！", false);
-                        }
-                        default -> bot.sendMsg(event, "权限不足！", false);
+                    if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
+                        UpdatePlugin.updatePlugin(bot, event, codes);
+                    } else {
+                        bot.sendMsg(event, "权限不足！", false);
                     }
                 }
 
@@ -87,6 +86,8 @@ public class GlobalDirectivesPlugin {
                 case WARFRAME_ARSON_HUNT_PLUGIN -> WarframeCodes.arsonHun(bot, event);
                 //奸商
                 case WARFRAME_VOID_PLUGIN -> WarframeCodes.aVoid(bot, event);
+                // 仲裁Ex
+                case WARFRAME_ARBITRATION_EX_PLUGIN -> WarframeCodes.arbitrationEx(bot, event);
                 //仲裁
                 case WARFRAME_ARBITRATION_PLUGIN -> WarframeCodes.arbitration(bot, event);
                 //钢铁

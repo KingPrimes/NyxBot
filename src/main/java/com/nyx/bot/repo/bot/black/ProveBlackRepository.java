@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface ProveBlackRepository extends JpaRepository<ProveBlack, Long>, JpaSpecificationExecutor<ProveBlack> {
-    Optional<ProveBlack> findByProve(Long prove);
+    Optional<ProveBlack> findByProveUid(Long prove);
 
-    @Query("select p from ProveBlack p where (:prove is null or p.prove = :prove)")
-    Page<ProveBlack> findAllPageable(Long prove, Pageable pageable);
+    @Query("select p from ProveBlack p where (:proveUid is null or p.proveUid = :proveUid)")
+    Page<ProveBlack> findAllPageable(Long proveUid, Pageable pageable);
 }
