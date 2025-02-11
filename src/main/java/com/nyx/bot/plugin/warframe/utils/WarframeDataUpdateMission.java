@@ -188,10 +188,8 @@ public class WarframeDataUpdateMission {
      * @param msgText 文本消息
      */
     private static void sendGroupsToUser(SubscribeEnums enums, String msgText, Data data) {
-        log.debug("正在准备发送订阅消息,订阅类型：{} -- 文本消息:{}", enums, msgText);
         //获取所有订阅
         List<MissionSubscribe> subscribes = repository.findAll();
-        log.debug("订阅列表:{}", JSON.toJSONString(subscribes));
         if (subscribes.isEmpty()) {
             log.debug("订阅列表为空！");
             return;
@@ -214,7 +212,6 @@ public class WarframeDataUpdateMission {
                 }
                 List<Long> botList = bots.keySet().stream().filter(bot -> subscribe.getSubBotUid().equals(bot)).toList();
                 for (Long l : botList) {
-                    log.debug("正在发送订阅消息,订阅类型：{} -- 文本消息:{} -- Bot:{} -- 群组:{}", enums, msgText, l, subscribe.getSubGroup());
                     if (!subscribe.getSubBotUid().equals(l)) {
                         continue;
                     }
@@ -224,7 +221,6 @@ public class WarframeDataUpdateMission {
                             .filter(u ->
                                     u.getTypeList().stream().anyMatch(t -> t.getSubscribe().equals(enums))
                             ).toList();
-                    log.debug("订阅用户列表:{}", JSON.toJSONString(subUsers));
                     for (MissionSubscribeUser user : subUsers) {
                         boolean flag = false;
                         List<MissionSubscribeUserCheckType> msucts = new ArrayList<>();
@@ -291,7 +287,6 @@ public class WarframeDataUpdateMission {
     }
 
     static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group, Data data) {
-        log.debug("正在获取最新的裂隙任务,并构建消息体");
         var json = FissuresUtils.getSubFissures(msuct, data.getFissures());
         if (json.isEmpty()) {
             return false;
