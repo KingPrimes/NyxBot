@@ -36,8 +36,8 @@ public class WarframeDataUpdateMission {
     /**
      * 警报更新提醒
      */
-    public static void updateAlerts() {
-        sendGroupsToUser(SubscribeEnums.ALERTS, I18nUtils.message("warframe.up.alerts"), new Data());
+    public static void updateAlerts(GlobalStates gs) {
+        sendGroupsToUser(SubscribeEnums.ALERTS, I18nUtils.message("warframe.up.alerts"), gs);
     }
 
     /**
@@ -57,28 +57,29 @@ public class WarframeDataUpdateMission {
     /**
      * 活动更新提醒
      */
-    public static void updateEvents() {
-        sendGroupsToUser(SubscribeEnums.EVENTS, I18nUtils.message("warframe.up.newEvents"), new Data());
+    public static void updateEvents(GlobalStates gs) {
+        sendGroupsToUser(SubscribeEnums.EVENTS, I18nUtils.message("warframe.up.newEvents"), gs);
     }
 
     /**
      * 裂隙
      */
-    public static void updateFissures(List<GlobalStates.Fissures> list) {
-        sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"), new Data(list));
+    public static void updateFissures(GlobalStates gs) {
+        sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"), gs);
     }
 
     /**
      * 新的入侵
      */
-    public static void updateInvasions() {
-        sendGroupsToUser(SubscribeEnums.INVASIONS, I18nUtils.message("warframe.up.invasions"), new Data());
+    public static void updateInvasions(GlobalStates gs) {
+        sendGroupsToUser(SubscribeEnums.INVASIONS, I18nUtils.message("warframe.up.invasions"), gs);
     }
 
     /**
      * 新闻
      */
-    public static void updateNews() {
+    public static void updateNews(GlobalStates gs) {
+        sendGroupsToUser(SubscribeEnums.NEWS, I18nUtils.message("warframe.up.news"), gs);
     }
 
     /**
@@ -140,6 +141,9 @@ public class WarframeDataUpdateMission {
      */
     static String gestural(SubscribeEnums enums) {
         switch (enums) {
+            case ALERTS -> {
+                return "postSubAlertsImage";
+            }
             case ARBITRATION -> {
                 return "getArbitrationImage";
             }
@@ -186,7 +190,7 @@ public class WarframeDataUpdateMission {
      * @param enums   通知类型
      * @param msgText 文本消息
      */
-    private static void sendGroupsToUser(SubscribeEnums enums, String msgText, Data data) {
+    private static void sendGroupsToUser(SubscribeEnums enums, String msgText, GlobalStates data) {
         //获取所有订阅
         List<MissionSubscribe> subscribes = repository.findAll();
         if (subscribes.isEmpty()) {
@@ -226,8 +230,8 @@ public class WarframeDataUpdateMission {
                         //获取是否是裂隙类型的订阅
                         for (MissionSubscribeUserCheckType userCheckType : user.getTypeList()) {
                             switch (userCheckType.getSubscribe()) {
-                                case FISSURES -> msucts.add(userCheckType);
-                                case INVASIONS, ARBITRATION, VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE, SORTIE, ARCHON_HUNT, DUVIRI_CYCLE ->
+                                case ALERTS, EVENTS, INVASIONS, NEWS, FISSURES -> msucts.add(userCheckType);
+                                case ARBITRATION, VOID, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NIGHTWAVE, SORTIE, ARCHON_HUNT, DUVIRI_CYCLE ->
                                         flag = true;
                             }
                         }
@@ -277,8 +281,26 @@ public class WarframeDataUpdateMission {
         }
     }
 
-    static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group, Data data) {
-        var json = FissuresUtils.getSubFissures(msuct, data.getFissures());
+
+    static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group, GlobalStates data) {
+        List<?> json = new ArrayList<>();
+        switch (enums) {
+            case ALERTS -> json = data.getAlerts();
+            case FISSURES -> json = FissuresUtils.getSubFissures(msuct, data.getFissures());
+            case INVASIONS -> json = data.getInvasions();
+            case NEWS -> {
+                List<GlobalStates.News> news = data.getNews();
+                news.forEach(n -> {
+                    if (!n.getTranslations().getZh().isEmpty()) {
+                        msg.text(n.getTranslations().getZh());
+                    } else {
+                        msg.text(n.getTranslations().getEn());
+                    }
+                    msg.text("\n").img(n.getImageLink()).text(n.getLink()).text("\n");
+                });
+                return true;
+            }
+        }
         if (json.isEmpty()) {
             return false;
         }
@@ -298,19 +320,6 @@ public class WarframeDataUpdateMission {
             msg.imgBase64(body.getFile());
         }
         return true;
-    }
-
-
-    @lombok.Data
-    private static class Data {
-        List<GlobalStates.Fissures> fissures;
-
-        public Data() {
-        }
-
-        public Data(List<GlobalStates.Fissures> fissures) {
-            this.fissures = fissures;
-        }
     }
 
 }

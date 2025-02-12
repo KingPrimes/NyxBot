@@ -35,4 +35,17 @@ public class AlertsImageController {
                 ).toByteArray()
         );
     }
+
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_ALERTS_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/postSubAlertsImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public void postImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+        response.setHeader("content-type", "image/png");
+        response.getOutputStream().write(
+                HtmlToImage.conversePost(
+                        Constants.LOCALHOST + "private/getAlertsHtml",
+                        data.getData()
+                ).toByteArray()
+        );
+    }
 }

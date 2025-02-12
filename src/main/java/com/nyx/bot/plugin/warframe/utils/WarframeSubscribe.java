@@ -29,11 +29,15 @@ public class WarframeSubscribe {
             Optional.of(old).ifPresentOrElse(data -> {
 
                 //检查警报是否不为空
-                Optional.ofNullable(states.getAlerts()).ifPresent(f -> {
+                Optional.ofNullable(states.getAlerts()).ifPresent(a -> {
                     //判断数据是否有更新
-                    if (!takeTheDifferenceSet(data.getAlerts(), f).isEmpty()) {
-                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateAlerts);
-                    }
+                    CompletableFuture.supplyAsync(() -> takeTheDifferenceSet(data.getAlerts(), a))
+                            .thenAccept(e -> {
+                                if (!e.isEmpty()) {
+                                    states.setAlerts(e);
+                                    WarframeDataUpdateMission.updateAlerts(states);
+                                }
+                            });
                 });
 
                 //检查仲裁信息是否为空值
@@ -54,36 +58,41 @@ public class WarframeSubscribe {
                 });
 
                 //活动
-                Optional.ofNullable(states.getEvents()).ifPresent(events -> {
-                    if (!takeTheDifferenceSet(data.getEvents(), events).isEmpty()) {
-                        CompletableFuture.runAsync(WarframeDataUpdateMission::updateEvents);
-                    }
-                });
+                Optional.ofNullable(states.getEvents()).ifPresent(events -> CompletableFuture.supplyAsync(() -> takeTheDifferenceSet(data.getEvents(), events))
+                        .thenAccept(e -> {
+                            if (!e.isEmpty()) {
+                                states.setEvents(e);
+                                WarframeDataUpdateMission.updateEvents(states);
+                            }
+                        }));
 
                 //裂隙
                 Optional.ofNullable(states.getFissures()).ifPresent(fissures -> CompletableFuture
                         .supplyAsync(() -> takeTheDifferenceSet(data.getFissures(), fissures))
                         .thenAccept(f -> {
                             if (!f.isEmpty()) {
-                                WarframeDataUpdateMission.updateFissures(f);
+                                states.setFissures(f);
+                                WarframeDataUpdateMission.updateFissures(states);
                             }
                         }));
 
                 //入侵
                 Optional.ofNullable(states.getInvasions()).ifPresent(invasions -> CompletableFuture
                         .supplyAsync(() -> takeTheDifferenceSet(data.getInvasions(), invasions))
-                        .thenAccept(f -> {
-                            if (!f.isEmpty()) {
-                                WarframeDataUpdateMission.updateInvasions();
+                        .thenAccept(i -> {
+                            if (!i.isEmpty()) {
+                                states.setInvasions(i);
+                                WarframeDataUpdateMission.updateInvasions(states);
                             }
                         }));
 
                 //新闻
                 Optional.ofNullable(states.getNews()).ifPresent(news -> CompletableFuture
                         .supplyAsync(() -> takeTheDifferenceSet(data.getNews(), news))
-                        .thenAccept(f -> {
-                            if (!f.isEmpty()) {
-                                WarframeDataUpdateMission.updateNews();
+                        .thenAccept(n -> {
+                            if (!n.isEmpty()) {
+                                states.setNews(n);
+                                WarframeDataUpdateMission.updateNews(states);
                             }
                         }));
 
