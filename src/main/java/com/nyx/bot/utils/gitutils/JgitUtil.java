@@ -61,8 +61,8 @@ public class JgitUtil {
     /**
      * 构建 Jgit工具类 进行拉取操作
      */
-    public static JgitUtil Build() throws Exception {
-        return Build("https://github.com/KingPrimes/DataSource", "").pull();
+    public static JgitUtil Build() {
+        return Build("https://github.com/KingPrimes/DataSource", "");
     }
 
     /**
@@ -171,10 +171,10 @@ public class JgitUtil {
             File newFile = new File(newDir, file.getName());
             boolean success = file.renameTo(newFile);
             if (success) {
-                add(".");
-                rm(sourcePath);
-                commit("File moved to new directory");
-                push(localPath);
+                add(".")
+                        .rm(sourcePath)
+                        .commit("File moved to new directory")
+                        .push(localPath);
             } else {
                 // handle error
                 log.error("文件移动异常！");
@@ -325,31 +325,36 @@ public class JgitUtil {
      * @param files      推送文件
      */
     public Iterator<PushResult> pushBranchCheckout(String commit, String branchName, String files) throws GitAPIException {
+        if (listBranch().stream().anyMatch(ref -> ref.getName().contains(branchName))) {
+            return checkoutBranch(branchName).add(files).commit(commit).push(branchName);
+        }
         return branch(branchName).checkoutBranch(branchName).add(files).commit(commit).push(branchName);
     }
 
     /**
      * 拉取(Pull) git pull origin
      */
-    public JgitUtil pull() throws GitAPIException {
+    public void pull() throws GitAPIException {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            return gitClone("main");
+            gitClone("main");
         }
+        Git git = openRpo(localPath);
         if (provider == null) {
-            openRpo(localPath).pull()
+            git.pull()
                     .setRemoteBranchName("main")
                     .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
-            return this;
+            git.close();
+            return;
         }
-        openRpo(localPath).pull()
+        git.pull()
                 .setRemoteBranchName("main")
                 .setCredentialsProvider(provider)
                 .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
-        return this;
+        git.close();
     }
 
     /**
@@ -357,25 +362,27 @@ public class JgitUtil {
      *
      * @param branch 分支
      */
-    public JgitUtil pull(String branch) throws Exception {
+    public void pull(String branch) throws Exception {
         //判断localPath是否存在，不存在调用clone方法
         File directory = new File(localPath);
         if (!directory.exists()) {
-            return gitClone(branch);
+            gitClone(branch);
         }
+        Git git = openRpo(localPath);
         if (provider == null) {
-            openRpo(localPath).pull()
+            git.pull()
                     .setRemoteBranchName("main")
                     .setProgressMonitor(new LoggingProgressMonitor())
                     .call();
-            return this;
+            git.close();
+            return;
         }
-        openRpo(localPath).pull()
+        git.pull()
                 .setRemoteBranchName(branch)
                 .setCredentialsProvider(provider)
                 .setProgressMonitor(new LoggingProgressMonitor())
                 .call();
-        return this;
+        git.close();
     }
 
     /**
@@ -383,10 +390,11 @@ public class JgitUtil {
      *
      * @param branch 分支
      */
-    public JgitUtil gitClone(String branch) throws GitAPIException {
+    public void gitClone(String branch) throws GitAPIException {
         if (provider == null) {
             Git git = Git.cloneRepository()
                     .setURI(urlPath + ".git")
+                    .setTimeout(60)
                     .setDirectory(new File(localPath))
                     //设置是否克隆子仓库
                     .setCloneSubmodules(true)
@@ -396,7 +404,7 @@ public class JgitUtil {
                     .call();
             //关闭源，以释放本地仓库锁
             git.getRepository().close();
-            return this;
+            return;
         }
         Git git = Git.cloneRepository()
                 .setURI(urlPath + ".git")
@@ -410,7 +418,6 @@ public class JgitUtil {
                 .call();
         //关闭源，以释放本地仓库锁
         git.getRepository().close();
-        return this;
     }
 
     /**
@@ -441,8 +448,8 @@ class LoggingProgressMonitor extends BatchingProgressMonitor {
     public void beginTask(String title, int work) {
         super.beginTask(title, work);
         startTime = Instant.now(); // 记录任务开始时间
-        currentTaskName = Translator.translate(title);// 存储当前任务的名称
-        log.info("开始: {}", currentTaskName); // 输出开始克隆的日志
+        currentTaskName = title;// 存储当前任务的名称
+        log.info("start: {}", title); // 输出开始克隆的日志
     }
 
     @Override
@@ -454,38 +461,19 @@ class LoggingProgressMonitor extends BatchingProgressMonitor {
     protected void onEndTask(String taskName, int workCurr, Duration duration) {
         Duration elapsed = Duration.between(startTime, Instant.now()); // 计算已用时间
         long seconds = elapsed.getSeconds();
-        log.info("任务: {} 完成, 用时: {}秒", taskName, seconds);
+        log.info("task: {} complete, unavailable: {}s", taskName, seconds);
     }
 
     @Override
     protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
         if (percentDone / 10 > lastLoggedPercent / 10) { // 检查是否达到下一个10%的里程碑
             lastLoggedPercent = percentDone; // 更新最后记录的百分比
-            log.info("任务: {}, 完成: {}% ({} / {})", taskName, percentDone, workCurr, workTotal);
+            log.info("task: {}, complete: {}% ({} / {})", taskName, percentDone, workCurr, workTotal);
         }
     }
 
     @Override
     protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
-        log.info("任务: {} 完成, 总工作量: {}", currentTaskName, workTotal);
-    }
-}
-
-class Translator {
-    private static final Map<String, String> translations = new HashMap<>();
-
-    static {
-        // 添加翻译映射
-        translations.put("remote: Enumerating objects", "远程：枚举对象");
-        translations.put("remote: Counting objects", "远程：计数对象");
-        translations.put("remote: Compressing objects", "远程：压缩对象");
-        translations.put("Receiving objects", "接收对象");
-        translations.put("Resolving deltas", "解决差异");
-        translations.put("Updating references", "更新引用");
-        translations.put("Checking out files", "检出文件");
-    }
-
-    public static String translate(String title) {
-        return translations.getOrDefault(title, title);
+        log.info("task: {} complete, totalWorkload: {}", currentTaskName, workTotal);
     }
 }

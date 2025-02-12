@@ -1,5 +1,7 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"en", "cn"}))
+@JsonView(Views.View.class)
 public class RivenTionAlias extends BaseEntity {
 
     @Id
@@ -22,4 +25,16 @@ public class RivenTionAlias extends BaseEntity {
     String en;
     //中文
     String cn;
+
+    public RivenTionAlias() {
+    }
+
+    public RivenTionAlias(RivenTionAlias ra) {
+        this.en = ra.en;
+        this.cn = ra.cn;
+    }
+
+    public String getEquation() {
+        return en + cn;
+    }
 }

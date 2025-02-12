@@ -24,7 +24,6 @@ public class GitHubUtil {
     public static Release getReleasesLatestVersion(String repoName, String depot) {
         HttpUtils.Body latest = HttpUtils.sendGet("https://api.github.com/repos/" + repoName + "/" + depot + "/releases/latest");
         if (!latest.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            System.out.println(latest);
             return null;
         }
         return JSON.parseObject(latest.getBody(), Release.class);

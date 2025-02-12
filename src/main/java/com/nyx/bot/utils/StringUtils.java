@@ -2,8 +2,6 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.text.StrFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 

@@ -1,55 +1,56 @@
 package com.nyx.bot.controller.data.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
 @RequestMapping("/data/warframe/subscribe")
 public class MissionSubscribeController extends BaseController {
-    String prefix = "data/warframe/subscribe/";
 
     @Resource
     MissionSubscribeRepository repository;
 
 
     @GetMapping
-    public String subscribe(Model model) {
-        model.addAttribute("sub", SubscribeEnums.values());
-        return prefix + "subscribe";
+    public AjaxResult subscribe() {
+        return success().put("data", Map.of("sub", Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME))));
     }
 
     @GetMapping("/detail/{subGroup}")
-    public String detail(@PathVariable Long subGroup, Model model) {
+    public AjaxResult detail(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        model.addAttribute("group", group);
-        return prefix + "detail";
+        return success().put("data", Map.of("group", group));
     }
 
     @GetMapping("/edit/{subGroup}")
-    public String edit(@PathVariable Long subGroup, Model model) {
+    public AjaxResult edit(@PathVariable Long subGroup) {
         MissionSubscribe group = repository.findByGroupId(subGroup);
-        model.addAttribute("group", group);
-        return prefix + "edit";
+        return success().put("data", Map.of("group", group));
     }
 
     @PostMapping("/list")
-    @ResponseBody
-    public ResponseEntity<?> list(MissionSubscribe ms) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody MissionSubscribe ms) {
 
         return getDataTable(
                 repository.findAllPageable(
                         ms.getSubGroup(),
                         PageRequest.of(
-                                ms.getPageNum() - 1,
-                                ms.getPageSize()
+                                ms.getCurrent() - 1,
+                                ms.getSize()
                         )
                 ).map(subscribe -> {
                     subscribe.setSubUsers(

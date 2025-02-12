@@ -1,8 +1,11 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +13,11 @@ import java.util.List;
 /**
  * 订阅
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subGroup"}))
+@JsonView(Views.View.class)
 public class MissionSubscribe extends BaseEntity {
 
     //订阅的群组

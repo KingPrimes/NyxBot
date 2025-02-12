@@ -7,6 +7,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.DateUtils;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.ServletUtils;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +16,6 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
@@ -32,7 +32,7 @@ public class BaseController {
      * 返回成功数据
      */
     public static AjaxResult success(Object data) {
-        return AjaxResult.success("操作成功", data);
+        return AjaxResult.success(I18nUtils.message("result.success"), data);
     }
 
     /**
@@ -56,15 +56,24 @@ public class BaseController {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(200);
         TableDataInfo.Data data = new TableDataInfo.Data();
-        data.setContent(list);
-        data.setTotalElements(totalElements);
+        data.setRecords(list);
+        data.setTotal(totalElements);
         rspData.setData(data);
         return rspData;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected ResponseEntity getDataTable(Page page) {
-        return ResponseEntity.ok(AjaxResult.success(page));
+
+    protected TableDataInfo getDataTable(Page<?> page) {
+        TableDataInfo td = new TableDataInfo();
+        TableDataInfo.Data data = new TableDataInfo.Data();
+        data.setTotal(page.getTotalElements());
+        data.setSize(page.getSize());
+        data.setRecords(page.getContent());
+        data.setCurrent(page.getNumber() + 1);
+        td.setData(data);
+        td.setMsg(I18nUtils.message("result.success"));
+        td.setCode(HttpCodeEnum.SUCCESS.getCode());
+        return td;
     }
 
     /**
@@ -129,6 +138,10 @@ public class BaseController {
         return AjaxResult.success(message);
     }
 
+    public AjaxResult success(String msg, Object data) {
+        return new AjaxResult(HttpCodeEnum.SUCCESS, msg, data);
+    }
+
     /**
      * 返回失败消息
      */
@@ -153,10 +166,8 @@ public class BaseController {
     public String pushJson(List<?> all) {
         SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
         Set<String> set = new HashSet<>();
-        set.add("pageNum");
-        set.add("pageSize");
-        set.add("totalCount");
-        set.add("totalPage");
+        set.add("current");
+        set.add("size");
         spf.getExcludes().addAll(set);
         return JSON.toJSONString(all, spf);
     }

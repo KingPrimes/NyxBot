@@ -1,74 +1,46 @@
 package com.nyx.bot.controller.config.bot.white;
 
-import com.nyx.bot.controller.config.bot.HandOff;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.NyxConfig;
+import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.bot.white.ProveWhite;
+import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.impl.black.BlackService;
 import com.nyx.bot.repo.impl.white.WhiteService;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/config/bot/white/prove")
 public class ProveWhiteController extends BaseController {
-    String prefix = "config/bot/white/prove";
 
     @Resource
     WhiteService whiteService;
 
-    @GetMapping
-    public String prove() {
-        return prefix + "/prove";
-    }
-
+    @Resource
+    BlackService bs;
 
     @PostMapping("/list")
-    @ResponseBody
-    public ResponseEntity<?> list(ProveWhite proveWhite) {
+    @JsonView(Views.View.class)
+    public TableDataInfo list(@RequestBody ProveWhite proveWhite) {
         return getDataTable(whiteService.list(proveWhite));
     }
 
-    @GetMapping("/add")
-    public String add() {
-        return prefix + "/add";
+    @PostMapping("/save")
+    public AjaxResult add(@Validated @RequestBody ProveWhite white) {
+        if (bs.isBlack(null, white.getProveUid())) {
+            return toAjax(whiteService.save(white) != null);
+        }
+        return error(HttpCodeEnum.FAIL, I18nUtils.BWBlackExist());
     }
 
-    @PostMapping("/add")
-    @ResponseBody
-    public AjaxResult add(ProveWhite white) {
-        whiteService.save(white);
-        return success();
-    }
-
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, Model map) {
-        map.addAttribute("white", whiteService.findByProve(id));
-        return prefix + "/edit";
-    }
-
-    @PostMapping("/update")
-    @ResponseBody
-    public AjaxResult edit(ProveWhite white) {
-        whiteService.save(white);
-        return success();
-    }
-
-    @PostMapping("/remove/{id}")
-    @ResponseBody
+    @DeleteMapping("/remove/{id}")
     public AjaxResult remove(@PathVariable("id") Long id) {
         whiteService.removeProve(id);
         return success();
-    }
-
-    @PostMapping("/handoff")
-    @ResponseBody
-    public AjaxResult handoff() {
-        NyxConfig nyxConfig = HandOff.getConfig();
-        nyxConfig.setIsBlackOrWhite(!nyxConfig.getIsBlackOrWhite());
-        return toAjax(HandOff.handoff(nyxConfig));
     }
 }

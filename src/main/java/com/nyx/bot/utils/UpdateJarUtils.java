@@ -2,7 +2,6 @@ package com.nyx.bot.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SystemUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 
@@ -13,96 +12,120 @@ import java.io.IOException;
 @Slf4j
 public class UpdateJarUtils {
     private static final ApplicationContext APP = SpringUtils.getApplicationContext();
+    private static final String winRun = """
+            java -jar %s
+            """;
+    private static final String macRun = """
+              #!/bin/bash
+              nohup java -jar %s >/dev/null 2>&1 &
+            """;
+    private static final String macUpdate = """
+                #!/bin/bash
+                cp %s ./backup/back_%s_%s
+                cp -r ./tmp/* ./%s
+                ./run.sh
+            """;
+    private static final String winUpdate = """
+            @echo off
+            @ping 127.0.0.1 -n 8 & copy /Y .\\ %s .\\backup\\back_%s_%s  & xcopy /s/e/y .\\tmp  .\\%s  & .\\run.bat
+            """;
+    private static final String linuxRun = """
+            nohup java -jar %s >/dev/null 2>&1 &
+            """;
+    private static final String linuxUpdate = """
+            #!/bin/bash
+            sleep 8s
+            cp ./%s ./backup/back_%s_%s
+            cp -r ./tmp/* ./%s
+            ./run.sh
+            """;
 
-    @NotNull
-    private static FileWriter getFileWriterForMac(String fileName, String path) throws IOException {
-        // 创建 backup 目录
+    private static void writerScript(String fileName) throws IOException {
+        String path = System.getProperty("user.dir");
+        log.debug("A backup update operation is in progress!");
+        log.debug("File Name：{} -- File path：{}", fileName, path);
         File backup = new File(path + "/backup");
         if (!backup.exists()) {
+            log.debug("backup directory does not exist, creating backup directory");
             backup.mkdirs();
         }
-
-        // 创建 run.sh 脚本
-        File run = new File(path + "/run.sh");
-        FileWriter runWriter = new FileWriter(run);
-        runWriter.write("#!/bin/bash\n");
-        runWriter.write("nohup java -jar " + fileName + " >/dev/null 2>&1 &");
-        runWriter.close();
-        // 使脚本可执行
-        Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
-
-        // 创建 update.sh 脚本
-        File update = new File(path + "/update.sh");
-        FileWriter writer = new FileWriter(update);
-        writer.write("#!/bin/bash\n");
-        writer.write("cp " + fileName + " ./backup/baka_" + DateUtils.getDate() + "_"
-                + fileName + "\n");
-        writer.write("cp -r ./tmp/* ./" + fileName + "\n");
-        writer.write("./run.sh\n");
-        // 使脚本可执行
-
-        return writer;
-    }
-
-    @NotNull
-    private static FileWriter getFileWriterForWindows(String fileName, String path) throws IOException {
-        File backup = new File(path + "\\backup");
-        if (!backup.exists()) {
-            backup.mkdirs();
+        log.debug("backup directory created successfully");
+        if (SystemUtils.IS_OS_WINDOWS) {
+            log.debug("OS Windows");
+            log.debug("Create and write a run.bat");
+            File run = new File(path + "/run.bat");
+            FileWriter runWriter = new FileWriter(run);
+            runWriter.write(winRun.formatted(fileName));
+            runWriter.close();
+            log.debug("run.bat file created successfully:{}", winRun.formatted(fileName));
+            log.debug("Create and write a update.bat");
+            File file = new File(path + "/update.bat");
+            FileWriter writer = new FileWriter(file);
+            String update = winUpdate.formatted(fileName, DateUtils.getDate(), fileName, fileName);
+            writer.write(update);
+            log.debug("update.bat file created successfully:{}", update);
+            writer.close();
+            Process exec = Runtime.getRuntime().exec("cmd /k start " + path + "/update.bat");
+            log.debug("run update.bat PID:{}", exec.pid());
+            int exitCode = SpringApplication.exit(APP, () -> 0);
+            System.exit(exitCode);
         }
-        File run = new File(path + "\\run.bat");
-        FileWriter runWriter = new FileWriter(run);
-        runWriter.write("java -jar " + fileName + "\nexit");
-        runWriter.close();
-
-        File file = new File(path + "\\updata.bat");
-        FileWriter writer = new FileWriter(file);
-        String builder = "@echo off " +
-                "@ping 127.0.0.1 -n 8 & copy /Y .\\" +
-                fileName +
-                " .\\backup\\baka_" +
-                DateUtils.getDate() +
-                "_" +
-                fileName +
-                " & xcopy /s/e/y .\\tmp  .\\" +
-                fileName +
-                " & .\\run.bat";
-        writer.write(builder);
-        return writer;
-    }
-
-    @NotNull
-    private static FileWriter getWriterForLinux(String fileName, String path) throws IOException {
-        File backup = new File(path + "/backup");
-        if (!backup.exists()) {
-            backup.mkdirs();
+        if (SystemUtils.IS_OS_LINUX) {
+            log.debug("OS Linux");
+            log.debug("Create and write a run.sh");
+            File run = new File(path + "/run.sh");
+            FileWriter runWriter = new FileWriter(run);
+            String runTxt = linuxRun.formatted(fileName);
+            runWriter.write(runTxt);
+            runWriter.close();
+            log.debug("run.sh file created successfully:{}", winRun.formatted(fileName));
+            log.debug("Create and write a update.sh");
+            Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
+            File update = new File(path + "/update.sh");
+            FileWriter writer = new FileWriter(update);
+            String builder = linuxUpdate.formatted(
+                    fileName,
+                    DateUtils.getDate(),
+                    fileName,
+                    fileName
+            );
+            writer.write(builder);
+            writer.close();
+            log.debug("update.bat file created successfully:{}", builder);
+            Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
+            Process exec = Runtime.getRuntime().exec("bash " + path + "/update.sh");
+            log.debug("run update.sh PID:{}", exec.pid());
+            int exitCode = SpringApplication.exit(APP, () -> 0);
+            System.exit(exitCode);
         }
-        File run = new File(path + "/run.sh");
-        FileWriter runWriter = new FileWriter(run);
-        runWriter.write("nohup java -jar " + fileName + " >/dev/null 2>&1 &");
-        runWriter.close();
-        return getFileWriter(fileName, path);
-    }
+        // TODO: 2023/3/29 待测试 MAC 自动更新是否可执行
+        if (SystemUtils.IS_OS_MAC) {
+            log.debug("OS MAC");
+            log.debug("Create and write a run.sh");
+            File run = new File(path + "/run.sh");
+            FileWriter runWriter = new FileWriter(run);
+            String runTxt = macRun.formatted(fileName);
+            runWriter.write(runTxt);
+            runWriter.close();
+            log.debug("run.sh file created successfully:{}", winRun.formatted(fileName));
+            log.debug("Create and write a update.sh");
 
-    @NotNull
-    private static FileWriter getFileWriter(String fileName, String path) throws IOException {
-        File file = new File(path + "/updata.sh");
-        FileWriter writer = new FileWriter(file);
-        String builder = "#!/bin/bash " +
-                "sleep 8s " +
-                "cp ./" +
-                fileName +
-                " ./backup/baka_" +
-                DateUtils.getDate() +
-                "_" +
-                fileName +
-                " " +
-                "cp -r ./tmp/* ./" +
-                fileName +
-                " " +
-                "./run.sh";
-        writer.write(builder);
-        return writer;
+            Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
+
+            // 创建 update.sh 脚本
+            File update = new File(path + "/update.sh");
+            FileWriter writer = new FileWriter(update);
+            String builder = macUpdate.formatted(fileName, fileName, DateUtils.getDate(), fileName);
+            writer.write(builder);
+            writer.close();
+            log.debug("update.bat file created successfully:{}", builder);
+            Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
+            Process exec = Runtime.getRuntime().exec("sh " + path + "/update.sh");
+            log.debug("run update.sh PID:{}", exec.pid());
+            int exitCode = SpringApplication.exit(APP, () -> 0);
+            System.exit(exitCode);
+        }
+
     }
 
     /**
@@ -111,45 +134,11 @@ public class UpdateJarUtils {
      *
      * @param fileName 文件名
      */
-    public void restartUpdate(String fileName) {
-        String path = System.getProperty("user.dir");
-        if (SystemUtils.IS_OS_WINDOWS) {
-            try {
-                FileWriter writer = getFileWriterForWindows(fileName, path);
-                writer.close();
-                Runtime.getRuntime().exec("cmd /k start " + path + "\\updata.bat");
-                int exitCode = SpringApplication.exit(APP, () -> 0);
-                System.exit(exitCode);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-
-        }
-        if (SystemUtils.IS_OS_LINUX) {
-            try {
-                FileWriter writer = getWriterForLinux(fileName, path);
-                writer.close();
-                Runtime.getRuntime().exec("bash " + path + "/updata.sh");
-                int exitCode = SpringApplication.exit(APP, () -> 0);
-                System.exit(exitCode);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-        }
-        // TODO: 2023/3/29 待测试 MAC 自动更新是否可执行
-        if (SystemUtils.IS_OS_MAC) {
-            try {
-                FileWriter writer = getFileWriterForMac(fileName, path);
-                writer.close();
-                // 使脚本可执行
-                Runtime.getRuntime().exec("chmod +x " + path + "/update.sh");
-                // 执行 update.sh 脚本
-                Runtime.getRuntime().exec("sh " + path + "/update.sh");
-                int exitCode = SpringApplication.exit(APP, () -> 0);
-                System.exit(exitCode);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
+    public static void restartUpdate(String fileName) {
+        try {
+            writerScript(fileName);
+        } catch (IOException e) {
+            log.error("restartUpdate error", e);
         }
     }
 }

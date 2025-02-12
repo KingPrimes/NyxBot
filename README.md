@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/KingPrimes/NyxBot/assets/50130875/2620c999-4d63-4d68-8df3-38d4457d9957" style="width: 35%" alt="">
+<img src="https://github.com/user-attachments/assets/549ad15a-a97a-42e8-b980-d0f28897d4ca" style="width: 35%" alt="">
 
 # NYXBot
 
@@ -45,7 +45,7 @@
    java -jar NyxBot.jar --server.port = 8080
    ```
    
-8. [详细部署文档](https://kingprimes.top/archives/bot_deploy_doc)
+8. [详细部署文档](https://kingprimes.top/posts/d99b802/)
 9. [云服务器推荐](#推广链接)
 
 # 配置

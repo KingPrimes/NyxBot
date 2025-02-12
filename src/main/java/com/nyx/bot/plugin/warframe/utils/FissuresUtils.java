@@ -81,7 +81,7 @@ public class FissuresUtils {
                                         node,
                                         node.indexOf('('),
                                         node.indexOf(')')).replace("(", "").trim())
-                        + "比邻星)");
+                        + ")");
             } else {
                 f.setNode(trans.enToZh(
                         StringUtils.substring(

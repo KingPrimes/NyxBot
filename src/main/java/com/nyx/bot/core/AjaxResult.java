@@ -148,6 +148,17 @@ public class AjaxResult extends HashMap<String, Object> {
     }
 
     /**
+     * 返回错误消息
+     *
+     * @param code 状态码
+     * @param msg  返回内容
+     * @return 警告消息
+     */
+    public static AjaxResult error(HttpCodeEnum code, String msg) {
+        return new AjaxResult(code, msg);
+    }
+
+    /**
      * 是否为成功消息
      *
      * @return 结果

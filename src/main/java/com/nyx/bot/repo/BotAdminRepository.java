@@ -2,6 +2,8 @@ package com.nyx.bot.repo;
 
 import com.nyx.bot.entity.bot.BotAdmin;
 import com.nyx.bot.enums.PermissionsEnums;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +17,7 @@ public interface BotAdminRepository extends JpaRepository<BotAdmin, Long>, JpaSp
 
     @Query("select b from BotAdmin b where (b.permissions = :permissions)")
     Optional<BotAdmin> findByPermissions(PermissionsEnums permissions);
+
+    @Query("select b from BotAdmin b where (:botUid is null or b.botUid = :botUid)")
+    Page<BotAdmin> findAllByBotUid(Long botUid, Pageable pageable);
 }
