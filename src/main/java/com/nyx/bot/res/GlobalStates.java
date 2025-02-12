@@ -143,6 +143,8 @@ public class GlobalStates {
         @JsonProperty("expiry")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
         private Date expiry;
+        @JsonProperty("active")
+        private Boolean active = true;
 
     }
 
@@ -174,8 +176,6 @@ public class GlobalStates {
         private Boolean isHard;
         @JsonProperty("isStorm")
         private Boolean isStorm;
-        @JsonProperty("active")
-        private Boolean active;
     }
 
     @NoArgsConstructor
@@ -366,8 +366,8 @@ public class GlobalStates {
 
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(of = {"message"})
-    public static class News {
+    @EqualsAndHashCode(of = {"message"}, callSuper = false)
+    public static class News extends BaseStatus {
 
         @JsonProperty("date")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -390,8 +390,7 @@ public class GlobalStates {
         private String link;
         @JsonProperty("update")
         private Boolean update;
-        @JsonProperty("id")
-        private String id;
+
         @JsonProperty("asString")
         private String asString;
         @JsonProperty("message")
@@ -445,16 +444,10 @@ public class GlobalStates {
         }
     }
 
+    @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
     @Data
-    @EqualsAndHashCode(exclude = {"activation", "expiry"})
-    public static class Arbitration {
-        @JsonProperty("activation")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date activation;
-        @JsonProperty("expiry")
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        private Date expiry;
+    public static class Arbitration extends BaseStatus {
         @JsonProperty("node")
         private String node;
         @JsonProperty("enemy")
@@ -467,6 +460,8 @@ public class GlobalStates {
         private Boolean sharkwing;
         @JsonProperty("etc")
         private String etc;
+
+
     }
 
     @NoArgsConstructor
@@ -474,7 +469,7 @@ public class GlobalStates {
     @EqualsAndHashCode(exclude = {"timeLeft"}, callSuper = false)
     public static class CambionCycle extends BaseStatus {
         @JsonProperty("active")
-        private String active;
+        private String dump;
         @JsonProperty("timeLeft")
         private String timeLeft;
     }

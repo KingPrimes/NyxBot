@@ -30,12 +30,6 @@ public class FissuresHtmlController {
     @PostMapping("/postSubscribeFissuresHtml")
     public String postSubscribeFissuresHtml(Model model, @RequestBody List<GlobalStates.Fissures> list) {
         model.addAttribute("fissues", list);
-        return "html/fissues";
-    }
-
-    @GetMapping("/getSubscribeFissuesHtml/{type}/tierNum")
-    public String getSubscribeFissuesHtml(Model model, String type, Long tierNum) {
-
         return "html/subscribeFissues";
     }
 

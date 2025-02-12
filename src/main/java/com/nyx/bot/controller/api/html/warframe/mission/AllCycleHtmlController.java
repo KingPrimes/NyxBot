@@ -45,7 +45,7 @@ public class AllCycleHtmlController {
 
         //魔胎之境
         GlobalStates.CambionCycle cambion = gs.getCambionCycle();
-        cambion.setActive(cambion.getActive().toUpperCase(Locale.ROOT));
+        cambion.setDump(cambion.getDump().toUpperCase(Locale.ROOT));
         cambion.setTimeLeft(DateUtils.getDiff((cambion.getExpiry()), new Date(), true));
         model.addAttribute("cambion", cambion);
 

@@ -11,10 +11,8 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
@@ -39,42 +37,42 @@ public class WarframeDataUpdateMission {
      * 警报更新提醒
      */
     public static void updateAlerts() {
-        sendGroupsToUser(SubscribeEnums.ALERTS, I18nUtils.message("warframe.up.alerts"));
+        sendGroupsToUser(SubscribeEnums.ALERTS, I18nUtils.message("warframe.up.alerts"), new Data());
     }
 
     /**
      * 仲裁更新提醒
      */
     public static void updateArbitration() {
-        sendGroupsToUser(SubscribeEnums.ARBITRATION, I18nUtils.message("warframe.up.arbitration"));
+        sendGroupsToUser(SubscribeEnums.ARBITRATION, I18nUtils.message("warframe.up.arbitration"), null);
     }
 
     /**
      * 每日特惠更新 提醒
      */
     public static void updateDailyDeals() {
-        sendGroupsToUser(SubscribeEnums.DAILY_DEALS, I18nUtils.message("warframe.up.dayDeals"));
+        sendGroupsToUser(SubscribeEnums.DAILY_DEALS, I18nUtils.message("warframe.up.dayDeals"), null);
     }
 
     /**
      * 活动更新提醒
      */
     public static void updateEvents() {
-        sendGroupsToUser(SubscribeEnums.EVENTS, I18nUtils.message("warframe.up.newEvents"));
+        sendGroupsToUser(SubscribeEnums.EVENTS, I18nUtils.message("warframe.up.newEvents"), new Data());
     }
 
     /**
      * 裂隙
      */
-    public static void updateFissures() {
-        sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"));
+    public static void updateFissures(List<GlobalStates.Fissures> list) {
+        sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"), new Data(list));
     }
 
     /**
      * 新的入侵
      */
     public static void updateInvasions() {
-        sendGroupsToUser(SubscribeEnums.INVASIONS, I18nUtils.message("warframe.up.invasions"));
+        sendGroupsToUser(SubscribeEnums.INVASIONS, I18nUtils.message("warframe.up.invasions"), new Data());
     }
 
     /**
@@ -87,7 +85,7 @@ public class WarframeDataUpdateMission {
      * 钢铁之路兑换轮换
      */
     public static void updateSteelPath() {
-        sendGroupsToUser(SubscribeEnums.STEEL_PATH, I18nUtils.message("warframe.up.steelPath"));
+        sendGroupsToUser(SubscribeEnums.STEEL_PATH, I18nUtils.message("warframe.up.steelPath"), null);
     }
 
     /**
@@ -96,42 +94,42 @@ public class WarframeDataUpdateMission {
      * @param msg 骚话！
      */
     public static void updateVoidTrader(String msg) {
-        sendGroupsToUser(SubscribeEnums.VOID, msg);
+        sendGroupsToUser(SubscribeEnums.VOID, msg, null);
     }
 
     /**
      * 到黑夜前提醒
      */
     public static void updateCetusCycle(String time) {
-        sendGroupsToUser(SubscribeEnums.CETUS_CYCLE, I18nUtils.message("warframe.up.cetusCycle") + time);
+        sendGroupsToUser(SubscribeEnums.CETUS_CYCLE, I18nUtils.message("warframe.up.cetusCycle") + time, null);
     }
 
     /**
      * 电波
      */
     public static void updateNightwave() {
-        sendGroupsToUser(SubscribeEnums.NIGHTWAVE, I18nUtils.message("warframe.up.night-wave"));
+        sendGroupsToUser(SubscribeEnums.NIGHTWAVE, I18nUtils.message("warframe.up.night-wave"), null);
     }
 
     /**
      * 突击
      */
     public static void updateSortie() {
-        sendGroupsToUser(SubscribeEnums.SORTIE, I18nUtils.message("warframe.up.sortie"));
+        sendGroupsToUser(SubscribeEnums.SORTIE, I18nUtils.message("warframe.up.sortie"), null);
     }
 
     /**
      * 执政官突击
      */
     public static void updateArchonHunt() {
-        sendGroupsToUser(SubscribeEnums.ARCHON_HUNT, I18nUtils.message("warframe.up.archonHunt"));
+        sendGroupsToUser(SubscribeEnums.ARCHON_HUNT, I18nUtils.message("warframe.up.archonHunt"), null);
     }
 
     /**
      * 双衍王境
      */
     public static void updateDuviriCycle() {
-        sendGroupsToUser(SubscribeEnums.DUVIRI_CYCLE, I18nUtils.message("warframe.up.duviriCycle"));
+        sendGroupsToUser(SubscribeEnums.DUVIRI_CYCLE, I18nUtils.message("warframe.up.duviriCycle"), null);
     }
 
     /**
@@ -181,26 +179,27 @@ public class WarframeDataUpdateMission {
         }
     }
 
+
     /**
      * 通知所有的订阅群组与用户
      *
      * @param enums   通知类型
      * @param msgText 文本消息
      */
-    private static void sendGroupsToUser(SubscribeEnums enums, String msgText) {
+    private static void sendGroupsToUser(SubscribeEnums enums, String msgText, Data data) {
         //获取所有订阅
         List<MissionSubscribe> subscribes = repository.findAll();
         if (subscribes.isEmpty()) {
+            log.debug("订阅列表为空！");
             return;
         }
         //获取Bots
         Map<Long, Bot> bots = SpringUtils.getBean(BotContainer.class).robots;
 
         if (bots.isEmpty()) {
-            log.warn("未链接Bot无法发送订阅消息");
+            log.error("未链接Bot无法发送订阅消息");
             return;
         }
-
         try {
             //遍历所有的订阅
             for (MissionSubscribe subscribe : subscribes) {
@@ -219,25 +218,16 @@ public class WarframeDataUpdateMission {
                     //获取订阅用户
                     List<MissionSubscribeUser> subUsers = subscribe.getSubUsers().stream()
                             .filter(u ->
-                                    u.getTypeList().stream()
-                                            .filter(t -> t.getSubscribe().equals(enums))
-                                            .count() > 1).toList();
+                                    u.getTypeList().stream().anyMatch(t -> t.getSubscribe().equals(enums))
+                            ).toList();
                     for (MissionSubscribeUser user : subUsers) {
                         boolean flag = false;
                         List<MissionSubscribeUserCheckType> msucts = new ArrayList<>();
                         //获取是否是裂隙类型的订阅
                         for (MissionSubscribeUserCheckType userCheckType : user.getTypeList()) {
                             switch (userCheckType.getSubscribe()) {
-                                case FISSURES -> {
-                                    msucts.add(userCheckType);
-                                }
-                                case INVASIONS -> {
-                                    flag = true;
-                                }
-                                case ARBITRATION -> {
-
-                                }
-                                case VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE, SORTIE, ARCHON_HUNT, DUVIRI_CYCLE ->
+                                case FISSURES -> msucts.add(userCheckType);
+                                case INVASIONS, ARBITRATION, VOID, ALERTS, CETUS_CYCLE, DAILY_DEALS, STEEL_PATH, NEWS, NIGHTWAVE, SORTIE, ARCHON_HUNT, DUVIRI_CYCLE ->
                                         flag = true;
                             }
                         }
@@ -246,7 +236,7 @@ public class WarframeDataUpdateMission {
                             continue;
                         }
                         if (!msucts.isEmpty()) {
-                            flag = ConstructTheReturnInformation(msg, enums, msucts, l, user.getUserId(), subGroup);
+                            flag = ConstructTheReturnInformation(msg, enums, msucts, l, user.getUserId(), subGroup, data);
                         }
                         if (flag) {
                             bots.get(l).sendGroupMsg(subGroup, msg.at(user.getUserId()).text("您订阅的 " + enums.getNAME() + " 更新了！").build(), false);
@@ -256,7 +246,7 @@ public class WarframeDataUpdateMission {
                 }
             }
         } catch (Exception e) {
-            log.error("发送订阅消息失败：{}", e.getMessage(), e.getCause());
+            log.error("发送订阅消息失败", e);
         }
 
     }
@@ -287,13 +277,11 @@ public class WarframeDataUpdateMission {
         }
     }
 
-    static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group) throws DataNotInfoException {
-        var json = FissuresUtils.getFissures(msuct);
-        List<GlobalStates.Fissures> t = CacheUtils.get(CacheUtils.GROUP_CAPTCHA, user.toString(), List.class);
-        if (t != null && WarframeSubscribe.areListsEqual(json, t)) {
+    static boolean ConstructTheReturnInformation(Msg msg, SubscribeEnums enums, List<MissionSubscribeUserCheckType> msuct, Long bot, Long user, Long group, Data data) {
+        var json = FissuresUtils.getSubFissures(msuct, data.getFissures());
+        if (json.isEmpty()) {
             return false;
         }
-        CacheUtils.set(CacheUtils.GROUP_CAPTCHA, user.toString(), json);
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 gestural(enums), new OneBotLogInfoData(
                         bot,
@@ -312,5 +300,17 @@ public class WarframeDataUpdateMission {
         return true;
     }
 
+
+    @lombok.Data
+    private static class Data {
+        List<GlobalStates.Fissures> fissures;
+
+        public Data() {
+        }
+
+        public Data(List<GlobalStates.Fissures> fissures) {
+            this.fissures = fissures;
+        }
+    }
 
 }
