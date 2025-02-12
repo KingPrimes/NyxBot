@@ -65,7 +65,6 @@ public class WarframeDataUpdateMission {
      * 裂隙
      */
     public static void updateFissures(List<GlobalStates.Fissures> list) {
-        log.debug("裂隙已更新任务！");
         sendGroupsToUser(SubscribeEnums.FISSURES, I18nUtils.message("warframe.up.newFissures"), new Data(list));
     }
 
@@ -179,6 +178,7 @@ public class WarframeDataUpdateMission {
             }
         }
     }
+
 
     /**
      * 通知所有的订阅群组与用户

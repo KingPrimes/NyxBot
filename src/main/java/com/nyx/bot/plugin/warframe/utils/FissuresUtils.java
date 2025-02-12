@@ -1,6 +1,5 @@
 package com.nyx.bot.plugin.warframe.utils;
 
-import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.entity.warframe.MissionSubscribeUserCheckType;
 import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.exception.DataNotInfoException;
@@ -100,7 +99,6 @@ public class FissuresUtils {
             f.setMissionType(trans.enToZh(f.getMissionType()));
             f.setMissionKey(trans.enToZh(f.getMissionKey()));
             f.setTier(trans.enToZh(f.getTier()));
-            log.debug("开始时间：{} -- 结束时间:{}", DateUtils.format(f.getActivation(), "yyyy-MM-dd HH:mm:ss"), DateUtils.format(f.getExpiry(), "yyyy-MM-dd HH:mm:ss"));
             f.setEta(DateUtils.getDiff(f.getExpiry(), new Date()));
         });
     }
@@ -128,7 +126,6 @@ public class FissuresUtils {
         }
         SortForTierNum(list);
         TranslateFissures(list);
-        log.debug("订阅的裂隙任务列表：{}", JSON.toJSONString(list));
         return list;
     }
 }
