@@ -148,31 +148,31 @@ public class WarframeDataUpdateMission {
                 return "getArbitrationImage";
             }
             case DAILY_DEALS -> {
-                return "getDailyDealsImage";
+                return "postDailyDealsImage";
             }
             case VOID -> {
-                return "getVoidImage";
+                return "postVoidImage";
             }
             case CETUS_CYCLE -> {
-                return "getAllCycleImage";
+                return "postAllCycleImage";
             }
             case INVASIONS -> {
-                return "getInvasionsImage";
+                return "postSubInvasionsImage";
             }
             case STEEL_PATH -> {
-                return "getSteelPathImage";
+                return "postSteelPathImage";
             }
             case NIGHTWAVE -> {
-                return "getNighTwaveImage";
+                return "postNighTwaveImage";
             }
             case SORTIE -> {
-                return "getAssaultImage";
+                return "postAssaultImage";
             }
             case ARCHON_HUNT -> {
-                return "getArsonHuntImage";
+                return "postArsonHuntImage";
             }
             case DUVIRI_CYCLE -> {
-                return "getDuviriCycleImage";
+                return "postDuviriCycleImage";
             }
             case FISSURES -> {
                 return "postSubscribeFissuresImage";

@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class AssaultImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_ASSAULT_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getAssaultImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postAssaultImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

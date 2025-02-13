@@ -9,6 +9,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
@@ -27,6 +29,17 @@ public class InvasionsHtmlController {
     public String getHtml(Model model) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         List<GlobalStates.Invasions> invasions = sgs.getInvasions();
+        model.addAttribute("inv", getInvasions(invasions));
+        return "html/invasions";
+    }
+
+    @PostMapping("/postSubscribeInvasionsHtml")
+    public String postSubscribeFissuresHtml(Model model, @RequestBody List<GlobalStates.Invasions> invasions) {
+        model.addAttribute("inv", getInvasions(invasions));
+        return "html/invasions";
+    }
+
+    private List<GlobalStates.Invasions> getInvasions(List<GlobalStates.Invasions> invasions) {
         List<GlobalStates.Invasions> newInvasions = new ArrayList<>();
         for (GlobalStates.Invasions invasion : invasions) {
             //忽略以结束得数据
@@ -60,7 +73,6 @@ public class InvasionsHtmlController {
             invasion.setDesc(trans.enToZh(invasion.getDesc()));
             newInvasions.add(invasion);
         }
-        model.addAttribute("inv", newInvasions);
-        return "html/invasions";
+        return newInvasions;
     }
 }

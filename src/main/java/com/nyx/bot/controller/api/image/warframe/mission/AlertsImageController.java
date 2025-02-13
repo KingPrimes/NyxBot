@@ -36,7 +36,7 @@ public class AlertsImageController {
         );
     }
 
-    @LogInfo(title = "Api", codes = Codes.WARFRAME_ALERTS_PLUGIN, businessType = BusinessType.IMAGE)
+    @LogInfo(title = "订阅", codes = Codes.WARFRAME_ALERTS_PLUGIN, businessType = BusinessType.IMAGE)
     @PostMapping(value = "/postSubAlertsImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void postImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {

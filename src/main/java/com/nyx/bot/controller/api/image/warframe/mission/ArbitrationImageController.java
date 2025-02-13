@@ -31,4 +31,16 @@ public class ArbitrationImageController {
                 ).toByteArray()
         );
     }
+
+    @LogInfo(title = "Api", codes = Codes.WARFRAME_ARBITRATION_EX_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/getArbitrationExImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public void getArbitrationExImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+        response.setHeader("content-type", "image/png");
+        response.getOutputStream().write(
+                HtmlToImage.converse(
+                        Constants.LOCALHOST + "private/getArbitrationEx"
+                ).toByteArray()
+        );
+    }
 }

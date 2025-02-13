@@ -22,7 +22,7 @@ import java.io.IOException;
 public class AllCycleImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_ALL_CYCLE_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getAllCycleImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postAllCycleImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

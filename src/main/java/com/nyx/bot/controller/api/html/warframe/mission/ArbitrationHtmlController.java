@@ -39,4 +39,10 @@ public class ArbitrationHtmlController {
         model.addAttribute("arbit", arbitration);
         return "html/arbitration";
     }
+
+    @GetMapping("/getArbitrationEx")
+    public String getArbitrationExHtml(Model model) {
+        model.addAttribute("arbitrations", CacheUtils.getArbitrationList().stream().peek(a -> a.setEtc(DateUtils.getDiff((a.getExpiry()), new Date(), true))).toList());
+        return "html/arbitration_ex";
+    }
 }

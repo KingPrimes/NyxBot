@@ -21,13 +21,26 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class InvasionsImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_INVASIONS_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getInvasionsImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postInvasionsImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
                 HtmlToImage.converse(
                         Constants.LOCALHOST + "private/getInvasionsHtml"
+                ).toByteArray()
+        );
+    }
+
+    @LogInfo(title = "订阅", codes = Codes.WARFRAME_INVASIONS_PLUGIN, businessType = BusinessType.IMAGE)
+    @PostMapping(value = "/postSubInvasionsImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public void getSubImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
+        response.setHeader("content-type", "image/png");
+        response.getOutputStream().write(
+                HtmlToImage.conversePost(
+                        Constants.LOCALHOST + "private/postSubscribeInvasionsHtml",
+                        data.getData()
                 ).toByteArray()
         );
     }

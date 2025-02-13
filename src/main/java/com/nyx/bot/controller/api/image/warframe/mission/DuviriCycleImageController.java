@@ -23,7 +23,7 @@ import java.io.IOException;
 public class DuviriCycleImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_KING_REALM_ROTATION, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getDuviriCycleImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postDuviriCycleImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

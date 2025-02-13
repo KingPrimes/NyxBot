@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class NighTwaveImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_NIGH_WAVE_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getNighTwaveImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postNighTwaveImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
