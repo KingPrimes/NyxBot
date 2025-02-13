@@ -86,7 +86,9 @@ public class BlackService {
         if (groupUid != null && groupUid != 0L) {
             repository.findByGroupUid(groupUid).ifPresent(g -> flag.set(false));
         }
-        proveBlackRepository.findByProveUid(userUid).ifPresent(p -> flag.set(false));
+        if (userUid != null && userUid != 0L) {
+            proveBlackRepository.findByProveUid(userUid).ifPresent(p -> flag.set(false));
+        }
         return flag.get();
     }
 

@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class SteelPathImageController {
     @LogInfo(title = "Api", codes = Codes.WARFRAME_STEEL_PATH_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getSteelPathImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postSteelPathImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

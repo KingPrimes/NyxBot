@@ -22,7 +22,7 @@ import java.io.IOException;
 public class SubscribeHelpImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_SUBSCRIBE, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/subscribeHelp", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postsubscribeHelp", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

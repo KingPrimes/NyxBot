@@ -65,7 +65,7 @@ public class WarframeCodes {
      */
     public static void allCycle(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getAllCycleImage",
+                "postAllCycleImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -76,7 +76,7 @@ public class WarframeCodes {
 
     public static void duviriCycle(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getDuviriCycleImage",
+                "postDuviriCycleImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -118,7 +118,7 @@ public class WarframeCodes {
      */
     public static void arsonHun(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getArsonHuntImage",
+                "postArsonHuntImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -132,7 +132,7 @@ public class WarframeCodes {
      */
     public static void assault(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getAssaultImage",
+                "postAssaultImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -146,7 +146,7 @@ public class WarframeCodes {
      */
     public static void dailyDeals(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getDailyDealsImage",
+                "postDailyDealsImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -177,7 +177,7 @@ public class WarframeCodes {
      */
     public static void invasions(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getInvasionsImage",
+                "postInvasionsImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -191,7 +191,7 @@ public class WarframeCodes {
      */
     public static void nighTwave(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getNighTwaveImage",
+                "postNighTwaveImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -205,7 +205,7 @@ public class WarframeCodes {
      */
     public static void steelPath(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getSteelPathImage",
+                "postSteelPathImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -219,7 +219,7 @@ public class WarframeCodes {
      */
     public static void aVoid(Bot bot, AnyMessageEvent event) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
-                "getVoidImage",
+                "postVoidImage",
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
@@ -370,7 +370,7 @@ public class WarframeCodes {
      */
     public static void rivenDisUpdate(Bot bot, AnyMessageEvent event, Codes code) {
         OneBotLogInfoData data = getLogInfoData(bot, event, code);
-        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("RivenDispositionUpdatesImage", data);
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postRivenDispositionUpdatesImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
@@ -395,7 +395,7 @@ public class WarframeCodes {
 
         if (str.isEmpty()) {
             OneBotLogInfoData data = getLogInfoData(bot, event, code);
-            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
+            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postsubscribeHelp", data);
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
             return;
@@ -424,7 +424,7 @@ public class WarframeCodes {
 
         if (str.isEmpty()) {
             OneBotLogInfoData data = getLogInfoData(bot, event, code);
-            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("subscribeHelp", data);
+            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postsubscribeHelp", data);
             bot.sendMsg(event,
                     Msg.builder().imgBase64(body.getFile()).build(), false);
             return;

@@ -403,8 +403,8 @@ public class GlobalStates {
         @NoArgsConstructor
         @Data
         public static class Translations {
-            @JsonProperty("es")
-            private String es;
+            @JsonProperty("en")
+            private String en;
             @JsonProperty("zh")
             private String zh;
         }

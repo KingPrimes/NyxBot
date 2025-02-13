@@ -22,7 +22,7 @@ import java.io.IOException;
 public class ArsonHuntImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_ARSON_HUNT_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/getArsonHuntImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postArsonHuntImage", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");

@@ -3,6 +3,8 @@ package com.nyx.bot.repo.impl;
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.impl.black.BlackService;
+import com.nyx.bot.repo.impl.white.WhiteService;
 import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,12 @@ import java.util.stream.Collectors;
 public class BotsService {
     @Resource
     BotContainer container;
+
+    @Resource
+    WhiteService ws;
+
+    @Resource
+    BlackService bs;
 
     /***
      * 获取机器人列表
@@ -46,5 +54,24 @@ public class BotsService {
         return container.robots.containsKey(botUid)
                 ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
                 : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+    }
+
+    /**
+     * 黑白名单过滤, 白名单优先级高于黑名单
+     * 白名单中存在时，返回true
+     * 白名单中不存在时，黑名单中存在，则返回false
+     * 默认返回 true
+     *
+     * @param group group
+     * @param prove prove
+     * @return 是否存在名单中
+     */
+    public boolean isCheck(Long group, Long prove) {
+        // 白名单中存在时，返回true
+        if (ws.isWhite(group, prove)) return true;
+        // 黑名单中存在，则返回false
+        if (!bs.isBlack(group, prove)) return false;
+        // 默认返回 true
+        return true;
     }
 }

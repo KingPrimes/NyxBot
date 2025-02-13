@@ -70,7 +70,9 @@ public class WhiteService {
         if (group != null && group != 0L) {
             groupWhiteRepository.findByGroupUid(group).ifPresent(g -> flag.set(true));
         }
-        proveWhiteRepository.findByProveUid(prove).ifPresent(p -> flag.set(true));
+        if (prove != null && prove != 0L) {
+            proveWhiteRepository.findByProveUid(prove).ifPresent(p -> flag.set(true));
+        }
         return flag.get();
     }
 

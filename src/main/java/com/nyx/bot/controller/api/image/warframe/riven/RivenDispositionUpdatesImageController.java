@@ -24,7 +24,7 @@ import java.io.IOException;
 public class RivenDispositionUpdatesImageController {
 
     @LogInfo(title = "Api", codes = Codes.WARFRAME_RIVEN_DIS_UPDATE_PLUGIN, businessType = BusinessType.IMAGE)
-    @PostMapping(value = "/RivenDispositionUpdatesImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @PostMapping(value = "/postRivenDispositionUpdatesImage", produces = MediaType.IMAGE_PNG_VALUE)
     public void getImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
         response.getOutputStream().write(
