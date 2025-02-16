@@ -135,7 +135,7 @@ public class WarframeSubscribeCheck {
                     ms.setCheckTypes(gts);
                     bean.save(ms);
                 });
-        return "订阅成功！";
+        return "已成功订阅！";
     }
 
     /**
@@ -192,7 +192,7 @@ public class WarframeSubscribeCheck {
             if (countUser <= 0) {
                 SpringUtils.getBean(MissionSubscribeRepository.class).delete(m);
             }
-            motion.append("成功取消订阅！");
+            motion.append("已取消订阅！");
         }, () -> motion.append("未订阅！无需取消！"));
 
         return motion.toString();

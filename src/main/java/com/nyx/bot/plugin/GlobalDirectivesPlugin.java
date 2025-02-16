@@ -87,9 +87,9 @@ public class GlobalDirectivesPlugin {
                 //奸商
                 case WARFRAME_VOID_PLUGIN -> WarframeCodes.aVoid(bot, event);
                 // 仲裁Ex
-                case WARFRAME_ARBITRATION_EX_PLUGIN -> WarframeCodes.arbitrationEx(bot, event);
+                //case WARFRAME_ARBITRATION_EX_PLUGIN -> WarframeCodes.arbitrationEx(bot, event);
                 //仲裁
-                case WARFRAME_ARBITRATION_PLUGIN -> WarframeCodes.arbitration(bot, event);
+                //case WARFRAME_ARBITRATION_PLUGIN -> WarframeCodes.arbitration(bot, event);
                 //钢铁
                 case WARFRAME_STEEL_PATH_PLUGIN -> WarframeCodes.steelPath(bot, event);
                 //每日特惠
