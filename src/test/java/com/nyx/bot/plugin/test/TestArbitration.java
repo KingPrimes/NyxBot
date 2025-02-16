@@ -24,7 +24,7 @@ public class TestArbitration {
 
     @Test
     void testArbitration() {
-        List<ArbitrationPre> arbitrationPres = JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        List<ArbitrationPre> arbitrationPres = JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION.get(0)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
         LocalDateTime now = LocalDateTime.now(ZoneOffset.ofHours(8));
         Date date = new Date(now.toEpochSecond(ZoneOffset.ofHours(8)) * 1000L);
         log.debug("now:{}", date);
