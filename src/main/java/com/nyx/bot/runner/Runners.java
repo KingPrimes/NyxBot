@@ -9,7 +9,10 @@ import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.repo.BotAdminRepository;
 import com.nyx.bot.repo.sys.SysUserRepository;
-import com.nyx.bot.utils.*;
+import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.DateUtils;
+import com.nyx.bot.utils.IoUtils;
+import com.nyx.bot.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +65,7 @@ public class Runners {
                 //程序启动之后获取WarframeDataSource
                 WarframeDataSource.init();
                 //new WarframeSocket().connectServer(ApiUrl.WARFRAME_SOCKET);
-                CacheUtils.getArbitrationList();
+                //CacheUtils.getArbitrationList();
             }
         };
     }
