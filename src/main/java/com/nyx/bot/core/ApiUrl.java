@@ -62,7 +62,10 @@ public class ApiUrl {
 
     public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
 
-    public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys";
+    public static final List<String> WARFRAME_ARBITRATION = List.of(
+            "https://wf.555590.xyz/api/arbys",
+            "https://wf-api.555590.xyz/api/arbys"
+    );
 
     private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
 
@@ -86,7 +89,8 @@ public class ApiUrl {
      * @return 仲裁
      */
     public static List<ArbitrationPre> arbitrationPreList() {
-        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch).stream()
+        int random = (int) (Math.random() * 2);
+        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION.get(random)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch).stream()
                 .filter(ArbitrationPre::isWorth)
                 .toList();
     }
