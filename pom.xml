@@ -14,7 +14,7 @@
     <artifactId>NxyBot</artifactId>
 
 
-    <version>0.2.6</version>
+    <version>0.2.7</version>
 
     <name>NxyBot</name>
 
@@ -295,6 +295,16 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

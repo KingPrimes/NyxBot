@@ -29,12 +29,6 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       PASSWORD: ${{ secrets.PASSWORD }}
     steps:
-      - name: Get latest tag
-        if: inputs.use_latest_tag == 'true'
-        id: get_tag
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*")
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -71,7 +65,7 @@ jobs:
           echo "::add-mask::$DX"
           echo "::add-mask::$USERNAME"
           echo "::add-mask::$PASSWORD"
-          mvn -B --file pom.xml clean package -Dex="$EX" -Ddx="$DX"
+          mvn clean package -Dex="$EX" -Ddx="$DX" -DUSERNAME="$USERNAME" -DPASSWORD="$PASSWORD"
       # 获取Commits信息 并将其存储到 generate_release_notes.outputs.notes 变量中
       - name: Generate release notes
         id: generate_release_notes
