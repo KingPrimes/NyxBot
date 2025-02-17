@@ -121,6 +121,9 @@ jobs:
         run: |
           TAG=${GITHUB_REF#refs/tags/}      
           
+          echo "Build context contents:"
+          ls -alh
+          
           docker build \
           --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
           --label "org.opencontainers.image.version=$TAG" \
