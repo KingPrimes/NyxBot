@@ -77,8 +77,6 @@ change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 exclude-labels:
   - 'skip-changelog'
-# 自动生成的发布草稿是否为预发布版本
-prerelease: false
 
 commitish: main
 
