@@ -119,15 +119,21 @@ jobs:
 
       - name: Build and push
         run: |
-          TAG=${GITHUB_REF#refs/tags/}      
+          # 清理标签名称
+          RAW_TAG=${GITHUB_REF#refs/tags/}
+          TAG=$(echo "$RAW_TAG" | tr '/' '-')  # 替换所有斜杠
           
-          echo "Build context contents:"
-          ls -alh
+          # 若无标签则使用默认值
+          if [ "$RAW_TAG" = "$GITHUB_REF" ]; then
+            TAG="latest-$(date +%Y%m%d%H%M%S)"
+          fi
+          
+          echo "Final TAG: $TAG"
           
           docker build \
-          --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-          --label "org.opencontainers.image.version=$TAG" \
-          -t kingprimes/nyxbot:$TAG .
+            --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            --label "org.opencontainers.image.version=$TAG" \
+            -t kingprimes/nyxbot:$TAG .
           
           docker push kingprimes/nyxbot:$TAG
           docker push kingprimes/nyxbot:latest
