@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.utils.http.HttpUtils;
+import com.nyx.bot.utils.x;
 import okhttp3.Headers;
 
 import java.util.List;
@@ -62,11 +63,6 @@ public class ApiUrl {
 
     public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
 
-    public static final List<String> WARFRAME_ARBITRATION = List.of(
-            "https://wf.555590.xyz/api/arbys",
-            "https://wf-api.555590.xyz/api/arbys"
-    );
-
     private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
 
     private static final String WARFRAME_PROFILE_STATS = "https://api.warframestat.us/profile/%s/stats";
@@ -88,11 +84,8 @@ public class ApiUrl {
      *
      * @return 仲裁
      */
-    public static List<ArbitrationPre> arbitrationPreList() {
-        int random = (int) (Math.random() * 2);
-        return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION.get(random)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch).stream()
-                .filter(ArbitrationPre::isWorth)
-                .toList();
+    public static List<ArbitrationPre> arbitrationPreList(String key) {
+        return JSON.parseArray(HttpUtils.sendGet(x.d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
     }
 
     /**

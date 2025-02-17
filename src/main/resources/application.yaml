@@ -4,7 +4,8 @@ test:
 jwt:
   expiration: 3600
   secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
-
+e: ${ex}
+d: ${dx}
 #线程池
 async:
   executor:
@@ -50,8 +51,8 @@ spring:
   #数据源配置
   datasource:
     driver-class-name: org.h2.Driver
-    username: sa
-    password: sa
+    username: ${USERNAME}
+    password: ${PASSWORD}
     #设置数据源；MODE=MySQL 可以解析MySQL形式的SQL语句
     url: jdbc:h2:file:./data/H2;MODE=MySQL;AUTO_SERVER=TRUE;PAGE_SIZE=16
   #H2
@@ -93,7 +94,7 @@ server:
 logging:
   level:
     com.nyx.bot: DEBUG
-    com.mikuac.shiro: DEBUG
+    com.mikuac.shiro: INFO
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF
