@@ -12,7 +12,7 @@ on:
       use_latest_tag:
         description: 'Use latest tag'
         required: true
-        default: true
+        default: false
         type: boolean
       logLevel:
         description: 'Log level'
@@ -130,19 +130,5 @@ jobs:
 
       - name: Build and push
         run: |
-          # 根据触发方式选择标签
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.use_latest_tag }}" == "true" ]]; then
-            TAG="${{ steps.get_tag.outputs.latest_tag }}"
-          else
-            TAG=${GITHUB_REF#refs/tags/}
-          fi
-
-          # 清理非法字符
-          CLEAN_TAG=$(echo "$TAG" | tr '/' '-' | sed 's/[^a-zA-Z0-9\._-]//g')
-
-          docker build \
-            -t kingprimes/nyxbot:$CLEAN_TAG \
-            -t kingprimes/nyxbot:latest .
-
-          docker push kingprimes/nyxbot:$CLEAN_TAG
+          docker build -t kingprimes/nyxbot:latest .
           docker push kingprimes/nyxbot:latest
