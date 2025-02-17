@@ -8,6 +8,7 @@ import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.*;
+import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.FileUtils;
@@ -20,6 +21,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -63,10 +65,15 @@ public class WarframeDataSource {
     }
 
     public static void initWarframeStatus() {
+        String a = FileUtils.readFileToString("./data/arbitration");
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
             GlobalStates globalStates = JSON.parseObject(str, GlobalStates.class);
             CacheUtils.setGlobalState(globalStates);
+        }
+        if (!a.isEmpty()) {
+            List<ArbitrationPre> arbitrationPres = JSON.parseArray(Base64.getDecoder().decode(a), ArbitrationPre.class);
+            CacheUtils.setArbitration(arbitrationPres);
         }
     }
 
