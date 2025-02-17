@@ -29,12 +29,6 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       PASSWORD: ${{ secrets.PASSWORD }}
     steps:
-      - name: Get latest tag
-        if: inputs.use_latest_tag == 'true'
-        id: get_tag
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*")
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v4
