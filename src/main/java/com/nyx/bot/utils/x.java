@@ -1,6 +1,7 @@
 package com.nyx.bot.utils;
 
-import com.nyx.bot.core.SpringValues;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import java.net.URLDecoder;
@@ -11,8 +12,14 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+@Component
 public class x {
 
+    @Value("${d:}")
+    public String d;
+
+    @Value("${e:}")
+    public String e;
     public static KeyPair get() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
@@ -40,10 +47,9 @@ public class x {
         return URLEncoder.encode(Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes())), StandardCharsets.UTF_8);
     }
 
-    public static String d() {
+    public String d() {
         try {
-            SpringValues bean = SpringUtils.getBean(SpringValues.class);
-            return d(bean.e, pr(bean.d));
+            return d(e, pr(d));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

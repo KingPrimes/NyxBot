@@ -27,7 +27,6 @@ public class ConfigTokenKeysController extends BaseController {
     public AjaxResult save(@RequestBody TokenKeys tokenKeys) {
         tokenKeys.setId(1L);
         repository.save(tokenKeys);
-        log.info("tokenKeys:{}", tokenKeys);
         return success();
     }
 }
