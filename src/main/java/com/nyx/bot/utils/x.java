@@ -7,9 +7,10 @@ import javax.crypto.Cipher;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Component
@@ -20,18 +21,6 @@ public class x {
 
     @Value("${e:}")
     public String e;
-    public static KeyPair get() throws Exception {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(2048);
-        return generator.generateKeyPair();
-    }
-
-
-    public static PublicKey p(String publicKeyStr) throws Exception {
-        byte[] keyBytes = Base64.getDecoder().decode(URLDecoder.decode(publicKeyStr, StandardCharsets.UTF_8));
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-        return KeyFactory.getInstance("RSA").generatePublic(keySpec);
-    }
 
 
     public static PrivateKey pr(String privateKeyStr) throws Exception {

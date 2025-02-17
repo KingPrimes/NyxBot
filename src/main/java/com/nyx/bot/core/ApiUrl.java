@@ -3,6 +3,7 @@ package com.nyx.bot.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
+import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.x;
 import okhttp3.Headers;
@@ -85,7 +86,7 @@ public class ApiUrl {
      * @return 仲裁
      */
     public static List<ArbitrationPre> arbitrationPreList(String key) {
-        return JSON.parseArray(HttpUtils.sendGet(new x().d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        return JSON.parseArray(HttpUtils.sendGet(SpringUtils.getBean(x.class).d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
     }
 
     /**
