@@ -13,10 +13,7 @@ import org.springframework.cache.CacheManager;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -30,6 +27,8 @@ public class CacheUtils {
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
 
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
+
+    private static int count = 0;
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
         GlobalStates data = cm.getCache(WARFRAME_SOCKET_DATA).get("data", GlobalStates.class);
@@ -46,7 +45,7 @@ public class CacheUtils {
 
     public static void setArbitration(List<ArbitrationPre> arbitrationList) {
         cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION).put("data", arbitrationList);
-        FileUtils.writeFile("./data/arbitration", JSON.toJSONBytes(arbitrationList));
+        FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(JSON.toJSONBytes(arbitrationList)));
     }
 
     /**
@@ -107,6 +106,9 @@ public class CacheUtils {
                 });
         // 如何没有匹配的值则获取新的数据
         if (arbitration.get() == null) {
+            if (count > 3) {
+                return null;
+            }
             getArbitrationList(key);
             // 迭代返回数据
             return getArbitration(key);
