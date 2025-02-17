@@ -8,8 +8,8 @@ RUN apk add --no-cache tzdata font-noto-cjk \
 
 WORKDIR /app
 
-COPY NyxBot.jar /app
+COPY NyxBot.jar .
 
 EXPOSE 8080
 
-CMD ["java", "-Dfile.encoding=UTF-8", "-jar", "/app/NyxBot.jar"]
+CMD ["java", "-Dfile.encoding=UTF-8", "-jar", "NyxBot.jar"]
