@@ -1,10 +1,13 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.entity.config.TokenKeys;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.repo.warframe.TokenKeysRepository;
 import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
+import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
@@ -42,7 +45,7 @@ public class ArbitrationHtmlController {
 
     @GetMapping("/getArbitrationEx")
     public String getArbitrationExHtml(Model model) {
-        //model.addAttribute("arbitrations", CacheUtils.getArbitrationList().stream().peek(a -> a.setEtc(DateUtils.getDiff((a.getExpiry()), new Date(), true))).toList());
+        model.addAttribute("arbitrations", CacheUtils.getArbitrationList(SpringUtils.getBean(TokenKeysRepository.class).findById(1L).orElse(new TokenKeys()).getTks()).stream().peek(a -> a.setEtc(DateUtils.getDiff((a.getExpiry()), new Date(), true))).toList());
         return "html/arbitration_ex";
     }
 }

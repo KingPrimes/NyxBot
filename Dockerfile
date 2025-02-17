@@ -1,17 +1,15 @@
-FROM eclipse-temurin:17-jre-focal
+# 使用更轻量的基础镜像
+FROM eclipse-temurin:17-jre-alpine
 
-ENV TZ="Asia/Shanghai"
-
-RUN apt update -y \
-    && apt-get -y install fonts-noto-cjk wget \
-    && rm -rf /var/lib/apt/lists/*
+# 设置时区和中文环境（Alpine版）
+RUN apk add --no-cache tzdata font-noto-cjk \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
 
 WORKDIR /app
 
 COPY NyxBot.jar /app
 
-VOLUME [ "/app" ]
-
 EXPOSE 8080
 
-CMD ["java", "-Dfile.encoding=UTF-8","-jar", "/app/NyxBot.jar"]
+CMD ["java", "-Dfile.encoding=UTF-8", "-jar", "/app/NyxBot.jar"]

@@ -44,6 +44,27 @@ public class CacheUtils {
         FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
     }
 
+    public static void setArbitration(List<ArbitrationPre> arbitrationList) {
+        cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION).put("data", arbitrationList);
+        FileUtils.writeFile("./data/arbitration", JSON.toJSONBytes(arbitrationList));
+    }
+
+    /**
+     * 获取有价值的仲裁列表
+     *
+     * @return List<ArbitrationPre>
+     */
+    public static List<ArbitrationPre> getArbitrationList(String key) {
+        List<ArbitrationPre> arbitrationList = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION).get("data", List.class);
+        if (arbitrationList == null || arbitrationList.isEmpty()) {
+            if (key != null && !key.isEmpty()) {
+                arbitrationList = ApiUrl.arbitrationPreList(key);
+                setArbitration(arbitrationList);
+            }
+        }
+        return arbitrationList;
+    }
+
     public static void setUser(String token, SysUser user) {
         set(USER, token, user);
     }
@@ -61,18 +82,14 @@ public class CacheUtils {
      *
      * @return 当前数据
      */
-    public static GlobalStates.Arbitration getArbitration() {
-        List<?> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitration", List.class);
+    public static GlobalStates.Arbitration getArbitration(String key) {
+        List<ArbitrationPre> arbitrationList = getArbitrationList(key);
         if (arbitrationList == null || arbitrationList.isEmpty()) {
-            arbitrationList = ApiUrl.arbitrationPreList();
-            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitration", arbitrationList);
+            return null;
         }
         AtomicReference<GlobalStates.Arbitration> arbitration = new AtomicReference<>(new GlobalStates.Arbitration());
         long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
         arbitrationList.stream()
-                // 类型转换
-                .filter(i -> i instanceof ArbitrationPre)
-                .map(i -> (ArbitrationPre) i)
                 //过滤掉过期的数据
                 .filter(a -> a.getExpiry().getTime() - milli > 0)
                 //判断两个时间相差的毫秒数，并取最小值的元素
@@ -90,26 +107,13 @@ public class CacheUtils {
                 });
         // 如何没有匹配的值则获取新的数据
         if (arbitration.get() == null) {
-            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitration", ApiUrl.arbitrationPreList());
+            getArbitrationList(key);
             // 迭代返回数据
-            return getArbitration();
+            return getArbitration(key);
         }
         return arbitration.get();
     }
 
-    /**
-     * 获取有价值的仲裁列表
-     *
-     * @return List<ArbitrationPre>
-     */
-    public static List<ArbitrationPre> getArbitrationList() {
-        List<ArbitrationPre> arbitrationList = Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).get("arbitrationList", List.class);
-        if (arbitrationList == null || arbitrationList.isEmpty()) {
-            arbitrationList = ApiUrl.arbitrationPreList();
-            Objects.requireNonNull(cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION)).put("arbitrationList", arbitrationList);
-        }
-        return arbitrationList;
-    }
 
     /**
      * 设置缓存

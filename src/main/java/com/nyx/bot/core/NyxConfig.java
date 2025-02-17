@@ -27,6 +27,8 @@ public class NyxConfig {
     @NotEmpty(message = "config.server.url.not.empty")
     String wsServerUrl = "/ws/shiro";
 
+    String token;
+
     // 不进行序列化
     @JsonIgnore
     public boolean isValidateClientUrl() {
