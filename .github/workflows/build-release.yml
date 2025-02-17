@@ -9,11 +9,6 @@ on:
       - v*
   workflow_dispatch:
     inputs:
-      use_latest_tag:
-        description: 'Use latest tag'
-        required: true
-        default: false
-        type: boolean
       logLevel:
         description: 'Log level'
         required: true
