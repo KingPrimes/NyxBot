@@ -97,7 +97,6 @@ jobs:
         with:
           file: target/NyxBot.jar
           tag: ${{ github.ref }}
-          overwrite: true
           draft: true
           release_name: ${{ steps.generate_release_notes.outputs.name }}
           # 设置正文为 release-drafter/release-drafter@v6 步骤中生成的 release notes
