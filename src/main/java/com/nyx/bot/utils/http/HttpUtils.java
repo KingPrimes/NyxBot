@@ -99,7 +99,6 @@ public class HttpUtils {
                     proxy = Proxy.NO_PROXY;
                 }
             }
-            log.debug("proxyHost:{} --- proxyPort:{}", proxyHost, proxyPort);
             client = new OkHttpClient().newBuilder()
                     .addInterceptor(new BrotliInterceptor())
                     .proxy(proxy)
@@ -170,7 +169,6 @@ public class HttpUtils {
             //log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
-            log.warn("sendGet", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }
@@ -186,9 +184,7 @@ public class HttpUtils {
                 log.warn("Response Code Is Not Successful code:{},message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
-            Body body = getBody(response);
-            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
-            return body;
+            return getBody(response);
         } catch (IOException e) {
             log.warn("sendPost", e);
             return new Body(HttpCodeEnum.ERROR);
@@ -253,7 +249,6 @@ public class HttpUtils {
      * @param path - 文件输出路径
      */
     public static Boolean sendGetForFile(String url, String path) {
-        log.debug("sendGetForFile Url:{}", url);
         // 用于下载完成返回标志符
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         File outputFile = new File(path);
@@ -348,7 +343,6 @@ public class HttpUtils {
             }
             Body body = getBodyForFile(response);
             body.setUrl(url);
-            log.debug("Url：{}，TakeTime：{}", url, body.getTakeTime());
             return body;
 
         } catch (IOException e) {

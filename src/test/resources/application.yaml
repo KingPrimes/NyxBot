@@ -4,7 +4,6 @@ test:
 jwt:
   expiration: 3600
   secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
-
 #线程池
 async:
   executor:
@@ -17,7 +16,7 @@ async:
 
 spring:
   profiles:
-    active: server
+    active: dev
   main:
     allow-circular-references: true
   mvc:

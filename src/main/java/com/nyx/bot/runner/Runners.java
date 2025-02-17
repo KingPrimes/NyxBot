@@ -64,8 +64,6 @@ public class Runners {
             if (!test) {
                 //程序启动之后获取WarframeDataSource
                 WarframeDataSource.init();
-                //new WarframeSocket().connectServer(ApiUrl.WARFRAME_SOCKET);
-                //CacheUtils.getArbitrationList();
             }
         };
     }

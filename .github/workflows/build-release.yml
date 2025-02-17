@@ -23,6 +23,11 @@ jobs:
   build-release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      EX: ${{ secrets.E}}
+      DX: ${{ secrets.D}}
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17 
@@ -55,7 +60,12 @@ jobs:
           cp -r NyxBot-WebUI/resources/* src/main/resources/
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: |
+          echo "::add-mask::$EX"
+          echo "::add-mask::$DX"
+          echo "::add-mask::$USERNAME"
+          echo "::add-mask::$PASSWORD"
+          mvn -B --file pom.xml clean package -Dex="$EX" -Ddx="$DX"
       # 获取Commits信息 并将其存储到 generate_release_notes.outputs.notes 变量中
       - name: Generate release notes
         id: generate_release_notes
@@ -66,6 +76,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF: ${{ github.ref }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyxbot-package
+          path: |
+            target/NyxBot.jar
+            Dockerfile
+            docker-compose.yml
       # 将JAR文件上传到GitHub Release
       - name: Upload JAR to Release
         uses: svenstaro/upload-release-action@v2
@@ -79,44 +98,15 @@ jobs:
           body: ${{ steps.generate_release_notes.outputs.body }}
 
   build-docker:
+    needs: build-release
     name: Docker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Clone NyxBot-WebUI repository
-        run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
-
-      - name: Build NyxBot-WebUI with pnpm
-        working-directory: ./NyxBot-WebUI
-        run: |
-          pnpm install
-          pnpm build
-
-      - name: Merge built resources into current project
-        run: |
-          mkdir -p src/main/resources/webui
-          cp -r NyxBot-WebUI/resources/* src/main/resources/
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+          name: nyxbot-package
+          path: .  # 下载到当前目录
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -127,10 +117,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Copy File
-        run: cp target/NyxBot.jar ./
-
       - name: Build and push
         run: |
-          docker build -t kingprimes/nyxbot:latest .
+          TAG=${GITHUB_REF#refs/tags/}      
+          
+          docker build \
+          --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+          --label "org.opencontainers.image.version=$TAG" \
+          -t kingprimes/nyxbot:$TAG .
+          
+          docker push kingprimes/nyxbot:$TAG
           docker push kingprimes/nyxbot:latest
