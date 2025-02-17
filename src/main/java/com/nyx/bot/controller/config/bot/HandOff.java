@@ -28,17 +28,16 @@ public class HandOff {
             Map<String, Object> o = yaml.load(new FileInputStream(file));
             if (o != null) {
                 load = o;
-                log.debug("Loaded config from file: {}", load);
             }
-            load.put("serverPort", config.getServerPort() == null ? 8080 : config.getServerPort());
-            load.put("isServerOrClient", config.getIsServerOrClient() == null || config.getIsServerOrClient());
-            load.put("wsServerUrl", config.getWsServerUrl() == null ? "/ws/shiro" : config.getWsServerUrl());
-            load.put("wsClientUrl", config.getWsClientUrl() == null ? "ws://localhost:3001" : config.getWsClientUrl());
+            load.put("serverPort", config.getServerPort() == null ? load.get("serverPort") : config.getServerPort());
+            load.put("isServerOrClient", config.getIsServerOrClient() == null ? load.get("isServerOrClient") : config.getIsServerOrClient());
+            load.put("wsServerUrl", config.getWsServerUrl() == null ? load.get("wsServerUrl") : config.getWsServerUrl());
+            load.put("wsClientUrl", config.getWsClientUrl() == null ? load.get("wsClientUrl") : config.getWsClientUrl());
+            load.put("token", config.getToken() == null ? load.get("token") : config.getToken());
             String s = yaml.dumpAs(load, Tag.MAP, DumperOptions.FlowStyle.BLOCK);
             writer = new BufferedWriter(new FileWriter(file));
             writer.write(s);
             writer.close();
-            log.debug("Config written to file: {}", s);
             return true;
         } catch (IOException e) {
             return false;
@@ -55,10 +54,15 @@ public class HandOff {
             config.setIsServerOrClient((Boolean) load.get("isServerOrClient"));
             config.setWsServerUrl((String) load.get("wsServerUrl"));
             config.setWsClientUrl((String) load.get("wsClientUrl"));
-            log.debug("Config Init:{}", config);
+            config.setToken((String) load.get("token"));
             return config;
         } catch (Exception e) {
-            handoff(new NyxConfig());
+            config.setWsServerUrl("/ws/shiro");
+            config.setWsClientUrl("ws://localhost:3001");
+            config.setToken("");
+            config.setServerPort(8080);
+            config.setIsServerOrClient(true);
+            handoff(config);
             return config;
         }
     }
@@ -67,11 +71,11 @@ public class HandOff {
         ConfigurableEnvironment env = new StandardEnvironment();
         NyxConfig config = getConfig();
         Map<String, Object> map = new HashMap<>();
-        map.put("server.port", config.getServerPort() == null ? 8080 : config.getServerPort()); // 设置新的端口号
-        map.put("shiro.ws.server.enable", config.getIsServerOrClient() == null || config.getIsServerOrClient());
-        map.put("shiro.ws.server.url", config.getWsServerUrl() == null ? "/ws/shiro" : config.getWsServerUrl());
-        map.put("shiro.ws.client.enable", config.getIsServerOrClient() != null && !config.getIsServerOrClient());
-        map.put("shiro.ws.client.url", config.getWsClientUrl() == null ? "ws://localhost:3001" : config.getWsClientUrl());
+        map.put("server.port", config.getServerPort()); // 设置新的端口号
+        map.put("shiro.ws.server.enable", config.getIsServerOrClient());
+        map.put("shiro.ws.server.url", config.getWsServerUrl());
+        map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
+        map.put("shiro.ws.client.url", config.getWsClientUrl());
         MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
         log.debug("Env AddFirst:{}", propertySource);
         env.getPropertySources().addFirst(propertySource);
