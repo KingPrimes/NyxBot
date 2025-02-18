@@ -401,7 +401,7 @@ public class WarframeCodes {
             return;
         }
 
-        String ms = WarframeSubscribeCheck.userSubscriptions(bot.getSelfId(),
+        String ms = new WarframeSubscribeCheck().userSubscriptions(bot.getSelfId(),
                 event.getUserId(),
                 bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), false).getData().getNickname(),
                 event.getGroupId(),
@@ -430,7 +430,7 @@ public class WarframeCodes {
             return;
         }
 
-        String ms = WarframeSubscribeCheck.userCancelSubscribe(
+        String ms = new WarframeSubscribeCheck().userCancelSubscribe(
                 event.getUserId(),
                 event.getGroupId(),
                 str

@@ -1,15 +1,14 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.nyx.bot.entity.warframe.MissionSubscribe;
-import com.nyx.bot.entity.warframe.MissionSubscribeGroupCheckType;
 import com.nyx.bot.entity.warframe.MissionSubscribeUser;
 import com.nyx.bot.entity.warframe.MissionSubscribeUserCheckType;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeUserCheckTypeRepository;
-import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeUserRepository;
 import com.nyx.bot.utils.SpringUtils;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -41,6 +40,129 @@ public class WarframeSubscribeCheck {
     }
 
     /**
+     * 参数解析增强方法（支持通配符）
+     */
+    private static SubscribeParams parseSubscribeParams(String raw) {
+        String[] parts = raw.replace("订阅", "").trim().split("-");
+        SubscribeParams params = new SubscribeParams();
+
+        try {
+            // 必填参数：订阅类型
+            if (parts.length < 1) throw new IllegalArgumentException();
+            params.type = parseSubscribeType(parts[0]);
+
+            // 可选参数处理
+            params.missionType = (parts.length > 1 && !parts[1].isEmpty()) ?
+                    parseMissionType(parts[1]) : null;
+
+            params.tier = (parts.length > 2 && !parts[2].isEmpty()) ?
+                    Integer.parseInt(parts[2]) : null;
+
+            // 校验遗物等级范围
+            if (params.tier != null && (params.tier < 1 || params.tier > 5)) {
+                throw new IllegalArgumentException("遗物等级需在1-5之间");
+            }
+        } catch (Exception e) {
+            params.error = """
+                    参数错误，格式：订阅类型[必填]-任务类型[可选]-遗物等级[可选]
+                    示例：
+                    订阅3 → 订阅所有裂隙
+                    订阅3-2 → 订阅所有捕获裂隙
+                    订阅3-2-5 → 订阅5级捕获裂隙
+                    """;
+        }
+        return params;
+    }
+
+    /**
+     * 构建订阅信息说明
+     */
+    private static String buildSubscriptionInfo(SubscribeParams params) {
+        StringBuilder sb = new StringBuilder()
+                .append("类型: ").append(params.type.getNAME());
+
+        if (params.missionType != null) {
+            sb.append("\n任务: ").append(params.missionType.get());
+        } else {
+            sb.append("\n任务: 全部");
+        }
+
+        if (params.tier != null) {
+            sb.append("\n等级: ").append(params.tier);
+        } else if (params.type == SubscribeEnums.FISSURES) {
+            sb.append("\n等级: 全部");
+        }
+
+        return sb.toString();
+    }
+
+    // 添加参数解析校验方法
+    private static SubscribeEnums parseSubscribeType(String input) {
+        try {
+            int code = Integer.parseInt(input);
+            if (code <= 0 || code >= SubscribeEnums.values().length) {
+                return SubscribeEnums.ERROR;
+            }
+            return SubscribeEnums.values()[code];
+        } catch (NumberFormatException e) {
+            return SubscribeEnums.ERROR;
+        }
+    }
+
+    private static WarframeMissionTypeEnum parseMissionType(String input) {
+        try {
+            int code = Integer.parseInt(input);
+            if (code <= 0 || code >= WarframeMissionTypeEnum.values().length) {
+                return WarframeMissionTypeEnum.ERROR;
+            }
+            return WarframeMissionTypeEnum.values()[code];
+        } catch (NumberFormatException e) {
+            return WarframeMissionTypeEnum.ERROR;
+        }
+    }
+
+    private static MissionSubscribe createNewSubscription(Long botUid, Long subGroup, String groupName) {
+        MissionSubscribe sub = new MissionSubscribe();
+        sub.setSubGroup(subGroup);
+        sub.setGroupName(groupName);
+        sub.setSubBotUid(botUid);
+        sub.setUsers(new HashSet<>());
+        return sub;
+    }
+
+    private static void processSubscription(SubscribeParams params, Long userUid,
+                                            String userName, MissionSubscribe sub) {
+
+        MissionSubscribeUser user = sub.getUsers().stream()
+                .filter(u -> u.getUserId().equals(userUid))
+                .findFirst()
+                .orElseGet(() -> createNewUser(userUid, userName, sub));
+
+        // 检查是否已存在相同订阅规则
+        boolean exists = user.getCheckTypes().stream()
+                .anyMatch(t -> t.matches(params.type, params.missionType, params.tier));
+
+        if (!exists) {
+            MissionSubscribeUserCheckType checkType = new MissionSubscribeUserCheckType();
+            checkType.setSubscribe(params.type);
+            checkType.setMissionTypeEnum(params.missionType == null ? WarframeMissionTypeEnum.ERROR : params.missionType); // 允许为null
+            checkType.setTierNum(params.tier == null ? 0 : params.tier); // 允许为null
+            checkType.setSubscribeUser(user);
+            user.getCheckTypes().add(checkType);
+        }
+    }
+
+    private static MissionSubscribeUser createNewUser(Long userUid, String userName, MissionSubscribe sub) {
+        MissionSubscribeUser user = new MissionSubscribeUser();
+        user.setUserId(userUid);
+        user.setUserName(userName);
+        user.setMissionSubscribe(sub);  // 关键关联设置
+        user.setCheckTypes(new HashSet<>());
+        sub.getUsers().add(user);
+        return user;
+    }
+
+    /**
      * 订阅
      *
      * @param botUid    机器人ID
@@ -51,167 +173,142 @@ public class WarframeSubscribeCheck {
      * @param raw       源消息
      * @return 发送的信息
      */
-    public static String userSubscriptions(Long botUid, Long userUid, String userName, Long subGroup, String groupName, String raw) {
-        String[] split = raw.replace("订阅", "").replace(" ", "").split("-");
-        int i = Integer.parseInt(split[0]);
-        if (i <= 0 || i > SubscribeEnums.values().length - 1) {
-            return SubscribeEnums.ERROR.getNAME();
-        }
-        SubscribeEnums subscribeEnums = SubscribeEnums.values()[i];
-        WarframeMissionTypeEnum missionTypeEnum;
-        int tierNum;
-        if (split.length >= 2) {
-            int te = Integer.parseInt(split[1]);
-            if (te <= 0 || te > WarframeMissionTypeEnum.values().length - 1) {
-                return SubscribeEnums.ERROR.getNAME();
+    @Transactional
+    public String userSubscriptions(Long botUid, Long userUid, String userName,
+                                    Long subGroup, String groupName, String raw) {
+        try {
+            // 参数解析
+            SubscribeParams params = parseSubscribeParams(raw);
+            if (params.hasError()) {
+                return params.getErrorMessage();
             }
-            missionTypeEnum = WarframeMissionTypeEnum.values()[te];
-        } else {
-            missionTypeEnum = WarframeMissionTypeEnum.ERROR;
+
+            MissionSubscribeRepository repo = SpringUtils.getBean(MissionSubscribeRepository.class);
+            MissionSubscribe subscription = repo.findBySubGroup(subGroup)
+                    .orElseGet(() -> createNewSubscription(botUid, subGroup, groupName));
+
+            processSubscription(params, userUid, userName, subscription);
+            repo.save(subscription);
+
+            return "订阅成功！\n" + buildSubscriptionInfo(params);
+        } catch (Exception e) {
+            log.error("订阅处理失败", e);
+            return "订阅失败，请检查参数格式";
         }
-        if (split.length >= 3) {
-            tierNum = Integer.parseInt(split[2]);
-        } else {
-            tierNum = 0;
-        }
-
-        MissionSubscribeRepository bean = SpringUtils.getBean(MissionSubscribeRepository.class);
-        Optional<MissionSubscribe> missionSubscribe = bean.findById(subGroup);
-        //查询已经订阅过的群组
-
-        missionSubscribe.ifPresentOrElse(s -> {
-                    List<MissionSubscribeUser> users;
-                    if (s.getSubUsers().stream().anyMatch(u -> u.getUserId().equals(userUid))) {
-                        users = s.getSubUsers().stream()
-                                .filter(u -> u.getUserId().equals(userUid))
-                                .peek(um -> {
-                                    //判断是否存在订阅类型
-                                    if (um.getTypeList().stream().noneMatch(t -> t.getSubscribe().equals(subscribeEnums) && t.getMissionTypeEnum().equals(missionTypeEnum))) {
-                                        // 不存在添加订阅
-                                        List<MissionSubscribeUserCheckType> list = um.getTypeList();
-                                        MissionSubscribeUserCheckType checkType = new MissionSubscribeUserCheckType();
-                                        checkType.setSubscribe(subscribeEnums);
-                                        checkType.setMissionTypeEnum(missionTypeEnum);
-                                        /*  checkType.setUserId(userUid);*/
-                                        checkType.setTierNum(tierNum);
-                                        list.add(checkType);
-                                        um.setTypeList(list);
-                                    }
-                                }).toList();
-                    } else {
-                        users = s.getSubUsers();
-                        users.add(saveUser(userUid, userName, subscribeEnums, missionTypeEnum, tierNum));
-                    }
-
-                    if (s.getCheckTypes().stream().noneMatch(t -> t.getSubscribe().equals(subscribeEnums))) {
-                        List<MissionSubscribeGroupCheckType> types = s.getCheckTypes();
-                        MissionSubscribeGroupCheckType type = new MissionSubscribeGroupCheckType();
-                        type.setSubscribe(subscribeEnums);
-                        type.setCheckType(true);
-                        types.add(type);
-                        s.setCheckTypes(types);
-                    }
-                    s.setSubUsers(users);
-                    bean.save(s);
-                },
-                //从未订阅新添用户
-                () -> {
-                    MissionSubscribe ms = new MissionSubscribe();
-                    ms.setSubGroup(subGroup);
-                    ms.setGroupName(groupName);
-                    ms.setSubBotUid(botUid);
-
-                    List<MissionSubscribeUser> users = new ArrayList<>();
-
-                    users.add(saveUser(userUid, userName, subscribeEnums, missionTypeEnum, tierNum));
-
-                    ms.setSubUsers(users);
-
-                    MissionSubscribeGroupCheckType gt = new MissionSubscribeGroupCheckType();
-                    gt.setCheckType(true);
-                    gt.setSubscribe(subscribeEnums);
-                    List<MissionSubscribeGroupCheckType> gts = new ArrayList<>();
-                    gts.add(gt);
-                    ms.setCheckTypes(gts);
-                    bean.save(ms);
-                });
-        return "已成功订阅！";
     }
 
     /**
-     * 取消订阅
+     * 增强版取消订阅方法
      *
      * @param userUid  用户ID
      * @param subGroup 订阅群组
-     * @param raw      源消息
-     * @return 发送的信息
+     * @param raw      输入内容 例如："取消订阅3" 或 "取消订阅3-2-5"
+     * @return 操作结果
      */
-    public static String userCancelSubscribe(Long userUid, Long subGroup, String raw) {
+    @Transactional
+    public String userCancelSubscribe(Long userUid, Long subGroup, String raw) {
         StringBuffer motion = new StringBuffer();
         MissionSubscribeRepository bean = SpringUtils.getBean(MissionSubscribeRepository.class);
-        Optional<MissionSubscribe> missionSubscribe = bean.findById(subGroup);
+        Optional<MissionSubscribe> missionSubscribe = bean.findBySubGroup(subGroup);
+
+        // 参数解析增强
         String[] split = raw.replace("取消订阅", "").replace(" ", "").split("-");
-        int i = Integer.parseInt(split[0]);
-        if (i <= 0 || i > SubscribeEnums.values().length - 1) {
-            return SubscribeEnums.ERROR.getNAME();
+        if (split.length < 1 || split[0].isEmpty()) {
+            return "参数格式错误，示例：取消订阅3 或 取消订阅3-2-5";
         }
-        SubscribeEnums subscribeEnums = SubscribeEnums.values()[i];
-        WarframeMissionTypeEnum missionTypeEnum;
-        int tierNum;
-        if (split.length >= 2) {
-            int te = Integer.parseInt(split[1]);
-            if (te <= 0 || te > WarframeMissionTypeEnum.values().length - 1) {
-                return SubscribeEnums.ERROR.getNAME();
+
+        // 解析订阅类型
+        SubscribeEnums subscribeEnums;
+        try {
+            int typeCode = Integer.parseInt(split[0]);
+            if (typeCode <= 0 || typeCode >= SubscribeEnums.values().length) {
+                return "无效的订阅类型代码";
             }
-            missionTypeEnum = WarframeMissionTypeEnum.values()[te];
-        } else {
-            missionTypeEnum = WarframeMissionTypeEnum.ERROR;
+            subscribeEnums = SubscribeEnums.values()[typeCode];
+        } catch (NumberFormatException e) {
+            return "订阅类型必须为数字";
         }
-        if (split.length >= 3) {
-            tierNum = Integer.parseInt(split[2]);
-        } else {
-            tierNum = 0;
+
+        // 解析可选参数
+        WarframeMissionTypeEnum missionTypeEnum = WarframeMissionTypeEnum.ERROR;
+        int tierNum = 0;
+        try {
+            if (split.length >= 2 && !split[1].isEmpty()) {
+                int missionCode = Integer.parseInt(split[1]);
+                if (missionCode >= 0 && missionCode < WarframeMissionTypeEnum.values().length) {
+                    missionTypeEnum = WarframeMissionTypeEnum.values()[missionCode];
+                }
+            }
+            if (split.length >= 3 && !split[2].isEmpty()) {
+                tierNum = Integer.parseInt(split[2]);
+            }
+        } catch (NumberFormatException e) {
+            return "参数包含非法数字";
         }
+        log.info("取消订阅参数解析结果：类型={}, 任务={}, 等级={}", subscribeEnums, missionTypeEnum, tierNum);
+        log.info("查询到的订阅数据: id={}， subGroup={}, groupName={}, subBotUid={}",
+                missionSubscribe.map(MissionSubscribe::getId).orElse(-1L),
+                missionSubscribe.map(MissionSubscribe::getSubGroup).orElse(-1L),
+                missionSubscribe.map(MissionSubscribe::getGroupName).orElse(""),
+                missionSubscribe.map(MissionSubscribe::getSubBotUid).orElse(-1L)
+
+        );
+        Integer finalTierNum = tierNum;
+        WarframeMissionTypeEnum finalMissionTypeEnum = missionTypeEnum;
         missionSubscribe.ifPresentOrElse(m -> {
-            List<MissionSubscribeUser> subUsers = m.getSubUsers();
-            long countUser = subUsers.stream()
-                    .filter(u -> u.getUserId().equals(userUid))
-                    .peek(u -> {
-                                long countUserType = u.getTypeList().stream()
-                                        .filter(t -> t.getSubscribe().equals(subscribeEnums) &&
-                                                t.getMissionTypeEnum().equals(missionTypeEnum) &&
-                                                t.getTierNum().equals(tierNum))
-                                        .peek(t -> SpringUtils.getBean(MissionSubscribeUserCheckTypeRepository.class).delete(t)).count();
-                                log.debug("剩余用户订阅类型：{}", countUserType);
-                                if (countUserType <= 0) {
-                                    SpringUtils.getBean(MissionSubscribeUserRepository.class).delete(u);
-                                }
-                            }
-                    ).count();
-            log.debug("剩余订阅人数：{}", countUser);
-            if (countUser <= 0) {
-                SpringUtils.getBean(MissionSubscribeRepository.class).delete(m);
+            Set<MissionSubscribeUser> subUsers = m.getUsers();
+            int removedCount = 0;
+            List<MissionSubscribeUserCheckType> toRemove;
+            // 使用迭代器安全删除
+            for (MissionSubscribeUser user : subUsers) {
+                if (!user.getUserId().equals(userUid)) continue;
+
+                // 过滤需要删除的检查项
+                toRemove = user.getCheckTypes().stream()
+                        .filter(t -> t.getSubscribe() == subscribeEnums)
+                        .filter(t -> t.getMissionTypeEnum() == null || t.getMissionTypeEnum() == finalMissionTypeEnum)
+                        .filter(t -> t.getTierNum() == null || Objects.equals(t.getTierNum(), finalTierNum))
+                        .toList();
+                List<Long> ids = toRemove.stream().map(MissionSubscribeUserCheckType::getId).toList();
+                // 执行删除
+                if (!ids.isEmpty()) {
+                    SpringUtils.getBean(MissionSubscribeUserCheckTypeRepository.class)
+                            .deleteAllByIdInBatch(ids);
+                    user.getCheckTypes().removeIf(t -> ids.contains(t.getId()));
+                    removedCount = ids.size();
+                }
+
+                // 如果用户没有其他订阅项，删除用户
+                if (user.getCheckTypes().isEmpty()) {
+                    m.getUsers().remove(user);
+                    if (m.getUsers().isEmpty()) {
+                        bean.delete(m);
+                        motion.append("已移除空订阅群组");
+                    }
+                }
             }
-            motion.append("已取消订阅！");
-        }, () -> motion.append("未订阅！无需取消！"));
+
+            motion.append("成功取消").append(removedCount).append("项订阅");
+
+        }, () -> motion.append("未找到相关订阅"));
 
         return motion.toString();
     }
 
-    private static MissionSubscribeUser saveUser(Long userUid, String userName, SubscribeEnums subscribeEnums, WarframeMissionTypeEnum missionTypeEnum, Integer tierNum) {
-        MissionSubscribeUser user = new MissionSubscribeUser();
-        user.setUserName(userName);
-        user.setUserId(userUid);
+    // 参数包装类
+    private static class SubscribeParams {
+        SubscribeEnums type;
+        WarframeMissionTypeEnum missionType;
+        Integer tier;
+        String error;
 
-        MissionSubscribeUserCheckType ut = new MissionSubscribeUserCheckType();
-        ut.setSubscribe(subscribeEnums);
-        ut.setMissionTypeEnum(missionTypeEnum);
-        ut.setTierNum(tierNum);
-        List<MissionSubscribeUserCheckType> tls = new ArrayList<>();
-        tls.add(ut);
-        user.setTypeList(tls);
-        return user;
+        boolean hasError() {
+            return error != null || type == null || type == SubscribeEnums.ERROR;
+        }
+
+        String getErrorMessage() {
+            return error != null ? error : "无效的订阅类型";
+        }
     }
-
 
 }

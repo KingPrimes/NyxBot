@@ -1,44 +1,59 @@
 package com.nyx.bot.entity.warframe;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-@Data
+
+@Getter
+@Setter
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Table
 public class MissionSubscribeUser {
 
+    Long userId;
+    String userName;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long msUid;
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_id")
+    private MissionSubscribe missionSubscribe;
 
-    Long userId;
+    @OneToMany(mappedBy = "subscribeUser",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<MissionSubscribeUserCheckType> checkTypes = new HashSet<>();
 
-    String userName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MissionSubscribeUser that = (MissionSubscribeUser) o;
+        return Objects.equals(userId, that.userId) && Objects.equals(userName, that.userName) && Objects.equals(id, that.id);
+    }
 
-    //订阅的用户
-    // fetch 加载方式
-    // targetEntity 关联的目标实体类
-    // cascade 联级操作，增删改
-    @OneToMany(
-            fetch = FetchType.EAGER,
-            targetEntity = MissionSubscribeUserCheckType.class,
-            cascade = CascadeType.ALL
-    )
-    // name = 外键名称
-    // referencedColumnName = 被关联的键名称
-    // nullable = false 外键列不可为 null。
-    @JoinColumn(
-            name = "subUserCheckType",
-            referencedColumnName = "userId",
-            nullable = false
-    )
-    List<MissionSubscribeUserCheckType> typeList = new ArrayList<>();
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, userName, id);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("id", id)
+                .append("userId", userId)
+                .append("userName", userName)
+                .append("missionSubscribe", missionSubscribe)
+                .toString();
+    }
 }
