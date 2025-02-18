@@ -1,16 +1,15 @@
 package com.nyx.bot.controller.data.warframe;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class MissionSubscribeController extends BaseController {
         return success().put("data", Map.of("group", group));
     }
 
-    @PostMapping("/list")
+    /*@PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody MissionSubscribe ms) {
 
@@ -68,7 +67,7 @@ public class MissionSubscribeController extends BaseController {
                     return subscribe;
                 })
         );
-    }
+    }*/
 
 
 }
