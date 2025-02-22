@@ -1,5 +1,8 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -17,21 +21,24 @@ import java.util.Set;
 @Setter
 @Entity
 @Table
-public class MissionSubscribeUser {
+public class MissionSubscribeUser extends BaseEntity {
 
     Long userId;
     String userName;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotEmpty(message = "id.not.empty", groups = Validated.class)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_id")
+    @JsonIgnore
     private MissionSubscribe missionSubscribe;
 
     @OneToMany(mappedBy = "subscribeUser",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
     private Set<MissionSubscribeUserCheckType> checkTypes = new HashSet<>();
 
     @Override
@@ -54,6 +61,7 @@ public class MissionSubscribeUser {
                 .append("userId", userId)
                 .append("userName", userName)
                 .append("missionSubscribe", missionSubscribe)
+                .append("checkTypes", checkTypes)
                 .toString();
     }
 }

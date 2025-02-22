@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.exception.HtmlToImageException;
+import com.nyx.bot.exception.ServiceException;
 import com.nyx.bot.utils.I18nUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -97,8 +98,14 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Object MethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("MethodArgumentNotValidException", e);
+        log.warn("MethodArgumentNotValidException:{} -{}", e.getBindingResult().getFieldError().getCode(),e.getBindingResult().getFieldError().getDefaultMessage());
         return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getBindingResult().getFieldError().getDefaultMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = ServiceException.class)
+    public Object ServiceException(ServiceException e) {
+        return AjaxResult.error(HttpCodeEnum.ERROR, e.getMessage());
     }
 
     @ResponseBody

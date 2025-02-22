@@ -147,7 +147,7 @@ public class WarframeSubscribe {
                             //取相差的分钟
                             long date = DateUtils.getDateMin(states.getCetusCycle().getExpiry(), new Date());
                             //相差13分钟的时候发送提醒
-                            if (date == 13) {
+                            if (date == 13 || date == 5) {
                                 //发送提醒
                                 mss.handleUpdate(SubscribeEnums.CETUS_CYCLE, states);
                             }

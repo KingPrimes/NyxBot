@@ -2,8 +2,6 @@ package com.nyx.bot.repo.warframe.subscribe;
 
 import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.utils.CacheUtils;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -25,19 +23,8 @@ public interface MissionSubscribeRepository extends JpaRepository<MissionSubscri
      * @param pageable 分页规则
      * @return 分页数据
      */
-    /*@Cacheable(value = CacheUtils.SYSTEM,key = "#subGroup")*/
     @Query("select m from MissionSubscribe m where (:subGroup is null or m.subGroup = :subGroup)")
     Page<MissionSubscribe> findAllPageable(Long subGroup, Pageable pageable);
-
-
-    /**
-     * Cacheable 设置缓存
-     *
-     * @param subGroup 群号
-     */
-    @Cacheable(value = CacheUtils.SYSTEM, key = "#subGroup")
-    @Query("select m from MissionSubscribe m where (:subGroup is null or m.subGroup = :subGroup)")
-    MissionSubscribe findByGroupId(Long subGroup);
 
 
     @EntityGraph(attributePaths = {
@@ -45,9 +32,10 @@ public interface MissionSubscribeRepository extends JpaRepository<MissionSubscri
             "users.checkTypes"
     })
     @Query("""
-                SELECT s FROM MissionSubscribe s
-                JOIN s.users gc
-                WHERE gc.missionSubscribe = :type
+            SELECT s FROM MissionSubscribe s
+            JOIN s.users u
+            JOIN u.checkTypes t
+            WHERE t.subscribe = :type
             """)
     List<MissionSubscribe> findSubscriptions(@Param("type") SubscribeEnums type);
 
