@@ -1,6 +1,7 @@
 package com.nyx.bot.entity.warframe;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table
-public class MissionSubscribeUserCheckType {
+public class MissionSubscribeUserCheckType extends BaseEntity {
 
     //订阅类型
     //订阅类型枚举
@@ -39,6 +40,7 @@ public class MissionSubscribeUserCheckType {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subu_id")
+    @JsonIgnore
     private MissionSubscribeUser subscribeUser;
 
     @JsonIgnore

@@ -1,7 +1,8 @@
 package com.nyx.bot.entity.warframe;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.core.Views;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.aop.Validated;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,7 +23,6 @@ import java.util.Set;
 @Setter
 @Entity
 @Table
-@JsonView(Views.View.class)
 public class MissionSubscribe extends BaseEntity {
 
     String groupName;
@@ -31,6 +31,7 @@ public class MissionSubscribe extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotEmpty(message = "id.not.empty",groups = Validated.class)
     private Long id;
 
     @Column(unique = true)
@@ -40,6 +41,7 @@ public class MissionSubscribe extends BaseEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
     private Set<MissionSubscribeUser> users = new HashSet<>();
 
 
@@ -64,6 +66,7 @@ public class MissionSubscribe extends BaseEntity {
                 .append("subBotUid", subBotUid)
                 .append("id", id)
                 .append("subGroup", subGroup)
+                .append("users", users)
                 .toString();
     }
 }

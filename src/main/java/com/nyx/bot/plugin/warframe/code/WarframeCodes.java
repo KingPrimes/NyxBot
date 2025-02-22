@@ -391,7 +391,7 @@ public class WarframeCodes {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
         }
-        String str = event.getRawMessage().replace("订阅", "").trim();
+        String str = event.getRawMessage().replace("订阅", "").replace(" ", "").trim();
 
         if (str.isEmpty()) {
             OneBotLogInfoData data = getLogInfoData(bot, event, code);
@@ -420,7 +420,7 @@ public class WarframeCodes {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
         }
-        String str = event.getRawMessage().replace("取消订阅", "").trim();
+        String str = event.getRawMessage().replace("取消订阅", "").replace(" ", "").trim();
 
         if (str.isEmpty()) {
             OneBotLogInfoData data = getLogInfoData(bot, event, code);

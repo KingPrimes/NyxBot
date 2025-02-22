@@ -43,7 +43,7 @@ public class WarframeSubscribeCheck {
      * 参数解析增强方法（支持通配符）
      */
     private static SubscribeParams parseSubscribeParams(String raw) {
-        String[] parts = raw.replace("订阅", "").trim().split("-");
+        String[] parts = raw.split("-");
         SubscribeParams params = new SubscribeParams();
 
         try {
@@ -66,9 +66,9 @@ public class WarframeSubscribeCheck {
             params.error = """
                     参数错误，格式：订阅类型[必填]-任务类型[可选]-遗物等级[可选]
                     示例：
-                    订阅3 → 订阅所有裂隙
-                    订阅3-2 → 订阅所有捕获裂隙
-                    订阅3-2-5 → 订阅5级捕获裂隙
+                    订阅9     → 订阅所有裂隙
+                    订阅9-2   → 订阅所有捕获裂隙
+                    订阅9-2-4 → 订阅后纪捕获裂隙
                     """;
         }
         return params;
@@ -212,9 +212,15 @@ public class WarframeSubscribeCheck {
         Optional<MissionSubscribe> missionSubscribe = bean.findBySubGroup(subGroup);
 
         // 参数解析增强
-        String[] split = raw.replace("取消订阅", "").replace(" ", "").split("-");
+        String[] split = raw.split("-");
         if (split.length < 1 || split[0].isEmpty()) {
-            return "参数格式错误，示例：取消订阅3 或 取消订阅3-2-5";
+            return """
+                    参数错误，格式：订阅类型[必填]-任务类型[可选]-遗物等级[可选]
+                    示例：
+                    取消订阅9     → 取消订阅所有裂隙
+                    取消订阅9-2   → 取消订阅所有捕获裂隙
+                    取消订阅9-2-4 → 取消订阅后纪捕获裂隙
+                    """;
         }
 
         // 解析订阅类型
@@ -245,14 +251,6 @@ public class WarframeSubscribeCheck {
         } catch (NumberFormatException e) {
             return "参数包含非法数字";
         }
-        log.info("取消订阅参数解析结果：类型={}, 任务={}, 等级={}", subscribeEnums, missionTypeEnum, tierNum);
-        log.info("查询到的订阅数据: id={}， subGroup={}, groupName={}, subBotUid={}",
-                missionSubscribe.map(MissionSubscribe::getId).orElse(-1L),
-                missionSubscribe.map(MissionSubscribe::getSubGroup).orElse(-1L),
-                missionSubscribe.map(MissionSubscribe::getGroupName).orElse(""),
-                missionSubscribe.map(MissionSubscribe::getSubBotUid).orElse(-1L)
-
-        );
         Integer finalTierNum = tierNum;
         WarframeMissionTypeEnum finalMissionTypeEnum = missionTypeEnum;
         missionSubscribe.ifPresentOrElse(m -> {
@@ -283,7 +281,7 @@ public class WarframeSubscribeCheck {
                     m.getUsers().remove(user);
                     if (m.getUsers().isEmpty()) {
                         bean.delete(m);
-                        motion.append("已移除空订阅群组");
+                        motion.append("已移除空订阅群组\n");
                     }
                 }
             }

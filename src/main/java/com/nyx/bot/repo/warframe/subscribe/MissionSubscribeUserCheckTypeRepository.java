@@ -3,6 +3,8 @@ package com.nyx.bot.repo.warframe.subscribe;
 import com.nyx.bot.entity.warframe.MissionSubscribeUserCheckType;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.enums.WarframeMissionTypeEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +27,9 @@ public interface MissionSubscribeUserCheckTypeRepository extends JpaRepository<M
             @Param("type") SubscribeEnums type,
             @Param("missionType") WarframeMissionTypeEnum missionType,
             @Param("tier") Integer tier);
+
+    @Query("""
+            SELECT t FROM MissionSubscribeUserCheckType t WHERE t.subscribeUser.id = :id
+            """)
+    Page<MissionSubscribeUserCheckType> findAllBySUBU_ID(Long id, Pageable pageable);
 }
