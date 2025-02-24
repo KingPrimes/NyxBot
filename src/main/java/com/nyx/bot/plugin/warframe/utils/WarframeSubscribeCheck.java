@@ -257,7 +257,7 @@ public class WarframeSubscribeCheck {
             Set<MissionSubscribeUser> subUsers = m.getUsers();
             int removedCount = 0;
             List<MissionSubscribeUserCheckType> toRemove;
-            // 使用迭代器安全删除
+
             for (MissionSubscribeUser user : subUsers) {
                 if (!user.getUserId().equals(userUid)) continue;
 
