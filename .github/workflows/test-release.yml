@@ -17,6 +17,11 @@ jobs:
   build-release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      EX: ${{ secrets.E}}
+      DX: ${{ secrets.D}}
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -49,7 +54,12 @@ jobs:
           cp -r NyxBot-WebUI/resources/* src/main/resources/
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: |
+          echo "::add-mask::$EX"
+          echo "::add-mask::$DX"
+          echo "::add-mask::$USERNAME"
+          echo "::add-mask::$PASSWORD"
+          mvn clean package -Dex="$EX" -Ddx="$DX" -DUSERNAME="$USERNAME" -DPASSWORD="$PASSWORD"
 
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
