@@ -7,12 +7,15 @@ import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.res.GlobalStates;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.cache2k.extra.spring.SpringCache2kCache;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -21,7 +24,7 @@ public class CacheUtils {
     public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
 
-    public static final String USER = "user";
+    public static final String WARFRAME = "warframe";
 
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
 
@@ -162,5 +165,35 @@ public class CacheUtils {
      */
     public static <T> T get(String name, Object key, @NotNull Class<T> type) {
         return cm.getCache(name).get(key, type);
+    }
+
+    public static boolean exists(String name, Object key) {
+        return cm.getCache(name).get(key) != null;
+    }
+
+    /**
+     * 存入缓存并指定过期时间（动态设置）
+     * @param cacheName 缓存名称
+     * @param key 键
+     * @param value 值
+     * @param duration 时间长度
+     * @param unit 时间单位
+     */
+    public static void putWithExpiry(String cacheName, Object key, Object value, long duration, TimeUnit unit) {
+        Cache springCache = cm.getCache(cacheName);
+        if (springCache instanceof SpringCache2kCache) {
+            // 获取 Cache2k 原生缓存实例
+            org.cache2k.Cache<Object, Object> nativeCache = ((SpringCache2kCache) springCache).getNativeCache();
+            long expiryTime = System.currentTimeMillis() + unit.toMillis(duration);
+            // 通过 EntryProcessor 设置值和过期时间
+            nativeCache.invoke(key, entry -> {
+                entry.setValue(value);
+                entry.setExpiryTime(expiryTime);
+                return entry;
+            });
+        } else {
+            // 非 Cache2k 缓存实现时的回退逻辑
+            springCache.put(key, value);
+        }
     }
 }
