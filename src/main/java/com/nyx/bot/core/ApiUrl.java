@@ -1,15 +1,18 @@
 package com.nyx.bot.core;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.x;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 
 import java.util.List;
 
+@Slf4j
 public class ApiUrl {
 
 
@@ -86,7 +89,12 @@ public class ApiUrl {
      * @return 仲裁
      */
     public static List<ArbitrationPre> arbitrationPreList(String key) {
-        return JSON.parseArray(HttpUtils.sendGet(SpringUtils.getBean(x.class).d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        try {
+            return JSON.parseArray(HttpUtils.sendGet(SpringUtils.getBean(x.class).d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+        } catch (JSONException e) {
+            log.error("Get Arbitration Data Error: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**

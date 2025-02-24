@@ -26,6 +26,9 @@ public class ConfigTokenKeysController extends BaseController {
     @PostMapping
     public AjaxResult save(@RequestBody TokenKeys tokenKeys) {
         tokenKeys.setId(1L);
+        if (tokenKeys.getTks().contains("************")) {
+            return error();
+        }
         repository.save(tokenKeys);
         return success();
     }
