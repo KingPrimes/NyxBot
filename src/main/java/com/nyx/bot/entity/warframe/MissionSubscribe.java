@@ -1,64 +1,72 @@
 package com.nyx.bot.entity.warframe;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.core.Views;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.aop.Validated;
 import com.nyx.bot.core.dao.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * 订阅
  */
-@EqualsAndHashCode(callSuper = false)
-@Data
+@Getter
+@Setter
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subGroup"}))
-@JsonView(Views.View.class)
+@Table
 public class MissionSubscribe extends BaseEntity {
 
-    //订阅的群组
-    @Id
-    Long subGroup;
-
     String groupName;
-
-    //订阅的用户
-    // fetch 加载方式
-    // targetEntity 关联的目标实体类
-    // cascade 联级操作，增删改
-    @OneToMany(
-            fetch = FetchType.EAGER,
-            targetEntity = MissionSubscribeUser.class,
-            cascade = CascadeType.ALL
-    )
-    // name = 外键名称
-    // referencedColumnName = 被关联的键名称
-    // nullable = false 外键列不可为 null。
-    @JoinColumn(
-            name = "groupUid",
-            referencedColumnName = "subGroup",
-            nullable = false
-    )
-    List<MissionSubscribeUser> subUsers = new ArrayList<>();
-
-
-    @OneToMany(
-            fetch = FetchType.EAGER,
-            targetEntity = MissionSubscribeGroupCheckType.class,
-            cascade = CascadeType.ALL
-    )
-    @JoinColumn(
-            name = "subGroupCheckType",
-            referencedColumnName = "subGroup",
-            nullable = false
-    )
-    List<MissionSubscribeGroupCheckType> checkTypes = new ArrayList<>();
-
     //发送消息的Bot
     Long subBotUid;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotEmpty(message = "id.not.empty",groups = Validated.class)
+    private Long id;
+
+    @Column(unique = true)
+    private Long subGroup;
+
+    @OneToMany(mappedBy = "missionSubscribe",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
+    private Set<MissionSubscribeUser> users = new HashSet<>();
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MissionSubscribe that = (MissionSubscribe) o;
+        return Objects.equals(groupName, that.groupName) && Objects.equals(subBotUid, that.subBotUid) && Objects.equals(id, that.id) && Objects.equals(subGroup, that.subGroup);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), groupName, subBotUid, id, subGroup);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("groupName", groupName)
+                .append("subBotUid", subBotUid)
+                .append("id", id)
+                .append("subGroup", subGroup)
+                .append("users", users)
+                .toString();
+    }
 }
