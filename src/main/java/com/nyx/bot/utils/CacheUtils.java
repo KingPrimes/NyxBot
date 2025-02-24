@@ -2,7 +2,6 @@ package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.res.GlobalStates;
@@ -58,22 +57,12 @@ public class CacheUtils {
         if (arbitrationList == null || arbitrationList.isEmpty()) {
             if (key != null && !key.isEmpty()) {
                 arbitrationList = ApiUrl.arbitrationPreList(key);
-                setArbitration(arbitrationList);
+                if (arbitrationList != null) {
+                    setArbitration(arbitrationList);
+                }
             }
         }
         return arbitrationList;
-    }
-
-    public static void setUser(String token, SysUser user) {
-        set(USER, token, user);
-    }
-
-    public static SysUser getUser(String token) {
-        return get(USER, token, SysUser.class);
-    }
-
-    public static void delUser(String token) {
-        Objects.requireNonNull(cm.getCache(USER)).evict(token);
     }
 
     /**
