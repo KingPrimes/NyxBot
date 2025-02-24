@@ -129,8 +129,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     public static long getDateHour(Date endDate, Date nowDate) {
         // 获得两个时间的毫秒时间差异
         long diff = endDate.getTime() - nowDate.getTime();
-        // 计算差多少分钟
-        return diff % DAYS / HOURS;
+        // 计算差多少小时
+        return diff / HOURS;
     }
 
     /**
@@ -144,7 +144,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         // 获得两个时间的毫秒时间差异
         long diff = endDate.getTime() - nowDate.getTime();
         // 计算差多少分钟
-        return diff % DAYS % HOURS / MINUTES;
+        return diff / MINUTES;
     }
 
     /**
@@ -158,7 +158,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         // 获得两个时间的毫秒时间差异
         long diff = endDate.getTime() - nowDate.getTime();
         // 计算差多少秒//输出结果
-        return diff % DAYS % HOURS % MINUTES / SECONDS;
+        return diff / SECONDS;
     }
 
     /**

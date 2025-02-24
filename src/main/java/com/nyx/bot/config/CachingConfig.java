@@ -19,18 +19,22 @@ public class CachingConfig {
      */
     @Bean
     public CacheManager cacheManager() {
-        return new SpringCache2kCacheManager()
+        SpringCache2kCacheManager cacheManager = new SpringCache2kCacheManager()
                 .addCaches(
                         //配置名称为 warframe-socket-data 的缓存策略， eternal永不过期， entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_SOCKET_DATA).eternal(true).entryCapacity(1),
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10, TimeUnit.MINUTES),
-                        b -> b.name(CacheUtils.USER).expireAfterWrite(30, TimeUnit.MINUTES),
+                        b -> b.name(CacheUtils.WARFRAME),
                         // 配置名称为 global-states 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES).entryCapacity(1).expireAfterWrite(30, TimeUnit.MINUTES),
                         // 配置名称为 global-states-arbitration 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(2).expireAfterWrite(60, TimeUnit.MINUTES)
                 );
+        cacheManager.setAllowUnknownCache(true);
+        //cacheManager.defaultSetup(builder -> builder.entryCapacity(100).disableStatistics(true));
+        return cacheManager;
+
     }
 
 }
