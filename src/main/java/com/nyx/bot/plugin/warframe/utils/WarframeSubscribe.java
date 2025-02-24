@@ -10,9 +10,9 @@ import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.nyx.bot.plugin.warframe.utils.GlobalStatesUtils.takeTheDifferenceSet;
 
@@ -141,20 +141,16 @@ public class WarframeSubscribe {
                 //检查 夜灵平野 是否为空
                 Optional.ofNullable(states.getCetusCycle()).ifPresent(f -> {
                     //判断是否更新
-                    if (states.getCetusCycle().getState().toLowerCase(Locale.ROOT).equals("day")) {
-                        //判断相差的小时是否在一小时以内
-                        if (DateUtils.getDateHour(states.getCetusCycle().getExpiry(), new Date()) == 0) {
-                            //取相差的分钟
-                            long date = DateUtils.getDateMin(states.getCetusCycle().getExpiry(), new Date());
-                            //相差13分钟的时候发送提醒
-                            if (date == 13 || date == 5) {
-                                //发送提醒
-                                mss.handleUpdate(SubscribeEnums.CETUS_CYCLE, states);
-                            }
+                    long date = DateUtils.getDateMin(states.getCetusCycle().getExpiry(), new Date());
+                    //相差13分钟的时候发送提醒
+                    if (date >= 5 && date <= 12) {
+                        if (!CacheUtils.exists(CacheUtils.WARFRAME, f.getId())) {
+                            //发送提醒
+                            mss.handleUpdate(SubscribeEnums.CETUS_CYCLE, states);
+                            CacheUtils.putWithExpiry(CacheUtils.WARFRAME, f.getId(), true, 13, TimeUnit.MINUTES);
                         }
                     }
                 });
-
             }, () -> {
                 //更新数据
                 CacheUtils.setGlobalState(states);

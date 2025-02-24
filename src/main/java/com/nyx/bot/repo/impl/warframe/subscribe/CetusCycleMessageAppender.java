@@ -10,9 +10,9 @@ import com.nyx.bot.utils.onebot.Msg;
 
 import java.util.Date;
 
-public class CetusCycleMessageAppender implements MessageAppender{
+public class CetusCycleMessageAppender implements MessageAppender {
     @Override
     public void appendContent(Msg builder, SubscribeEnums enums, GlobalStates data, MissionSubscribe subscribe, MissionSubscribeUser user) {
-        builder.text(I18nUtils.message("warframe.up.cetusCycle") + DateUtils.getDiff(data.getCetusCycle().getExpiry(), new Date()));
+        builder.text(I18nUtils.message("warframe." + data.getCetusCycle().getState() + ".cetusCycle") + DateUtils.getDiff(data.getCetusCycle().getExpiry(), new Date()));
     }
 }
