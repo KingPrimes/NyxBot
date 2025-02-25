@@ -4,8 +4,6 @@ test:
 jwt:
   expiration: 3600
   secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
-e: @ex@
-d: @dx@
 #线程池
 async:
   executor:

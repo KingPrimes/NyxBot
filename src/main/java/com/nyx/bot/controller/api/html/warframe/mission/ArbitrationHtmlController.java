@@ -32,16 +32,21 @@ public class ArbitrationHtmlController {
     public String getHtml(Model model) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         GlobalStates.Arbitration arbitration = sgs.getArbitration();
-        arbitration.setNode(arbitration.getNode().
-                replace(
-                        StringUtils.quStr(arbitration.getNode()),
-                        trans.enToZh(StringUtils.quStr(arbitration.getNode())
-                        )
-                ));
-        arbitration.setType(trans.enToZh(arbitration.getType()));
-        arbitration.setEtc(DateUtils.getDiff((arbitration.getExpiry()), new Date(), true));
-        model.addAttribute("arbit", arbitration);
-        return "html/arbitration";
+        if (arbitration != null) {
+            arbitration.setNode(arbitration.getNode().
+                    replace(
+                            StringUtils.quStr(arbitration.getNode()),
+                            trans.enToZh(StringUtils.quStr(arbitration.getNode())
+                            )
+                    ));
+            arbitration.setType(trans.enToZh(arbitration.getType()));
+            arbitration.setEtc(DateUtils.getDiff((arbitration.getExpiry()), new Date(), true));
+            model.addAttribute("arbit", arbitration);
+            return "html/arbitration";
+        } else {
+            throw new DataNotInfoException("未获取到仲裁数据，请查看是否填写密钥！");
+        }
+
     }
 
     @GetMapping("/getArbitrationEx")

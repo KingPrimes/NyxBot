@@ -4,9 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
-import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
-import com.nyx.bot.utils.x;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 
@@ -67,6 +65,8 @@ public class ApiUrl {
 
     public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
 
+    public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30&key=%s";
+
     private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
 
     private static final String WARFRAME_PROFILE_STATS = "https://api.warframestat.us/profile/%s/stats";
@@ -90,7 +90,7 @@ public class ApiUrl {
      */
     public static List<ArbitrationPre> arbitrationPreList(String key) {
         try {
-            return JSON.parseArray(HttpUtils.sendGet(SpringUtils.getBean(x.class).d().formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+            return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
         } catch (JSONException e) {
             log.error("Get Arbitration Data Error: {}", e.getMessage());
             return null;
