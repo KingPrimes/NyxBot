@@ -25,21 +25,23 @@ public class TaskWarframeStatus {
     @Scheduled(cron = "0/120 * * * * ?")
     public void execute() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
-        GlobalStates.Arbitration arbitration = CacheUtils.getArbitration(
-                SpringUtils.getBean(TokenKeysRepository.class)
-                        .findAll()
-                        .stream()
-                        .map(TokenKeys::getTks)
-                        .filter(tks ->!tks.isEmpty())
-                        .findAny()
-                        .orElse("")
-        );
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            if (arbitration != null) {
+            GlobalStates.Arbitration arbitration = CacheUtils.getArbitration(
+                    SpringUtils.getBean(TokenKeysRepository.class)
+                            .findAll()
+                            .stream()
+                            .map(TokenKeys::getTks)
+                            .filter(tks -> !tks.isEmpty())
+                            .findAny()
+                            .orElse("")
+            );
+            if (arbitration != null && states != null) {
                 states.setArbitration(arbitration);
             }
-            WarframeSubscribe.isUpdated(states);
+            if (states != null) {
+                WarframeSubscribe.isUpdated(states);
+            }
         } else {
             log.error("Failed to get data!");
         }
