@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +83,6 @@ public class RivenAnalyseTrendCompute {
             return getString(medianValue, abs, i);
         }
 
-        @NotNull
         private String getString(double medianValue, double abs, double i) {
             double v = DoubleUtils.formatDouble4(((Math.abs(medianValue) - Math.abs(abs)) / Math.abs(medianValue)) * 100);
             return i > 0 ? "<span class=\"diff-high\">高：" + Math.abs(v) + "%</span>" :

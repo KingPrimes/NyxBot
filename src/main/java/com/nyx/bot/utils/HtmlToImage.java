@@ -7,7 +7,6 @@ import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.repo.HintRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.xhtmlrenderer.layout.SharedContext;
@@ -129,7 +128,6 @@ public class HtmlToImage {
         return str.toString();
     }
 
-    @NotNull
     private static StringBuilder getBuilder(String html, Hint hint) {
         StringBuilder str = new StringBuilder(html);
         if (str.indexOf("</body>") > 1) {
