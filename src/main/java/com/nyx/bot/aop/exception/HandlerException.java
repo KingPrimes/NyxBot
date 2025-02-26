@@ -30,7 +30,6 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = DataNotInfoException.class)
     public Object handlerDataNotInfoException(DataNotInfoException e) {
-        log.error("DataNotInfoException", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body("<body>" + e.getMessage() + "</body>");

@@ -47,6 +47,7 @@ public class WarframeSubscribeCheck {
         SubscribeParams params = new SubscribeParams();
 
         try {
+            log.info("订阅 参数解析：{}", raw);
             // 必填参数：订阅类型
             if (parts.length < 1) throw new IllegalArgumentException();
             params.type = parseSubscribeType(parts[0]);

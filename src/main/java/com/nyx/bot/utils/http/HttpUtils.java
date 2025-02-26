@@ -8,6 +8,7 @@ import com.nyx.bot.utils.SpringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import okhttp3.brotli.BrotliInterceptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.*;
@@ -100,7 +101,7 @@ public class HttpUtils {
                 }
             }
             client = new OkHttpClient().newBuilder()
-                    .addInterceptor(new BrotliInterceptor())
+                    .addInterceptor(BrotliInterceptor.INSTANCE)
                     .proxy(proxy)
                     //调用超时
                     .callTimeout(60, TimeUnit.SECONDS)
@@ -108,11 +109,8 @@ public class HttpUtils {
                     .connectTimeout(60, TimeUnit.SECONDS)
                     //读取超时
                     .readTimeout(60, TimeUnit.SECONDS)
-
                     .sslSocketFactory(sslSocketFactory, trustAllCerts)
-
                     .hostnameVerifier((home, seen) -> true)
-
                     .build();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new RuntimeException(e);
@@ -191,7 +189,7 @@ public class HttpUtils {
         }
     }
 
-    @NotNull
+
     private static Body getBody(Response response) {
         Body body = new Body();
         Optional.ofNullable(response.body()).ifPresentOrElse(r -> {
@@ -351,7 +349,7 @@ public class HttpUtils {
         }
     }
 
-    @NotNull
+
     private static Body getBodyForFile(Response response) throws IOException {
         InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
         Body body = new Body(inputToByte(inputStream, response.body().contentLength()), HttpCodeEnum.getCode(response.code()), response.headers());
