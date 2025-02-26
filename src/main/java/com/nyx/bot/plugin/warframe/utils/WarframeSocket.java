@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -77,7 +76,7 @@ public class WarframeSocket extends WebSocketListener {
     }
 
     @Override
-    public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
+    public void onFailure(@NotNull WebSocket webSocket, Throwable t, Response response) {
         log.info("链接失败：{},{}", t.getMessage(), response);
         super.onFailure(webSocket, t, response);
         log.info("链接已被关闭将于5秒后重新链接");
@@ -94,9 +93,7 @@ public class WarframeSocket extends WebSocketListener {
         SocketGlobalStates states = JSONObject.parseObject(text, SocketGlobalStates.class, JSONReader.Feature.SupportSmartMatch);
         if (!states.getEvent().equals("connected") && states.getEvent().equals("ws:update")) {
             if (states.getPacket().getLanguage().equals("en") && states.getPacket().getPlatform().equals("pc")) {
-                AsyncUtils.me().execute(() -> {
-                    WarframeSubscribe.isUpdated(states);
-                });
+                AsyncUtils.me().execute(() -> WarframeSubscribe.isUpdated(states));
 
             }
         }

@@ -10,7 +10,6 @@ import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 public class FissuresUtils {
-    @NotNull
+
     public static List<GlobalStates.Fissures> getFissures(Integer type) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         List<GlobalStates.Fissures> fissures = sgs.getFissures();
