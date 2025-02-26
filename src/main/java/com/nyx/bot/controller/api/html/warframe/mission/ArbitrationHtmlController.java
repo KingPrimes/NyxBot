@@ -44,7 +44,7 @@ public class ArbitrationHtmlController {
             model.addAttribute("arbit", arbitration);
             return "html/arbitration";
         } else {
-            throw new DataNotInfoException("未获取到仲裁数据，请查看是否填写密钥！");
+            throw new DataNotInfoException("The arbitration data was not obtained, please check whether to enter the key!");
         }
 
     }
