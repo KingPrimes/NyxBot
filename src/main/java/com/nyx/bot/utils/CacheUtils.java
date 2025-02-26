@@ -30,7 +30,7 @@ public class CacheUtils {
 
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
-    private static final int count = 0;
+    private static int COUNT = 0;
 
     public static GlobalStates getGlobalState() throws DataNotInfoException {
         GlobalStates data = cm.getCache(WARFRAME_SOCKET_DATA).get("data", GlobalStates.class);
@@ -98,7 +98,7 @@ public class CacheUtils {
                 });
         // 如何没有匹配的值则获取新的数据
         if (arbitration.get() == null) {
-            if (count > 3) {
+            if (COUNT > 3) {
                 return null;
             }
             return getArbitration(key);
@@ -171,11 +171,12 @@ public class CacheUtils {
 
     /**
      * 存入缓存并指定过期时间（动态设置）
+     *
      * @param cacheName 缓存名称
-     * @param key 键
-     * @param value 值
-     * @param duration 时间长度
-     * @param unit 时间单位
+     * @param key       键
+     * @param value     值
+     * @param duration  时间长度
+     * @param unit      时间单位
      */
     public static void putWithExpiry(String cacheName, Object key, Object value, long duration, TimeUnit unit) {
         Cache springCache = cm.getCache(cacheName);
