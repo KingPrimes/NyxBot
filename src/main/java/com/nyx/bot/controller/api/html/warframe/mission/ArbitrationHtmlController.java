@@ -39,6 +39,7 @@ public class ArbitrationHtmlController {
                             trans.enToZh(StringUtils.quStr(arbitration.getNode())
                             )
                     ));
+            arbitration.setEnemy(arbitration.getEnemy().replace("Infestation","Infested"));
             arbitration.setType(trans.enToZh(arbitration.getType()));
             arbitration.setEtc(DateUtils.getDiff((arbitration.getExpiry()), new Date(), true));
             model.addAttribute("arbit", arbitration);

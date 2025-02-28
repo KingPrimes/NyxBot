@@ -47,8 +47,10 @@ public class WarframeSubscribe {
 
                 //检查仲裁信息是否为空值
                 Optional.ofNullable(states.getArbitration()).ifPresentOrElse(f -> {
-                    if (!f.getId().equals(data.getArbitration().getId())) {
-                        mss.handleUpdate(SubscribeEnums.ARBITRATION, states);
+                    if (data.getArbitration() != null) {
+                        if (!f.getId().equals(data.getArbitration().getId())) {
+                            mss.handleUpdate(SubscribeEnums.ARBITRATION, states);
+                        }
                     }
                 }, () -> {
                     //为空则使用缓存中的仲裁信息覆盖
@@ -158,6 +160,7 @@ public class WarframeSubscribe {
         } catch (Exception e) {
             //设置数据
             CacheUtils.setGlobalState(states);
+            log.info("获取warframe数据失败:{}", e.getMessage(), e);
         }
 
     }

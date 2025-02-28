@@ -90,9 +90,14 @@ public class ApiUrl {
      */
     public static List<ArbitrationPre> arbitrationPreList(String key) {
         try {
-            return JSON.parseArray(HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key)).getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+            String body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key)).getBody();
+            if (body.contains("\"error\":\"")) {
+                String error = JSON.parseObject(body).getString("error");
+                log.warn("Get Arbitration Data Error:{}", error);
+                return null;
+            }
+            return JSON.parseArray(body, ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
         } catch (JSONException e) {
-            log.error("Get Arbitration Data Error: {}", e.getMessage());
             return null;
         }
     }
