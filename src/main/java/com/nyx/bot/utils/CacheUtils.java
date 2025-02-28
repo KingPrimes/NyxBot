@@ -87,6 +87,7 @@ public class CacheUtils {
                 .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
                 // 赋值
                 .ifPresentOrElse(a -> {
+                    arbitration.get().setId(a.getId());
                     arbitration.get().setActivation(a.getActivation());
                     arbitration.get().setExpiry(a.getExpiry());
                     arbitration.get().setNode(a.getNode());
