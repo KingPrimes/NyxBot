@@ -34,25 +34,12 @@ public class AlertsHtmlController {
         if (alerts.isEmpty()) {
             model.put("alerts", null);
         }
-        alerts.forEach(alert -> {
-            GlobalStates.Alerts.Mission mission = alert.getMission();
-            mission.setNode(mission.getNode().
-                    replace(
-                            StringUtils.quStr(mission.getNode()),
-                            trans.enToZh(StringUtils.quStr(mission.getNode())
-                            )
-                    ));
-            mission.setType(trans.enToZh(mission.getType()));
-            GlobalStates.Alerts.Mission.Reward reward = mission.getReward();
-            reward.getCountedItems().forEach(r -> r.setKey(trans.enToZh(r.getKey())));
-            alert.setEta(DateUtils.getDiff((alert.getExpiry()), new Date(), true));
-        });
+        getAlerts(alerts);
         model.put("alerts", alerts);
         return "html/alerts";
     }
 
-    @PostMapping("/postSubscribeAlertsHtml")
-    public String postSubscribeFissuresHtml(Model model, @RequestBody List<GlobalStates.Alerts> alerts) {
+    private void getAlerts(List<GlobalStates.Alerts> alerts) {
         alerts.forEach(alert -> {
             GlobalStates.Alerts.Mission mission = alert.getMission();
             mission.setNode(mission.getNode().
@@ -66,6 +53,11 @@ public class AlertsHtmlController {
             reward.getCountedItems().forEach(r -> r.setKey(trans.enToZh(r.getKey())));
             alert.setEta(DateUtils.getDiff((alert.getExpiry()), new Date(), true));
         });
+    }
+
+    @PostMapping("/postSubscribeAlertsHtml")
+    public String postSubscribeFissuresHtml(Model model, @RequestBody List<GlobalStates.Alerts> alerts) {
+        getAlerts(alerts);
         model.addAttribute("alerts", alerts);
         return "html/alerts";
     }
