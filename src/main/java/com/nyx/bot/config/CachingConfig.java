@@ -29,7 +29,7 @@ public class CachingConfig {
                         // 配置名称为 global-states 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES).entryCapacity(1).expireAfterWrite(30, TimeUnit.MINUTES),
                         // 配置名称为 global-states-arbitration 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(2).expireAfterWrite(60, TimeUnit.MINUTES)
+                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(1).expireAfterWrite(1, TimeUnit.DAYS)
                 );
         cacheManager.setAllowUnknownCache(true);
         //cacheManager.defaultSetup(builder -> builder.entryCapacity(100).disableStatistics(true));
