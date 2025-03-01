@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.res.ArbitrationPre;
+import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
@@ -93,7 +94,7 @@ public class ApiUrl {
             String body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key)).getBody();
             if (body.contains("\"error\":\"")) {
                 String error = JSON.parseObject(body).getString("error");
-                log.warn("Get Arbitration Data Error:{}", error);
+                log.warn("{}:{}", I18nUtils.message("error.warframe.arbitration"), error);
                 return null;
             }
             return JSON.parseArray(body, ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
