@@ -1,10 +1,16 @@
+version: '3.8'
+
 services:
   nyxbot:
+    image: kingprimes/nyxbot:latest
+    ports:
+      - "8080:8080"
     environment:
       - TZ=Asia/Shanghai
     volumes:
       - ./data:/app/data
-      - ./logs:/app/logs  # 建议取消注释以持久化日志
+      - ./logs:/app/logs
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 30s
