@@ -74,6 +74,9 @@ public class GlobalDirectivesPlugin {
                         bot.sendMsg(event, "权限不足！", false);
                     }
                 }
+                // 赏金
+                case WARFRAME_SYNDICATE_ENTRATI, WARFRAME_SYNDICATE_OSTRONS, WARFRAME_SYNDICATE_SOLARIS_UNITED ->
+                        WarframeCodes.syndicate(bot, event, codes);
 
                 //Warframe
                 //警报

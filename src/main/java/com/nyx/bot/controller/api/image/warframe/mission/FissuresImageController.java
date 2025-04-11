@@ -25,10 +25,11 @@ public class FissuresImageController {
     @ResponseBody
     public void postFissuresImage(HttpServletResponse response, @RequestBody OneBotLogInfoData data) throws IOException, HtmlToImageException {
         response.setHeader("content-type", "image/png");
-        int i = 0;
+        int i;
         switch (data.getCodes()) {
             case WARFRAME_FISSURES_EMPYREAN_PLUGIN -> i = 1;
             case WARFRAME_FISSURES_PATH_PLUGIN -> i = 2;
+            default -> i = 0;
         }
         response.getOutputStream().write(
                 HtmlToImage.converse(
