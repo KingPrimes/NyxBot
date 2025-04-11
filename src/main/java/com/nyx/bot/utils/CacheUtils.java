@@ -30,8 +30,6 @@ public class CacheUtils {
 
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
-    private static int COUNT = 0;
-
     public static GlobalStates getGlobalState() throws DataNotInfoException {
         GlobalStates data = cm.getCache(WARFRAME_SOCKET_DATA).get("data", GlobalStates.class);
         if (data == null) {
@@ -97,13 +95,6 @@ public class CacheUtils {
                     // 设置为空，说明缓存中没有匹配的值了
                     arbitration.set(null);
                 });
-        // 如何没有匹配的值则获取新的数据
-        if (arbitration.get() == null) {
-            if (COUNT > 3) {
-                return null;
-            }
-            return getArbitration(key);
-        }
         return arbitration.get();
     }
 

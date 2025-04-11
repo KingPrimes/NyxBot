@@ -9,6 +9,7 @@ import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
+import com.nyx.bot.enums.SyndicateKeyEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.plugin.warframe.utils.MarketUtils;
 import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
@@ -58,7 +59,6 @@ public class WarframeCodes {
         }
         sendErrorMsg(bot, event, body);
     }
-
 
     /**
      * 平原
@@ -171,7 +171,6 @@ public class WarframeCodes {
         sendErrorMsg(bot, event, body);
     }
 
-
     /**
      * 入侵
      */
@@ -245,13 +244,13 @@ public class WarframeCodes {
 
         OneBotLogInfoData data = getLogInfoData(bot, event, code);
 
-        //是否是满级
+        // 是否是满级
         data.setIsMax(false);
-        //是否是购买
+        // 是否是购买
         data.setIsBy(false);
-        //是否是买家
+        // 是否是买家
         data.setIsBy(false);
-        //平台
+        // 平台
         data.setForm(MarketFormEnums.PC);
 
         if (str.contains("满级") || str.contains("MAX")) {
@@ -267,7 +266,7 @@ public class WarframeCodes {
             str = (str.replaceAll("出售", "").replaceAll("卖家", "").replaceAll("SELL", ""));
             data.setIsBy(false);
         }
-        //获取平台
+        // 获取平台
         String finalStr = str;
         for (MarketFormEnums form : MarketFormEnums.values()) {
             if (finalStr.contains(form.getForm())) {
@@ -277,10 +276,10 @@ public class WarframeCodes {
             }
         }
 
-        //关键字
+        // 关键字
         data.setKey(str.replaceAll(code.getStr(), "").trim());
 
-        //发送POST请求获取生成得图片
+        // 发送POST请求获取生成得图片
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 "postMarketOrdersImage",
                 data);
@@ -318,6 +317,26 @@ public class WarframeCodes {
     }
 
     /**
+     * 赏金
+     */
+    public static void syndicate(Bot bot, AnyMessageEvent event,Codes code){
+        OneBotLogInfoData logInfoData = getLogInfoData(bot, event, code);
+        switch (code){
+            case WARFRAME_SYNDICATE_OSTRONS -> logInfoData.setData(SyndicateKeyEnum.OSTRONS.name());
+            case WARFRAME_SYNDICATE_ENTRATI -> logInfoData.setData(SyndicateKeyEnum.ENTRATI.name());
+            case WARFRAME_SYNDICATE_SOLARIS_UNITED -> logInfoData.setData(SyndicateKeyEnum.SOLARIS_UNITED.name());
+        }
+        HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
+                "postSyndicateMissionsImage",
+                logInfoData);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            bot.sendMsg(event,
+                    Msg.builder().imgBase64(body.getFile()).build(), false);
+        }
+        sendErrorMsg(bot, event, body);
+    }
+
+    /**
      * 紫卡属性计算
      */
     public static void ocrRivenCompute(Bot bot, AnyMessageEvent event, Codes code) {
@@ -350,11 +369,11 @@ public class WarframeCodes {
         if (Objects.isNull(ducats)) {
             bot.sendMsg(event, "获取ducat失败", false);
         }
-        switch (code) {
-            case WARFRAME_MARKET_GOD_DUMP ->
-                    data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getGodDump()));
-            case WARFRAME_MARKET_SILVER_DUMP ->
-                    data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getSilverDump()));
+        if (code.equals(Codes.WARFRAME_MARKET_GOD_DUMP)) {
+            data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getGodDump()));
+        }
+        if (code.equals(Codes.WARFRAME_MARKET_SILVER_DUMP)) {
+            data.setData(JSON.toJSONString(Objects.requireNonNull(ducats).getPayload().getSilverDump()));
         }
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postMarketDucatsImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
@@ -406,8 +425,7 @@ public class WarframeCodes {
                 bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), false).getData().getNickname(),
                 event.getGroupId(),
                 bot.getGroupInfo(event.getGroupId(), false).getData().getGroupName(),
-                str
-        );
+                str);
 
         bot.sendMsg(event, ms, false);
     }
@@ -433,11 +451,9 @@ public class WarframeCodes {
         String ms = new WarframeSubscribeCheck().userCancelSubscribe(
                 event.getUserId(),
                 event.getGroupId(),
-                str
-        );
+                str);
         bot.sendMsg(event, ms, false);
     }
-
 
     public static void relics(Bot bot, AnyMessageEvent event) {
         OneBotLogInfoData data = getLogInfoData(bot, event, Codes.WARFRAME_RELICS_PLUGIN);

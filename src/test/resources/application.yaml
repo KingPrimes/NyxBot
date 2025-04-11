@@ -32,6 +32,8 @@ spring:
   messages:
     # 国际化资源文件路径
     basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
 
   #定时任务
   task:

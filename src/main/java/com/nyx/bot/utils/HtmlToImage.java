@@ -132,14 +132,14 @@ public class HtmlToImage {
         StringBuilder str = new StringBuilder(html);
         if (str.indexOf("</body>") > 1) {
             if (hint != null) {
-                str.insert(str.indexOf("</body>"), "<div class=\"foot-by\">\n" +
+                str.insert(str.indexOf("</body>"), "<div class=\"foot-by\" style=\"text-align: center\">\n" +
                         "\tPosted by:KingPrimes\n" +
                         "\t" +
                         hint.getHint() +
                         "\n</div>\n");
             } else {
                 str.insert(str.indexOf("</body>"), """
-                        <div class="foot-by">
+                        <div class="foot-by" style="text-align: center">
                         \tPosted by:KingPrimes
                         </div>
                         """);
@@ -156,7 +156,7 @@ public class HtmlToImage {
      */
     private static ByteArrayOutputStream tmpHtmlToImageByteArray(String html, int width) {
         String path = HTML_PATH;
-        path = path + "/" + new Date().getTime() + ".html";
+        path = path + "/" + new Date().getTime() + StringUtils.getRandomString() + ".html";
         try {
             FileOutputStream fo = new FileOutputStream(path);
             OutputStreamWriter os = new OutputStreamWriter(fo, StandardCharsets.UTF_8);

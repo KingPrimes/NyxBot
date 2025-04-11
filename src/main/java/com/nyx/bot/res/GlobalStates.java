@@ -414,31 +414,59 @@ public class GlobalStates {
     @Data
     @EqualsAndHashCode(of = {"nodes", "jobs"}, callSuper = false)
     public static class SyndicateMissions extends BaseStatus {
+        /**
+         * 集团任务节点
+         */
         @JsonProperty("nodes")
         private List<String> nodes;
         @JsonProperty("eta")
         private String eta;
+        /**
+         * 任务列表
+         */
         @JsonProperty("jobs")
         private List<Jobs> jobs;
         @JsonProperty("syndicate")
         private String syndicate;
+        /**
+         * 派系
+         */
+        @JsonProperty("syndicateKey")
+        private String syndicateKey;
 
         @NoArgsConstructor
         @Data
         @EqualsAndHashCode(of = {"rewardPool"})
         public static class Jobs {
+            @JsonProperty("id")
+            private String id;
             @JsonProperty("activation")
             private String activation;
             @JsonProperty("expiry")
             private String expiry;
+            /**
+             * 奖励列表
+             */
             @JsonProperty("rewardPool")
             private List<String> rewardPool;
+            /**
+             * 任务类型
+             */
             @JsonProperty("type")
             private String type;
+            /**
+             * 敌人等级
+             */
             @JsonProperty("enemyLevels")
             private List<Integer> enemyLevels;
+            /**
+             *
+             */
             @JsonProperty("standingStages")
             private List<Integer> standingStages;
+            /**
+             * 最小段位要求
+             */
             @JsonProperty("minMR")
             private Integer minMR;
         }

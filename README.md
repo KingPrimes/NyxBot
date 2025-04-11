@@ -33,8 +33,8 @@
       3. 点击确定按钮
       4. 之后重启NyxBot程序即可
 3. 设置消息上报格式为 **CQ码**
-4. 安装[Java17 Oracle](https://www.oracle.com/java/technologies/downloads/#java17)
-   或 [Open Jdk 17](https://www.openlogic.com/openjdk-downloads)
+4. 安装[Java21 Oracle](https://www.oracle.com/java/technologies/downloads/#java21)
+   或 [Open Jdk 21](https://www.openlogic.com/openjdk-downloads)
 5. 下载[NyxBot](https://github.com/KingPrimes/NyxBot/releases)
 6. 打开命令行工具，跳转到 "NyxBot.jar" 所存放的目录 **启动命令** **java -jar NyxBot.jar**
 7. 如若8080端口被占用或你想要使用别的端口可在启动命令后方添加参数.
