@@ -6,7 +6,6 @@ import com.nyx.bot.res.GlobalStates;
 import com.nyx.bot.utils.SpringUtils;
 
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SyndicateMissionsUtils {
 
@@ -19,14 +18,13 @@ public class SyndicateMissionsUtils {
      */
     public static GlobalStates.SyndicateMissions getSyndicateMissions(GlobalStates gs, SyndicateKeyEnum syndicateKey) {
         TranslationService tr = SpringUtils.getBean(TranslationService.class);
-        AtomicReference<GlobalStates.SyndicateMissions> gsm = new AtomicReference<>(new GlobalStates.SyndicateMissions());
-        gs.getSyndicateMissions().stream()
+        return gs.getSyndicateMissions().stream()
                 // 过滤出指定集团派系
                 .filter(s -> s.getSyndicateKey().equals(syndicateKey.getKey()))
                 // 获取指定集团派系的任务
                 .findFirst()
                 // 设置任务
-                .ifPresent(sm -> {
+                .map(sm -> {
                     // 设置任务奖励
                     sm.setJobs(sm.getJobs().stream()
                             .peek(j -> {
@@ -55,8 +53,7 @@ public class SyndicateMissionsUtils {
                         default -> {
                         }
                     }
-                    gsm.set(sm);
-                });
-        return gsm.get();
+                    return sm;
+                }).orElse(new GlobalStates.SyndicateMissions());
     }
 }
