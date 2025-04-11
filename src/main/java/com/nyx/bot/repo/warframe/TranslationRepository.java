@@ -7,13 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Resource
-public interface TranslationRepository extends JpaRepository<Translation, Long>, JpaSpecificationExecutor<Translation>, PagingAndSortingRepository<Translation, Long> {
+public interface TranslationRepository extends JpaRepository<Translation, Long>, JpaSpecificationExecutor<Translation> {
     Optional<Translation> findByEn(String en);
 
     List<Translation> findByEnLike(String en);
