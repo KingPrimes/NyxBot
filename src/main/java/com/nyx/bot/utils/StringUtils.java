@@ -149,6 +149,13 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
+     * 去除空格包含特殊空格
+     */
+    public static String trimEx(String str) {
+        return (str == null ? "" : str.replaceAll("[\\s\\u00A0]+", "").trim());
+    }
+
+    /**
      * 截取字符串
      *
      * @param str   字符串

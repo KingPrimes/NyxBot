@@ -13,4 +13,9 @@ public class testInitData {
     void initAlias() {
         WarframeDataSource.getRivenTrend();
     }
+
+    @Test
+    void initTranslation() {
+        WarframeDataSource.initTranslation();
+    }
 }
