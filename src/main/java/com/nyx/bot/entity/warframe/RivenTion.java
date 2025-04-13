@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
@@ -68,7 +69,7 @@ public class RivenTion extends BaseEntity {
         this.urlName = tr.urlName;
         this.exclusiveTo = tr.exclusiveTo;
     }
-
+    @JsonIgnore
     public String getEquation() {
         return this.effect + this.group + this.negativeOnly + this.positiveIsNegative + this.prefix + this.searchOnly + this.suffix + this.units + this.urlName + this.exclusiveTo;
     }

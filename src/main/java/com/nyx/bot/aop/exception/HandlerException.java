@@ -30,7 +30,7 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = DataNotInfoException.class)
     public Object handlerDataNotInfoException(DataNotInfoException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body("<body>" + e.getMessage() + "</body>");
     }
@@ -39,7 +39,7 @@ public class HandlerException {
     @ExceptionHandler(value = HtmlToImageException.class)
     public Object handlerHtmlToImageException(HtmlToImageException e) {
         log.error("HtmlToImageException", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body(e.getMessage());
     }
@@ -49,7 +49,7 @@ public class HandlerException {
     @ExceptionHandler(value = TemplateInputException.class)
     public Object handlerTemplateInputException(TemplateInputException html) {
         log.error("TemplateInputException", html);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body(html.getMessage());
     }

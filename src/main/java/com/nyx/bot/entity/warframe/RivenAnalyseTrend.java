@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
@@ -59,7 +60,7 @@ public class RivenAnalyseTrend extends BaseEntity {
         this.shotgun = rat.shotgun;
         this.suffix = rat.suffix;
     }
-
+    @JsonIgnore
     public String getEquation() {
         return archwing + melle + name + pistol + prefix + rifle + shotgun + suffix;
     }

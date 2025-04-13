@@ -20,7 +20,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -157,14 +156,10 @@ public class HttpUtils {
      * @return 返回的文本
      */
     public static Body sendGet(String url, String param, Headers.Builder headers) {
-        try (
-
-                Response response = client.newCall(send(url, param, headers)).execute()
-        ) {
-            //返回体
+        Request request = send(url, param, headers);
+        try (Response response = client.newCall(request).execute()) { // 关键点：自动关闭 Response
             Body body = getBody(response);
             body.setUrl(url);
-            //log.debug("Url：{}，Param:{} TakeTime：{}ms", url, param, body.getTakeTime());
             return body;
         } catch (IOException e) {
             return new Body(HttpCodeEnum.ERROR);
@@ -192,25 +187,19 @@ public class HttpUtils {
 
     private static Body getBody(Response response) {
         Body body = new Body();
-        Optional.ofNullable(response.body()).ifPresentOrElse(r -> {
-            //响应体
-            try {
-                body.setBody(r.string());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try (ResponseBody responseBody = response.body()) { // 自动关闭 ResponseBody
+            if (responseBody != null) {
+                body.setBody(responseBody.string());
+                body.setCode(HttpCodeEnum.getCode(response.code()));
+                body.setHeaders(response.headers());
+                body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
+            } else {
+                body.setCode(HttpCodeEnum.getCode(response.code()));
             }
-            //响应code
-            body.setCode(HttpCodeEnum.getCode(response.code()));
-            //响应头
-            body.setHeaders(response.headers());
-            //响应时间
-            body.setTakeTime(response.receivedResponseAtMillis() - response.sentRequestAtMillis());
-
-            r.close();
-        }, () -> {
-            body.setCode(HttpCodeEnum.getCode(response.code()));
-            response.close();
-        });
+        } catch (IOException e) {
+            log.error("读取响应体失败", e);
+            body.setCode(HttpCodeEnum.ERROR);
+        }
         return body;
     }
 
@@ -324,27 +313,25 @@ public class HttpUtils {
      * @return byte[] 文件
      */
     public static Body sendPostForFile(String url, String json) {
-        Response response;
-        try {
-            Headers.Builder headers = new Headers.Builder();
-            headers.add("Accept-Encoding", "application/octet-stream");
-            RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(requestBody)
-                    .headers(headers.build())
-                    .build();
-            response = client.newCall(request).execute();
+        Headers.Builder headers = new Headers.Builder();
+        headers.add("Accept-Encoding", "application/octet-stream");
+        RequestBody requestBody = RequestBody.create(json, MEDIA_TYPE_JSON);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .headers(headers.build())
+                .build();
+
+        try (Response response = client.newCall(request).execute()) { // 自动关闭 Response
             if (!response.isSuccessful()) {
-                log.warn("Response Code Is Not Successful code:{},message:{}", response.code(), response.message());
+                log.warn("请求失败 code:{}, message:{}", response.code(), response.message());
                 return new Body(HttpCodeEnum.ERROR);
             }
             Body body = getBodyForFile(response);
             body.setUrl(url);
             return body;
-
         } catch (IOException e) {
-            log.warn("An exception occurred in the initiation request", e);
+            log.warn("请求异常", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }
