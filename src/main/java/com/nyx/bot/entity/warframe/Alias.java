@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.annotation.NotEmpty;
@@ -53,6 +54,7 @@ public class Alias extends BaseEntity {
         return cn.matches("^[\\u4e00-\\u9fa5]+$");
     }
 
+    @JsonIgnore
     public String getEquation() {
         return cn + en;
     }

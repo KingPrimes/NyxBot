@@ -1,10 +1,12 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
+import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,8 +49,9 @@ public class Translation extends BaseEntity {
         this.isSet = translation.isSet;
     }
 
+    @JsonIgnore
     public String getEquation() {
-        return cn + en + isPrime + isSet;
+        return StringUtils.trimEx(cn.toUpperCase()) + StringUtils.trimEx(en.toUpperCase());
     }
 
     @PrePersist

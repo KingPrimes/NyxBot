@@ -1,5 +1,6 @@
 package com.nyx.bot.entity.warframe;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
@@ -33,7 +34,7 @@ public class RivenTionAlias extends BaseEntity {
         this.en = ra.en;
         this.cn = ra.cn;
     }
-
+    @JsonIgnore
     public String getEquation() {
         return en + cn;
     }
