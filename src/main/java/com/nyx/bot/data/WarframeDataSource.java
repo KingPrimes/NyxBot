@@ -22,11 +22,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -292,19 +294,9 @@ public class WarframeDataSource {
         List<Alias> aliasList = JSON.parseArray(new File(DATA_SOURCE_PATH + "alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Alias.class);
         AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
 
-        Map<String, Alias> allMap = aliasR.findAll().stream()
-                .collect(Collectors.toMap(
-                        Alias::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> oldVal
-                ));
+        Map<String, Alias> allMap = createMap(aliasR.findAll(), Alias::getEquation, (oldVal, newVal) -> oldVal);
 
-        Map<String, Alias> uniqueTranslations = aliasList.stream()
-                .collect(Collectors.toMap(
-                        Alias::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> newVal
-                ));
+        Map<String, Alias> uniqueTranslations = createMap(aliasList, Alias::getEquation, (oldVal, newVal) -> oldVal);
 
         List<Alias> list = uniqueTranslations.values().stream()
                 .filter(item -> !allMap.containsKey(item.getEquation()))
@@ -323,19 +315,9 @@ public class WarframeDataSource {
         List<RivenTion> rivenTions = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTion.class);
         RivenTionRepository records = SpringUtils.getBean(RivenTionRepository.class);
 
-        Map<String, RivenTion> allMap = records.findAll().stream()
-                .collect(Collectors.toMap(
-                        RivenTion::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> oldVal
-                ));
+        Map<String, RivenTion> allMap = createMap(records.findAll(), RivenTion::getEquation, (oldVal, newVal) -> oldVal);
 
-        Map<String, RivenTion> uniqueTranslations = rivenTions.stream()
-                .collect(Collectors.toMap(
-                        RivenTion::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> newVal
-                ));
+        Map<String, RivenTion> uniqueTranslations = createMap(rivenTions, RivenTion::getEquation, (oldVal, newVal) -> oldVal);
 
         List<RivenTion> list = uniqueTranslations.values().stream()
                 .filter(item -> !allMap.containsKey(item.getEquation()))
@@ -353,19 +335,9 @@ public class WarframeDataSource {
         List<RivenTionAlias> rivenTionAliases = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion_alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTionAlias.class);
         RivenTionAliasRepository repository = SpringUtils.getBean(RivenTionAliasRepository.class);
 
-        Map<String, RivenTionAlias> allMap = repository.findAll().stream()
-                .collect(Collectors.toMap(
-                        RivenTionAlias::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> oldVal
-                ));
+        Map<String, RivenTionAlias> allMap = createMap(repository.findAll(), RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
 
-        Map<String, RivenTionAlias> uniqueTranslations = rivenTionAliases.stream()
-                .collect(Collectors.toMap(
-                        RivenTionAlias::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> newVal
-                ));
+        Map<String, RivenTionAlias> uniqueTranslations = createMap(rivenTionAliases, RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
 
         List<RivenTionAlias> list = uniqueTranslations.values().stream()
                 .filter(item -> !allMap.containsKey(item.getEquation()))
@@ -382,19 +354,10 @@ public class WarframeDataSource {
         log.info("Start initializing your translation data!");
         List<Translation> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "translation.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Translation.class);
         TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
-        Map<String, Translation> allMap = t.findAll().stream()
-                .collect(Collectors.toMap(
-                        Translation::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> oldVal
-                ));
 
-        Map<String, Translation> uniqueTranslations = translations.stream()
-                .collect(Collectors.toMap(
-                        Translation::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> newVal
-                ));
+        Map<String, Translation> allMap = createMap(t.findAll(), Translation::getEquation, (oldVal, newVal) -> oldVal);
+
+        Map<String, Translation> uniqueTranslations = createMap(translations, Translation::getEquation, (oldVal, newVal) -> oldVal);
 
         List<Translation> list = uniqueTranslations.values().stream()
                 .filter(item -> !allMap.containsKey(item.getEquation()))
@@ -411,19 +374,9 @@ public class WarframeDataSource {
         List<RivenAnalyseTrend> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_analyse_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenAnalyseTrend.class);
         RivenAnalyseTrendRepository r = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
 
-        Map<String, RivenAnalyseTrend> allMap = r.findAll().stream()
-                .collect(Collectors.toMap(
-                        RivenAnalyseTrend::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> oldVal
-                ));
+        Map<String, RivenAnalyseTrend> allMap = createMap(r.findAll(), RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
 
-        Map<String, RivenAnalyseTrend> uniqueTranslations = translations.stream()
-                .collect(Collectors.toMap(
-                        RivenAnalyseTrend::getEquation,
-                        Function.identity(),
-                        (oldVal, newVal) -> newVal
-                ));
+        Map<String, RivenAnalyseTrend> uniqueTranslations = createMap(translations, RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
 
         List<RivenAnalyseTrend> list = uniqueTranslations.values().stream()
                 .filter(item -> !allMap.containsKey(item.getEquation()))
@@ -440,16 +393,19 @@ public class WarframeDataSource {
         log.info("Start initializing RivenTrend data!");
         List<RivenTrend> rt = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTrend.class);
         RivenTrendRepository r = SpringUtils.getBean(RivenTrendRepository.class);
-        if (!r.findAll().isEmpty()) {
-            List<RivenTrend> all = r.findAll();
-            List<RivenTrend> list = rt.stream().filter(item ->
-                    !all.stream().collect(Collectors.toMap(RivenTrend::getEquation, value -> value))
-                            .containsKey(item.getEquation())).map(RivenTrend::new).toList();
-            log.info("Total updates Warframe.RivenTrend {} data！", r.saveAll(list).size());
-        } else {
-            log.info("Total updates Warframe.RivenTrend {} data！", r.saveAll(rt.stream().map(RivenTrend::new).toList()).size());
-        }
-        return rt.size();
+
+        Map<String, RivenTrend> allMap = createMap(r.findAll(), RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
+
+        Map<String, RivenTrend> uniqueTranslations = createMap(rt, RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
+
+        List<RivenTrend> list = uniqueTranslations.values().stream()
+                .filter(item -> !allMap.containsKey(item.getEquation()))
+                .map(RivenTrend::new)
+                .toList();
+
+        log.info("Total updates Warframe.RivenTrend {} data！", r.saveAll(list).size());
+
+        return list.size();
     }
 
     public static Boolean cloneDataSource() {
@@ -467,6 +423,10 @@ public class WarframeDataSource {
             }
         }
         return flag;
+    }
+
+    private static <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
+        return items.stream().collect(Collectors.toMap(keyMapper, Function.identity(), mergeFunction));
     }
 
 }
