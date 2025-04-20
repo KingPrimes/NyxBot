@@ -30,7 +30,7 @@ public class ApiUrl {
     public static final List<String> DATA_SOURCE_GIT = List.of(
             "https://github.com/KingPrimes/DataSource",
             "https://gitcode.com/KingPrimes/DataSource",
-            "https://gitlab.com/KingPrimes/DataSource",
+            "https://jihulab.com/KingPrimes/DataSource",
             "https://gitee.com/KingPrime/DataSource"
     );
 
