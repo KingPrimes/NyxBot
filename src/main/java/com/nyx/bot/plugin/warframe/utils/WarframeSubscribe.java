@@ -160,7 +160,7 @@ public class WarframeSubscribe {
         } catch (Exception e) {
             //设置数据
             CacheUtils.setGlobalState(states);
-            log.info("获取warframe数据失败:{}", e.getMessage(), e);
+            //log.info("获取warframe数据失败:{}", e.getMessage(), e);
         }
 
     }
