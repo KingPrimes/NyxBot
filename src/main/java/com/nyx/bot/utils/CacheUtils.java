@@ -16,7 +16,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class CacheUtils {
@@ -54,11 +53,24 @@ public class CacheUtils {
      * @return List<ArbitrationPre>
      */
     public static List<ArbitrationPre> getArbitrationList(String key) {
-        List<ArbitrationPre> arbitrationList = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION).get("data", List.class);
-        if (arbitrationList == null || arbitrationList.isEmpty()) {
-            if (key != null && !key.isEmpty()) {
+        return loadArbitrationList(key);
+    }
+
+    private static List<ArbitrationPre> loadArbitrationList(String key) {
+        Cache cache = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION);
+        List<ArbitrationPre> arbitrationList;
+        if (cache == null) {
+            arbitrationList = ApiUrl.arbitrationPreList(key);
+            if (!arbitrationList.isEmpty()) {
+                setArbitration(arbitrationList);
+            }
+        } else {
+            @SuppressWarnings("unchecked")
+            List<ArbitrationPre> cachedList = (List<ArbitrationPre>) cache.get("data", List.class);
+            arbitrationList = cachedList;
+            if (arbitrationList.isEmpty() && key != null && !key.isEmpty()) {
                 arbitrationList = ApiUrl.arbitrationPreList(key);
-                if (arbitrationList != null) {
+                if (!arbitrationList.isEmpty()) {
                     setArbitration(arbitrationList);
                 }
             }
@@ -71,31 +83,31 @@ public class CacheUtils {
      *
      * @return 当前数据
      */
-    public static GlobalStates.Arbitration getArbitration(String key) {
-        List<ArbitrationPre> arbitrationList = getArbitrationList(key);
-        if (arbitrationList == null || arbitrationList.isEmpty()) {
-            return null;
+    public static Optional<GlobalStates.Arbitration> getArbitration(String key) {
+        List<ArbitrationPre> arbitrationList = loadArbitrationList(key);
+        if (arbitrationList.isEmpty()) {
+            return Optional.empty();
         }
-        AtomicReference<GlobalStates.Arbitration> arbitration = new AtomicReference<>(new GlobalStates.Arbitration());
+        GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
         long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
-        arbitrationList.stream()
+        ArbitrationPre a = arbitrationList.stream()
                 //过滤掉过期的数据
-                .filter(a -> a.getExpiry().getTime() - milli > 0)
+                .filter(ar -> ar.getExpiry().getTime() - milli > 0)
                 //判断两个时间相差的毫秒数，并取最小值的元素
                 .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
-                // 赋值
-                .ifPresentOrElse(a -> {
-                    arbitration.get().setId(a.getId());
-                    arbitration.get().setActivation(a.getActivation());
-                    arbitration.get().setExpiry(a.getExpiry());
-                    arbitration.get().setNode(a.getNode());
-                    arbitration.get().setType(a.getType());
-                    arbitration.get().setEnemy(a.getEnemy());
-                }, () -> {
-                    // 设置为空，说明缓存中没有匹配的值了
-                    arbitration.set(null);
-                });
-        return arbitration.get();
+                .orElse(null);
+        if (a == null) {
+            setArbitration(ApiUrl.arbitrationPreList(key));
+            return Optional.empty();
+        }
+        arbitration.setId(a.getId());
+        arbitration.setActivation(a.getActivation());
+        arbitration.setExpiry(a.getExpiry());
+        arbitration.setNode(a.getNode());
+        arbitration.setType(a.getType());
+        arbitration.setEnemy(a.getEnemy());
+
+        return Optional.of(arbitration);
     }
 
 
