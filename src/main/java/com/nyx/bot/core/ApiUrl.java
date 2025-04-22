@@ -3,12 +3,14 @@ package com.nyx.bot.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.res.ArbitrationPre;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -29,8 +31,9 @@ public class ApiUrl {
      */
     public static final List<String> DATA_SOURCE_GIT = List.of(
             "https://github.com/KingPrimes/DataSource",
-            "https://gitcode.com/KingPrimes/DataSource",
             "https://jihulab.com/KingPrimes/DataSource",
+            "https://gitlab.com/KingPrimes/DataSource.git",
+            "https://gitcode.com/KingPrimes/DataSource",
             "https://gitee.com/KingPrime/DataSource"
     );
 
@@ -91,15 +94,18 @@ public class ApiUrl {
      */
     public static List<ArbitrationPre> arbitrationPreList(String key) {
         try {
-            String body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key)).getBody();
-            if (body.contains("\"error\":\"")) {
-                String error = JSON.parseObject(body).getString("error");
-                log.warn("{}:{}", I18nUtils.message("error.warframe.arbitration"), error);
-                return null;
+            HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key));
+            if(!body.getCode().equals(HttpCodeEnum.SUCCESS)){
+                log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
+                return Collections.emptyList();
             }
-            return JSON.parseArray(body, ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+            if (body.getBody().isEmpty()) {
+                log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
+                return Collections.emptyList();
+            }
+            return JSON.parseArray(body.getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
         } catch (JSONException e) {
-            return null;
+            return Collections.emptyList();
         }
     }
 
