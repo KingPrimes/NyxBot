@@ -18,6 +18,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @Slf4j
 public class TaskWarframeStatus {
@@ -27,7 +29,7 @@ public class TaskWarframeStatus {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            GlobalStates.Arbitration arbitration = CacheUtils.getArbitration(
+            Optional<GlobalStates.Arbitration> arbitration = CacheUtils.getArbitration(
                     SpringUtils.getBean(TokenKeysRepository.class)
                             .findAll()
                             .stream()
@@ -36,10 +38,8 @@ public class TaskWarframeStatus {
                             .findAny()
                             .orElse("")
             );
-            if (arbitration != null && states != null) {
-                states.setArbitration(arbitration);
-            }
             if (states != null) {
+                arbitration.ifPresent(states::setArbitration);
                 WarframeSubscribe.isUpdated(states);
             }
         } else {
