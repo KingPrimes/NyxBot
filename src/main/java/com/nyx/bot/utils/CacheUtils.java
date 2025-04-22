@@ -52,21 +52,23 @@ public class CacheUtils {
      *
      * @return List<ArbitrationPre>
      */
-    @SuppressWarnings("unchecked")
     public static List<ArbitrationPre> getArbitrationList(String key) {
-        Cache cache = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION);
-        if (cache == null) {
-            List<ArbitrationPre> arbitrationPres = ApiUrl.arbitrationPreList(key);
-            if (!arbitrationPres.isEmpty()) {
-                setArbitration(arbitrationPres);
-            }
-            return arbitrationPres;
-        }
+        return loadArbitrationList(key);
+    }
 
-        // 类型安全转换
-        List<ArbitrationPre> arbitrationList = (List<ArbitrationPre>) cache.get("data", List.class);
-        if (arbitrationList.isEmpty()) {
-            if (key != null && !key.isEmpty()) {
+    private static List<ArbitrationPre> loadArbitrationList(String key) {
+        Cache cache = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION);
+        List<ArbitrationPre> arbitrationList;
+        if (cache == null) {
+            arbitrationList = ApiUrl.arbitrationPreList(key);
+            if (!arbitrationList.isEmpty()) {
+                setArbitration(arbitrationList);
+            }
+        } else {
+            @SuppressWarnings("unchecked")
+            List<ArbitrationPre> cachedList = (List<ArbitrationPre>) cache.get("data", List.class);
+            arbitrationList = cachedList;
+            if (arbitrationList.isEmpty() && key != null && !key.isEmpty()) {
                 arbitrationList = ApiUrl.arbitrationPreList(key);
                 if (!arbitrationList.isEmpty()) {
                     setArbitration(arbitrationList);
@@ -82,7 +84,7 @@ public class CacheUtils {
      * @return 当前数据
      */
     public static Optional<GlobalStates.Arbitration> getArbitration(String key) {
-        List<ArbitrationPre> arbitrationList = getArbitrationList(key);
+        List<ArbitrationPre> arbitrationList = loadArbitrationList(key);
         if (arbitrationList.isEmpty()) {
             return Optional.empty();
         }
