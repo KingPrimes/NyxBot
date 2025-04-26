@@ -43,7 +43,7 @@ public class TaskWarframeStatus {
                 WarframeSubscribe.isUpdated(states);
             }
         } else {
-            log.error("Failed to get data!");
+            log.error("无法获取数据！");
         }
     }
 

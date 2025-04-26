@@ -27,7 +27,7 @@ public class FileUtils {
             b = new byte[len];
             inputStream.read(b);
         } catch (Exception e) {
-            log.error("read file error:{}", e.getMessage());
+            log.error("读取文件错误:{}", e.getMessage());
         }
         return new String(b, StandardCharsets.UTF_8);
     }
@@ -57,7 +57,7 @@ public class FileUtils {
         try (FileOutputStream stream = new FileOutputStream(file)) {
             stream.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            log.error("write file error:{}", e.getMessage());
+            log.error("写入文件错误:{}", e.getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ public class FileUtils {
         try (FileOutputStream stream = new FileOutputStream(file)) {
             stream.write(content);
         } catch (Exception e) {
-            log.error("write file error:{}", e.getMessage());
+            log.error("写入文件错误:{}", e.getMessage());
         }
     }
 

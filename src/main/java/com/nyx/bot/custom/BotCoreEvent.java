@@ -19,7 +19,7 @@ public class BotCoreEvent extends CoreEvent {
 
     @Override
     public void online(Bot bot) {
-        log.info("The bot has established links BotId：{} -- Time：{}", bot.getSelfId(), DateUtils.format(new Date(), DateUtils.YYYY));
+        log.info("链接的机器人ID：{} -- 链接时间：{}", bot.getSelfId(), DateUtils.format(new Date(), DateUtils.YYYY));
     }
 
     @Override
@@ -27,9 +27,9 @@ public class BotCoreEvent extends CoreEvent {
         try {
             session.close();
         } catch (IOException e) {
-            log.warn("Bot offline", e);
+            log.warn("机器人离线", e);
         }
-        log.info("Bot {} The link is broken", account);
+        log.info("机器人 {} 链接已断开", account);
     }
 
     @Override

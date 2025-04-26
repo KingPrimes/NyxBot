@@ -10,7 +10,6 @@ import com.nyx.bot.entity.warframe.OrdersItems;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
+
 @RestController
 @RequestMapping("/data/warframe/market")
 public class OrdersItemsController extends BaseController {

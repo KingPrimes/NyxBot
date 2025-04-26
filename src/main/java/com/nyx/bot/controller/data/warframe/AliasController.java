@@ -13,7 +13,6 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
+
 @RestController
 @RequestMapping("/data/warframe/alias")
 public class AliasController extends BaseController {

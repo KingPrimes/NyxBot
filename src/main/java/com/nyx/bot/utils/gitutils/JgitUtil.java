@@ -449,7 +449,7 @@ class LoggingProgressMonitor extends BatchingProgressMonitor {
         super.beginTask(title, work);
         startTime = Instant.now(); // 记录任务开始时间
         currentTaskName = title;// 存储当前任务的名称
-        log.info("start: {}", title); // 输出开始克隆的日志
+        log.info("开始: {}", title); // 输出开始克隆的日志
     }
 
     @Override
@@ -461,19 +461,19 @@ class LoggingProgressMonitor extends BatchingProgressMonitor {
     protected void onEndTask(String taskName, int workCurr, Duration duration) {
         Duration elapsed = Duration.between(startTime, Instant.now()); // 计算已用时间
         long seconds = elapsed.getSeconds();
-        log.info("task: {} complete, unavailable: {}s", taskName, seconds);
+        log.info("任务：{} 完成，耗时：{}s", taskName, seconds);
     }
 
     @Override
     protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
         if (percentDone / 10 > lastLoggedPercent / 10) { // 检查是否达到下一个10%的里程碑
             lastLoggedPercent = percentDone; // 更新最后记录的百分比
-            log.info("task: {}, complete: {}% ({} / {})", taskName, percentDone, workCurr, workTotal);
+            log.info("任务：{}，完成: {}% ({} / {})", taskName, percentDone, workCurr, workTotal);
         }
     }
 
     @Override
     protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone, Duration duration) {
-        log.info("task: {} complete, totalWorkload: {}", currentTaskName, workTotal);
+        log.info("任务：{} 完成，totalWorkload: {}", currentTaskName, workTotal);
     }
 }
