@@ -6,7 +6,6 @@ import com.nyx.bot.core.SecurityUtils;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.sys.SysUser;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Slf4j
+
 @RestController
 @CrossOrigin
 public class LoginController extends BaseController {

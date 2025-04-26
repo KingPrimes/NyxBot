@@ -251,7 +251,7 @@ public class HttpUtils {
             client.newCall(req).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    log.error("onFailure Error", e);
+                    log.error("onFailure 错误", e);
                     future.complete(false);
                     future.completeExceptionally(e);
                 }
@@ -259,14 +259,14 @@ public class HttpUtils {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     if (!response.isSuccessful()) {
-                        log.warn("File Download： code:{},headers:{},message:{}", response.code(), response.headers(), response.message());
+                        log.warn("文件下载： code：{}，headers：{}，message：{}", response.code(), response.headers(), response.message());
                         future.complete(false);
                         return;
                     }
 
                     ResponseBody body = response.body();
                     if (body == null) {
-                        log.warn("File Download： body is null");
+                        log.warn("文件下载：body 为 null");
                         return;
                     }
                     long fileSize = body.contentLength();
@@ -288,7 +288,7 @@ public class HttpUtils {
                 }
             });
         } catch (Exception e) {
-            log.warn("sendGetForFile An abnormality occurred:", e);
+            log.warn("sendGetForFile 出现异常：", e);
             future.complete(false);
             future.completeExceptionally(e);
         }
@@ -300,7 +300,7 @@ public class HttpUtils {
         progress = Math.floor(progress); // Round down to nearest integer
 
         if (progress - lastProgress >= 1) {
-            log.info("File download progress:{}%", String.format("%.2f", progress));
+            //log.info("文件下载进度:{}%", String.format("%.2f", progress));
             lastProgress = progress;
         }
     }
@@ -365,7 +365,7 @@ public class HttpUtils {
             //如果下载进度大于提示进度
             if (tip < progress) {
                 tip = progress;
-                log.info("File download progress: {}%", tip);
+                log.info("文件下载进度: {}%", tip);
             }
 
         }

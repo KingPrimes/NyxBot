@@ -6,11 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-@Slf4j
 public class GitHubUtil {
 
 
