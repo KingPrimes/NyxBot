@@ -85,7 +85,7 @@ public class Runners {
             File[] listOfFiles = folder.listFiles();
             boolean fileExists = false;
             if (listOfFiles != null) {
-                log.debug("./backup not null");
+                log.debug("./backup 不为空");
                 for (File file : listOfFiles) {
                     if (file.isFile() && file.getName().contains(DateUtils.getDate(new Date(), DateUtils.NOT_HMS))) {
                         fileExists = true;
@@ -94,14 +94,14 @@ public class Runners {
                 }
             }
             if (fileExists) {
-                log.debug("./backup/bake_{} exists", DateUtils.getDate(new Date(), DateUtils.NOT_HMS));
+                log.debug("./backup/bake_{} 存在", DateUtils.getDate(new Date(), DateUtils.NOT_HMS));
                 Map<Long, Bot> robots = SpringUtils.getBean(BotContainer.class).robots;
                 if (robots != null) {
                     Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByPermissions(PermissionsEnums.SUPER_ADMIN);
                     for (Bot bot : robots.values()) {
                         admin.ifPresent(a -> {
                             if (a.getBotUid().equals(bot.getSelfId())) {
-                                bot.sendPrivateMsg(a.getAdminUid(), "Update complete!", false);
+                                bot.sendPrivateMsg(a.getAdminUid(), "更新完成!", false);
                             }
                         });
                     }

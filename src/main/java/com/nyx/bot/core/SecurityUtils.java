@@ -3,13 +3,11 @@ package com.nyx.bot.core;
 import com.nyx.bot.entity.sys.SysUser;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.exception.ServiceException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@Slf4j
 public class SecurityUtils {
     /**
      * 用户ID

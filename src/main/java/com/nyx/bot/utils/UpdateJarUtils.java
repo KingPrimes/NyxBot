@@ -42,44 +42,44 @@ public class UpdateJarUtils {
 
     private static void writerScript(String fileName) throws IOException {
         String path = System.getProperty("user.dir");
-        log.debug("A backup update operation is in progress!");
-        log.debug("File Name：{} -- File path：{}", fileName, path);
+        log.debug("备份更新作正在进行中！");
+        log.debug("文件名：{} -- 文件路径：{}", fileName, path);
         File backup = new File(path + "/backup");
         if (!backup.exists()) {
-            log.debug("backup directory does not exist, creating backup directory");
+            log.debug("备份目录 不存在，正在创建备份目录");
             backup.mkdirs();
         }
-        log.debug("backup directory created successfully");
+        log.debug("备份目录创建成功");
         if (SystemUtils.IS_OS_WINDOWS) {
             log.debug("OS Windows");
-            log.debug("Create and write a run.bat");
+            log.debug("创建和编写run.bat");
             File run = new File(path + "/run.bat");
             FileWriter runWriter = new FileWriter(run);
             runWriter.write(winRun.formatted(fileName));
             runWriter.close();
-            log.debug("run.bat file created successfully:{}", winRun.formatted(fileName));
-            log.debug("Create and write a update.bat");
+            log.debug("已成功创建 run.bat 文件:{}", winRun.formatted(fileName));
+            log.debug("创建和编写update.bat");
             File file = new File(path + "/update.bat");
             FileWriter writer = new FileWriter(file);
             String update = winUpdate.formatted(fileName, DateUtils.getDate(), fileName, fileName);
             writer.write(update);
-            log.debug("update.bat file created successfully:{}", update);
+            log.debug("已成功创建 update.bat 文件:{}", update);
             writer.close();
             Process exec = Runtime.getRuntime().exec("cmd /k start " + path + "/update.bat");
-            log.debug("run update.bat PID:{}", exec.pid());
+            log.debug("运行 update.bat PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);
         }
         if (SystemUtils.IS_OS_LINUX) {
             log.debug("OS Linux");
-            log.debug("Create and write a run.sh");
+            log.debug("创建和编写 run.sh");
             File run = new File(path + "/run.sh");
             FileWriter runWriter = new FileWriter(run);
             String runTxt = linuxRun.formatted(fileName);
             runWriter.write(runTxt);
             runWriter.close();
-            log.debug("run.sh file created successfully:{}", winRun.formatted(fileName));
-            log.debug("Create and write a update.sh");
+            log.debug("已成功创建 run.sh 文件:{}", winRun.formatted(fileName));
+            log.debug("创建和编写 update.sh");
             Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
             File update = new File(path + "/update.sh");
             FileWriter writer = new FileWriter(update);
@@ -91,24 +91,24 @@ public class UpdateJarUtils {
             );
             writer.write(builder);
             writer.close();
-            log.debug("update.bat file created successfully:{}", builder);
+            log.debug("已成功创建 update.bat 文件:{}", builder);
             Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
             Process exec = Runtime.getRuntime().exec("bash " + path + "/update.sh");
-            log.debug("run update.sh PID:{}", exec.pid());
+            log.debug("运行 update.sh PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);
         }
         // TODO: 2023/3/29 待测试 MAC 自动更新是否可执行
         if (SystemUtils.IS_OS_MAC) {
             log.debug("OS MAC");
-            log.debug("Create and write a run.sh");
+            log.debug("创建和编写 run.sh");
             File run = new File(path + "/run.sh");
             FileWriter runWriter = new FileWriter(run);
             String runTxt = macRun.formatted(fileName);
             runWriter.write(runTxt);
             runWriter.close();
-            log.debug("run.sh file created successfully:{}", winRun.formatted(fileName));
-            log.debug("Create and write a update.sh");
+            log.debug("已成功创建 run.sh 文件:{}", winRun.formatted(fileName));
+            log.debug("创建和编写 update.sh");
 
             Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
 
@@ -118,10 +118,10 @@ public class UpdateJarUtils {
             String builder = macUpdate.formatted(fileName, fileName, DateUtils.getDate(), fileName);
             writer.write(builder);
             writer.close();
-            log.debug("update.bat file created successfully:{}", builder);
+            log.debug("已成功创建 update.bat 文件:{}", builder);
             Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
             Process exec = Runtime.getRuntime().exec("sh " + path + "/update.sh");
-            log.debug("run update.sh PID:{}", exec.pid());
+            log.debug("运行 update.sh PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);
         }
@@ -138,7 +138,7 @@ public class UpdateJarUtils {
         try {
             writerScript(fileName);
         } catch (IOException e) {
-            log.error("restartUpdate error", e);
+            log.error("自动更新错误", e);
         }
     }
 }
