@@ -4,6 +4,7 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.entity.config.TokenKeys;
 import com.nyx.bot.repo.warframe.TokenKeysRepository;
+import com.nyx.bot.utils.CacheUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class ConfigTokenKeysController extends BaseController {
         tokenKeys.setId(1L);
         tokenKeys.setTks(URLEncoder.encode(tokenKeys.getTks(), StandardCharsets.UTF_8));
         repository.save(tokenKeys);
+        CacheUtils.reloadArbitration(tokenKeys.getTks());
         return success();
     }
 }

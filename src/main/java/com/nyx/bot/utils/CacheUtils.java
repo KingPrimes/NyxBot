@@ -47,6 +47,10 @@ public class CacheUtils {
         FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(JSON.toJSONBytes(arbitrationList)));
     }
 
+    public static void reloadArbitration(String key) {
+        fetchAndCacheArbitrationList(key);
+    }
+
     /**
      * 获取有价值的仲裁列表
      *
@@ -57,23 +61,27 @@ public class CacheUtils {
     }
 
     private static List<ArbitrationPre> loadArbitrationList(String key) {
+
         Cache cache = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION);
-        List<ArbitrationPre> arbitrationList;
         if (cache == null) {
-            arbitrationList = ApiUrl.arbitrationPreList(key);
-            if (!arbitrationList.isEmpty()) {
-                setArbitration(arbitrationList);
-            }
-        } else {
-            @SuppressWarnings("unchecked")
-            List<ArbitrationPre> cachedList = (List<ArbitrationPre>) cache.get("data", List.class);
-            arbitrationList = cachedList;
-            if (arbitrationList.isEmpty() && key != null && !key.isEmpty()) {
-                arbitrationList = ApiUrl.arbitrationPreList(key);
-                if (!arbitrationList.isEmpty()) {
-                    setArbitration(arbitrationList);
-                }
-            }
+            return fetchAndCacheArbitrationList(key);
+        }
+        return Optional.ofNullable(cache.get("data")) // 获取 ValueWrapper
+                .map(Cache.ValueWrapper::get)              // 获取实际的值
+                .filter(Objects::nonNull)              // 确保值不为 Null
+                .filter(d -> d instanceof List)      // 确保数据是 List 类型
+                .map(d -> (List<ArbitrationPre>) d)  // 安全类型转换
+                .filter(list -> !list.isEmpty())     // 过滤空列表
+                .orElseGet(() -> {
+                    log.warn("缓存中 'data' 键不存在或数据无效，将从 API 重新获取数据。");
+                    return fetchAndCacheArbitrationList(key);
+                });
+    }
+
+    private static List<ArbitrationPre> fetchAndCacheArbitrationList(String key) {
+        List<ArbitrationPre> arbitrationList = ApiUrl.arbitrationPreList(key);
+        if (!arbitrationList.isEmpty()) {
+            setArbitration(arbitrationList);
         }
         return arbitrationList;
     }
