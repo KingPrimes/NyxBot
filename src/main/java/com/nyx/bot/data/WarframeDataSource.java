@@ -21,10 +21,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,12 +34,6 @@ import java.util.stream.Collectors;
 public class WarframeDataSource {
 
     static final String DATA_SOURCE_PATH = JgitUtil.lockPath + "/warframe/";
-    static int cod = 0;
-    static int rood = 0;
-
-    static int eco = 0;
-
-    static int mod = 0;
 
     public static void init() {
         log.info("开始初始化数据！");
@@ -86,36 +77,51 @@ public class WarframeDataSource {
             CacheUtils.setArbitration(arbitrationPres);
         }
     }
+    private static void sleepSeconds() {
+        try {
+            TimeUnit.SECONDS.sleep(30);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
     //幻纹
     public static Integer getEphemeras() {
         log.info("开始获取幻纹信息！");
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("赤毒幻纹初始化不正确！未获得数据！尝试在 30 秒后再次获取它！");
-            try {
-                if (eco >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return eco = getEphemeras() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        int attempts = 0;
+        List<Ephemeras> ephemerasList = new ArrayList<>();
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("赤毒幻纹初始化不正确！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            List<Ephemeras> ephemeras = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
+            if (!ephemeras.isEmpty()) {
+                ephemerasList.addAll(ephemeras);
+                break;
             }
         }
-        String s = body.getBody();
-        List<Ephemeras> ephemerasList = JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
-        body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("信条幻纹初始化错误！未获得数据！请检查网络！");
-            try {
-                if (eco >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return eco = getEphemeras() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("信条幻纹初始化不正确！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            List<Ephemeras> ephemeras = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
+            if (!ephemeras.isEmpty()) {
+                ephemerasList.addAll(ephemeras);
+                break;
             }
         }
-        s = body.getBody();
-        ephemerasList.addAll(JSONObject.parseObject(s).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch));
+        if (ephemerasList.isEmpty()) {
+            log.warn("幻纹初始化不正确！未获得数据！");
+            return -1;
+        }
         EphemerasRepository repository = SpringUtils.getBean(EphemerasRepository.class);
         if (!repository.findAll().isEmpty()) {
             List<Ephemeras> all = repository.findAll();
@@ -133,137 +139,150 @@ public class WarframeDataSource {
         }
     }
 
+
     //Market
     public static Integer getMarket() {
         log.info("开始初始化Market市场数据!");
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("Market市场初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-            try {
-                if (mod >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return mod = getMarket() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        int attempts = 0;
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("Market市场初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            List<OrdersItems> items = JSON.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
+            OrdersItemsRepository ordersItem = SpringUtils.getBean(OrdersItemsRepository.class);
+            if (!ordersItem.findAll().isEmpty()) {
+                List<OrdersItems> all = ordersItem.findAll();
+                List<OrdersItems> list = items.stream()
+                        .filter(item -> !all.stream()
+                                .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
+                                .containsKey(item.getItemName() + item.getUrlName())).toList();
+                log.info("总计更新 Warframe.Market {} 数据！", list.size());
+                return ordersItem.saveAll(list).size();
+            } else {
+                log.info("总计更新 Warframe.Market {} 数据！", items.size());
+                return ordersItem.saveAll(items).size();
+
             }
         }
-
-        List<OrdersItems> items = JSON.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
-        OrdersItemsRepository ordersItem = SpringUtils.getBean(OrdersItemsRepository.class);
-        if (!ordersItem.findAll().isEmpty()) {
-            List<OrdersItems> all = ordersItem.findAll();
-            List<OrdersItems> list = items.stream()
-                    .filter(item -> !all.stream()
-                            .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
-                            .containsKey(item.getItemName() + item.getUrlName())).toList();
-            log.info("总计更新 Warframe.Market {} 数据！", list.size());
-            return ordersItem.saveAll(list).size();
-        } else {
-            log.info("总计更新 Warframe.Market {} 数据！", items.size());
-            return ordersItem.saveAll(items).size();
-
-        }
+        log.warn("Market市场初始化错误！未获得数据！");
+        return -1;
     }
 
     //赤毒武器/信条武器
     public static Integer getWeapons() {
         log.info("开始获取武器信息！");
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("赤毒武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-            try {
-                if (cod >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return cod = getWeapons() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        int attempts = 0;
+        List<Weapons> weaponsList = new ArrayList<>();
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("赤毒武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            List<Weapons> weapons = JSONObject.parseObject(body.getBody())
+                    .getJSONObject("payload")
+                    .getJSONArray("weapons")
+                    .toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
+            if (!weapons.isEmpty()) {
+                weaponsList.addAll(weapons);
+                break;
             }
         }
-        List<Weapons> weapons = JSONObject.parseObject(body.getBody())
-                .getJSONObject("payload")
-                .getJSONArray("weapons")
-                .toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
-
-
-        body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("信条武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-            try {
-                if (cod >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return cod = getWeapons() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        attempts = 0;
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("信条武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            List<Weapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
+            if (!weapons.isEmpty()) {
+                weaponsList.addAll(weapons);
+                break;
             }
         }
-        weapons.addAll(JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch));
+
+        if (weaponsList.isEmpty()) {
+            log.warn("Market Purple Weapon 初始化错误！未获得数据！");
+            return -1;
+        }
 
         WeaponsRepository repository = SpringUtils.getBean(WeaponsRepository.class);
         if (!repository.findAll().isEmpty()) {
             List<Weapons> all = repository.findAll();
-            List<Weapons> list = weapons.stream()
+            List<Weapons> list = weaponsList.stream()
                     .filter(item -> !all.stream()
                             .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
                             .containsKey(item.getItemName() + item.getUrlName())).toList();
             log.info("总更新 Warframe.Weapons {} 数据！", list.size());
             return repository.saveAll(list).size();
         } else {
-            log.info("总更新 Warframe.Weapons {} 数据！", weapons.size());
-            return repository.saveAll(weapons).size();
+            log.info("总更新 Warframe.Weapons {} 数据！", weaponsList.size());
+            return repository.saveAll(weaponsList).size();
         }
     }
 
     //紫卡武器
     public static Integer getRivenWeapons() {
         log.info("开始获取 Market Purple Weapon 数据！");
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_RIVEN_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.warn("市场紫卡武器初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-            try {
-                if (rood >= 3) return -1;
-                TimeUnit.SECONDS.sleep(30);
-                return rood = getRivenWeapons() + 1;
-            } catch (InterruptedException ignored) {
-                return -1;
+        int attempts = 0;
+        while (attempts < 3) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_RIVEN_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                log.warn("市场紫卡武器初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
+                sleepSeconds();
+                attempts++;
+                continue;
+            }
+            //获取数据源
+            List<RivenItems> items = JSON.parseObject(body.getBody())
+                    .getJSONObject("payload")
+                    .getJSONArray("items")
+                    .toJavaList(RivenItems.class, JSONReader.Feature.SupportSmartMatch);
+
+            RivenItemsRepository repository = SpringUtils.getBean(RivenItemsRepository.class);
+            AtomicInteger size = new AtomicInteger();
+            //判断数据库表中是否有数据
+            if (!repository.findAll().isEmpty()) {
+                List<RivenItems> all = repository.findAll();
+                //stream取差集，对比与数据库中不同的数据
+                List<RivenItems> list = items.stream().filter(item ->
+                                !all.stream()
+                                        //采用Map Key的方式对比多属性不同的值
+                                        .collect(Collectors.toMap(ri -> ri.getItemName() + "-" + ri.getIconFormat() + "-" + ri.getUrlName(), value -> value))
+                                        .containsKey(item.getItemName() + "-" + item.getIconFormat() + "-" + item.getUrlName())
+
+                        )
+                        //接受结果到List集合中
+                        .toList();
+                //便利结果集合
+                list.forEach(item -> {
+                    //到数据库中查询是否有这个值,如果有这个值则把ID付给要保存的新值
+                    repository.findById(item.getId()).ifPresent(b -> item.setRivenId(b.getRivenId()));
+                    //增加|修改值
+                    repository.save(item);
+                    //增加|修改值的数量
+                    size.addAndGet(1);
+                });
+                log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", size);
+                return size.get();
+            } else {
+                List<RivenItems> rivenItems = repository.saveAll(items);
+                log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", rivenItems.size());
+                return rivenItems.size();
             }
         }
-        //获取数据源
-        List<RivenItems> items = JSON.parseObject(body.getBody())
-                .getJSONObject("payload")
-                .getJSONArray("items")
-                .toJavaList(RivenItems.class, JSONReader.Feature.SupportSmartMatch);
+        log.warn("Market Purple Weapon 初始化错误！未获得数据！");
+        return -1;
 
-        RivenItemsRepository repository = SpringUtils.getBean(RivenItemsRepository.class);
-        AtomicInteger size = new AtomicInteger();
-        //判断数据库表中是否有数据
-        if (!repository.findAll().isEmpty()) {
-            List<RivenItems> all = repository.findAll();
-            //stream取差集，对比与数据库中不同的数据
-            List<RivenItems> list = items.stream().filter(item ->
-                            !all.stream()
-                                    //采用Map Key的方式对比多属性不同的值
-                                    .collect(Collectors.toMap(ri -> ri.getItemName() + "-" + ri.getIconFormat() + "-" + ri.getUrlName(), value -> value))
-                                    .containsKey(item.getItemName() + "-" + item.getIconFormat() + "-" + item.getUrlName())
-
-                    )
-                    //接受结果到List集合中
-                    .toList();
-            //便利结果集合
-            list.forEach(item -> {
-                //到数据库中查询是否有这个值,如果有这个值则把ID付给要保存的新值
-                repository.findById(item.getId()).ifPresent(b -> item.setRivenId(b.getRivenId()));
-                //增加|修改值
-                repository.save(item);
-                //增加|修改值的数量
-                size.addAndGet(1);
-            });
-            log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", size);
-            return size.get();
-        } else {
-            List<RivenItems> rivenItems = repository.saveAll(items);
-            log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", rivenItems.size());
-            return rivenItems.size();
-        }
     }
 
     // 遗物
