@@ -15,7 +15,7 @@
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG}</pattern>
-            <charset>${SYSTEM_ENCODING}</charset>
+           <!-- <charset>${SYSTEM_ENCODING}</charset>-->
         </encoder>
     </appender>
 

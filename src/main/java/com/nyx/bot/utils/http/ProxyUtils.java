@@ -6,11 +6,11 @@ import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URI;
+import java.net.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -38,6 +38,26 @@ public class ProxyUtils {
 
         // 默认无代理
         return Proxy.NO_PROXY;
+    }
+
+    public static ProxySelector getProxySelector() {
+        return new ProxySelector() {
+            @Override
+            public List<Proxy> select(URI uri) {
+                Proxy effectiveProxy = ProxyUtils.getEffectiveProxyForUrl();
+                if (uri == null) return List.of(Proxy.NO_PROXY);
+
+                String host = uri.getHost();
+                if (ProxyUtils.shouldBypassProxy(host)) return List.of(Proxy.NO_PROXY);
+
+                return List.of(effectiveProxy != null ? effectiveProxy : Proxy.NO_PROXY);
+            }
+
+            @Override
+            public void connectFailed(URI uri, SocketAddress address, IOException ex) {
+                log.error("Proxy connection failed: {}", uri, ex);
+            }
+        };
     }
 
     private static Proxy parseStandardProxy(String proxyUrl) {
@@ -207,7 +227,7 @@ public class ProxyUtils {
     private static Proxy fromSpringConfig() {
         try {
             var utils = SpringUtils.getBean(SpringValues.class);
-            String proxyUrl = utils.proxy;
+            String proxyUrl = utils.url;
             if (proxyUrl != null && !proxyUrl.isEmpty()) {
                 return parseStandardProxy(proxyUrl);
             }

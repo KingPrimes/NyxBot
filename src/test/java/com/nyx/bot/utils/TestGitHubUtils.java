@@ -2,17 +2,15 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
+import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
-@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER,
-        properties = {
-                "spring.sendgrid.proxy.host=127.0.0.1",
-                "spring.sendgrid.proxy.port=7890"
-        })
+@SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 public class TestGitHubUtils {
 
     //测试下载最新的Jar文件
@@ -31,6 +29,11 @@ public class TestGitHubUtils {
     @Test
     void testGitHubGetReleasesLatestVersion() {
         log.info("testGitHubGetReleasesLatestVersion:{}", GitHubUtil.getReleasesLatestVersion("KingPrimes", "NyxBot"));
+    }
+
+    @Test
+    void testGitClone() throws GitAPIException {
+        JgitUtil.Build("https://github.com/KingPrimes/DataSource","./data111").gitClone();
     }
 
 }

@@ -19,7 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.*;
+import java.net.ProxySelector;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -49,34 +50,11 @@ public class JgitUtil {
     }
 
     private static void configureGitProxy() {
-        ProxySelector defaultSelector = getProxySelector();
-
+        ProxySelector defaultSelector = ProxyUtils.getProxySelector();
         ProxySelector.setDefault(defaultSelector);
     }
 
     @NotNull
-    private static ProxySelector getProxySelector() {
-        Proxy effectiveProxy = ProxyUtils.getEffectiveProxyForUrl();
-
-        return new ProxySelector() {
-            @Override
-            public List<Proxy> select(URI uri) {
-                if (uri == null) return List.of(Proxy.NO_PROXY);
-
-                String host = uri.getHost();
-                if (ProxyUtils.shouldBypassProxy(host)) return List.of(Proxy.NO_PROXY);
-
-                return List.of(effectiveProxy != null ? effectiveProxy : Proxy.NO_PROXY);
-            }
-
-            @Override
-            public void connectFailed(URI uri, SocketAddress address, IOException ex) {
-                log.error("Proxy connection failed: {}", uri, ex);
-            }
-        };
-    }
-
-
 
 
     /**
