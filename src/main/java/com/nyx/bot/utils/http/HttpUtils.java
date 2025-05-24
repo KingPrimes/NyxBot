@@ -1,10 +1,8 @@
 package com.nyx.bot.utils.http;
 
-import com.nyx.bot.core.SpringValues;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.utils.FileUtils;
-import com.nyx.bot.utils.SpringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -13,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -77,31 +73,10 @@ public class HttpUtils {
             sslContext.init(null, new TrustManager[]{trustAllCerts}, new java.security.SecureRandom());
 
             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            String proxyHost = System.getProperty("proxyHost");
-            String proxyPort = System.getProperty("proxyPort");
-            Proxy proxy;
-            if (proxyHost != null && proxyPort != null) {
-                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-            } else {
 
-                try {
-                    // 仅在测试环境中生效
-                    var utils = SpringUtils.getBean(SpringValues.class);
-                    proxyHost = utils.proxyHost;
-                    proxyPort = utils.proxyPort;
-                    if (proxyHost.isEmpty() || proxyPort.isEmpty()) {
-                        proxy = Proxy.NO_PROXY;
-                    } else {
-                        proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
-                    }
-                } catch (Exception e) {
-                    //
-                    proxy = Proxy.NO_PROXY;
-                }
-            }
             client = new OkHttpClient().newBuilder()
                     .addInterceptor(BrotliInterceptor.INSTANCE)
-                    .proxy(proxy)
+                    .proxy(ProxyUtils.getEffectiveProxyForUrl())
                     //调用超时
                     .callTimeout(60, TimeUnit.SECONDS)
                     //链接超时

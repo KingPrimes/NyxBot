@@ -20,5 +20,8 @@ public class SpringValues {
     @Value("${spring.sendgrid.proxy.port:}")
     public String proxyPort;
 
+    @Value("${spring.sendgrid.proxy.proxy:}")
+    public String proxy;
+
 
 }
