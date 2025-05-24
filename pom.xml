@@ -35,7 +35,7 @@
         <oshi.version>6.8.0</oshi.version>
         <okhttp.version>4.12.0</okhttp.version>
         <jjwt.version>0.12.6</jjwt.version>
-        <org.eclipse.jgit.varsion>7.2.0.202503040940-r</org.eclipse.jgit.varsion>
+        <org.eclipse.jgit.varsion>7.2.1.202505142326-r</org.eclipse.jgit.varsion>
     </properties>
 
     <dependencies>
