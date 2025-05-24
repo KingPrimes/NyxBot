@@ -44,6 +44,7 @@ logs
 /data
 ### 忽略其余文件
 /DataSource/**
+/DataSource
 /models
 locate.yaml
 /src/main/resources/templates/**

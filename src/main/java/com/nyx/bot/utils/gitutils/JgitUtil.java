@@ -3,6 +3,7 @@ package com.nyx.bot.utils.gitutils;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.http.ProxyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
@@ -14,9 +15,11 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ProxySelector;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -27,6 +30,10 @@ import java.util.*;
 public class JgitUtil {
 
     public static String lockPath = "./DataSource";
+
+    static {
+        configureGitProxy();
+    }
 
     private final CredentialsProvider provider;
     String urlPath;
@@ -41,6 +48,14 @@ public class JgitUtil {
         }
         this.provider = provider;
     }
+
+    private static void configureGitProxy() {
+        ProxySelector defaultSelector = ProxyUtils.getProxySelector();
+        ProxySelector.setDefault(defaultSelector);
+    }
+
+    @NotNull
+
 
     /**
      * @param urlPath   远程仓库地址
