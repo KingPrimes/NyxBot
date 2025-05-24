@@ -76,7 +76,7 @@ public class HttpUtils {
 
             client = new OkHttpClient().newBuilder()
                     .addInterceptor(BrotliInterceptor.INSTANCE)
-                    .proxy(ProxyUtils.getEffectiveProxyForUrl())
+                    .proxySelector(ProxyUtils.getProxySelector())
                     //调用超时
                     .callTimeout(60, TimeUnit.SECONDS)
                     //链接超时
