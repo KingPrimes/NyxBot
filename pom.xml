@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.4</version>
+        <version>3.4.5</version>
         <relativePath/>
     </parent>
 
@@ -14,7 +14,7 @@
     <artifactId>NxyBot</artifactId>
 
 
-    <version>0.3.3</version>
+    <version>0.3.4</version>
 
     <name>NxyBot</name>
 
@@ -35,7 +35,7 @@
         <oshi.version>6.8.0</oshi.version>
         <okhttp.version>4.12.0</okhttp.version>
         <jjwt.version>0.12.6</jjwt.version>
-        <org.eclipse.jgit.varsion>7.2.1.202505142326-r</org.eclipse.jgit.varsion>
+        <org.eclipse.jgit.version>7.2.1.202505142326-r</org.eclipse.jgit.version>
     </properties>
 
     <dependencies>
@@ -214,7 +214,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>${org.eclipse.jgit.varsion}</version>
+            <version>${org.eclipse.jgit.version}</version>
         </dependency>
 
         <!--YAML操作-->

@@ -240,7 +240,10 @@ public class ProxyUtils {
 
     public static boolean shouldBypassProxy(String host) {
         if (host == null) return true;
-
+        // 添加对本地地址（如 localhost、127.0.0.1）的判断
+        if (host.equalsIgnoreCase("localhost") || host.equalsIgnoreCase("127.0.0.1")) {
+            return true;
+        }
         Set<String> noProxyHosts = getNoProxyHosts();
         for (String pattern : noProxyHosts) {
             if (pattern.startsWith(".") && host.endsWith(pattern)) {
