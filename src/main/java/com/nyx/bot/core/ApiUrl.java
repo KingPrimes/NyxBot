@@ -26,6 +26,8 @@ public class ApiUrl {
 
     public static final String WARFRAME_STATUS = "https://warframestat.kcme.space/api";
 
+    public static final String WARFRAME_WORLD_STATE = "https://content.warframe.com/dynamic/worldState.php";
+
     /**
      * 战甲数据源 git push pull等操作链接
      */

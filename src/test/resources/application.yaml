@@ -13,6 +13,8 @@ async:
       queue_capacity: 80
       name:
         prefix: async-
+app:
+  timezone: Asia/Shanghai
 
 spring:
   profiles:
