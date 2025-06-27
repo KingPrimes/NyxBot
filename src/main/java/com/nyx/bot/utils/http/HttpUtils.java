@@ -137,6 +137,7 @@ public class HttpUtils {
             body.setUrl(url);
             return body;
         } catch (IOException e) {
+            log.error("sendGet", e);
             return new Body(HttpCodeEnum.ERROR);
         }
     }

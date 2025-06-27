@@ -94,7 +94,6 @@ public class WarframeSocket extends WebSocketListener {
         if (!states.getEvent().equals("connected") && states.getEvent().equals("ws:update")) {
             if (states.getPacket().getLanguage().equals("en") && states.getPacket().getPlatform().equals("pc")) {
                 AsyncUtils.me().execute(() -> WarframeSubscribe.isUpdated(states));
-
             }
         }
         super.onMessage(webSocket, text);

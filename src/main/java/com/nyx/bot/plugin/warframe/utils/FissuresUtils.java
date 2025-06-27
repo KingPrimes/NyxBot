@@ -22,38 +22,21 @@ public class FissuresUtils {
     public static List<GlobalStates.Fissures> getFissures(Integer type) throws DataNotInfoException {
         GlobalStates sgs = CacheUtils.getGlobalState();
         List<GlobalStates.Fissures> fissures = sgs.getFissures();
-        List<GlobalStates.Fissures> list = new ArrayList<>();
+        List<GlobalStates.Fissures> list;
         //分级
         switch (type) {
             //裂隙
-            case 0 -> fissures.forEach(f -> {
-                if (f.getActive()) {
-                    if (!f.getIsStorm() && !f.getIsHard()) {
-                        list.add(f);
-                    }
-                }
-            });
+            case 0 ->
+                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(f -> !f.getIsStorm() && !f.getIsHard()).toList();
             //九重天
-            case 1 -> fissures.forEach(f -> {
-                if (f.getActive()) {
-                    if (f.getIsStorm()) {
-                        list.add(f);
-                    }
-                }
-            });
+            case 1 ->
+                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(GlobalStates.Fissures::getIsStorm).toList();
+
             //钢铁
-            case 2 -> fissures.forEach(f -> {
-                if (f.getActive()) {
-                    if (f.getIsHard()) {
-                        list.add(f);
-                    }
-                }
-            });
-            default -> fissures.forEach(f -> {
-                if (f.getActive()) {
-                    list.add(f);
-                }
-            });
+            case 2 ->
+                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(GlobalStates.Fissures::getIsHard).toList();
+
+            default -> list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).toList();
         }
         return list;
     }
@@ -68,33 +51,19 @@ public class FissuresUtils {
         //翻译
         list.forEach(f -> {
             String node = f.getNode();
-            if (f.getIsStorm()) {
-                f.setNode(trans.enToZh(
-                        StringUtils.substring(
-                                node,
-                                0,
-                                node.indexOf('('))) +
-                        "(" +
-                        trans.enToZh(
-                                StringUtils.substring(
-                                        node,
-                                        node.indexOf('('),
-                                        node.indexOf(')')).replace("(", "").trim())
-                        + ")");
-            } else {
-                f.setNode(trans.enToZh(
-                        StringUtils.substring(
-                                node,
-                                0,
-                                node.indexOf('('))) +
-                        "(" +
-                        trans.enToZh(
-                                StringUtils.substring(
-                                        node,
-                                        node.indexOf('('),
-                                        node.indexOf(')')).replace("(", "").trim())
-                        + ")");
-            }
+            String sb = trans.enToZh(
+                    StringUtils.substring(
+                            node,
+                            0,
+                            node.indexOf('('))) +
+                    "(" +
+                    trans.enToZh(
+                            StringUtils.substring(
+                                    node,
+                                    node.indexOf('('),
+                                    node.indexOf(')')).replace("(", "").trim()) +
+                    ")";
+            f.setNode(sb);
             f.setMissionType(trans.enToZh(f.getMissionType()));
             f.setMissionKey(trans.enToZh(f.getMissionKey()));
             f.setTier(trans.enToZh(f.getTier()));

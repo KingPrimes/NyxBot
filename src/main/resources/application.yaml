@@ -14,6 +14,9 @@ async:
       name:
         prefix: async-
 
+app:
+  timezone: Asia/Shanghai
+
 spring:
   profiles:
     active: server
