@@ -26,7 +26,7 @@ public class TaskWarframeStatus {
     @Async("taskExecutor")
     @Scheduled(cron = "0/120 * * * * ?")
     public void execute() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
+        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
             Optional<GlobalStates.Arbitration> arbitration = CacheUtils.getArbitration(
