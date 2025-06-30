@@ -30,6 +30,4 @@ public class ActiveMission extends BastWorldState {
     // 是否是钢铁模式
     @JsonProperty("Hard")
     private Boolean hard;
-
-
 }

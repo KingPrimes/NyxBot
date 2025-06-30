@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class FeaturedGuilds extends BastWorldState {
     @JsonProperty("AllianceId")
-    private Id allianceId;
+    private Id id;
     @JsonProperty("Emblem")
     private Boolean emblem;
     @JsonProperty("HiddenPlatforms")

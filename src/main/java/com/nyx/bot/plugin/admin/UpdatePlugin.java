@@ -110,7 +110,7 @@ public class UpdatePlugin {
 
     private static void updateWarframeSister(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::getWeapons)
+        CompletableFuture.supplyAsync(WarframeDataSource::getLichSisterWeapons)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "信条/赤毒武器 已更新：" + items + " 条数据！", false);
