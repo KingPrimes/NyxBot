@@ -24,7 +24,7 @@ public class ApiUrl {
 
     public static final String WARFRAME_SOCKET = "ws://api.warframestat.us/socket";
 
-    public static final String WARFRAME_STATUS = "https://api.warframestat.us/";
+    public static final String WARFRAME_STATUS = "https://warframestat.kcme.space/api";
 
     /**
      * 战甲数据源 git push pull等操作链接
