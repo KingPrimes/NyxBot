@@ -1,100 +1,185 @@
 package com.nyx.bot.res;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.worldstate.*;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
-
+@SuppressWarnings("unused")
 @Data
 public class WorldState {
+    // 地球循环
+    EarthCycle earthCycle;
+
+    // 夜灵平原
+    CetusCycle cetusCycle;
+
+    // 魔胎之境
+    CambionCycle cambionCycle;
+
+    // 奥布山谷 轮换
+    VallisCycle vallisCycle;
+
     // 裂隙任务
     @JsonProperty("ActiveMissions")
-    private List<ActiveMission> activeMissions;
+    List<ActiveMission> activeMissions;
+
     // 警报任务
     @JsonProperty("Alerts")
-    private List<Alert> alerts;
+    List<Alert> alerts;
+
     @JsonProperty("BuildLabel")
-    private String buildLabel;
+    String buildLabel;
+
     @JsonProperty("ConstructionProjects")
-    private List<ConstructionProjects> constructionProjects;
+    List<ConstructionProjects> constructionProjects;
+
     // 每日特惠
     @JsonProperty("DailyDeals")
-    private List<DailyDeals> dailyDeals;
-    // 双衍王境
+    List<DailyDeals> dailyDeals;
+
+    // 双衍王境 奖励
     @JsonProperty("EndlessXpChoices")
-    private List<EndlessXpChoices> endlessXpChoices;
+    List<EndlessXpChoices> endlessXpChoices;
+
+    // 双衍王境 轮换
+    DuviriCycle duviriCycle;
+
     // 新闻
     @JsonProperty("Events")
-    private List<Event> events;
+    List<Event> events;
+
     //
     @JsonProperty("ExperimentRecommended")
-    private List<ExperimentRecommended> experimentRecommended;
+    List<ExperimentRecommended> experimentRecommended;
+
     // 精选氏族
     @JsonProperty("FeaturedGuilds")
-    private List<FeaturedGuilds> featuredGuilds;
+    List<FeaturedGuilds> featuredGuilds;
+
     // 闪购
     @JsonProperty("FlashSales")
-    private List<FlashSale> flashSales;
+    List<FlashSale> flashSales;
+
     @JsonProperty("ForceLogoutVersion")
-    private Integer forceLogoutVersion;
+    Integer forceLogoutVersion;
+
     @JsonProperty("GlobalUpgrades")
-    private List<GlobalUpgrade> globalUpgrades;
+    List<GlobalUpgrade> globalUpgrades;
+
     // 活动
     @JsonProperty("Goals")
-    private List<Goal> goals;
+    List<Goal> goals;
+
     //
     @JsonProperty("HubEvents")
-    private List<HubEvents> hubEvents;
+    List<HubEvents> hubEvents;
+
     // 游戏内商城
     @JsonProperty("InGameMarket")
-    private InGameMarket inGameMarket;
+    InGameMarket inGameMarket;
+
     // 入侵
     @JsonProperty("Invasions")
-    private List<Invasion> invasions;
+    List<Invasion> invasions;
+
     // 1999日历
     @JsonProperty("KnownCalendarSeasons")
-    private List<KnownCalendarSeasons> knownCalendarSeasons;
+    List<KnownCalendarSeasons> knownCalendarSeasons;
+
     //
     @JsonProperty("LibraryInfo")
-    private LibraryInfo libraryInfo;
+    LibraryInfo libraryInfo;
+
     // 执刑官猎杀
     @JsonProperty("LiteSorties")
-    private List<LiteSorite> liteSorties;
+    List<LiteSorite> liteSorties;
+
     //
     @JsonProperty("MobileVersion")
-    private String mobileVersion;
+    String mobileVersion;
+
     //
     @JsonProperty("NodeOverrides")
-    private List<NodeOverride> nodeOverrides;
+    List<NodeOverride> nodeOverrides;
+
     // 瓦奇娅
     @JsonProperty("PrimeVaultTraders")
-    private List<PrimeVaultTrader> primeVaultTraders;
+    List<PrimeVaultTrader> primeVaultTraders;
+
     //
     @JsonProperty("ProjectPct")
-    private List<Float> projectPct;
-    //
+    List<Float> projectPct;
+
+    // 电波
     @JsonProperty("SeasonInfo")
-    private List<SeasonInfo> seasonInfo;
+    SeasonInfo seasonInfo;
+
     // 突击
     @JsonProperty("Sorties")
-    private List<Sortie> sorties;
+    List<Sortie> sorties;
+
     // 集团任务
     @JsonProperty("SyndicateMissions")
-    private List<SyndicateMission> syndicateMissions;
+    List<SyndicateMission> syndicateMissions;
+
+    // 扎的曼轮换
+    ZarimanCycle zarimanCycle;
+
     @JsonProperty("Time")
-    private Long time;
+    Long time;
+
     @JsonProperty("Tmp")
-    private String tmp;
+    String tmp;
+
     @JsonProperty("Version")
-    private Integer version;
+    Integer version;
+
     // 虚空风暴 九重天裂隙
     @JsonProperty("VoidStorms")
-    private List<VoidStorms> voidStorms;
+    List<VoidStorms> voidStorms;
+
     // 虚空商人
     @JsonProperty("VoidTraders")
-    private List<VoidTrader> voidTraders;
-    // 世界种子
-    private String worldSeed;
+    List<VoidTrader> voidTraders;
 
+    // 世界种子
+    @JsonProperty("WorldSeed")
+    String worldSeed;
+
+    public EarthCycle getEarthCycle() {
+        return new EarthCycle();
+    }
+
+    public CetusCycle getCetusCycle() {
+        return new CetusCycle(getBountiesEndDate("CetusSyndicate"));
+    }
+
+    public CambionCycle getCambionCycle() {
+        return new CambionCycle(getCetusCycle());
+    }
+
+    public VallisCycle getVallisCycle() {
+        return new VallisCycle();
+    }
+
+    public DuviriCycle getDuviriCycle() {
+        return new DuviriCycle(this.getEndlessXpChoices());
+    }
+
+    public ZarimanCycle getZarimanCycle() {
+        return new ZarimanCycle(getBountiesEndDate("ZarimanSyndicate"));
+    }
+
+    @JsonIgnore
+    private Instant getBountiesEndDate(String key) {
+        return this.getSyndicateMissions()
+                .stream()
+                .filter(s -> s.getTag().equals(key))
+                .findFirst()
+                .map(s -> s.getExpiry().getEpochSecond())
+                .orElse(Instant.now());
+    }
 }

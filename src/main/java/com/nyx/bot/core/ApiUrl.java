@@ -12,7 +12,7 @@ import okhttp3.Headers;
 
 import java.util.Collections;
 import java.util.List;
-
+@SuppressWarnings("unused")
 @Slf4j
 public class ApiUrl {
 
@@ -26,7 +26,11 @@ public class ApiUrl {
 
     public static final String WARFRAME_STATUS = "https://api.warframestat.us/";
 
+    // 官方数据源
     public static final String WARFRAME_WORLD_STATE = "https://content.warframe.com/dynamic/worldState.php";
+
+    // 官方图片获取地址
+    public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
 
     /**
      * 战甲数据源 git push pull等操作链接
@@ -97,7 +101,7 @@ public class ApiUrl {
     public static List<ArbitrationPre> arbitrationPreList(String key) {
         try {
             HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key));
-            if(!body.getCode().equals(HttpCodeEnum.SUCCESS)){
+            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }

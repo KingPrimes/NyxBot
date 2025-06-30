@@ -5,6 +5,8 @@ import com.nyx.bot.res.enums.FactionEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * 入侵
  */
@@ -28,7 +30,7 @@ public class Invasion extends BastWorldState{
     @JsonProperty("ChainID")
     private Id chainID;
     @JsonProperty("AttackerReward")
-    private Reward attackerReward;
+    private List<Reward> attackerReward;
     @JsonProperty("AttackerMissionInfo")
     private MissionInfo attackerMissionInfo;
     @JsonProperty("DefenderReward")

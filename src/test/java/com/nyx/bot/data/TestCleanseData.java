@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.NyxBotApplication;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Locale;
 
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
@@ -34,6 +34,15 @@ public class TestCleanseData {
                 .toUpperCase(Locale.ROOT)
                 .replaceAll("^_", "")
                 .replaceAll("__", "_");
+    }
+
+    @Test
+    void testGetZhTranslation() throws IOException {
+        HttpUtils.Body body = HttpUtils.sendGet("https://content.warframe.com/PublicExport/Manifest/ExportManifest.json!00_QuYGmcTCltbR7qG1eNIvSQ");
+        File file = new File("D:\\Demos\\NyxBot\\data\\phpData\\ExportManifest.json");
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(body.getBody());
+        }
     }
 
 }

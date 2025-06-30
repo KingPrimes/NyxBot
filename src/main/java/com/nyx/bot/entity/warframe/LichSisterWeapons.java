@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name", "item_name"}))
 @JsonView(Views.View.class)
-public class Weapons extends BaseEntity {
+public class LichSisterWeapons extends BaseEntity {
     @Id
     @JsonProperty("id")
     //唯一字符串武器ID

@@ -4,21 +4,20 @@ import com.nyx.bot.entity.warframe.NotTranslation;
 import com.nyx.bot.entity.warframe.StateTranslation;
 import com.nyx.bot.repo.warframe.NotTranslationRepository;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicReference;
-
+@SuppressWarnings("unused")
 @Slf4j
 @Service
 public class StateTranslationService {
-    private final StateTranslationRepository str;
-    private final NotTranslationRepository ntr;
+    @Resource
+    StateTranslationRepository str;
+    @Resource
+    NotTranslationRepository ntr;
 
-    public StateTranslationService(StateTranslationRepository str, NotTranslationRepository ntr) {
-        this.str = str;
-        this.ntr = ntr;
-    }
 
     /**
      * 新增 | 修改

@@ -8,33 +8,35 @@ import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.utils.StringUtils;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@SuppressWarnings("unused")
 @EqualsAndHashCode(callSuper = false)
 @Data
-@Table(name = "state_translation", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "uniqueName"}))
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"NAME", "UNIQUE_NAME"}))
 @JsonView(Views.View.class)
 public class StateTranslation extends BaseEntity {
+    // 唯一名词
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    //唯一自增ID
-    String id;
-    // 解释
-    @JsonProperty("description")
-    String description;
+    @JsonProperty("uniqueName")
+    @NotEmpty(message = "unique_name.not.empty")
+    String uniqueName;
     // 名称
     @JsonProperty("name")
     @NotEmpty(message = "state.name.not.empty")
     String name;
+    // 解释
+    @JsonProperty("description")
+    String description;
     // 类型
     @JsonProperty("type")
     StateTypeEnum type;
-    // 唯一名词
-    @JsonProperty("unique_name")
-    @NotEmpty(message = "state.unique_name.not.empty")
-    String uniqueName;
     // 能否交易
     @JsonProperty("tradable")
     Boolean tradable;
@@ -64,12 +66,5 @@ public class StateTranslation extends BaseEntity {
     @JsonIgnore
     public String getEquation() {
         return StringUtils.trimEx(name.toUpperCase()) + StringUtils.trimEx(uniqueName.toUpperCase());
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        if (id != null && id.isEmpty()) {
-            id = null;
-        }
     }
 }

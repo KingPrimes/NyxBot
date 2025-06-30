@@ -59,7 +59,7 @@ public class WarframeDataSource {
                 CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus)
                         .thenRunAsync(WarframeDataSource::getEphemeras)
                         .thenRunAsync(WarframeDataSource::getMarket)
-                        .thenRunAsync(WarframeDataSource::getWeapons)
+                        .thenRunAsync(WarframeDataSource::getLichSisterWeapons)
                         .thenRunAsync(WarframeDataSource::getRivenWeapons)
                         .thenRunAsync(WarframeDataSource::getRelics)
         ).thenRun(() -> log.info("数据初始化完成！"));
@@ -173,10 +173,10 @@ public class WarframeDataSource {
     }
 
     //赤毒武器/信条武器
-    public static Integer getWeapons() {
+    public static Integer getLichSisterWeapons() {
         log.info("开始获取武器信息！");
         int attempts = 0;
-        List<Weapons> weaponsList = new ArrayList<>();
+        List<LichSisterWeapons> weaponsList = new ArrayList<>();
         while (attempts < 3) {
             HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
@@ -185,10 +185,10 @@ public class WarframeDataSource {
                 attempts++;
                 continue;
             }
-            List<Weapons> weapons = JSONObject.parseObject(body.getBody())
+            List<LichSisterWeapons> weapons = JSONObject.parseObject(body.getBody())
                     .getJSONObject("payload")
                     .getJSONArray("weapons")
-                    .toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
+                    .toJavaList(LichSisterWeapons.class, JSONReader.Feature.SupportSmartMatch);
             if (!weapons.isEmpty()) {
                 weaponsList.addAll(weapons);
                 break;
@@ -203,7 +203,7 @@ public class WarframeDataSource {
                 attempts++;
                 continue;
             }
-            List<Weapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(Weapons.class, JSONReader.Feature.SupportSmartMatch);
+            List<LichSisterWeapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(LichSisterWeapons.class, JSONReader.Feature.SupportSmartMatch);
             if (!weapons.isEmpty()) {
                 weaponsList.addAll(weapons);
                 break;
@@ -215,17 +215,17 @@ public class WarframeDataSource {
             return -1;
         }
 
-        WeaponsRepository repository = SpringUtils.getBean(WeaponsRepository.class);
+        LichSisterWeaponsRepository repository = SpringUtils.getBean(LichSisterWeaponsRepository.class);
         if (!repository.findAll().isEmpty()) {
-            List<Weapons> all = repository.findAll();
-            List<Weapons> list = weaponsList.stream()
+            List<LichSisterWeapons> all = repository.findAll();
+            List<LichSisterWeapons> list = weaponsList.stream()
                     .filter(item -> !all.stream()
                             .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
                             .containsKey(item.getItemName() + item.getUrlName())).toList();
-            log.info("总更新 Warframe.Weapons {} 数据！", list.size());
+            log.info("总更新 Warframe.LichSisterWeapons {} 数据！", list.size());
             return repository.saveAll(list).size();
         } else {
-            log.info("总更新 Warframe.Weapons {} 数据！", weaponsList.size());
+            log.info("总更新 Warframe.LichSisterWeapons {} 数据！", weaponsList.size());
             return repository.saveAll(weaponsList).size();
         }
     }
@@ -272,11 +272,11 @@ public class WarframeDataSource {
                     //增加|修改值的数量
                     size.addAndGet(1);
                 });
-                log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", size);
+                log.info("总计更新 Warframe.Market Riven LichSisterWeapons {} 数据！", size);
                 return size.get();
             } else {
                 List<RivenItems> rivenItems = repository.saveAll(items);
-                log.info("总计更新 Warframe.Market Riven Weapons {} 数据！", rivenItems.size());
+                log.info("总计更新 Warframe.Market Riven LichSisterWeapons {} 数据！", rivenItems.size());
                 return rivenItems.size();
             }
         }

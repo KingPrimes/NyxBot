@@ -1,8 +1,10 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+@SuppressWarnings("unused")
 @Data
 public class BastWorldState {
     @JsonProperty("_id")
@@ -15,9 +17,14 @@ public class BastWorldState {
     @JsonProperty("Expiry")
     private DateField expiry;
 
+    @JsonIgnore
+    public String getTimeLeft() {
+        return expiry.getTimeLeft();
+    }
+
     @Data
     public static class Id {
         @JsonProperty("$oid")
-        private String $oid;
+        private String oid;
     }
 }
