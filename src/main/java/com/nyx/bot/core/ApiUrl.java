@@ -32,6 +32,10 @@ public class ApiUrl {
     // 官方图片获取地址
     public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
 
+    public static final String WARFRAME_PUBLIC_EXPORT_MANIFESTS = "https://content.warframe.com/PublicExport/Manifests/ExportCustoms_zh.json!00_elSVjyO-wjnuVPkf5b3QvA";
+
+    public static final String WARFRAME_PUBLIC_EXPORT_INDEX = " https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
+
     /**
      * 战甲数据源 git push pull等操作链接
      */

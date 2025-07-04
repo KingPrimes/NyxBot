@@ -21,6 +21,7 @@ public class KnownCalendarSeasons extends BastWorldState {
     @JsonProperty("UpgradeAvaliabilityRequirements")
     private List<String> upgradeAvaliabilityRequirements;
 
+    // conclaveChallenges
     public enum DaysTypeEnum {
         // 任务
         CET_CHALLENGE,
@@ -33,9 +34,9 @@ public class KnownCalendarSeasons extends BastWorldState {
 
     @Data
     public static class Days {
-        @JsonProperty("Day")
+        @JsonProperty("day")
         private Integer day;
-        @JsonProperty("Events")
+        @JsonProperty("events")
         private List<Events> events;
     }
 

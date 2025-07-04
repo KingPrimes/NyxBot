@@ -5,7 +5,7 @@ import com.nyx.bot.annotation.NotEmpty;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * 奖励池
@@ -22,8 +22,8 @@ public class RewardPool {
     @NotEmpty(message = "unique_name.not.empty")
     String uniqueName;
 
-    @OneToMany(mappedBy = "rewards", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonProperty("rewards")
-    Set<Reward> rewards;
+    List<Reward> rewards;
 
 }
