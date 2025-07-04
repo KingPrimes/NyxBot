@@ -33,6 +33,24 @@ public class FileUtils {
     }
 
     /**
+     * 读取文本到列表
+     * @param path 文件路径
+     * @return 列表
+     */
+    public static List<String> readFileToList(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            return List.of();
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            return reader.lines().toList();
+        } catch (Exception e) {
+            log.error("读取文件错误:{}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
      * 创建目录如果目录不存在
      *
      * @param file 文件

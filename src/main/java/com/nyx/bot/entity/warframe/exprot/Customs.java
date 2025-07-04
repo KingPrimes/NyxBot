@@ -5,7 +5,6 @@ import com.nyx.bot.annotation.NotEmpty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 
 /**
@@ -13,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"UNIQUE_NAME"}))
+@Table
 public class Customs {
     /**
      * 唯一名称

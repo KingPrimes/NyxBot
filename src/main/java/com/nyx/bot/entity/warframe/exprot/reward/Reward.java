@@ -1,8 +1,8 @@
 package com.nyx.bot.entity.warframe.exprot.reward;
 
+import com.nyx.bot.enums.RarityEnum;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
 
 /**
  * 具体奖励
@@ -17,18 +17,7 @@ public class Reward {
 
     String item;
 
-    Rarity rarity;
+    RarityEnum rarity;
 
-    @Getter
-    public enum Rarity {
-        Common("常见"),
-        Uncommon("罕见"),
-        Rare("稀有"),
-        ;
-        final String name;
-
-        Rarity(String s) {
-            name = s;
-        }
-    }
+    Integer itemCount;
 }

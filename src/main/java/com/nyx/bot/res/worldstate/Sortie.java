@@ -1,6 +1,7 @@
 package com.nyx.bot.res.worldstate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.res.enums.BossEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public class Sortie extends BastWorldState{
 
     @JsonProperty("Boss")
-    private String boss;
+    private BossEnum boss;
     @JsonProperty("Reward")
     private String reward;
     @JsonProperty("Seed")
