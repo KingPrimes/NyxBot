@@ -8,10 +8,7 @@ import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.utils.StringUtils;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -32,24 +29,22 @@ public class StateTranslation extends BaseEntity {
     @NotEmpty(message = "state.name.not.empty")
     String name;
     // 解释
+    @Column(columnDefinition = "text")
     @JsonProperty("description")
     String description;
     // 类型
     @JsonProperty("type")
     StateTypeEnum type;
     // 能否交易
-    @JsonProperty("tradable")
-    Boolean tradable;
+    @JsonProperty("parentName")
+    String parentName;
 
-    // /Lotus/StoreItems/Types/BoosterPacks/BaroTreasureBox
-    // 虚空余货
-
-    public StateTranslation(String description, String name, StateTypeEnum type, String uniqueName, Boolean tradable) {
+    public StateTranslation(String description, String name, StateTypeEnum type, String uniqueName, String parentName) {
         this.description = description;
         this.name = name;
         this.type = type;
         this.uniqueName = uniqueName;
-        this.tradable = tradable;
+        this.parentName = parentName;
     }
 
     public StateTranslation() {
@@ -60,7 +55,7 @@ public class StateTranslation extends BaseEntity {
         this.name = stateTranslation.name;
         this.type = stateTranslation.type;
         this.uniqueName = stateTranslation.uniqueName;
-        this.tradable = stateTranslation.tradable;
+        this.parentName = stateTranslation.parentName;
     }
 
     @JsonIgnore

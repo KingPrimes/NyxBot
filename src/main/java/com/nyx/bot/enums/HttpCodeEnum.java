@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 public enum HttpCodeEnum {
     SUCCESS(200, "成功"),
+    NOT_MODIFIED(304, "未修改"),
     FAIL(400, "失败"),
     ERROR(500, "错误"),
     WARN(301, "警告"),

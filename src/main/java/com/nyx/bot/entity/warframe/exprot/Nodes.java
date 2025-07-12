@@ -21,7 +21,7 @@ public class Nodes {
     @NotEmpty(message = "unique_name.not.empty")
     @JsonProperty("uniqueName")
     String uniqueName;
-
+    @NotEmpty(message = "state.name.not.empty")
     @JsonProperty("name")
     String name;
 
@@ -34,7 +34,7 @@ public class Nodes {
     @JsonProperty("nodeType")
     Integer nodeType;
 
-    @JsonProperty("productCategory")
+    @JsonProperty("masteryReq")
     Integer masteryReq;
 
     @JsonProperty("missionIndex")
@@ -89,6 +89,9 @@ public class Nodes {
             }
             case 11 -> {
                 return FactionEnum.FC_MITW.getName();
+            }
+            case 12 -> {
+                return FactionEnum.FC_TENNO.getName();
             }
             default -> {
                 return "未知派系";

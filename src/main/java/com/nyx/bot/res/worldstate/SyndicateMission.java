@@ -1,6 +1,7 @@
 package com.nyx.bot.res.worldstate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.res.enums.SyndicateEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @Data
 public class SyndicateMission extends BastWorldState{
     @JsonProperty("Tag")
-    private String tag;
+    private SyndicateEnum tag;
     @JsonProperty("Seed")
     private Integer seed;
     @JsonProperty("Nodes")

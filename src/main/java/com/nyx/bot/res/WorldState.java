@@ -2,6 +2,7 @@ package com.nyx.bot.res;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.res.enums.SyndicateEnum;
 import com.nyx.bot.res.worldstate.*;
 import lombok.Data;
 
@@ -154,7 +155,7 @@ public class WorldState {
     }
 
     public CetusCycle getCetusCycle() {
-        return new CetusCycle(getBountiesEndDate("CetusSyndicate"));
+        return new CetusCycle(getBountiesEndDate(SyndicateEnum.CetusSyndicate));
     }
 
     public CambionCycle getCambionCycle() {
@@ -170,11 +171,11 @@ public class WorldState {
     }
 
     public ZarimanCycle getZarimanCycle() {
-        return new ZarimanCycle(getBountiesEndDate("ZarimanSyndicate"));
+        return new ZarimanCycle(getBountiesEndDate(SyndicateEnum.ZarimanSyndicate));
     }
 
     @JsonIgnore
-    private Instant getBountiesEndDate(String key) {
+    private Instant getBountiesEndDate(SyndicateEnum key) {
         return this.getSyndicateMissions()
                 .stream()
                 .filter(s -> s.getTag().equals(key))

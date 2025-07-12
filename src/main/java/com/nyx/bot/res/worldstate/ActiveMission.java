@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.MissionTypeEnum;
 import com.nyx.bot.res.enums.VoidEnum;
@@ -30,4 +31,17 @@ public class ActiveMission extends BastWorldState {
     // 是否是钢铁模式
     @JsonProperty("Hard")
     private Boolean hard;
+
+    public String getMissionType() {
+        return missionType.getName();
+    }
+
+    public String getModifier() {
+        return modifier.getName();
+    }
+
+    @JsonIgnore
+    public VoidEnum getVoidEnum() {
+        return modifier;
+    }
 }
