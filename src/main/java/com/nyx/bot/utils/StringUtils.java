@@ -7,6 +7,7 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 @Component
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
@@ -743,4 +744,50 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return str.replace("^", "").replace("$", "").trim();
     }
 
+    /**
+     * 保留最后一个 / 后的内容
+     *
+     * @param path 输入路径字符串
+     * @return 最后一个 / 后的内容；如果不存在 /，返回原字符串
+     */
+    public static String getLastValueAfterSlash(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+
+        int lastSlashIndex = path.lastIndexOf('/');
+        if (lastSlashIndex == -1) {
+            return path; // 没有斜杠，返回原字符串
+        }
+
+        return path.substring(lastSlashIndex + 1);
+    }
+
+    /**
+     * 保留路径中最后三个 / 的内容
+     *
+     * @param path 输入路径字符串
+     * @return 最后三段路径；若不足三段则返回全部
+     */
+    public static String getLastThreeSegments(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+
+        String[] parts = path.split("/");
+        int length = parts.length;
+
+        // 计算起始索引（取最后3段）
+        int startIndex = Math.max(0, length - 3);
+
+        StringBuilder result = new StringBuilder();
+        for (int i = startIndex; i < length; i++) {
+            result.append(parts[i]);
+            if (i < length - 1) {
+                result.append("/");
+            }
+        }
+
+        return result.toString();
+    }
 }

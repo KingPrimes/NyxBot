@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
- * 外观
+ * 节点
  */
 @Repository
 public interface NodesRepository extends JpaRepository<Nodes, String>, JpaSpecificationExecutor<Nodes> {

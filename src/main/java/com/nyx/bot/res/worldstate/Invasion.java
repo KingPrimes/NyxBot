@@ -37,4 +37,11 @@ public class Invasion extends BastWorldState{
     private Reward defenderReward;
     @JsonProperty("DefenderMissionInfo")
     private MissionInfo defenderMissionInfo;
+
+    public String getFaction() {
+        return faction.getName();
+    }
+    public String getDefenderFaction() {
+        return defenderFaction.getName();
+    }
 }

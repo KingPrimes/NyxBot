@@ -25,4 +25,8 @@ public class Sortie extends BastWorldState{
     private List<Variant> variants;
     @JsonProperty("Twitter")
     private Boolean twitter;
+
+    public String getBoss() {
+        return boss.getName();
+    }
 }

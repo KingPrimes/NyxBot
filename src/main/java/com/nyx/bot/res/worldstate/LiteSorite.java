@@ -1,6 +1,7 @@
 package com.nyx.bot.res.worldstate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.res.enums.BossEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,7 +15,11 @@ public class LiteSorite extends BastWorldState{
     @JsonProperty("Seed")
     private Integer seed;
     @JsonProperty("Boss")
-    private String boss;
+    private BossEnum boss;
     @JsonProperty("Missions")
     private List<Mission> missions;
+
+    public String getBoss() {
+        return boss.getName();
+    }
 }

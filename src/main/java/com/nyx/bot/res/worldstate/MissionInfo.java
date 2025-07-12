@@ -18,4 +18,8 @@ public class MissionInfo {
     private FactionEnum faction;
     @JsonProperty("missionReward")
     private List<Reward> missionReward; // 添加这个字段
+
+    public String getFaction() {
+        return faction.getName();
+    }
 }

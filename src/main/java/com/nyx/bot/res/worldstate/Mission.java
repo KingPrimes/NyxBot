@@ -10,4 +10,8 @@ public class Mission {
     private MissionTypeEnum missionType;
     @JsonProperty("node")
     private String node;
+
+    public String getMissionType(){
+        return missionType.getName();
+    }
 }

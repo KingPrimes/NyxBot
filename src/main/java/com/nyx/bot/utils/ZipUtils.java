@@ -11,10 +11,8 @@ public class ZipUtils {
      *
      * @param inputPath  Lzma文件路径
      * @param outputPath 解压后的文件路径
-     * @throws IOException IO 异常
      */
-    public static void unLzma(String inputPath, String outputPath)
-            throws IOException {
+    public static Boolean unLzma(String inputPath, String outputPath) {
 
         try (InputStream fis = new BufferedInputStream(new FileInputStream(inputPath));
              LZMAInputStream lzmaIn = new LZMAInputStream(fis, -1);  // -1表示自动检测字典大小
@@ -25,6 +23,9 @@ public class ZipUtils {
             while ((bytesRead = lzmaIn.read(buffer)) != -1) {
                 fos.write(buffer, 0, bytesRead);
             }
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 }

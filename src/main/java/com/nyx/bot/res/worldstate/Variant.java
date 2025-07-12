@@ -20,4 +20,11 @@ public class Variant {
     @JsonProperty("tileset")
     private String tileset;
 
+    public String getMissionType() {
+        return missionType.getName();
+    }
+
+    public String getModifierType() {
+        return modifierType.getStr();
+    }
 }
