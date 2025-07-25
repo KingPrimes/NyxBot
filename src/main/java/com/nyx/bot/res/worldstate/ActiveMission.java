@@ -32,10 +32,11 @@ public class ActiveMission extends BastWorldState {
     @JsonProperty("Hard")
     private Boolean hard;
 
+    @JsonIgnore
     public String getMissionType() {
         return missionType.getName();
     }
-
+    @JsonIgnore
     public String getModifier() {
         return modifier.getName();
     }

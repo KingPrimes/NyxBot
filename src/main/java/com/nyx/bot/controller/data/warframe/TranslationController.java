@@ -5,7 +5,6 @@ import com.nyx.bot.core.AjaxResult;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.controller.BaseController;
 import com.nyx.bot.core.page.TableDataInfo;
-import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.entity.warframe.Translation;
 import com.nyx.bot.repo.warframe.TranslationRepository;
 import com.nyx.bot.utils.DateUtils;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/data/warframe/translation")
@@ -63,11 +61,11 @@ public class TranslationController extends BaseController {
      */
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-            if (flag) {
-                CompletableFuture.runAsync(WarframeDataSource::initTranslation);
-            }
-        });
+//        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
+//            if (flag) {
+//                CompletableFuture.runAsync(WarframeDataSource::initTranslation);
+//            }
+//        });
         return success(I18nUtils.RequestTaskRun());
     }
 

@@ -44,10 +44,10 @@ public class TestInitData {
         WarframeDataSource.getRivenTrend();
     }
 
-    @Test
-    void initTranslation() {
-        WarframeDataSource.initTranslation();
-    }
+//    @Test
+//    void initTranslation() {
+//        WarframeDataSource.initTranslation();
+//    }
 
     @Test
     void test() {

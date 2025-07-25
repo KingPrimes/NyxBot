@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.BossEnum;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Sortie extends BastWorldState{
+public class Sortie extends BastWorldState {
 
     @JsonProperty("Boss")
     private BossEnum boss;
@@ -26,6 +27,7 @@ public class Sortie extends BastWorldState{
     @JsonProperty("Twitter")
     private Boolean twitter;
 
+    @JsonIgnore
     public String getBoss() {
         return boss.getName();
     }

@@ -17,14 +17,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = "urlName"))
+@Table
 @JsonView(Views.View.class)
 public class RivenItems extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //唯一自增ID
-    Long rivenId;
     @JsonProperty("id")
     @Column(length = 50)
     //紫卡ID

@@ -60,7 +60,7 @@ public class ApiUrl {
     /**
      * Market 物品
      */
-    public static final String WARFRAME_MARKET_ITEMS = "https://api.warframe.market/v1/items";
+    public static final String WARFRAME_MARKET_ITEMS = "https://api.warframe.market/v2/items";
 
     /**
      * Market 紫卡武器
@@ -80,10 +80,6 @@ public class ApiUrl {
     public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
 
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30&key=%s";
-
-    private static final String WARFRAME_PROFILE = "https://api.warframestat.us/profile/%s";
-
-    private static final String WARFRAME_PROFILE_STATS = "https://api.warframestat.us/profile/%s/stats";
 
     /**
      * Market 物品查询
@@ -118,25 +114,4 @@ public class ApiUrl {
             return Collections.emptyList();
         }
     }
-
-    /**
-     * 获取Warframe的个人信息
-     *
-     * @param name ID
-     * @return 个人信息
-     */
-    public static HttpUtils.Body getProfile(String name) {
-        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE, name));
-    }
-
-    /**
-     * 获取Warframe的个人统计信息
-     *
-     * @param name ID
-     * @return 统计信息
-     */
-    public static HttpUtils.Body getProfileStats(String name) {
-        return HttpUtils.sendGet(String.format(WARFRAME_PROFILE_STATS, name));
-    }
-
 }

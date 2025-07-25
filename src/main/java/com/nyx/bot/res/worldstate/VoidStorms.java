@@ -15,7 +15,7 @@ public class VoidStorms extends BastWorldState {
     // 遗物等级
     @JsonProperty("ActiveMissionTier")
     private VoidEnum ActiveMissionTier;
-
+    @JsonIgnore
     public String getActiveMissionTier() {
         return ActiveMissionTier.getName();
     }
