@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.FactionEnum;
 import lombok.Data;
@@ -38,9 +39,11 @@ public class Invasion extends BastWorldState{
     @JsonProperty("DefenderMissionInfo")
     private MissionInfo defenderMissionInfo;
 
+    @JsonIgnore
     public String getFaction() {
         return faction.getName();
     }
+    @JsonIgnore
     public String getDefenderFaction() {
         return defenderFaction.getName();
     }

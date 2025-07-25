@@ -1,16 +1,14 @@
 package com.nyx.bot.task;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.entity.warframe.StateTranslation;
-import com.nyx.bot.entity.warframe.exprot.Nodes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.res.WorldState;
 import com.nyx.bot.res.worldstate.*;
+import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -46,8 +44,7 @@ public class TestApi {
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            WorldState worldState = JSONObject.parseObject(body.getBody(), WorldState.class);
-            log.info(JSON.toJSONString(worldState));
+            FileUtils.writeFile("./data/state.json", body.getBody());
         }
     }
 
@@ -56,8 +53,8 @@ public class TestApi {
      */
     @Test
     void testStateDailyDeals() {
-        worldState.getDailyDeals().stream().peek(d -> {
-            d.setItem(str.findByUniqueName(StringUtils.getLastThreeSegments(d.getItem())).orElse(new StateTranslation()).getName());
+        worldState.getDailyDeals().stream().peek(i -> {
+            str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()));
         }).findFirst().ifPresent(d -> log.info(JSON.toJSONString(d)));
     }
 
@@ -68,12 +65,14 @@ public class TestApi {
     void testStateInvasions() {
         List<Invasion> list = worldState.getInvasions().stream()
                 .peek(d -> {
-                            Nodes nodes = nodesRepository.findById(d.getNode()).orElse(new Nodes());
-                            d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                            nodesRepository.findById(d.getNode())
+                                    .ifPresent(nodes -> d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
                             List<Reward.Item> items = d.getDefenderReward().getCountedItems()
                                     .stream()
                                     .filter(Objects::nonNull)
-                                    .peek(i -> i.setName(str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).orElse(new StateTranslation()).getName()))
+                                    .peek(i -> {
+                                        str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()));
+                                    })
                                     .toList();
                             d.getDefenderReward().setCountedItems(items);
 
@@ -84,7 +83,9 @@ public class TestApi {
                                                 r.getCountedItems()
                                                         .stream()
                                                         .filter(Objects::nonNull)
-                                                        .peek(i -> i.setName(str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).orElse(new StateTranslation()).getName()))
+                                                        .peek(i -> {
+                                                            str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()));
+                                                        })
                                                         .toList()
                                         );
                                     }).toList());
@@ -101,18 +102,20 @@ public class TestApi {
         List<ActiveMission> hard = worldState.getActiveMissions().stream()
                 .filter(m -> Objects.nonNull(m.getHard()) && m.getHard())
                 .peek(m -> {
-                    Nodes nodes = nodesRepository.findById(m.getNode()).orElse(new Nodes());
-                    m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
+                        m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    });
                 }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
-        log.info("ActiveMissions Hard:{}",JSON.toJSONString(hard));
+        log.info("ActiveMissions Hard:{}", JSON.toJSONString(hard));
         List<ActiveMission> list = worldState.getActiveMissions().stream()
                 .filter(m -> !Objects.nonNull(m.getHard()))
                 .peek(m -> {
-                    Nodes nodes = nodesRepository.findById(m.getNode()).orElse(new Nodes());
-                    m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
+                        m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    });
                 }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
 
-        log.info("ActiveMissions:{}",JSON.toJSONString(list));
+        log.info("ActiveMissions:{}", JSON.toJSONString(list));
     }
 
     /**
@@ -122,8 +125,9 @@ public class TestApi {
     void testVoidStorms() {
         List<VoidStorms> list = worldState.getVoidStorms().stream()
                 .peek(m -> {
-                    Nodes nodes = nodesRepository.findById(m.getNode()).orElse(new Nodes());
-                    m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
+                        m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                    });
                 }).sorted(Comparator.comparing(VoidStorms::getVoidEnum)).toList();
         log.info(JSON.toJSONString(list));
     }
@@ -142,18 +146,17 @@ public class TestApi {
     void testVoidTraders() {
         List<VoidTrader> list = worldState.getVoidTraders().stream()
                 .peek(v -> {
-                    Nodes nodes = nodesRepository.findById(v.getNode()).orElse(new Nodes());
-                    v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                    v.setManifest(v.getManifest()
-                            .stream()
-                            .peek(m ->
-                                    m.setItem(
-                                            str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItem()))
-                                                    .orElse(new StateTranslation()).getName()
-                                    )
-                            )
-                            .toList()
-                    );
+                    nodesRepository.findById(v.getNode())
+                            .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+                    if (v.getManifest() != null && !v.getManifest().isEmpty()) {
+                        v.setManifest(v.getManifest()
+                                .stream()
+                                .peek(i -> {
+                                    str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()));
+                                })
+                                .toList()
+                        );
+                    }
                 }).toList();
         log.info(JSON.toJSONString(list));
     }
@@ -167,11 +170,11 @@ public class TestApi {
                 .peek(s -> {
                     s.setVariants(s.getVariants().stream()
                             .peek(v -> {
-                                Nodes node = nodesRepository.findById(v.getNode()).orElse(new Nodes());
-                                v.setNode(node.getName() + "(" + node.getSystemName() + ")");
+                                nodesRepository.findById(v.getNode())
+                                        .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
                             }).toList());
                 }).toList();
-        log.info("Sorties:{}",JSON.toJSONString(list));
+        log.info("Sorties:{}", JSON.toJSONString(list));
     }
 
     /**
@@ -183,11 +186,11 @@ public class TestApi {
                 .peek(s -> {
                     s.setMissions(s.getMissions().stream()
                             .peek(v -> {
-                                Nodes node = nodesRepository.findById(v.getNode()).orElse(new Nodes());
-                                v.setNode(node.getName() + "(" + node.getSystemName() + ")");
+                                nodesRepository.findById(v.getNode())
+                                        .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
                             }).toList());
                 }).toList();
-        log.info("LiteSorties:{}",JSON.toJSONString(list));
+        log.info("LiteSorties:{}", JSON.toJSONString(list));
     }
 
     @Test

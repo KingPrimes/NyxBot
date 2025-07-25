@@ -22,19 +22,40 @@ public class OrdersItems extends BaseEntity {
     @JsonProperty("id")
     //唯一字符串ID
     String id;
-    @JsonProperty("url_name")
+
+    @JsonProperty("slug")
     @Column(length = 50)
     //URL name
-    String urlName;
-    @JsonProperty("item_name")
-    @Column(length = 50)
+    String slug;
+
+    @JsonProperty("gameRef")
+    String gameRef;
+
+
+    // 可批量交易
+    @JsonProperty("bulkTradable")
+    Boolean bulkTradable;
+
+    // 最大等级
+    @JsonProperty("maxRank")
+    Integer maxRank;
+
+    // 杜卡币
+    @JsonProperty("ducats")
+    Integer ducats;
+
+    @JsonProperty("name")
     //物品名称
-    String itemName;
-    @JsonProperty("thumb")
-    @Column(length = 120)
+    String name;
+
+    // 图标
+    @JsonProperty("icon")
+    String icon;
+
     //缩略图
+    @JsonProperty("thumb")
     String thumb;
     //
-    @JsonProperty("vaulted")
-    Boolean vaulted;
+    @JsonProperty("subIcon")
+    String subIcon;
 }

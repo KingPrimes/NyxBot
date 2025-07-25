@@ -44,10 +44,10 @@ public class UpdatePlugin {
                 updateWarframeSister(bot, event);
                 break;
             }
-            case UPDATE_WARFRAME_TAR: {
-                updateWarframeTar(bot, event);
-                break;
-            }
+//            case UPDATE_WARFRAME_TAR: {
+//                updateWarframeTar(bot, event);
+//                break;
+//            }
             case UPDATE_JAR: {
                 updateJar(bot, event);
                 break;
@@ -120,18 +120,18 @@ public class UpdatePlugin {
                 });
     }
 
-    private static void updateWarframeTar(Bot bot, AnyMessageEvent event) {
-        bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-            if (flag) {
-                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
-                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
-                );
-            } else {
-                bot.sendMsg(event, "翻译数据，更新失败！", false);
-            }
-        });
-    }
+//    private static void updateWarframeTar(Bot bot, AnyMessageEvent event) {
+//        bot.sendMsg(event, "已发布任务，正在更新！", false);
+//        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
+//            if (flag) {
+//                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
+//                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
+//                );
+//            } else {
+//                bot.sendMsg(event, "翻译数据，更新失败！", false);
+//            }
+//        });
+//    }
 
     private static void updateJar(Bot bot, AnyMessageEvent event) {
         log.debug("Updating the jar file");
