@@ -32,7 +32,7 @@ public class OrdersItemsController extends BaseController {
     public TableDataInfo list(@RequestBody OrdersItems oi) {
         return getDataTable(
                 repository.findAllPageable(
-                        oi.getItemName(),
+                        oi.getName(),
                         PageRequest.of(
                                 oi.getCurrent() - 1, oi.getSize()
                         )

@@ -21,8 +21,6 @@ public class CachingConfig {
     public CacheManager cacheManager() {
         SpringCache2kCacheManager cacheManager = new SpringCache2kCacheManager()
                 .addCaches(
-                        //配置名称为 warframe-socket-data 的缓存策略， eternal永不过期， entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.WARFRAME_SOCKET_DATA).eternal(true).entryCapacity(1),
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10, TimeUnit.MINUTES),
                         b -> b.name(CacheUtils.WARFRAME),

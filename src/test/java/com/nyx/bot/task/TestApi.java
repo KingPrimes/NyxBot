@@ -1,9 +1,11 @@
 package com.nyx.bot.task;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.res.WorldState;
@@ -22,7 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Slf4j
@@ -32,19 +36,42 @@ public class TestApi {
     StateTranslationRepository str;
 
     @Resource
+    TranslationService trans;
+    @Resource
     NodesRepository nodesRepository;
 
-    FileInputStream state = new FileInputStream("./data/state.json");
+    FileInputStream state = new FileInputStream("./data/state2.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
+    }
+
+    static Map<String, String> compareTheHashAndSave(List<String> keys) {
+        String keysHashPath = "./data/keys.json";
+        Map<String, String> collect = keys.stream()
+                .map(key -> key.split("!", 2))
+                .filter(parts -> parts.length == 2)
+                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        try {
+            Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
+            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            return collect.entrySet().stream()
+                    .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue
+                    ));
+        } catch (FileNotFoundException e) {
+            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            return collect;
+        }
     }
 
     @Test
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state.json", body.getBody());
+            FileUtils.writeFile("./data/state2.json", body.getBody());
         }
     }
 
@@ -55,7 +82,21 @@ public class TestApi {
     void testStateDailyDeals() {
         worldState.getDailyDeals().stream().peek(i -> {
             str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()));
-        }).findFirst().ifPresent(d -> log.info(JSON.toJSONString(d)));
+        }).findFirst().ifPresent(d -> log.info(JSON.toJSONString(d, JSONWriter.Feature.PrettyFormatWith4Space)));
+    }
+    /**
+     * 测试双衍王境
+     */
+    @Test
+    void testDuviriCycle(){
+        DuviriCycle duviriCycle = worldState.getDuviriCycle();
+        List<EndlessXpChoices> list = duviriCycle.getChoices().stream().peek(c -> {
+            if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
+                c.setChoices(c.getChoices().stream().map(s -> trans.enToZh(s)).toList());
+            }
+        }).toList();
+        duviriCycle.setChoices(list);
+        log.info(JSON.toJSONString(duviriCycle, JSONWriter.Feature.PrettyFormatWith4Space));
     }
 
     /**
@@ -64,6 +105,7 @@ public class TestApi {
     @Test
     void testStateInvasions() {
         List<Invasion> list = worldState.getInvasions().stream()
+                .filter(i -> !i.getCompleted())
                 .peek(d -> {
                             nodesRepository.findById(d.getNode())
                                     .ifPresent(nodes -> d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
@@ -135,13 +177,6 @@ public class TestApi {
     /**
      * 测试虚空商人
      */
-    //          "ItemType": "/Lotus/StoreItems/Types/Keys/MummyQuestKeyBlueprint",
-    //          "zh": "Inaros 之沙 蓝图",
-    //          "dec": "帮 Baro Ki'Teer 突袭一座古老的火星古墓并盗取一件神秘的宝物。",
-
-    //          "ItemType": "/Lotus/StoreItems/Types/BoosterPacks/BaroTreasureBox",
-    //          "zh": "虚空余货",
-    //          "dec": "随机出售一件未贴标的库存余货，恕不提供挑选。每位顾客限购一个。",
     @Test
     void testVoidTraders() {
         List<VoidTrader> list = worldState.getVoidTraders().stream()
@@ -161,6 +196,44 @@ public class TestApi {
         log.info(JSON.toJSONString(list));
     }
 
+    // 瓦奇娅
+    // ScheduleInfo 时间表信息
+    @Test
+    void testPrimeVaultTrader() {
+        List<PrimeVaultTrader> primeVaultTraders = worldState.getPrimeVaultTraders()
+                .stream()
+                .peek(p -> nodesRepository.findById(p.getNode())
+                        .ifPresent(nodes -> p.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
+                .peek(p -> {
+                    p.setManifest(p.getManifest().stream().peek(m -> {
+                        str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType()))
+                                .ifPresent(s -> m.setItemType(s.getName()));
+                    }).collect(Collectors.toList()));
+                    p.setEvergreenManifest(p.getEvergreenManifest().stream().peek(m -> {
+                        str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType()))
+                                .ifPresent(s -> m.setItemType(s.getName()));
+                    }).collect(Collectors.toList()));
+                    p.setScheduleInfos(p.getScheduleInfos().stream().peek(m -> {
+                        str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItem()))
+                                .ifPresent(s -> m.setItem(s.getName()));
+                    }).collect(Collectors.toList()));
+                })
+                .collect(Collectors.toList());
+        log.info(JSON.toJSONString(primeVaultTraders));
+    }
+
+    @Test
+    void testFlashSale() {
+        List<FlashSale> flashSales = worldState.getFlashSales()
+                .stream()
+                .peek(f -> {
+                    str.findByUniqueName(StringUtils.getLastThreeSegments(f.getTypeName()))
+                            .ifPresent(s -> f.setTypeName(s.getName()));
+                })
+                .toList();
+        log.info(JSON.toJSONString(flashSales));
+    }
+
     /**
      * 测试突击任务
      */
@@ -174,7 +247,7 @@ public class TestApi {
                                         .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
                             }).toList());
                 }).toList();
-        log.info("Sorties:{}", JSON.toJSONString(list));
+        log.info("Sorties:{}", JSON.toJSONString(list, JSONWriter.Feature.PrettyFormatWith4Space));
     }
 
     /**
@@ -190,9 +263,12 @@ public class TestApi {
                                         .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
                             }).toList());
                 }).toList();
-        log.info("LiteSorties:{}", JSON.toJSONString(list));
+        log.info("LiteSorties:{}", JSON.toJSONString(list, JSONWriter.Feature.PrettyFormatWith4Space));
     }
 
+    /**
+     * @throws IOException
+     */
     @Test
     void testUnzip() throws IOException {
         Boolean zh = HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted("zh"), "./data/lzma/index_zh.txt.lzma");
@@ -201,5 +277,11 @@ public class TestApi {
         }
     }
 
+    @Test
+    void testCompareKeysHash() {
+        List<String> keys = FileUtils.readFileToList("./data/lzma/index_zh.txt");
+        Map<String, String> compareTheHashAndSave = compareTheHashAndSave(keys);
+        log.info("KeysHash:{}", compareTheHashAndSave);
+    }
 
 }

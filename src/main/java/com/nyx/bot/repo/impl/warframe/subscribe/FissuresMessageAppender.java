@@ -4,7 +4,8 @@ import com.nyx.bot.entity.warframe.MissionSubscribe;
 import com.nyx.bot.entity.warframe.MissionSubscribeUser;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.enums.WarframeMissionTypeEnum;
-import com.nyx.bot.res.GlobalStates;
+import com.nyx.bot.res.WorldState;
+import com.nyx.bot.res.worldstate.ActiveMission;
 import com.nyx.bot.utils.onebot.Msg;
 
 import java.util.List;
@@ -18,19 +19,19 @@ public class FissuresMessageAppender implements MessageAppender{
      * @param user 用户
      * @return 过滤后的裂隙数据
      */
-    private List<GlobalStates.Fissures> filterFissures(List<GlobalStates.Fissures> fissures,
+    private List<ActiveMission> filterFissures(List<ActiveMission> fissures,
                                                        MissionSubscribeUser user) {
         return user.getCheckTypes().stream()
                 .filter(check -> check.getSubscribe() == SubscribeEnums.FISSURES)
                 .flatMap(check -> fissures.stream()
                         .filter(f -> {
                             if (check.getTierNum() != 0 && !check.getMissionTypeEnum().equals(WarframeMissionTypeEnum.ERROR)) {
-                                return Objects.equals(f.getTierNum(), check.getTierNum()) &&
+                                return Objects.equals(f.getVoidEnum().ordinal(), check.getTierNum()) &&
                                         f.getMissionType().contains(check.getMissionTypeEnum().get());
                             } else if (!check.getMissionTypeEnum().equals(WarframeMissionTypeEnum.ERROR)) {
                                 return f.getMissionType().contains(check.getMissionTypeEnum().get());
                             } else if (check.getTierNum() != 0) {
-                                return Objects.equals(f.getTierNum(), check.getTierNum());
+                                return Objects.equals(f.getVoidEnum().ordinal(), check.getTierNum());
                             }
                             return true;
                         }))
@@ -38,8 +39,8 @@ public class FissuresMessageAppender implements MessageAppender{
     }
 
     @Override
-    public void appendContent(Msg builder, SubscribeEnums enums, GlobalStates data, MissionSubscribe subscribe, MissionSubscribeUser user) {
-        List<GlobalStates.Fissures> filtered = filterFissures(data.getFissures(), user);
+    public void appendContent(Msg builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
+        List<ActiveMission> filtered = filterFissures(data.getActiveMissions(), user);
         if (!filtered.isEmpty()) {
             builder.text("裂隙信息：\n");
             SystemImage.addSystemImage(builder, SubscribeEnums.FISSURES, subscribe, user, filtered);

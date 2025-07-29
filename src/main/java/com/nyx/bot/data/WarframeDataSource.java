@@ -4,6 +4,8 @@ package com.nyx.bot.data;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.nyx.bot.cache.ArbitrationCache;
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.entity.warframe.exprot.Nodes;
@@ -13,12 +15,14 @@ import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
-import com.nyx.bot.res.ArbitrationPre;
-import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.utils.*;
+import com.nyx.bot.res.Arbitration;
+import com.nyx.bot.res.WorldState;
+import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.StringUtils;
+import com.nyx.bot.utils.ZipUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -42,12 +46,10 @@ public class WarframeDataSource {
     static final String EXPORT_PATH = "./data/export/%s";
     static final String LAMA_PATH = "./data/lzma/index_zh.txt.lzma";
     static final String INDEX_PATH = "./data/lzma/index_zh.txt";
-    @Resource
-    StateTranslationRepository str;
-    @Resource
-    NodesRepository nodesRepository;
-    @Resource
-    WeaponsRepository weaponsRepository;
+
+    StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
+    NodesRepository nodesRepository = SpringUtils.getBean(NodesRepository.class);
+    WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
 
     public static void init() {
         log.info("开始初始化数据！");
@@ -87,12 +89,14 @@ public class WarframeDataSource {
         String a = FileUtils.readFileToString("./data/arbitration");
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
-            GlobalStates globalStates = JSON.parseObject(str, GlobalStates.class);
-            CacheUtils.setGlobalState(globalStates);
+            WorldState worldState = JSON.parseObject(str, WorldState.class);
+            WarframeCache.setWarframeStatus(worldState);
         }
         if (!a.isEmpty()) {
-            List<ArbitrationPre> arbitrationPres = JSON.parseArray(Base64.getDecoder().decode(a), ArbitrationPre.class);
-            CacheUtils.setArbitration(arbitrationPres);
+            List<Arbitration> arbitration = JSON.parseArray(Base64.getDecoder().decode(a), Arbitration.class);
+            ArbitrationCache.setArbitration(arbitration);
+        }else{
+            ArbitrationCache.reloadArbitration();
         }
     }
 
@@ -492,7 +496,8 @@ public class WarframeDataSource {
         }
         if (ZipUtils.unLzma(path, outPath)) {
             List<String> keys = FileUtils.readFileToList(outPath);
-            for (String key : keys) {
+            Map<String, String> compared = compareTheHashAndSave(keys);
+            for (String key : compared.keySet()) {
                 if (key.contains("ExportRecipes") || key.contains("ExportFusionBundles")) {
                     continue;
                 }
@@ -507,7 +512,7 @@ public class WarframeDataSource {
      * @param path - 文件保存路径
      * @param key  语言
      */
-    private static Boolean getExportLZMAFiles(String key, String path) {
+    static Boolean getExportLZMAFiles(String key, String path) {
         return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted(key), path);
     }
 
@@ -517,7 +522,7 @@ public class WarframeDataSource {
      * @param exportPath 文件路径
      * @return List<StateTranslation>
      */
-    private static List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
+    static List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
         JSONObject object;
         try {
             object = JSON.parseObject(new FileInputStream(exportPath));
@@ -540,12 +545,39 @@ public class WarframeDataSource {
      * @param key  索引
      * @param path 文件保存路径
      */
-    private static Boolean getExportFiles(String key, String path) {
+    static Boolean getExportFiles(String key, String path) {
         return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
     }
 
-    private static <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
+    static <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
         return items.stream().collect(Collectors.toMap(keyMapper, Function.identity(), mergeFunction));
+    }
+
+    /**
+     * 对比Lzma数据的Hash值并保存，返回不同的Hash值
+     *
+     * @param keys Lzma读取的列表
+     * @return 不同的Hash值
+     */
+    static Map<String, String> compareTheHashAndSave(List<String> keys) {
+        String keysHashPath = "./data/keys.json";
+        Map<String, String> collect = keys.stream()
+                .map(key -> key.split("!", 2))
+                .filter(parts -> parts.length == 2)
+                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        try {
+            Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
+            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            return collect.entrySet().stream()
+                    .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue
+                    ));
+        } catch (FileNotFoundException e) {
+            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            return collect;
+        }
     }
 
     <T> List<T> parsingExportJson(String exportPath, String key, Class<T> c) {
@@ -575,21 +607,30 @@ public class WarframeDataSource {
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
         str.saveAll(stateTranslationList);
         try {
-            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class);
+            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class)
+                    .stream()
+                    .peek(s -> {
+                        s.setType(StateTypeEnum.RESOURCES);
+                        Arrays.stream(StateTypeEnum.values())
+                                .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
+                                .findFirst()
+                                .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+                    })
+                    .toList();
             str.saveAll(javaList);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            log.error("state_translation.json文件不存在");
         }
         log.info("初始化状态翻译完成");
     }
 
     void initNodes() {
         List<Nodes> nodesList;
+        nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
         try {
-            nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
             nodesList.addAll(JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "nodes.json")).toJavaList(Nodes.class));
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            log.error("nodes.json文件不存在");
         }
         nodesRepository.saveAll(nodesList);
     }
