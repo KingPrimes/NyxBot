@@ -22,9 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Slf4j
@@ -48,6 +48,17 @@ public class TestInitData {
 //    void initTranslation() {
 //        WarframeDataSource.initTranslation();
 //    }
+
+    @Test
+    void testInitExprot() {
+        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
+                .thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
+                .thenRunAsync(() -> new WarframeDataSource().initNodes())
+                .thenRunAsync(() -> new WarframeDataSource().initWeapons())
+                .thenRun(() -> log.info("数据初始化完成！"));
+        completableFuture.join();
+    }
+
 
     @Test
     void test() {
@@ -74,30 +85,38 @@ public class TestInitData {
 
     @Test
     void initNodes() throws FileNotFoundException {
-//        List<Nodes> nodes = parsingExportJsonToNodes("./data/export/ExportRegions_zh.json", "ExportRegions");
-//        log.info(JSON.toJSONString(nodes));
-//        nodesRepository.saveAll(nodes);
         List<Nodes> nodesList = JSON.parseArray(new FileInputStream("./data/export/nodes.json")).toJavaList(Nodes.class);
         nodesRepository.saveAll(nodesList);
     }
 
     @Test
-    void initStateTranslation() {
-        List<StateTranslation> stateTranslationList = new ArrayList<>();
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportFlavour_zh.json", "ExportFlavour", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportGear_zh.json", "ExportGear", StateTypeEnum.GEAR));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportKeys_zh.json", "ExportKeys", StateTypeEnum.KEYS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportRelicArcane_zh.json", "ExportRelicArcane", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportResources_zh.json", "ExportResources", StateTypeEnum.RESOURCES));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSentinels_zh.json", "ExportSentinels", StateTypeEnum.SENTINELS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSortieRewards_zh.json", "ExportOther", StateTypeEnum.OTHER));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportUpgrades_zh.json", "ExportUpgrades", StateTypeEnum.MODS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWarframes_zh.json", "ExportWarframes", StateTypeEnum.WARFRAMES));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWeapons_zh.json", "ExportWeapons", StateTypeEnum.WEAPONS));
+    void initStateTranslation() throws FileNotFoundException {
+//        List<StateTranslation> stateTranslationList = new ArrayList<>();
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportFlavour_zh.json", "ExportFlavour", StateTypeEnum.ALL));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportGear_zh.json", "ExportGear", StateTypeEnum.GEAR));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportKeys_zh.json", "ExportKeys", StateTypeEnum.KEYS));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportRelicArcane_zh.json", "ExportRelicArcane", StateTypeEnum.ALL));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportResources_zh.json", "ExportResources", StateTypeEnum.RESOURCES));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSentinels_zh.json", "ExportSentinels", StateTypeEnum.SENTINELS));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSortieRewards_zh.json", "ExportOther", StateTypeEnum.OTHER));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportUpgrades_zh.json", "ExportUpgrades", StateTypeEnum.MODS));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWarframes_zh.json", "ExportWarframes", StateTypeEnum.WARFRAMES));
+//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWeapons_zh.json", "ExportWeapons", StateTypeEnum.WEAPONS));
         //FileUtils.writeFile("./data/st.json", JSON.toJSONString(stateTranslationList));
-        str.saveAll(stateTranslationList);
+        List<StateTranslation> javaList = JSON.parseArray(new FileInputStream("./data/state_translation.json")).toJavaList(StateTranslation.class)
+                .stream()
+                .peek(s -> {
+                    s.setType(StateTypeEnum.RESOURCES);
+                    Arrays.stream(StateTypeEnum.values())
+                            .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
+                            .findFirst()
+                            .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+                })
+                .toList();
+        log.info("javaList: {}", JSON.toJSONString(javaList));
+        str.saveAll(javaList);
     }
 
     List<Nodes> parsingExportJsonToNodes(String exportPath, String key) {

@@ -11,7 +11,7 @@ import com.nyx.bot.repo.impl.warframe.subscribe.*;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.repo.warframe.subscribe.MissionSubscribeUserRepository;
-import com.nyx.bot.res.GlobalStates;
+import com.nyx.bot.res.WorldState;
 import com.nyx.bot.utils.onebot.Msg;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -109,7 +109,7 @@ public class MissionSubscribeService {
      * @param type    更新类型
      * @param newData 新数据
      */
-    public void handleUpdate(SubscribeEnums type, GlobalStates newData) {
+    public void handleUpdate(SubscribeEnums type, WorldState newData) {
         List<MissionSubscribe> subscriptions = subscribeRepository.findSubscriptions(type);
         subscriptions.parallelStream().forEach(subscribe -> subscribe.getUsers().stream()
                 .filter(user -> isUserSubscribed(user, type))
@@ -141,7 +141,7 @@ public class MissionSubscribeService {
     private void buildAndSendMessage(MissionSubscribe subscribe,
                                      MissionSubscribeUser user,
                                      SubscribeEnums type,
-                                     GlobalStates data) {
+                                     WorldState data) {
         try {
             Bot bot = botContainer.robots.get(subscribe.getSubBotUid());
             if (bot == null) return;
@@ -167,7 +167,7 @@ public class MissionSubscribeService {
      */
     private void appendContentByType(Msg builder,
                                      SubscribeEnums type,
-                                     GlobalStates data,
+                                     WorldState data,
                                      MissionSubscribe subscribe,
                                      MissionSubscribeUser user) {
         MessageAppender appender = appenderMap.get(type);
@@ -176,7 +176,7 @@ public class MissionSubscribeService {
         } else {
            new MessageAppender(){
                @Override
-               public void appendContent(Msg builder, SubscribeEnums enums, GlobalStates data, MissionSubscribe subscribe, MissionSubscribeUser user) {
+               public void appendContent(Msg builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
                    MessageAppender.super.appendContent(builder, enums, data, subscribe, user);
                }
            };

@@ -19,6 +19,14 @@ public class PrimeVaultTrader extends BastWorldState {
     private String node;
     @JsonProperty("Manifest")
     private List<ManifestItem> manifest;
+    /**
+     *
+     */
     @JsonProperty("EvergreenManifest")
     private List<ManifestItem> evergreenManifest;
+    /**
+     * 时间表信息
+     */
+    @JsonProperty("ScheduleInfo")
+    private List<ScheduleInfo> scheduleInfos;
 }

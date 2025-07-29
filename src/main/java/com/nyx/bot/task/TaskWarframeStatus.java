@@ -1,49 +1,37 @@
 package com.nyx.bot.task;
 
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.entity.config.TokenKeys;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.plugin.warframe.utils.WarframeSubscribe;
-import com.nyx.bot.repo.warframe.TokenKeysRepository;
-import com.nyx.bot.res.GlobalStates;
-import com.nyx.bot.utils.CacheUtils;
-import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.res.WorldState;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 @Slf4j
 public class TaskWarframeStatus {
     @Async("taskExecutor")
     @Scheduled(cron = "0/120 * * * * ?")
-    public void execute() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS + "pc");
+    public void executeWarframeStatus() {
+        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            Optional<GlobalStates.Arbitration> arbitration = CacheUtils.getArbitration(
-                    SpringUtils.getBean(TokenKeysRepository.class)
-                            .findAll()
-                            .stream()
-                            .map(TokenKeys::getTks)
-                            .filter(tks -> !tks.isEmpty())
-                            .findAny()
-                            .orElse("")
-            );
-            if (states != null) {
-                arbitration.ifPresent(states::setArbitration);
-                WarframeSubscribe.isUpdated(states);
+            try {
+                WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
+                WarframeCache.setWarframeStatus(worldState);
+                WarframeSubscribe.isUpdated(worldState);
+            } catch (JSONException e){
+                log.error("Warframe 状态数据解析错误: {}", e.getMessage());
             }
-        } else {
-            log.error("无法获取数据！");
+        }else{
+            log.error("Warframe 状态数据错误: {}", body.getBody());
         }
     }
 

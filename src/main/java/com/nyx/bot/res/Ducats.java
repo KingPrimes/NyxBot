@@ -1,5 +1,6 @@
 package com.nyx.bot.res;
 
+import com.nyx.bot.entity.warframe.OrdersItems;
 import com.nyx.bot.repo.warframe.OrdersItemsRepository;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.Data;
@@ -113,12 +114,12 @@ public class Ducats {
         public Map<String, List<Ducat>> getSilverDump() {
             Map<String, List<Ducat>> silverDump = new java.util.HashMap<>();
             List<Ducat> day = this.previousDay.stream().filter(ducat -> ducat.ducats >= 45 && ducat.ducats < 100)
-                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).get().getItemName()))
+                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))
                     .sorted((o1, o2) -> o2.ducatsPerPlatinumWa.compareTo(o1.ducatsPerPlatinumWa))
                     .limit(10)
                     .toList();
             List<Ducat> hour = this.previousHour.stream().filter(ducat -> ducat.ducats >= 45 && ducat.ducats < 100)
-                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).get().getItemName()))
+                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))
                     .sorted((o1, o2) -> o2.ducatsPerPlatinumWa.compareTo(o1.ducatsPerPlatinumWa))
                     .limit(10)
                     .toList();
@@ -130,12 +131,12 @@ public class Ducats {
         public Map<String, List<Ducat>> getGodDump() {
             Map<String, List<Ducat>> silverDump = new java.util.HashMap<>();
             List<Ducat> day = this.previousDay.stream().filter(ducat -> ducat.ducats == 100)
-                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).get().getItemName()))
+                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))
                     .sorted((o1, o2) -> o2.ducatsPerPlatinumWa.compareTo(o1.ducatsPerPlatinumWa))
                     .limit(10)
                     .toList();
             List<Ducat> hour = this.previousHour.stream().filter(ducat -> ducat.ducats == 100)
-                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).get().getItemName()))
+                    .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))
                     .sorted((o1, o2) -> o2.ducatsPerPlatinumWa.compareTo(o1.ducatsPerPlatinumWa))
                     .limit(10)
                     .toList();

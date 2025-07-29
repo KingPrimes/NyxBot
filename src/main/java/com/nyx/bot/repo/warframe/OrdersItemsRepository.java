@@ -23,31 +23,31 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, String
     /**
      * 根据物品名称模糊查询
      *
-     * @param itemName 物品名称
+     * @param name 物品名称
      * @return 结果
      */
-    @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ','')) and URL_NAME regexp '(.*set)?' group by ITEM_NAME limit 1", nativeQuery = true)
-    Optional<OrdersItems> findByItemNameLike(@Param("i") String itemName);
+    @Query(value = "select * from ORDERS_ITEMS where upper(replace(NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ','')) and SLUG regexp '(.*set)?' group by NAME limit 1", nativeQuery = true)
+    Optional<OrdersItems> findByItemNameLike(@Param("i") String name);
 
     /**
      * 根据物品名称模糊查询
      *
-     * @param itemName 物品名称
+     * @param name 物品名称
      * @return 结果列表
      */
 
-    @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ',''))", nativeQuery = true)
-    List<OrdersItems> findByItemNameLikeToList(@Param("i") String itemName);
+    @Query(value = "select * from ORDERS_ITEMS where upper(replace(NAME,' ','')) like upper(replace('%'||:#{#i}||'%',' ',''))", nativeQuery = true)
+    List<OrdersItems> findByItemNameLikeToList(@Param("i") String name);
 
     /**
      * 正则查询
      *
      * @param regex 正则表达式
      */
-    @Query(value = "select * from ORDERS_ITEMS where upper(replace(ITEM_NAME,' ','')) regexp upper(replace(:#{#r},' ','')) limit 1", nativeQuery = true)
+    @Query(value = "select * from ORDERS_ITEMS where upper(replace(NAME,' ','')) regexp upper(replace(:#{#r},' ','')) limit 1", nativeQuery = true)
     Optional<OrdersItems> findByItemNameRegex(@Param("r") String regex);
 
-    @Query("select o from OrdersItems o where (:itemName is null or LOWER(o.itemName) like LOWER(concat('%', :itemName, '%')))")
-    Page<OrdersItems> findAllPageable(String itemName, Pageable pageable);
+    @Query("select o from OrdersItems o where (:name is null or LOWER(o.name) like LOWER(concat('%', :name, '%')))")
+    Page<OrdersItems> findAllPageable(String name, Pageable pageable);
 
 }

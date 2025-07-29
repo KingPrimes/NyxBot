@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.core.Views;
 import com.nyx.bot.core.dao.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,7 +17,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
-@Table(name = "orders_items", uniqueConstraints = @UniqueConstraint(name = "ordersItems", columnNames = {"item_name", "url_name"}), indexes = @Index(columnList = "id"))
+@Table
 @JsonView(Views.View.class)
 public class OrdersItems extends BaseEntity {
 
@@ -30,7 +33,6 @@ public class OrdersItems extends BaseEntity {
 
     @JsonProperty("gameRef")
     String gameRef;
-
 
     // 可批量交易
     @JsonProperty("bulkTradable")

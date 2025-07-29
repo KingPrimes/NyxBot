@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.enums.HttpCodeEnum;
-import com.nyx.bot.res.ArbitrationPre;
+import com.nyx.bot.res.Arbitration;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +79,7 @@ public class ApiUrl {
 
     public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
 
-    public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30&key=%s";
+    public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
 
     /**
      * Market 物品查询
@@ -98,18 +98,14 @@ public class ApiUrl {
      *
      * @return 仲裁
      */
-    public static List<ArbitrationPre> arbitrationPreList(String key) {
+    public static List<Arbitration> arbitrationPreList() {
         try {
-            HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION.formatted(key));
+            HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION);
             if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }
-            if (body.getBody().isEmpty()) {
-                log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
-                return Collections.emptyList();
-            }
-            return JSON.parseArray(body.getBody(), ArbitrationPre.class, JSONReader.Feature.SupportSmartMatch);
+            return JSON.parseArray(body.getBody(), Arbitration.class, JSONReader.Feature.SupportSmartMatch);
         } catch (JSONException e) {
             return Collections.emptyList();
         }

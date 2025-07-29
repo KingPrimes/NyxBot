@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum StateTypeEnum {
-    ALL("","未知"),
-    GEAR("","道具"),
-    KEYS("","钥匙"),
-    RESOURCES("","资源"),
-    SENTINELS("","守护/宠物"),
-    OTHER("","加成"),
+    ALL("", "未知"),
+    GEAR("", "道具"),
+    KEYS("", "钥匙"),
+    RESOURCES("", "资源"),
+    SENTINELS("", "守护/宠物"),
+    OTHER("", "加成"),
     MODS("", "MOD"),
     WARFRAMES("", "战甲"),
     WEAPONS("", "武器"),
@@ -17,7 +17,7 @@ public enum StateTypeEnum {
     RELIC_PLATINUM("/Lotus/Types/Game/Projections/.*?(Platinum)$", "光辉遗物"),
     RELIC_GOLD("/Lotus/Types/Game/Projections/.*?(Gold)$", "无暇遗物"),
     RELIC_SILVER("/Lotus/Types/Game/Projections/.*?(Silver)$", "优良遗物"),
-    ENHANCERS("/Lotus/Upgrades/CosmeticEnhancers/.*","赋能"),
+    ENHANCERS("/Lotus/Upgrades/CosmeticEnhancers/.*", "赋能"),
     SKINS("/Lotus/Upgrades/Skins/.*", "外观"),
     SHIP("/Lotus/Types/Ship/.*", "采集机"),
     TENNO_ACCESSORY_SCARVES("/Lotus/Characters/Tenno/Accessory/Scarves/.*", "披饰"),
@@ -40,7 +40,11 @@ public enum StateTypeEnum {
     VIDEO_WALL_BACKDROPS("/Lotus/Types/Items/VideoWallBackdrops/.*", "视频墙背景"),
     VIDEO_WALL_SOUNDSCAPES("/Lotus/Types/Items/VideoWallSoundscapes/.*", "视频墙音景"),
     AVATAR_IMAGES("/Lotus/Types/StoreItems/AvatarImages/.*", "浮印"),
-    SUIT_CUSTOMIZATIONS("/Lotus/Types/StoreItems/SuitCustomizations/.*", "颜色包");
+    SUIT_CUSTOMIZATIONS("/Lotus/Types/StoreItems/SuitCustomizations/.*", "颜色包"),
+    PACKAGES("/Lotus/Types/StoreItems/Packages/.*", "组合包"),
+    SHIP_SCENES("/Lotus/Types/StoreItems/ShipScenes/.*", "轨道飞行器装饰"),
+    BLUEPRINT("/Lotus/.*Blueprint", "蓝图"),
+    ;
 
     final String NAME;
     final String KEY;

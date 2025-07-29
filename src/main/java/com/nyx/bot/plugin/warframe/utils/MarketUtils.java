@@ -56,8 +56,8 @@ public class MarketUtils {
             //直接使用别名模糊查询
             items = itemsRepository.findByItemNameLike(key);
             if (items.isPresent()) {
-                market.setItemName(items.get().getItemName());
-                market.setKey(items.get().getUrlName());
+                market.setItemName(items.get().getName());
+                market.setKey(items.get().getSlug());
                 return market;
             }
 
@@ -67,8 +67,8 @@ public class MarketUtils {
 
             items = itemsRepository.findByItemNameLike(key);
             if (items.isPresent()) {
-                market.setKey(items.get().getUrlName());
-                market.setItemName(items.get().getItemName());
+                market.setKey(items.get().getSlug());
+                market.setItemName(items.get().getName());
                 return market;
             }
 
@@ -78,8 +78,8 @@ public class MarketUtils {
             //正则查询
             items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
             if (items.isPresent()) {
-                market.setItemName(items.get().getItemName());
-                market.setKey(items.get().getUrlName());
+                market.setItemName(items.get().getName());
+                market.setKey(items.get().getSlug());
                 return market;
 
             } else {
@@ -88,8 +88,8 @@ public class MarketUtils {
                 //正则查询
                 items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
                 if (items.isPresent()) {
-                    market.setItemName(items.get().getItemName());
-                    market.setKey(items.get().getUrlName());
+                    market.setItemName(items.get().getName());
+                    market.setKey(items.get().getSlug());
                     return market;
                 }
             }
@@ -110,7 +110,7 @@ public class MarketUtils {
 
             List<String> item = new ArrayList<>();
             for (OrdersItems o : items) {
-                item.add(o.getItemName());
+                item.add(o.getName());
             }
 
             market.setPossibleItems(item);

@@ -14,7 +14,7 @@ import java.util.Date;
  */
 @NoArgsConstructor
 @Data
-public class ArbitrationPre {
+public class Arbitration {
 
     /**
      * 时间

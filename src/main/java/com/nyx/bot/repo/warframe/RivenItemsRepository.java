@@ -1,6 +1,7 @@
 package com.nyx.bot.repo.warframe;
 
 import com.nyx.bot.entity.warframe.RivenItems;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,11 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RivenItemsRepository extends JpaRepository<RivenItems, Long>, JpaSpecificationExecutor<RivenItems> {
-    @Query(value = "select max(rivenId) from RivenItems")
-    Long queryMaxId();
+public interface RivenItemsRepository extends JpaRepository<RivenItems, String>, JpaSpecificationExecutor<RivenItems> {
 
-    Optional<RivenItems> findById(String id);
+    @NotNull
+    Optional<RivenItems> findById(@NotNull String id);
 
     /**
      * 分页查询
