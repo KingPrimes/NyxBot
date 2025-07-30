@@ -5,10 +5,12 @@ import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.StateTranslation;
+import com.nyx.bot.entity.warframe.exprot.Nightwave;
 import com.nyx.bot.entity.warframe.exprot.Nodes;
 import com.nyx.bot.entity.warframe.exprot.Weapons;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
+import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
 import com.nyx.bot.utils.FileUtils;
@@ -39,6 +41,9 @@ public class TestInitData {
     @Resource
     NodesRepository nodesRepository;
 
+    @Resource
+    NightwaveRepository nightwaveRepository;
+
     @Test
     void initAlias() {
         WarframeDataSource.getRivenTrend();
@@ -65,6 +70,12 @@ public class TestInitData {
         Weapons weapons = repository.findById("/Lotus/Weapons/Infested/InfestedLich/Melee/CodaMire").orElse(new Weapons());
         log.info("{}", weapons.getDamagePerShotList());
         log.info("{}", JSON.toJSONString(weapons));
+    }
+
+    @Test
+    void testInitNightwave() throws FileNotFoundException {
+        List<Nightwave> javaList = JSON.parseObject(new FileInputStream("./data/export/ExportSortieRewards_zh.json")).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(Nightwave.class);
+        nightwaveRepository.saveAll(javaList);
     }
 
     @Test

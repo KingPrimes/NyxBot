@@ -1,12 +1,18 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.exception.DataNotInfoException;
-import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.repo.warframe.StateTranslationRepository;
+import com.nyx.bot.repo.warframe.exprot.NodesRepository;
+import com.nyx.bot.res.worldstate.VoidTrader;
+import com.nyx.bot.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 /**
  * 奸商
@@ -16,23 +22,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class VoidHtmlController {
 
     @Resource
-    TranslationService trans;
+    StateTranslationRepository str;
+
+
+    @Resource
+    NodesRepository nodesRepository;
 
     @GetMapping("/getVoidHtml")
     public String getHtml(Model model) throws DataNotInfoException {
-//        GlobalStates sgs = CacheUtils.getGlobalState();
-//        GlobalStates.VoidTrader v = sgs.getVoidTrader();
-//        v.setLocation(v.getLocation().replace(
-//                StringUtils.quStr(v.getLocation()),
-//                trans.enToZh(StringUtils.quStr(v.getLocation()))
-//        ));
-//        for (GlobalStates.VoidTrader.Inventory inventory : v.getInventory()) {
-//            inventory.setItem(trans.enToZh(inventory.getItem()).replace("&", "&amp;"));
-//            inventory.setCredits(inventory.getCredits() / 1000);
-//        }
-//        v.setEndString(DateUtils.getDiff(v.getExpiry(), new Date(), true));
-//        v.setStartString(DateUtils.getDiff(v.getActivation(), new Date(), true));
-//        model.addAttribute("vo", v);
+        List<VoidTrader> list = WarframeCache.getWarframeStatus().getVoidTraders().stream()
+                .peek(v -> {
+                    nodesRepository.findById(v.getNode())
+                            .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+                    if (v.getManifest() != null && !v.getManifest().isEmpty()) {
+                        v.setManifest(v.getManifest()
+                                .stream()
+                                .peek(i -> {
+                                    str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()));
+                                })
+                                .toList()
+                        );
+                    }
+                }).limit(1).toList();
+        model.addAttribute("vo", list);
         return "html/voidTrader";
     }
 }

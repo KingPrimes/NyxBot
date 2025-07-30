@@ -1,8 +1,10 @@
 package com.nyx.bot.plugin.warframe.utils;
 
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.entity.warframe.MissionSubscribeUserCheckType;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.res.worldstate.ActiveMission;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -11,31 +13,59 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class FissuresUtils {
 
     public static List<ActiveMission> getFissures(Integer type) throws DataNotInfoException {
-//        GlobalStates sgs = CacheUtils.getGlobalState();
-//        List<GlobalStates.Fissures> fissures = sgs.getFissures();
-//        List<GlobalStates.Fissures> list;
-//        //分级
-//        switch (type) {
-//            //裂隙
-//            case 0 ->
-//                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(f -> !f.getIsStorm() && !f.getIsHard()).toList();
-//            //九重天
-//            case 1 ->
-//                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(GlobalStates.Fissures::getIsStorm).toList();
-//
-//            //钢铁
-//            case 2 ->
-//                    list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).filter(GlobalStates.Fissures::getIsHard).toList();
-//
-//            default -> list = fissures.stream().filter(GlobalStates.BaseStatus::getActive).toList();
-//        }
-//        return list;
-        return null;
+        //分级
+        switch (type) {
+            //裂隙
+            case 0 -> {
+                return WarframeCache.getWarframeStatus().getActiveMissions().stream()
+                        .filter(m -> !Objects.nonNull(m.getHard()))
+                        .peek(m -> {
+                            SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
+                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                            });
+                        }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+            }
+            //九重天
+            case 1 -> {
+                return WarframeCache.getWarframeStatus().getVoidStorms().stream()
+                        .map(v -> {
+                            ActiveMission am = new ActiveMission();
+                            SpringUtils.getBean(NodesRepository.class).findById(v.getNode()).ifPresentOrElse(nodes -> {
+                                am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                                am.setMissionType(nodes.getMissionType());
+                            }, () -> {
+                                am.setNode(v.getNode());
+                            });
+                            am.set_id(v.get_id());
+                            am.setActivation(v.getActivation());
+                            am.setExpiry(v.getExpiry());
+                            am.setModifier(v.getVoidEnum());
+                            return am;
+                        })
+                        .sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+            }
+
+            //钢铁
+            case 2 -> {
+                return WarframeCache.getWarframeStatus().getActiveMissions().stream()
+                        .filter(m -> Objects.nonNull(m.getHard()) && m.getHard())
+                        .peek(m -> {
+                            SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
+                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                            });
+                        }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+            }
+
+            default -> {
+                return new ArrayList<>();
+            }
+        }
     }
 
 
