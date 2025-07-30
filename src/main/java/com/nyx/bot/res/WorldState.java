@@ -150,6 +150,9 @@ public class WorldState {
     @JsonProperty("WorldSeed")
     String worldSeed;
 
+    @JsonProperty("SteelPath")
+    SteelPathOffering steelPath = new SteelPathOffering();
+
     public EarthCycle getEarthCycle() {
         return new EarthCycle();
     }

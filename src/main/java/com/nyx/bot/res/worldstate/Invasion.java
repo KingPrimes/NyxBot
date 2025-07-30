@@ -13,7 +13,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Invasion extends BastWorldState{
+public class Invasion extends BastWorldState {
     @JsonProperty("Faction")
     private FactionEnum faction;
     @JsonProperty("DefenderFaction")
@@ -21,9 +21,9 @@ public class Invasion extends BastWorldState{
     @JsonProperty("Node")
     private String node;
     @JsonProperty("Count")
-    private Integer count;
+    private Double count;
     @JsonProperty("Goal")
-    private Integer goal;
+    private Double goal;
     @JsonProperty("LocTag")
     private String locTag;
     @JsonProperty("Completed")
@@ -46,5 +46,9 @@ public class Invasion extends BastWorldState{
     @JsonIgnore
     public String getDefenderFaction() {
         return defenderFaction.getName();
+    }
+    @JsonIgnore
+    public String getCompletion() {
+        return String.format("%.2f", count / goal);
     }
 }

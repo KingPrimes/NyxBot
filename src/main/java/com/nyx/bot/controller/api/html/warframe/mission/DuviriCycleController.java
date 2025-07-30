@@ -1,13 +1,18 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.exception.DataNotInfoException;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.res.worldstate.DuviriCycle;
+import com.nyx.bot.res.worldstate.EndlessXpChoices;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 /**
  * 双衍王境
@@ -23,22 +28,15 @@ public class DuviriCycleController {
 
     @GetMapping("/getDuviriCycleHtml")
     public String getHtml(Model model) throws DataNotInfoException {
-//        GlobalStates gs = CacheUtils.getGlobalState();
-//        List<String> normal = new ArrayList<>();
-//        List<String> hard = new ArrayList<>();
-//        GlobalStates.DuviriCycle duviriCycle = gs.getDuviriCycle();
-//        for (GlobalStates.DuviriCycle.Choices choice : duviriCycle.getChoices()) {
-//            if (choice.getCategory().equals("normal")) {
-//                normal = choice.getChoices();
-//            }
-//            if (choice.getCategory().equals("hard")) {
-//                hard = choice.getChoices().stream().map(s -> trans.enToZh(StringUtils.addSpaceBetweenWords(s))).toList();
-//            }
-//        }
-//        log.info("normal:{}, hard:{}", normal, hard);
-//        model.addAttribute("normal", normal);
-//        model.addAttribute("hard", hard);
 
+        DuviriCycle duviriCycle = WarframeCache.getWarframeStatus().getDuviriCycle();
+        List<EndlessXpChoices> list = duviriCycle.getChoices().stream().peek(c -> {
+            if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
+                c.setChoices(c.getChoices().stream().map(s -> trans.enToZh(s)).toList());
+            }
+        }).toList();
+        duviriCycle.setChoices(list);
+        model.addAttribute("duiri", duviriCycle);
         return "html/duviriCycle";
     }
 

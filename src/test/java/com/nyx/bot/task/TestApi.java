@@ -7,6 +7,7 @@ import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
+import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.res.WorldState;
 import com.nyx.bot.res.worldstate.*;
@@ -40,6 +41,9 @@ public class TestApi {
     @Resource
     NodesRepository nodesRepository;
 
+    @Resource
+    NightwaveRepository nightwaveRepository;
+
     FileInputStream state = new FileInputStream("./data/state2.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
@@ -68,6 +72,11 @@ public class TestApi {
     }
 
     @Test
+    void testWorldState() {
+        log.info(JSON.toJSONString(worldState));
+    }
+
+    @Test
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
@@ -84,11 +93,12 @@ public class TestApi {
             str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()));
         }).findFirst().ifPresent(d -> log.info(JSON.toJSONString(d, JSONWriter.Feature.PrettyFormatWith4Space)));
     }
+
     /**
      * 测试双衍王境
      */
     @Test
-    void testDuviriCycle(){
+    void testDuviriCycle() {
         DuviriCycle duviriCycle = worldState.getDuviriCycle();
         List<EndlessXpChoices> list = duviriCycle.getChoices().stream().peek(c -> {
             if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
@@ -165,14 +175,42 @@ public class TestApi {
      */
     @Test
     void testVoidStorms() {
-        List<VoidStorms> list = worldState.getVoidStorms().stream()
-                .peek(m -> {
-                    nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
-                        m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+        List<ActiveMission> list = worldState.getVoidStorms().stream()
+                .map(v -> {
+                    ActiveMission am = new ActiveMission();
+                    nodesRepository.findById(v.getNode()).ifPresentOrElse(nodes -> {
+                        am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                        am.setMissionType(nodes.getMissionType());
+                    }, () -> {
+                        am.setNode(v.getNode());
                     });
-                }).sorted(Comparator.comparing(VoidStorms::getVoidEnum)).toList();
+                    am.set_id(v.get_id());
+                    am.setActivation(v.getActivation());
+                    am.setExpiry(v.getExpiry());
+                    am.setModifier(v.getVoidEnum());
+                    return am;
+                })
+                .sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
         log.info(JSON.toJSONString(list));
     }
+
+    /**
+     * 测试电波
+     */
+    @Test
+    void testSeasonInfo(){
+        SeasonInfo seasonInfo = worldState.getSeasonInfo();
+        seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c -> {
+            nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave);
+        }).toList());
+        log.info(JSON.toJSONString(seasonInfo));
+    }
+
+    @Test
+    void testSteelPathOffering(){
+        log.info(JSON.toJSONString(worldState.getSteelPath()));
+    }
+
 
     /**
      * 测试虚空商人

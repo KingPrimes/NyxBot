@@ -1,7 +1,9 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
+import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.exception.DataNotInfoException;
-import com.nyx.bot.repo.impl.warframe.TranslationService;
+import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
+import com.nyx.bot.res.worldstate.SeasonInfo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,20 +13,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/private")
 public class NighTwaveHtmlController {
+
     @Resource
-    TranslationService trans;
+    NightwaveRepository nightwaveRepository;
 
     @GetMapping("/getNighTwaveHtml")
     public String getHtml(Model model) throws DataNotInfoException {
-//        GlobalStates sgs = CacheUtils.getGlobalState();
-//        GlobalStates.Nightwave nightwave = sgs.getNightwave();
-//        //翻译
-//        nightwave.getActiveChallenges().forEach(c -> c.setDesc(trans.enToZh(c.getDesc())));
-//        //排序 从小到大
-//        nightwave.getActiveChallenges().sort(Comparator.comparing(GlobalStates.Nightwave.ActiveChallenges::getReputation));
-//
-//        model.addAttribute("nigh", nightwave.getActiveChallenges());
-
+        SeasonInfo seasonInfo = WarframeCache.getWarframeStatus().getSeasonInfo();
+        seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c -> {
+            nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave);
+        }).toList());
+        model.addAttribute("nigh", seasonInfo);
         return "html/nighTwave";
     }
 }

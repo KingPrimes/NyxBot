@@ -1,6 +1,7 @@
 package com.nyx.bot.controller.api.html.warframe.mission;
 
 import com.nyx.bot.exception.DataNotInfoException;
+import com.nyx.bot.plugin.warframe.utils.FissuresUtils;
 import com.nyx.bot.res.worldstate.ActiveMission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -17,12 +18,9 @@ public class FissuresHtmlController {
 
     @GetMapping("/getFissuresHtml/{type}")
     public String getHtml(Model model, @PathVariable Integer type) throws DataNotInfoException {
-//        List<GlobalStates.Fissures> list = FissuresUtils.getFissures(type);
-//        FissuresUtils.SortForTierNum(list);
-//        FissuresUtils.TranslateFissures(list);
-//
-//        model.addAttribute("type", type);
-//        model.addAttribute("fissues", list);
+        List<ActiveMission> list = FissuresUtils.getFissures(type);
+        model.addAttribute("type", type);
+        model.addAttribute("fissues", list);
         return "html/fissues";
     }
 

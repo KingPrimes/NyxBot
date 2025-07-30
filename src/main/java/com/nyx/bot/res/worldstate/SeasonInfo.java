@@ -1,6 +1,7 @@
 package com.nyx.bot.res.worldstate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.entity.warframe.exprot.Nightwave;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -37,6 +38,8 @@ public class SeasonInfo extends BastWorldState {
 
         @JsonProperty("Challenge")
         private String challenge;
+
+        Nightwave nightwave;
     }
 
 }
