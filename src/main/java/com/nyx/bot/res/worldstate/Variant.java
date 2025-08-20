@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.MissionTypeEnum;
 import com.nyx.bot.res.enums.ModifierTypeEnum;
@@ -20,10 +21,12 @@ public class Variant {
     @JsonProperty("tileset")
     private String tileset;
 
+    @JsonIgnore
     public String getMissionType() {
         return missionType.getName();
     }
 
+    @JsonIgnore
     public String getModifierType() {
         return modifierType.getStr();
     }

@@ -28,7 +28,6 @@ public class DuviriCycleController {
 
     @GetMapping("/getDuviriCycleHtml")
     public String getHtml(Model model) throws DataNotInfoException {
-
         DuviriCycle duviriCycle = WarframeCache.getWarframeStatus().getDuviriCycle();
         List<EndlessXpChoices> list = duviriCycle.getChoices().stream().peek(c -> {
             if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {

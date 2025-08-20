@@ -19,7 +19,7 @@ public class DailyDeals extends BastWorldState {
     private Integer total;
     // 折扣
     @JsonProperty("Discount")
-    private Integer count;
+    private Double count;
     // 原价
     @JsonProperty("OriginalPrice")
     private Integer originalPrice;

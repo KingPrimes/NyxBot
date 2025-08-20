@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.entity.warframe.StateTranslation;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
@@ -22,11 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
@@ -44,7 +41,7 @@ public class TestApi {
     @Resource
     NightwaveRepository nightwaveRepository;
 
-    FileInputStream state = new FileInputStream("./data/state2.json");
+    FileInputStream state = new FileInputStream("./data/state4.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
@@ -80,7 +77,7 @@ public class TestApi {
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state2.json", body.getBody());
+            FileUtils.writeFile("./data/state4.json", body.getBody());
         }
     }
 
@@ -198,7 +195,7 @@ public class TestApi {
      * 测试电波
      */
     @Test
-    void testSeasonInfo(){
+    void testSeasonInfo() {
         SeasonInfo seasonInfo = worldState.getSeasonInfo();
         seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c -> {
             nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave);
@@ -206,8 +203,11 @@ public class TestApi {
         log.info(JSON.toJSONString(seasonInfo));
     }
 
+    /**
+     * 钢铁轮换
+     */
     @Test
-    void testSteelPathOffering(){
+    void testSteelPathOffering() {
         log.info(JSON.toJSONString(worldState.getSteelPath()));
     }
 
@@ -305,13 +305,79 @@ public class TestApi {
     }
 
     /**
-     * @throws IOException
+     * 测试活动任务
      */
     @Test
-    void testUnzip() throws IOException {
+    void testGoals() {
+        List<Goal> list = worldState.getGoals().stream().peek(g -> {
+            nodesRepository.findById(g.getNode()).ifPresent(nodes -> g.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+
+            if (g.getMissionKeyName().isEmpty() && !g.getScoreLocTag().isEmpty()) {
+                str.findByUniqueName(g.getScoreLocTag()).ifPresent(s -> {
+                    g.setMissionKeyName(s.getName());
+                    g.setDesc(s.getDescription());
+                });
+            } else {
+                str.findByUniqueName(g.getMissionKeyName()).ifPresent(s -> {
+                    g.setMissionKeyName(s.getName());
+                    g.setDesc(s.getDescription());
+                });
+            }
+            List<Reward> rewardList = new ArrayList<>(g.getInterimRewards().stream().peek(r -> {
+                r.setCountedItems(r.getCountedItems().stream().peek(i -> {
+                    str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()));
+                }).toList());
+                r.setItems(r.getItems().stream().map(i -> {
+                    StateTranslation stateTranslation = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
+                    if (stateTranslation == null) {
+                        return i;
+                    }
+                    return stateTranslation.getName();
+                }).toList());
+            }).toList());
+
+            Reward reward = g.getReward();
+            if (reward != null) {
+                reward.setCountedItems(reward.getCountedItems().stream().peek(i -> {
+                    str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()));
+                }).toList());
+                reward.setItems(reward.getItems().stream().map(i -> {
+                    StateTranslation s = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
+                    if (s == null) {
+                        return i;
+                    }
+                    return s.getName();
+                }).toList());
+                g.setReward(reward);
+                rewardList.add(reward);
+            }
+            Reward breward = g.getBonusReward();
+            if (breward != null) {
+                breward.setCountedItems(breward.getCountedItems().stream().peek(i -> {
+                    str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()));
+                }).toList());
+                breward.setItems(breward.getItems().stream().map(i -> {
+                    StateTranslation s = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
+                    if (s == null) {
+                        return i;
+                    }
+                    return s.getName();
+                }).toList());
+                g.setBonusReward(breward);
+                g.setInterimRewards(rewardList);
+            }
+            rewardList.add(breward);
+        }).toList();
+        log.info("Goals:{}", JSON.toJSONString(list));
+    }
+
+    @Test
+    void testUnzip() {
         Boolean zh = HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted("zh"), "./data/lzma/index_zh.txt.lzma");
+        log.info("文件获取状态:{}", zh);
         if (zh) {
-            ZipUtils.unLzma("./data/lzma/index_zh.txt.lzma", "./data/lzma/index_zh.txt");
+            Boolean b = ZipUtils.unLzma("./data/lzma/index_zh.txt.lzma", "./data/lzma/index_zh.txt");
+            log.info("文件解压状态:{}", b);
         }
     }
 

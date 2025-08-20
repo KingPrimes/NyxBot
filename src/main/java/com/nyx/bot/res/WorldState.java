@@ -153,26 +153,27 @@ public class WorldState {
     @JsonProperty("SteelPath")
     SteelPathOffering steelPath = new SteelPathOffering();
 
+    @JsonIgnore
     public EarthCycle getEarthCycle() {
         return new EarthCycle();
     }
-
+    @JsonIgnore
     public CetusCycle getCetusCycle() {
         return new CetusCycle(getBountiesEndDate(SyndicateEnum.CetusSyndicate));
     }
-
+    @JsonIgnore
     public CambionCycle getCambionCycle() {
         return new CambionCycle(getCetusCycle());
     }
-
+    @JsonIgnore
     public VallisCycle getVallisCycle() {
         return new VallisCycle();
     }
-
+    @JsonIgnore
     public DuviriCycle getDuviriCycle() {
         return new DuviriCycle(this.getEndlessXpChoices());
     }
-
+    @JsonIgnore
     public ZarimanCycle getZarimanCycle() {
         return new ZarimanCycle(getBountiesEndDate(SyndicateEnum.ZarimanSyndicate));
     }

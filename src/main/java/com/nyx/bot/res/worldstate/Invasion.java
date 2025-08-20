@@ -43,9 +43,20 @@ public class Invasion extends BastWorldState {
     public String getFaction() {
         return faction.getName();
     }
+
+    @JsonIgnore
+    public String getFactionName() {
+        return faction.name();
+    }
+
     @JsonIgnore
     public String getDefenderFaction() {
         return defenderFaction.getName();
+    }
+
+    @JsonIgnore
+    public String getDefenderFactionName() {
+        return defenderFaction.name();
     }
     @JsonIgnore
     public String getCompletion() {

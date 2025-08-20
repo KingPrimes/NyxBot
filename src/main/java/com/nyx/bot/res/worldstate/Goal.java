@@ -17,10 +17,8 @@ public class Goal extends BastWorldState {
     @JsonProperty("ScoreVar")
     private String scoreVar;
     // 分数标签
-    // /Lotus/Language/G1Quests/HeatFissuresEventScore  热美亚裂缝
-    // /Lotus/Language/Isleweaver/DuviriMurmurEventScore 《行动代号：八爪》
     @JsonProperty("ScoreLocTag")
-    private String scoreLocTag;
+    private String scoreLocTag = "";
     // 节点分数
     @JsonProperty("Count")
     private Integer count;
@@ -63,6 +61,9 @@ public class Goal extends BastWorldState {
     // 中期奖励
     @JsonProperty("InterimRewards")
     private List<Reward> interimRewards;
+    // 奖励
+    @JsonProperty("BonusReward")
+    private Reward bonusReward;
     // 氏族目标
     @JsonProperty("ClanGoal")
     private List<Integer> clanGoal;
@@ -74,5 +75,5 @@ public class Goal extends BastWorldState {
     private String icon;
     // 任务Key名称
     @JsonProperty("MissionKeyName")
-    private String missionKeyName;
+    private String missionKeyName = "";
 }

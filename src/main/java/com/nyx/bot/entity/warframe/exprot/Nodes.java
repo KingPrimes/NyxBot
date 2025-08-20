@@ -52,49 +52,49 @@ public class Nodes {
 
     @Transient
     @JsonIgnore
-    public String getFactionName() {
+    public FactionEnum getFactionName() {
         switch (factionIndex) {
             case 0 -> {
-                return FactionEnum.FC_GRINEER.getName();
+                return FactionEnum.FC_GRINEER;
             }
             case 1 -> {
-                return FactionEnum.FC_CORPUS.getName();
+                return FactionEnum.FC_CORPUS;
             }
             case 2 -> {
-                return FactionEnum.FC_INFESTATION.getName();
+                return FactionEnum.FC_INFESTATION;
             }
             case 3 -> {
-                return FactionEnum.FC_OROKIN.getName();
+                return FactionEnum.FC_OROKIN;
             }
             case 4 -> {
-                return FactionEnum.FC_CORRUPTED.getName();
+                return FactionEnum.FC_CORRUPTED;
             }
             case 5 -> {
-                return FactionEnum.FC_SENTIENT.getName();
+                return FactionEnum.FC_SENTIENT;
             }
             case 6 -> {
-                return FactionEnum.FC_NARMER.getName();
+                return FactionEnum.FC_NARMER;
             }
             case 7 -> {
-                return FactionEnum.FC_MURMUR.getName();
+                return FactionEnum.FC_MURMUR;
             }
             case 8 -> {
-                return FactionEnum.FC_SCALDRA.getName();
+                return FactionEnum.FC_SCALDRA;
             }
             case 9 -> {
-                return FactionEnum.FC_TECHROT.getName();
+                return FactionEnum.FC_TECHROT;
             }
             case 10 -> {
-                return FactionEnum.FC_DUVIRI.getName();
+                return FactionEnum.FC_DUVIRI;
             }
             case 11 -> {
-                return FactionEnum.FC_MITW.getName();
+                return FactionEnum.FC_MITW;
             }
             case 12 -> {
-                return FactionEnum.FC_TENNO.getName();
+                return FactionEnum.FC_TENNO;
             }
             default -> {
-                return "未知派系";
+                return FactionEnum.FC_NONE;
             }
         }
     }

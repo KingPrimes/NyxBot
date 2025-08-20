@@ -9,12 +9,12 @@ import com.nyx.bot.core.OneBotLogInfoData;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.MarketFormEnums;
-import com.nyx.bot.enums.SyndicateKeyEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.plugin.warframe.utils.MarketUtils;
 import com.nyx.bot.plugin.warframe.utils.RivenAttributeCompute;
 import com.nyx.bot.plugin.warframe.utils.WarframeSubscribeCheck;
 import com.nyx.bot.res.Ducats;
+import com.nyx.bot.res.enums.SyndicateEnum;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -322,9 +322,9 @@ public class WarframeCodes {
     public static void syndicate(Bot bot, AnyMessageEvent event,Codes code){
         OneBotLogInfoData logInfoData = getLogInfoData(bot, event, code);
         switch (code){
-            case WARFRAME_SYNDICATE_OSTRONS -> logInfoData.setData(SyndicateKeyEnum.OSTRONS.name());
-            case WARFRAME_SYNDICATE_ENTRATI -> logInfoData.setData(SyndicateKeyEnum.ENTRATI.name());
-            case WARFRAME_SYNDICATE_SOLARIS_UNITED -> logInfoData.setData(SyndicateKeyEnum.SOLARIS_UNITED.name());
+            case WARFRAME_SYNDICATE_OSTRONS -> logInfoData.setData(SyndicateEnum.CetusSyndicate.name());
+            case WARFRAME_SYNDICATE_ENTRATI -> logInfoData.setData(SyndicateEnum.EntratiSyndicate.name());
+            case WARFRAME_SYNDICATE_SOLARIS_UNITED -> logInfoData.setData(SyndicateEnum.SolarisSyndicate.name());
         }
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 "postSyndicateMissionsImage",

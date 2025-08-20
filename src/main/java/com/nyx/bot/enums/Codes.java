@@ -34,7 +34,7 @@ public enum Codes {
     WARFRAME_FISSURES_PATH_PLUGIN("^钢铁裂隙$|^钢铁裂缝$", PermissionsEnums.USER),
     WARFRAME_STEEL_PATH_PLUGIN("^钢铁$", PermissionsEnums.USER),
     WARFRAME_ALL_CYCLE_PLUGIN("^平原$|^夜灵平原$|^夜灵平野$|^福尔图娜$|^魔胎之境$|^扎里曼$", PermissionsEnums.USER),
-    WARFRAME_SYNDICATE_OSTRONS("^希图斯$", PermissionsEnums.USER),
+    WARFRAME_SYNDICATE_OSTRONS("^希图斯$|^平原赏金$", PermissionsEnums.USER),
     WARFRAME_SYNDICATE_ENTRATI("^英择谛$", PermissionsEnums.USER),
     WARFRAME_SYNDICATE_SOLARIS_UNITED("^索拉里斯$", PermissionsEnums.USER),
     WARFRAME_KING_REALM_ROTATION("^轮换$|^双衍王境$", PermissionsEnums.USER),

@@ -17,6 +17,7 @@ public enum FactionEnum {
     FC_DUVIRI("双衍王境"),
     FC_MITW("墙中人"),
     FC_TENNO("TENNO"),
+    FC_NONE("未知派系"),
     ;
     private final String name;
 
