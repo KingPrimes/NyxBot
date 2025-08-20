@@ -37,7 +37,7 @@ public class ArbitrationCache {
     private static List<Arbitration> loadArbitrationList() {
         List<?> data = CacheUtils.get(WARFRAME_GLOBAL_STATES_ARBITRATION, "data", List.class);
 
-        if (data == null && data.isEmpty()) {
+        if (data == null || data.isEmpty()) {
             return fetchAndCacheArbitrationList();
         }
 

@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.MissionTypeEnum;
 import lombok.Data;
@@ -11,6 +12,7 @@ public class Mission {
     @JsonProperty("node")
     private String node;
 
+    @JsonIgnore
     public String getMissionType(){
         return missionType.getName();
     }

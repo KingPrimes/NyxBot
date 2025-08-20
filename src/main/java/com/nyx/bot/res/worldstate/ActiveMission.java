@@ -2,6 +2,7 @@ package com.nyx.bot.res.worldstate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nyx.bot.entity.warframe.exprot.Nodes;
 import com.nyx.bot.res.enums.MissionTypeEnum;
 import com.nyx.bot.res.enums.VoidEnum;
 import lombok.Data;
@@ -22,6 +23,8 @@ public class ActiveMission extends BastWorldState {
     // 节点
     @JsonProperty("Node")
     private String node;
+    @JsonIgnore
+    private Nodes nodes;
     //
     @JsonProperty("Region")
     private Integer region;
@@ -36,6 +39,7 @@ public class ActiveMission extends BastWorldState {
     public String getMissionType() {
         return missionType.getName();
     }
+
     @JsonIgnore
     public String getModifier() {
         return modifier.getName();

@@ -96,7 +96,7 @@ public class TestInitData {
 
     @Test
     void initNodes() throws FileNotFoundException {
-        List<Nodes> nodesList = JSON.parseArray(new FileInputStream("./data/export/nodes.json")).toJavaList(Nodes.class);
+        List<Nodes> nodesList = JSON.parseArray(new FileInputStream("./data/nodes.json")).toJavaList(Nodes.class);
         nodesRepository.saveAll(nodesList);
     }
 

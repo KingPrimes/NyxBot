@@ -25,11 +25,10 @@ public class FissuresUtils {
             case 0 -> {
                 return WarframeCache.getWarframeStatus().getActiveMissions().stream()
                         .filter(m -> !Objects.nonNull(m.getHard()))
-                        .peek(m -> {
-                            SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
-                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                            });
-                        }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+                        .peek(m -> SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
+                            m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                            m.setNodes(nodes);
+                        })).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
             }
             //九重天
             case 1 -> {
@@ -38,10 +37,9 @@ public class FissuresUtils {
                             ActiveMission am = new ActiveMission();
                             SpringUtils.getBean(NodesRepository.class).findById(v.getNode()).ifPresentOrElse(nodes -> {
                                 am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                                am.setNodes(nodes);
                                 am.setMissionType(nodes.getMissionType());
-                            }, () -> {
-                                am.setNode(v.getNode());
-                            });
+                            }, () -> am.setNode(v.getNode()));
                             am.set_id(v.get_id());
                             am.setActivation(v.getActivation());
                             am.setExpiry(v.getExpiry());
@@ -55,11 +53,10 @@ public class FissuresUtils {
             case 2 -> {
                 return WarframeCache.getWarframeStatus().getActiveMissions().stream()
                         .filter(m -> Objects.nonNull(m.getHard()) && m.getHard())
-                        .peek(m -> {
-                            SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
-                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                            });
-                        }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+                        .peek(m -> SpringUtils.getBean(NodesRepository.class).findById(m.getNode()).ifPresent(nodes -> {
+                            m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                            m.setNodes(nodes);
+                        })).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
             }
 
             default -> {

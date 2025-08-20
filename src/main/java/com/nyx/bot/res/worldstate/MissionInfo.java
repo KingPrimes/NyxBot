@@ -1,5 +1,6 @@
 package com.nyx.bot.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.res.enums.FactionEnum;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class MissionInfo {
     @JsonProperty("missionReward")
     private List<Reward> missionReward; // 添加这个字段
 
+    @JsonIgnore
     public String getFaction() {
         return faction.getName();
     }
