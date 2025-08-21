@@ -6,10 +6,12 @@ import com.nyx.bot.res.enums.SyndicateEnum;
 import com.nyx.bot.res.worldstate.SyndicateMission;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 public class SyndicateMissionsUtils {
 
     /**
@@ -29,7 +31,10 @@ public class SyndicateMissionsUtils {
                             .peek(j ->
                                     SpringUtils.getBean(StateTranslationRepository.class)
                                             .findByUniqueName(StringUtils.getLastThreeSegments(j.getType()))
-                                            .ifPresent(s -> j.setType(s.getName()))
+                                            .ifPresent(s -> {
+                                                j.setType(s.getName());
+                                                j.setDesc(s.getDescription());
+                                            })
                             ).peek(j -> SpringUtils.getBean(RewardPoolRepository.class).findById(j.getRewards()).ifPresent(j::setRewardPool))
                             .toList());
                     smr.set(sm);

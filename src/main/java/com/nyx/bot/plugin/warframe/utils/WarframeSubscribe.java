@@ -81,7 +81,7 @@ public class WarframeSubscribe {
 
                 //电波
                 Optional.ofNullable(states.getSeasonInfo()).ifPresent(nightwave -> {
-                    if (!nightwave.get_id().equals(data.getSeasonInfo().get_id())) {
+                    if (!nightwave.getSeason().equals(data.getSeasonInfo().getSeason())) {
                         mss.handleUpdate(SubscribeEnums.NIGHTWAVE, states);
                     }
                 });

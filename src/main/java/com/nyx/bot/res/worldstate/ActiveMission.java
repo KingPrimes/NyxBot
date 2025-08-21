@@ -37,11 +37,13 @@ public class ActiveMission extends BastWorldState {
 
     @JsonIgnore
     public String getMissionType() {
+        if (missionType == null) return MissionTypeEnum.MT_DEFAULT.getName();
         return missionType.getName();
     }
 
     @JsonIgnore
     public String getModifier() {
+        if (modifier == null) return VoidEnum.VoidT1.getName();
         return modifier.getName();
     }
 
