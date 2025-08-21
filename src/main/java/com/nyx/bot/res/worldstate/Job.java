@@ -14,6 +14,11 @@ public class Job {
     @JsonProperty("jobType")
     private String type;
     /**
+     * 任务描述
+     */
+    @JsonProperty("desc")
+    private String desc;
+    /**
      * 任务奖励
      */
     @JsonProperty("rewards")
@@ -46,6 +51,7 @@ public class Job {
      */
     @JsonProperty("endless")
     private Boolean endless;
+
     @JsonProperty("locationTag")
     private String locationTag;
     /**

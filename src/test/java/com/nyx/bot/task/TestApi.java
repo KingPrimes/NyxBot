@@ -6,11 +6,13 @@ import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.StateTranslation;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.plugin.warframe.utils.SyndicateMissionsUtils;
 import com.nyx.bot.repo.impl.warframe.TranslationService;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
 import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.res.WorldState;
+import com.nyx.bot.res.enums.SyndicateEnum;
 import com.nyx.bot.res.worldstate.*;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -41,7 +43,7 @@ public class TestApi {
     @Resource
     NightwaveRepository nightwaveRepository;
 
-    FileInputStream state = new FileInputStream("./data/state4.json");
+    FileInputStream state = new FileInputStream("./data/state5.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
@@ -77,8 +79,17 @@ public class TestApi {
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state4.json", body.getBody());
+            FileUtils.writeFile("./data/state5.json", body.getBody());
         }
+    }
+
+    /**
+     * 测试集团赏金任务
+     */
+    @Test
+    void testSyndicateMissions() {
+        SyndicateMission syndicateMissions = SyndicateMissionsUtils.getSyndicateMissions(worldState.getSyndicateMissions(), SyndicateEnum.CetusSyndicate);
+        log.info(JSON.toJSONString(syndicateMissions));
     }
 
     /**

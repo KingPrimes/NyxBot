@@ -22,7 +22,8 @@ public class RewardPool {
     @NotEmpty(message = "unique_name.not.empty")
     String uniqueName;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "reward_pool_reward", joinColumns = @JoinColumn(name = "rewards"), inverseJoinColumns = @JoinColumn(name = "reward_id"))
     @JsonProperty("rewards")
     List<Reward> rewards;
 
