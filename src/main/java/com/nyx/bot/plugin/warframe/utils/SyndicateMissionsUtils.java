@@ -30,7 +30,7 @@ public class SyndicateMissionsUtils {
                     sm.setJobs(sm.getJobs().stream()
                             .peek(j ->
                                     SpringUtils.getBean(StateTranslationRepository.class)
-                                            .findByUniqueName(StringUtils.getLastThreeSegments(j.getType()))
+                                            .findByUniqueName(StringUtils.getLastThreeSegments(j.getType()!= null?j.getType():j.getLocationTag()))
                                             .ifPresent(s -> {
                                                 j.setType(s.getName());
                                                 j.setDesc(s.getDescription());

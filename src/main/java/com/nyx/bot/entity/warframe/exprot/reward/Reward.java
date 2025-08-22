@@ -20,4 +20,9 @@ public class Reward {
     RarityEnum rarity;
 
     Integer itemCount;
+
+
+    public String getItem() {
+        return item.replace("|COUNT|", itemCount.toString());
+    }
 }

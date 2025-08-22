@@ -8,11 +8,13 @@ import com.nyx.bot.entity.warframe.StateTranslation;
 import com.nyx.bot.entity.warframe.exprot.Nightwave;
 import com.nyx.bot.entity.warframe.exprot.Nodes;
 import com.nyx.bot.entity.warframe.exprot.Weapons;
+import com.nyx.bot.entity.warframe.exprot.reward.RewardPool;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
 import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
+import com.nyx.bot.repo.warframe.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
@@ -24,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +46,9 @@ public class TestInitData {
 
     @Resource
     NightwaveRepository nightwaveRepository;
+
+    @Resource
+    RewardPoolRepository rewardPoolRepository;
 
     @Test
     void initAlias() {
@@ -64,6 +70,11 @@ public class TestInitData {
         completableFuture.join();
     }
 
+    @Test
+    void testInitRewardPool() throws FileNotFoundException {
+        List<RewardPool> javaList = JSON.parseArray(new FileInputStream("./data/reward_pool.json")).toJavaList(RewardPool.class);
+        rewardPoolRepository.saveAll(javaList);
+    }
 
     @Test
     void test() {
@@ -102,7 +113,7 @@ public class TestInitData {
 
     @Test
     void initStateTranslation() throws FileNotFoundException {
-//        List<StateTranslation> stateTranslationList = new ArrayList<>();
+        List<StateTranslation> stateTranslationList = new ArrayList<>();
 //        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
 //        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL));
 //        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportFlavour_zh.json", "ExportFlavour", StateTypeEnum.ALL));
@@ -126,8 +137,12 @@ public class TestInitData {
                             .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
                 })
                 .toList();
-        log.info("javaList: {}", JSON.toJSONString(javaList));
-        str.saveAll(javaList);
+        //log.info("javaList: {}", JSON.toJSONString(javaList));
+        stateTranslationList.addAll(javaList);
+        str.saveAll(stateTranslationList);
+
+        List<RewardPool> rps = JSON.parseArray(new FileInputStream("./data/reward_pool.json")).toJavaList(RewardPool.class);
+        rewardPoolRepository.saveAll(rps);
     }
 
     List<Nodes> parsingExportJsonToNodes(String exportPath, String key) {

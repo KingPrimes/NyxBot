@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@SuppressWarnings("unused")
 public class HttpUtils {
     public static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
     public static final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");

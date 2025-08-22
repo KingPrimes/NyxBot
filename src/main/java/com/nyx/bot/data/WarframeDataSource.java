@@ -10,11 +10,13 @@ import com.nyx.bot.core.ApiUrl;
 import com.nyx.bot.entity.warframe.*;
 import com.nyx.bot.entity.warframe.exprot.Nodes;
 import com.nyx.bot.entity.warframe.exprot.Weapons;
+import com.nyx.bot.entity.warframe.exprot.reward.RewardPool;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.repo.warframe.*;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
 import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
+import com.nyx.bot.repo.warframe.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.res.Arbitration;
 import com.nyx.bot.res.WorldState;
 import com.nyx.bot.utils.FileUtils;
@@ -50,6 +52,7 @@ public class WarframeDataSource {
     StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
     NodesRepository nodesRepository = SpringUtils.getBean(NodesRepository.class);
     WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
+    RewardPoolRepository rewardPoolRepository = SpringUtils.getBean(RewardPoolRepository.class);
 
     public static void init() {
         log.info("开始初始化数据！");
@@ -82,6 +85,7 @@ public class WarframeDataSource {
                 ).thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
                 .thenRunAsync(() -> new WarframeDataSource().initNodes())
                 .thenRunAsync(() -> new WarframeDataSource().initWeapons())
+                .thenRunAsync(() -> new WarframeDataSource().initRewardPool())
                 .thenRun(() -> log.info("数据初始化完成！"));
     }
 
@@ -95,7 +99,7 @@ public class WarframeDataSource {
         if (!a.isEmpty()) {
             List<Arbitration> arbitration = JSON.parseArray(Base64.getDecoder().decode(a), Arbitration.class);
             ArbitrationCache.setArbitration(arbitration);
-        }else{
+        } else {
             ArbitrationCache.reloadArbitration();
         }
     }
@@ -633,6 +637,15 @@ public class WarframeDataSource {
             log.error("nodes.json文件不存在");
         }
         nodesRepository.saveAll(nodesList);
+    }
+
+    void initRewardPool() {
+        try {
+            List<RewardPool> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "reward_pool.json")).toJavaList(RewardPool.class);
+            rewardPoolRepository.saveAll(javaList);
+        } catch (FileNotFoundException e) {
+            log.error("reward_pool.json文件不存在");
+        }
     }
 
     void initWeapons() {
