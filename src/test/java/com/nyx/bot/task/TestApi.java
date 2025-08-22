@@ -43,7 +43,7 @@ public class TestApi {
     @Resource
     NightwaveRepository nightwaveRepository;
 
-    FileInputStream state = new FileInputStream("./data/state5.json");
+    FileInputStream state = new FileInputStream("./data/state8.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
@@ -79,7 +79,7 @@ public class TestApi {
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state5.json", body.getBody());
+            FileUtils.writeFile("./data/state8.json", body.getBody());
         }
     }
 
@@ -88,7 +88,7 @@ public class TestApi {
      */
     @Test
     void testSyndicateMissions() {
-        SyndicateMission syndicateMissions = SyndicateMissionsUtils.getSyndicateMissions(worldState.getSyndicateMissions(), SyndicateEnum.CetusSyndicate);
+        SyndicateMission syndicateMissions = SyndicateMissionsUtils.getSyndicateMissions(worldState.getSyndicateMissions(), SyndicateEnum.EntratiSyndicate);
         log.info(JSON.toJSONString(syndicateMissions));
     }
 

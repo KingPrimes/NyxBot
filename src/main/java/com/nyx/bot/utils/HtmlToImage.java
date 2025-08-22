@@ -132,15 +132,18 @@ public class HtmlToImage {
         StringBuilder str = new StringBuilder(html);
         if (str.indexOf("</body>") > 1) {
             if (hint != null) {
-                str.insert(str.indexOf("</body>"), "<div class=\"foot-by\" style=\"text-align: center\">\n" +
-                        "\tPosted by:KingPrimes\n" +
-                        "\t" +
-                        hint.getHint() +
-                        "\n</div>\n");
+                str.insert(str.indexOf("</body>"),
+                        """
+                        <div style="width: 100%; bottom: 0; text-align: center;">
+                        Posted by:KingPrimes
+                        %s
+                        </div>
+                        """.formatted(hint.getHint())
+                );
             } else {
                 str.insert(str.indexOf("</body>"), """
-                        <div class="foot-by" style="text-align: center">
-                        \tPosted by:KingPrimes
+                        <div style="width: 100%; bottom: 0; text-align: center;">
+                                Posted by:KingPrimes
                         </div>
                         """);
             }
