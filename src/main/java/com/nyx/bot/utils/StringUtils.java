@@ -2,6 +2,7 @@ package com.nyx.bot.utils;
 
 import com.nyx.bot.core.Constants;
 import com.nyx.bot.core.text.StrFormatter;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
@@ -742,6 +743,21 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     public static String removeMatcher(String str) {
         return str.replace("^", "").replace("$", "").trim();
+    }
+
+    /**
+     * 将驼峰命名的字符串拆分为空格分隔的单词
+     * 示例: "GarudaPrimeBlueprint" -> "Garuda Prime Blueprint"
+     */
+    public static String splitCamelCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // 第一步：在大写字母前添加空格（处理连续大写的特殊情况）
+        String processed = input.replaceAll("(?<=\\D)(?=\\p{Upper})", " ");
+        // 第二步：确保每个单词首字母大写，其余字母小写（规范化）
+        return WordUtils.capitalizeFully(processed);
     }
 
     /**
