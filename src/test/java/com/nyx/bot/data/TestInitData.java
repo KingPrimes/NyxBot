@@ -13,16 +13,21 @@ import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.repo.warframe.StateTranslationRepository;
 import com.nyx.bot.repo.warframe.exprot.NightwaveRepository;
 import com.nyx.bot.repo.warframe.exprot.NodesRepository;
+import com.nyx.bot.repo.warframe.exprot.RelicsRepository;
 import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
 import com.nyx.bot.repo.warframe.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.RelicsImportUtil;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import jakarta.annotation.Resource;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,15 +36,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
+@Rollback(false)
 @Slf4j
 public class TestInitData {
 
     @Resource
     WeaponsRepository repository;
 
-    @Resource
-    StateTranslationRepository str;
 
     @Resource
     NodesRepository nodesRepository;
@@ -50,16 +56,32 @@ public class TestInitData {
     @Resource
     RewardPoolRepository rewardPoolRepository;
 
+    @Resource
+    StateTranslationRepository str;
+
+
+    @Resource
+    RelicsRepository relicsRepository;
+
+    @Resource
+    EntityManager entityManager;
     @Test
     void initAlias() {
         WarframeDataSource.getRivenTrend();
     }
 
-//    @Test
-//    void initTranslation() {
-//        WarframeDataSource.initTranslation();
-//    }
 
+    @Test
+    @Transactional
+    void testInitRelics() {
+        Long start = System.currentTimeMillis();
+        RelicsImportUtil util = new RelicsImportUtil(str, relicsRepository, entityManager);
+        Integer i1 = util.importRelicsData("./data/export/ExportRelicArcane_zh.json");
+        log.info("已导入{}条数据", i1);
+        Long end = System.currentTimeMillis();
+        log.info("耗时{}ms", end - start);
+        assertThat(i1).isGreaterThan(0);
+    }
     @Test
     void testInitExprot() {
         CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
