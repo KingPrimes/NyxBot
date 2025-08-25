@@ -2,6 +2,7 @@ package com.nyx.bot.common.core;
 
 import com.nyx.bot.utils.SpringUtils;
 
+@SuppressWarnings("unused")
 public class Constants {
     /**
      * UTF-8 字符集
