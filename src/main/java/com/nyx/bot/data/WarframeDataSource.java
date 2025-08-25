@@ -6,19 +6,19 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.cache.ArbitrationCache;
 import com.nyx.bot.cache.WarframeCache;
-import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.entity.warframe.*;
-import com.nyx.bot.entity.warframe.exprot.Nodes;
-import com.nyx.bot.entity.warframe.exprot.Weapons;
-import com.nyx.bot.entity.warframe.exprot.reward.RewardPool;
+import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.StateTypeEnum;
-import com.nyx.bot.repo.warframe.*;
-import com.nyx.bot.repo.warframe.exprot.NodesRepository;
-import com.nyx.bot.repo.warframe.exprot.WeaponsRepository;
-import com.nyx.bot.repo.warframe.exprot.reward.RewardPoolRepository;
-import com.nyx.bot.res.Arbitration;
-import com.nyx.bot.res.WorldState;
+import com.nyx.bot.modules.warframe.entity.*;
+import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
+import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
+import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
+import com.nyx.bot.modules.warframe.repo.*;
+import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
+import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
+import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
+import com.nyx.bot.modules.warframe.res.Arbitration;
+import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -314,30 +314,30 @@ public class WarframeDataSource {
 
     // 遗物
     public static Integer getRelics() {
-        log.info("开始初始化 Relics 数据！");
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_RELICS_DATA);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            List<Relics> relics = JSON.parseObject(body.getBody()).getJSONArray("relics").toJavaList(Relics.class).stream().filter(r -> r.getState().equals("Intact")).toList();
-            relics = relics.stream().peek(r -> r.setRewards(r.getRewards().stream().peek(w -> w.setRelics(r)).toList())).toList();
-            RelicsRepository repository = SpringUtils.getBean(RelicsRepository.class);
-            if (!repository.findAll().isEmpty()) {
-                List<Relics> all = repository.findAll();
-                log.debug("Relics data is being filtered!");
-                List<Relics> list = relics.stream().filter(item ->
-                                !all.stream()
-                                        .collect(Collectors.toMap(re -> re.getRelicsId() + re.getRewards().stream().map(RelicsRewards::getRewardId).toList(), value -> value))
-                                        .containsKey(item.getRelicsId() + item.getRewards().stream().map(RelicsRewards::getRewardId).toList())
-                        )
-                        .toList();
-                relics = repository.saveAll(list);
-                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
-            } else {
-                relics = repository.saveAll(relics);
-                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
-            }
-            return relics.size();
-
-        }
+//        log.info("开始初始化 Relics 数据！");
+//        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_RELICS_DATA);
+//        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+//            List<Relics> relics = JSON.parseObject(body.getBody()).getJSONArray("relics").toJavaList(Relics.class).stream().filter(r -> r.getState().equals("Intact")).toList();
+//            relics = relics.stream().peek(r -> r.setRewards(r.getRewards().stream().peek(w -> w.setRelics(r)).toList())).toList();
+//            RelicsRepository repository = SpringUtils.getBean(RelicsRepository.class);
+//            if (!repository.findAll().isEmpty()) {
+//                List<Relics> all = repository.findAll();
+//                log.debug("Relics data is being filtered!");
+//                List<Relics> list = relics.stream().filter(item ->
+//                                !all.stream()
+//                                        .collect(Collectors.toMap(re -> re.getRelicsId() + re.getRewards().stream().map(RelicsRewards::getRewardId).toList(), value -> value))
+//                                        .containsKey(item.getRelicsId() + item.getRewards().stream().map(RelicsRewards::getRewardId).toList())
+//                        )
+//                        .toList();
+//                relics = repository.saveAll(list);
+//                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
+//            } else {
+//                relics = repository.saveAll(relics);
+//                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
+//            }
+//            return relics.size();
+//
+//        }
         return -1;
     }
 

@@ -1,6 +1,6 @@
 package com.nyx.bot;
 
-import com.nyx.bot.controller.config.bot.HandOff;
+import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;

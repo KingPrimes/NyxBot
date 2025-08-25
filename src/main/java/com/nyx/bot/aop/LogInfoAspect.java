@@ -2,9 +2,9 @@ package com.nyx.bot.aop;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.annotation.LogInfo;
-import com.nyx.bot.core.OneBotLogInfoData;
+import com.nyx.bot.common.core.OneBotLogInfoData;
 import com.nyx.bot.enums.BusinessStatus;
-import com.nyx.bot.repo.sys.LogInfoRepository;
+import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -56,7 +56,7 @@ public class LogInfoAspect {
         try {
 
             // *========数据库日志=========*//
-            com.nyx.bot.entity.sys.LogInfo logInfo = new com.nyx.bot.entity.sys.LogInfo();
+            com.nyx.bot.modules.system.entity.LogInfo logInfo = new com.nyx.bot.modules.system.entity.LogInfo();
             logInfo.setStatus(BusinessStatus.SUCCESS.ordinal());
             // 请求的地址
             logInfo.setUrl(StringUtils.substring(ServletUtils.getRequest().getRequestURI(), 0, 255));
@@ -90,7 +90,7 @@ public class LogInfoAspect {
      * @param log     日志
      * @param logInfo 操作日志
      */
-    public void getControllerMethodDescription(JoinPoint joinPoint, LogInfo log, com.nyx.bot.entity.sys.LogInfo logInfo, Object jsonResult) {
+    public void getControllerMethodDescription(JoinPoint joinPoint, LogInfo log, com.nyx.bot.modules.system.entity.LogInfo logInfo, Object jsonResult) {
         // 设置action动作
         logInfo.setBusinessType(log.businessType().getType());
         // 设置标题
@@ -118,7 +118,7 @@ public class LogInfoAspect {
      *
      * @param logInfo 操作日志
      */
-    private void setRequestValue(JoinPoint joinPoint, com.nyx.bot.entity.sys.LogInfo logInfo) {
+    private void setRequestValue(JoinPoint joinPoint, com.nyx.bot.modules.system.entity.LogInfo logInfo) {
         Map<String, String[]> map = ServletUtils.getRequest().getParameterMap();
         if (StringUtils.isNotEmpty(map)) {
             String params = JSONObject.toJSONString(map);

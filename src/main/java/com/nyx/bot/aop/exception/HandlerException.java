@@ -1,10 +1,10 @@
 package com.nyx.bot.aop.exception;
 
-import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
+import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.enums.HttpCodeEnum;
-import com.nyx.bot.exception.DataNotInfoException;
-import com.nyx.bot.exception.HtmlToImageException;
-import com.nyx.bot.exception.ServiceException;
 import com.nyx.bot.utils.I18nUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,14 +1,14 @@
 package com.nyx.bot.utils;
 
-import com.nyx.bot.core.Constants;
-import com.nyx.bot.core.text.StrFormatter;
+import com.nyx.bot.common.core.Constants;
+import com.nyx.bot.common.core.text.StrFormatter;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 @Component
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 

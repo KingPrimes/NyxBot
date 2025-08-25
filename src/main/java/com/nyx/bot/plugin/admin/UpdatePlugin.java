@@ -4,7 +4,7 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
+import com.nyx.bot.modules.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.UpdateJarUtils;
 import com.nyx.bot.utils.gitutils.GitHubUtil;

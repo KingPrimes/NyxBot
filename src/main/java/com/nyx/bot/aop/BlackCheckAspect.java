@@ -3,7 +3,7 @@ package com.nyx.bot.aop;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent;
-import com.nyx.bot.repo.impl.BotsService;
+import com.nyx.bot.modules.bot.service.BotsService;
 import jakarta.annotation.Resource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
