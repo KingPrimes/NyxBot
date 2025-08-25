@@ -1,7 +1,7 @@
 package com.nyx.bot.utils;
 
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.core.ApiUrl;
+import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.utils.http.HttpUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

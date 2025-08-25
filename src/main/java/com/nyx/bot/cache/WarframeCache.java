@@ -1,8 +1,8 @@
 package com.nyx.bot.cache;
 
 import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.exception.DataNotInfoException;
-import com.nyx.bot.res.WorldState;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;

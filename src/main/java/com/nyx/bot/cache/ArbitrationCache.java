@@ -1,8 +1,8 @@
 package com.nyx.bot.cache;
 
 import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.res.Arbitration;
+import com.nyx.bot.common.core.ApiUrl;
+import com.nyx.bot.modules.warframe.res.Arbitration;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;

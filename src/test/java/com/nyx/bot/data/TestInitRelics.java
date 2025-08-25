@@ -2,9 +2,9 @@ package com.nyx.bot.data;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.entity.warframe.exprot.Relics;
-import com.nyx.bot.repo.impl.warframe.RelicsService;
-import com.nyx.bot.repo.warframe.exprot.RelicsRepository;
+import com.nyx.bot.modules.warframe.entity.exprot.Relics;
+import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
+import com.nyx.bot.modules.warframe.service.RelicsService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

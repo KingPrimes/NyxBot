@@ -2,9 +2,9 @@ package com.nyx.bot.permissions;
 
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.entity.bot.BotAdmin;
 import com.nyx.bot.enums.PermissionsEnums;
-import com.nyx.bot.repo.BotAdminRepository;
+import com.nyx.bot.modules.bot.entity.BotAdmin;
+import com.nyx.bot.modules.bot.repo.BotAdminRepository;
 import com.nyx.bot.utils.SpringUtils;
 
 import java.util.Objects;

@@ -1,7 +1,7 @@
 package com.nyx.bot.service;
 
-import com.nyx.bot.entity.sys.SysUser;
-import com.nyx.bot.repo.sys.SysUserRepository;
+import com.nyx.bot.modules.system.entity.SysUser;
+import com.nyx.bot.modules.system.repo.SysUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;

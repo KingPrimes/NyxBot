@@ -2,8 +2,8 @@ package com.nyx.bot.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.entity.Hint;
-import com.nyx.bot.exception.HtmlToImageException;
 import com.nyx.bot.repo.HintRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;

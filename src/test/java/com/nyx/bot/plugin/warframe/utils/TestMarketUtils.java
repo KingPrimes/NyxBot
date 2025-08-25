@@ -2,7 +2,8 @@ package com.nyx.bot.plugin.warframe.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.res.MarketRiven;
+import com.nyx.bot.modules.warframe.res.MarketRiven;
+import com.nyx.bot.modules.warframe.utils.MarketUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

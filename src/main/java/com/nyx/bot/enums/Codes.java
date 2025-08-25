@@ -2,70 +2,72 @@ package com.nyx.bot.enums;
 
 import lombok.Getter;
 
+import static com.nyx.bot.enums.CommandConstants.*;
+
 /**
  * 指令 枚举
  */
 @Getter
 public enum Codes {
+    HELP(HELP_CMD, PermissionsEnums.USER),
 
-    HELP("^HELP$|^帮助$|^指令$|^命令$|^菜单$", PermissionsEnums.USER),
+    CHECK_VERSION(CHECK_VERSION_CMD, PermissionsEnums.USER),
 
-    CHECK_VERSION("^检查版本$|^版本$|^运行状态$|^状态$", PermissionsEnums.USER),
+    UPDATE_HTML(UPDATE_HTML_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_MARKET_ITEMS(UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_MARKET_RIVEN(UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RES_RM(UPDATE_WARFRAME_RES_RM_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_RIVEN_CHANGES(UPDATE_WARFRAME_RIVEN_CHANGES_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_SISTER(UPDATE_WARFRAME_SISTER_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_WARFRAME_TAR(UPDATE_WARFRAME_TAR_CMD, PermissionsEnums.SUPER_ADMIN),
+    UPDATE_JAR(UPDATE_JAR_CMD, PermissionsEnums.SUPER_ADMIN),
 
-    UPDATE_HTML("^更新HTML$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RES_MARKET_ITEMS("^更新WM物品$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RES_MARKET_RIVEN("^更新WM紫卡$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RES_RM("^更新RM紫卡$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RIVEN_CHANGES("^更新紫卡倾向变动$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_SISTER("^更新信条$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_TAR("^更新翻译$", PermissionsEnums.SUPER_ADMIN),
-    UPDATE_JAR("^自动更新$|^更新版本$|^版本更新$", PermissionsEnums.SUPER_ADMIN),
-
-    WARFRAME_ALERTS_PLUGIN("^警报$", PermissionsEnums.USER),
-    WARFRAME_ASSAULT_PLUGIN("^突击$", PermissionsEnums.USER),
-    WARFRAME_ARSON_HUNT_PLUGIN("^执刑官猎杀$|^猎杀$|^执行官$|^执政官$|^执刑官$", PermissionsEnums.USER),
-    WARFRAME_VOID_PLUGIN("^奸商$", PermissionsEnums.USER),
-    WARFRAME_ARBITRATION_EX_PLUGIN("^仲裁Ex", PermissionsEnums.USER),
-    WARFRAME_ARBITRATION_PLUGIN("^仲裁$", PermissionsEnums.USER),
-    WARFRAME_DAILY_DEALS_PLUGIN("^每日特惠$|^特惠$", PermissionsEnums.USER),
-    WARFRAME_INVASIONS_PLUGIN("^入侵$", PermissionsEnums.USER),
-    WARFRAME_FISSURES_PLUGIN("^裂隙$|^裂缝$", PermissionsEnums.USER),
-    WARFRAME_FISSURES_EMPYREAN_PLUGIN("^九重天裂隙$|^九重天$|^九重天裂缝$", PermissionsEnums.USER),
-    WARFRAME_FISSURES_PATH_PLUGIN("^钢铁裂隙$|^钢铁裂缝$", PermissionsEnums.USER),
-    WARFRAME_STEEL_PATH_PLUGIN("^钢铁$", PermissionsEnums.USER),
-    WARFRAME_ALL_CYCLE_PLUGIN("^平原$|^夜灵平原$|^夜灵平野$|^福尔图娜$|^魔胎之境$|^扎里曼$", PermissionsEnums.USER),
-    WARFRAME_SYNDICATE_OSTRONS("^希图斯$|^平原赏金$", PermissionsEnums.USER),
-    WARFRAME_SYNDICATE_ENTRATI("^英择谛$", PermissionsEnums.USER),
-    WARFRAME_SYNDICATE_SOLARIS_UNITED("^索拉里斯$", PermissionsEnums.USER),
-    WARFRAME_KING_REALM_ROTATION("^轮换$|^双衍王境$", PermissionsEnums.USER),
-    WARFRAME_NIGH_WAVE_PLUGIN("^电波$", PermissionsEnums.USER),
-    WARFRAME_RIVEN_DIS_UPDATE_PLUGIN("^紫卡倾向变动$|^倾向变动$", PermissionsEnums.USER),
-    WARFRAME_TRA_PLUGIN("^翻译", PermissionsEnums.USER),
-    WARFRAME_MARKET_RIVEN_PLUGIN("^/WR|^WR|^WMR", PermissionsEnums.USER),
-    WARFRAME_MARKET_ORDERS_PLUGIN("^/WM|^WM|^MARKET", PermissionsEnums.USER),
-    WARFRAME_RIVEN_MARKET_PLUGIN("^/RM|^RM", PermissionsEnums.USER),
-    WARFRAME_CD_PLUGIN("^/CD|^CD|^赤毒", PermissionsEnums.USER),
-    WARFRAME_XT_PLUGIN("^/XT|^XT|^信条", PermissionsEnums.USER),
-    WARFRAME_SISTER_PLUGIN("^佩兰$|^佩兰数列$|^信条武器$", PermissionsEnums.USER),
-    WARFRAME_MARKET_GOD_DUMP("^金垃圾$", PermissionsEnums.USER),
-    WARFRAME_MARKET_SILVER_DUMP("^银垃圾$", PermissionsEnums.USER),
-    WARFRAME_RELICS_PLUGIN("^核桃|^查核桃", PermissionsEnums.USER),
-    WARFRAME_OPEN_RELICS_PLUGIN("^开核桃|^砸核桃", PermissionsEnums.USER),
-    WARFRAME_RIVEN_ANALYSE("^紫卡分析|^分析紫卡", PermissionsEnums.USER),
-    WARFRAME_SUBSCRIBE("^订阅 ?([0-9]+)? ?-? ?([0-9]+)?", PermissionsEnums.USER),
-    WARFRAME_CANCEL_SUBSCRIBE("^取消订阅 ?([0-9]+)? ?-? ?([0-9]+)?", PermissionsEnums.USER),
+    WARFRAME_ALERTS_PLUGIN(WARFRAME_ALERTS_CMD, PermissionsEnums.USER),
+    WARFRAME_SORTIES_PLUGIN(WARFRAME_SORTIES_CMD, PermissionsEnums.USER),
+    WARFRAME_LITE_SORITE_PLUGIN(WARFRAME_LITE_SORITE_CMD, PermissionsEnums.USER),
+    WARFRAME_VOID_PLUGIN(WARFRAME_VOID_CMD, PermissionsEnums.USER),
+    WARFRAME_ARBITRATION_EX_PLUGIN(WARFRAME_ARBITRATION_EX_CMD, PermissionsEnums.USER),
+    WARFRAME_ARBITRATION_PLUGIN(WARFRAME_ARBITRATION_CMD, PermissionsEnums.USER),
+    WARFRAME_DAILY_DEALS_PLUGIN(WARFRAME_DAILY_DEALS_CMD, PermissionsEnums.USER),
+    WARFRAME_INVASIONS_PLUGIN(WARFRAME_INVASIONS_CMD, PermissionsEnums.USER),
+    WARFRAME_ACTIVE_MISSION_PLUGIN(WARFRAME_ACTIVE_MISSION_CMD, PermissionsEnums.USER),
+    WARFRAME_VOID_STORMS_PLUGIN(WARFRAME_VOID_STORMS_CMD, PermissionsEnums.USER),
+    WARFRAME_ACTIVE_MISSION_PATH_PLUGIN(WARFRAME_ACTIVE_MISSION_PATH_CMD, PermissionsEnums.USER),
+    WARFRAME_STEEL_PATH_PLUGIN(WARFRAME_STEEL_PATH_CMD, PermissionsEnums.USER),
+    WARFRAME_ALL_CYCLE_PLUGIN(WARFRAME_ALL_CYCLE_CMD, PermissionsEnums.USER),
+    WARFRAME_SYNDICATE_OSTRONS(WARFRAME_SYNDICATE_OSTRONS_CMD, PermissionsEnums.USER),
+    WARFRAME_SYNDICATE_ENTRATI(WARFRAME_SYNDICATE_ENTRATI_CMD, PermissionsEnums.USER),
+    WARFRAME_SYNDICATE_SOLARIS_UNITED(WARFRAME_SYNDICATE_SOLARIS_UNITED_CMD, PermissionsEnums.USER),
+    WARFRAME_DUVIRI_CYCLE(WARFRAME_DUVIRI_CYCLE_CMD, PermissionsEnums.USER),
+    WARFRAME_NIGH_WAVE_PLUGIN(WARFRAME_NIGH_WAVE_CMD, PermissionsEnums.USER),
+    WARFRAME_RIVEN_DIS_UPDATE_PLUGIN(WARFRAME_RIVEN_DIS_UPDATE_CMD, PermissionsEnums.USER),
+    WARFRAME_TRA_PLUGIN(WARFRAME_TRA_CMD, PermissionsEnums.USER),
+    WARFRAME_MARKET_RIVEN_PLUGIN(WARFRAME_MARKET_RIVEN_CMD, PermissionsEnums.USER),
+    WARFRAME_MARKET_ORDERS_PLUGIN(WARFRAME_MARKET_ORDERS_CMD, PermissionsEnums.USER),
+    WARFRAME_RIVEN_MARKET_PLUGIN(WARFRAME_RIVEN_MARKET_CMD, PermissionsEnums.USER),
+    WARFRAME_LICHES_PLUGIN(WARFRAME_LICHES_CMD, PermissionsEnums.USER),
+    WARFRAME_SISTERS_PLUGIN(WARFRAME_SISTERS_CMD, PermissionsEnums.USER),
+    WARFRAME_THE_PERLIN_SEQUENCE_PLUGIN(WARFRAME_THE_PERLIN_SEQUENCE_CMD, PermissionsEnums.USER),
+    WARFRAME_MARKET_GOD_DUMP(WARFRAME_MARKET_GOD_DUMP_CMD, PermissionsEnums.USER),
+    WARFRAME_MARKET_SILVER_DUMP(WARFRAME_MARKET_SILVER_DUMP_CMD, PermissionsEnums.USER),
+    WARFRAME_RELICS_PLUGIN(WARFRAME_RELICS_CMD, PermissionsEnums.USER),
+    WARFRAME_OPEN_RELICS_PLUGIN(WARFRAME_OPEN_RELICS_CMD, PermissionsEnums.USER),
+    WARFRAME_RIVEN_ANALYSE(WARFRAME_RIVEN_ANALYSE_CMD, PermissionsEnums.USER),
+    WARFRAME_SUBSCRIBE(WARFRAME_SUBSCRIBE_CMD, PermissionsEnums.USER),
+    WARFRAME_UNSUBSCRIBE(WARFRAME_UNSUBSCRIBE_CMD, PermissionsEnums.USER),
     ;
 
-    private final PermissionsEnums permissions;
-    private String str;
 
-    Codes(String s, PermissionsEnums permissions) {
-        str = s;
+    private final PermissionsEnums permissions;
+    private String comm;
+
+    Codes(String comm, PermissionsEnums permissions) {
+        this.comm = comm;
         this.permissions = permissions;
     }
 
-    public Codes setStr(String str) {
-        this.str = str;
+    public Codes setComm(String comm) {
+        this.comm = comm;
         return this;
     }
 
