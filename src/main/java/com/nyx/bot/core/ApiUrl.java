@@ -22,9 +22,15 @@ public class ApiUrl {
      */
     public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
-    public static final String WARFRAME_SOCKET = "ws://api.warframestat.us/socket";
+    // 官方数据源
+    public static final String WARFRAME_WORLD_STATE = "https://content.warframe.com/dynamic/worldState.php";
 
-    public static final String WARFRAME_STATUS = "https://warframestat.kcme.space/api";
+    // 官方图片获取地址
+    public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
+
+    public static final String WARFRAME_PUBLIC_EXPORT_MANIFESTS = "http://content.warframe.com/PublicExport/Manifest/%s";
+
+    public static final String WARFRAME_PUBLIC_EXPORT_INDEX = "https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
 
     /**
      * 战甲数据源 git push pull等操作链接
