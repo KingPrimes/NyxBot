@@ -1,4 +1,5 @@
 package com.nyx.bot.modules.warframe.plugin;
+
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
@@ -21,7 +22,7 @@ public class RelicsPlugin {
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RELICS_CMD)
     public void relics(Bot bot, AnyMessageEvent event) {
         OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_RELICS_PLUGIN);
-        data.setData(event.getRawMessage().replaceAll(CommandConstants.WARFRAME_RELICS_CMD,"").trim());
+        data.setData(event.getRawMessage().replaceAll(CommandConstants.WARFRAME_RELICS_CMD, "").trim());
         WarframeSend.sendForData(bot, event, "postRelicsImage", data, log);
     }
 }

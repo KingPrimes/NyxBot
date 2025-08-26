@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,9 +64,18 @@ public class RelicsImportUtil {
                 log.warn("未解析到任何Relics数据");
                 return 0;
             }
-
+            // 新增：根据name字段去重 (保留第一个出现的记录)
+            List<Relics> distinctRelics = originalRelics.stream()
+                    .collect(Collectors.toMap(
+                            Relics::getName,       // 以name为key
+                            Function.identity(),   // value为对象本身
+                            (existing, replacement) -> existing  // 重复时保留第一个
+                    ))
+                    .values()
+                    .stream()
+                    .toList();
             // 2. 预处理数据（过滤+提取翻译关键词）
-            List<Relics> filteredRelics = filterSecretRelics(originalRelics);
+            List<Relics> filteredRelics = filterSecretRelics(distinctRelics);
             List<String> rewardKeywords = extractRewardKeywords(filteredRelics);
 
             // 3. 预加载翻译数据

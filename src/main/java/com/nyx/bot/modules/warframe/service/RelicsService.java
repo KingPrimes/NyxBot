@@ -47,21 +47,21 @@ public class RelicsService {
         var rs = repository.findByName(name);
         if (!rs.isEmpty()) {
             sort(rs);
-            return rs.stream().limit(12).toList();
+            return rs;
         }
         log.debug("未查询到遗物名称为 {} 的遗物，进行模糊查询", name);
         // 如果未查询到，进行模糊查询
         rs = repository.findByNameContaining(name);
         if (!rs.isEmpty()) {
             sort(rs);
-            return rs.stream().limit(12).toList();
+            return rs;
         }
         log.debug("未查询到包含 {} 的遗物，进行奖励物品的模糊查询", name);
         // 如果遗物名称未查询到，进行奖励物品的查询
         rs = repository.findByRelicRewardsRewardNameContaining(name);
         if (!rs.isEmpty()) {
             sort(rs);
-            return rs.stream().limit(12).toList();
+            return rs;
         }
         log.debug("未查询到包含 {} 的遗物，使用别名模糊查询奖励列表", name);
         // 如果奖励物品名称未查询到，使用别名模糊查询奖励列表
@@ -75,14 +75,15 @@ public class RelicsService {
         rs = repository.findByRelicRewardsRewardNameContaining(key.get());
         if (!rs.isEmpty()) {
             sort(rs);
-            return rs.stream().limit(12).toList();
+            return rs;
         }
         log.debug("未找到物品:{}", name);
         return new ArrayList<>();
     }
 
     private void sort(List<Relics> rs) {
-        rs.sort(Comparator.comparing(Relics::getUniqueName));
+        // 排序
+        rs.sort(Comparator.comparing(Relics::getName));
     }
 
 

@@ -39,6 +39,11 @@ public class MarketRivenPlugin {
         }
         OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_MARKET_RIVEN_PLUGIN);
         data.setKey(str.replaceAll(data.getCodes().getComm(), "").trim());
+        if (data.getKey().isEmpty()) {
+            log.debug("用户:{} 输入了错误的指令 {}", event.getUserId(), str);
+            bot.sendMsg(event, "请输入正确的指令！", false);
+            return;
+        }
         log.debug("用户:{} 指令 {} 执行开始", event.getUserId(), data.getCodes().getComm());
         log.debug("用户:{} 指令 {} 执行参数 {}", event.getUserId(), data.getCodes().getComm(), data.getKey());
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
