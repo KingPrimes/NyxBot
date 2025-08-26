@@ -298,8 +298,8 @@ public class WarframeDataSource {
         }
         if (ZipUtils.unLzma(path, outPath)) {
             List<String> keys = FileUtils.readFileToList(outPath);
-            Map<String, String> compared = compareTheHashAndSave(keys);
-            for (String key : compared.keySet()) {
+            compareTheHashAndSave(keys);
+            for (String key : keys) {
                 if (key.contains("ExportRecipes") || key.contains("ExportFusionBundles")) {
                     continue;
                 }
@@ -348,6 +348,7 @@ public class WarframeDataSource {
      * @param path 文件保存路径
      */
     static Boolean getExportFiles(String key, String path) {
+        log.debug("ExportFiles URL:{} Path:{}", key, path);
         return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
     }
 
