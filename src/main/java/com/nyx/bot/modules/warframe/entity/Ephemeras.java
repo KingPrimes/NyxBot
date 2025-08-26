@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
  * Warframe 幻纹
@@ -14,31 +18,31 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"url_name", "item_name"}))
+@Table
 @JsonView(Views.View.class)
+@Accessors(chain = true)
 public class Ephemeras extends BaseEntity {
 
     @Id
     @JsonProperty("id")
     String id;
-    @Column(length = 120)
-    @JsonProperty("icon")
-    String icon;
-    @Column(length = 20)
-    @JsonProperty("icon_format")
-    String iconFormat;
-    @JsonProperty("item_name")
     @Column(length = 50)
-    String itemName;
+    @JsonProperty("slug")
+    String slug;
+    @JsonProperty("gameRef")
+    String gameRef;
     @JsonProperty("animation")
     @Column(length = 120)
     String animation;
     @JsonProperty("element")
     @Column(length = 20)
     String element;
-    @JsonProperty("url_name")
-    @Column(length = 40)
-    String urlName;
+    @JsonProperty("name")
+    @Column(length = 80)
+    String name;
+    @JsonProperty("icon")
+    @Column(length = 120)
+    String icon;
     @JsonProperty("thumb")
     @Column(length = 120)
     String thumb;

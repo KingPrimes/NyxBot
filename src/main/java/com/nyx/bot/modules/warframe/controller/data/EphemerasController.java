@@ -28,7 +28,7 @@ public class EphemerasController extends BaseController {
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody Ephemeras e) {
         return getDataTable(ephemerasRepository.findAllPageable(
-                e.getItemName(),
+                e.getName(),
                 PageRequest.of(
                         e.getCurrent() - 1,
                         e.getSize())

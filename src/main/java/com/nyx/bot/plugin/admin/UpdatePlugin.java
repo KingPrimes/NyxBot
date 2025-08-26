@@ -70,7 +70,7 @@ public class UpdatePlugin {
 
     private static void updateWarframeResMarketItems(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::getMarket)
+        CompletableFuture.supplyAsync(WarframeDataSource::initOrdersItemsData)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "Market 已更新：" + items + " 条数据！", false);

@@ -21,16 +21,16 @@ public interface RivenItemsRepository extends JpaRepository<RivenItems, String>,
      * @param pageable  分页
      * @return 结果集
      */
-    @Query("SELECT r FROM RivenItems r WHERE (:itemName IS NULL OR LOWER(r.itemName) LIKE LOWER(CONCAT('%', :itemName, '%'))) AND (:rivenType IS NULL OR r.rivenType = :rivenType)")
+    @Query("SELECT r FROM RivenItems r WHERE (:itemName IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :itemName, '%'))) AND (:rivenType IS NULL OR r.rivenType = :rivenType)")
     Page<RivenItems> findAllPageable(String itemName, String rivenType, Pageable pageable);
 
 
-    Optional<RivenItems> findByItemName(String itemName);
+    Optional<RivenItems> findByName(String name);
 
-    @Query(value = "select * from RIVEN_ITEMS r where upper(replace(r.ITEM_NAME,' ','')) regexp upper(replace(:#{#regex},' ','')) limit 1", nativeQuery = true)
-    Optional<RivenItems> findByItemNameRegex(String regex);
+    @Query(value = "SELECT * FROM RIVEN_ITEMS r where upper(replace(r.name,' ','')) regexp upper(replace(:#{#regex},' ','')) limit 1", nativeQuery = true)
+    Optional<RivenItems> findByNameRegex(String regex);
 
-    @Query("select r from RivenItems r where LOWER(replace(r.itemName,' ','')) like LOWER(replace(CONCAT('%', :name, '%'),' ',''))")
-    List<RivenItems> itemNameLikes(String name);
+    @Query("select r from RivenItems r where LOWER(replace(r.name,' ','')) like LOWER(replace(CONCAT('%', :name, '%'),' ',''))")
+    List<RivenItems> nameLikes(String name);
 
 }

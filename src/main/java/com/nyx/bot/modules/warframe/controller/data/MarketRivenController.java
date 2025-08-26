@@ -29,7 +29,7 @@ public class MarketRivenController extends BaseController {
     public TableDataInfo list(@RequestBody RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
-                        rivenItems.getItemName(),
+                        rivenItems.getName(),
                         rivenItems.getRivenType(),
                         PageRequest.of(
                                 rivenItems.getCurrent() - 1,

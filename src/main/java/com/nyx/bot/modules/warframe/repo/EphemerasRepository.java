@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EphemerasRepository extends JpaRepository<Ephemeras, String>, JpaSpecificationExecutor<Ephemeras> {
 
-    @Query("select e from Ephemeras e where (:itemName is null or Lower(e.itemName) like Lower(concat('%', :itemName, '%')))")
+    @Query("select e from Ephemeras e where (:itemName is null or Lower(e.name) like Lower(concat('%', :itemName, '%')))")
     Page<Ephemeras> findAllPageable(String itemName, Pageable pageable);
 
 }

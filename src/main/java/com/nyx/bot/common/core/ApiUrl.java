@@ -22,10 +22,6 @@ public class ApiUrl {
      */
     public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
-    public static final String WARFRAME_SOCKET = "ws://api.warframestat.us/socket";
-
-    public static final String WARFRAME_STATUS = "https://warframestat.kcme.space/api";
-
     // 官方数据源
     public static final String WARFRAME_WORLD_STATE = "https://content.warframe.com/dynamic/worldState.php";
 
@@ -50,12 +46,12 @@ public class ApiUrl {
     /**
      * 赤毒幻纹
      */
-    public static final String WARFRAME_MARKET_LICH_EPHEMERAS = "https://api.warframe.market/v1/lich/ephemeras";
+    public static final String WARFRAME_MARKET_LICH_EPHEMERAS = "https://api.warframe.market/v2/lich/ephemeras";
 
     /**
      * 信条幻纹
      */
-    public static final String WARFRAME_MARKET_SISTER_EPHEMERAS = "https://api.warframe.market/v1/sister/ephemeras";
+    public static final String WARFRAME_MARKET_SISTER_EPHEMERAS = "https://api.warframe.market/v2/sister/ephemeras";
 
     /**
      * Market 物品
@@ -65,19 +61,17 @@ public class ApiUrl {
     /**
      * Market 紫卡武器
      */
-    public static final String WARFRAME_MARKET_RIVEN_ITEMS = "https://api.warframe.market/v1/riven/items";
+    public static final String WARFRAME_MARKET_RIVEN_WEAPONS = "https://api.warframe.market/v2/riven/weapons";
 
     /**
      * 赤毒武器
      */
-    public static final String WARFRAME_MARKET_LICH_WEAPONS = "https://api.warframe.market/v1/lich/weapons";
+    public static final String WARFRAME_MARKET_LICH_WEAPONS = "https://api.warframe.market/v2/lich/weapons";
 
     /**
      * 信条武器
      */
-    public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v1/sister/weapons";
-
-    public static final String WARFRAME_RELICS_DATA = "https://drops.warframestat.us/data/relics.json";
+    public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v2/sister/weapons";
 
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
 

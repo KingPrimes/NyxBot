@@ -42,7 +42,7 @@ public class OrdersItemsController extends BaseController {
 
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getMarket);
+        CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData);
         return success(I18nUtils.RequestTaskRun());
     }
 }
