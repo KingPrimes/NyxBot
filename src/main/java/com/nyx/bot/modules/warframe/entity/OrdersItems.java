@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
  * Warframe Orders Items数据
@@ -19,6 +20,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table
 @JsonView(Views.View.class)
+@Accessors(chain = true)
 public class OrdersItems extends BaseEntity {
 
     @Id
