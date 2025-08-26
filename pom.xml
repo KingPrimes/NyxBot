@@ -11,14 +11,14 @@
 
     <groupId>com.nyx</groupId>
 
-    <artifactId>NxyBot</artifactId>
+    <artifactId>NyxBot</artifactId>
 
 
-    <version>0.3.4</version>
+    <version>1.0.0</version>
 
-    <name>NxyBot</name>
+    <name>${project.artifactId}</name>
 
-    <description>NxyBot</description>
+    <description>${project.artifactId}</description>
 
     <packaging>jar</packaging>
 
@@ -39,7 +39,7 @@
     </properties>
 
     <dependencies>
-       <!--  统一 Kotlin 版本-->
+        <!--  统一 Kotlin 版本-->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -404,7 +404,7 @@
                 </executions>
             </plugin>
         </plugins>
-        <finalName>NyxBot</finalName>
+        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
