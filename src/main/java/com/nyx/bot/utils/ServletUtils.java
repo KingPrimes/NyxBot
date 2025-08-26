@@ -1,6 +1,6 @@
 package com.nyx.bot.utils;
 
-import com.nyx.bot.core.text.Convert;
+import com.nyx.bot.common.core.text.Convert;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@SuppressWarnings("unused")
 public class ServletUtils {
     /**
      * 定义移动端请求的所有可能类型

@@ -1,7 +1,7 @@
 package com.nyx.bot.utils;
 
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.plugin.warframe.utils.WarframeSubscribeCheck;
+import com.nyx.bot.modules.warframe.utils.WarframeSubscribeCheck;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

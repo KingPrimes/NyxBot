@@ -1,26 +1,19 @@
 package com.nyx.bot.utils;
 
-import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.exception.DataNotInfoException;
-import com.nyx.bot.res.ArbitrationPre;
-import com.nyx.bot.res.GlobalStates;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.extra.spring.SpringCache2kCache;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class CacheUtils {
     public static final String SYSTEM = "system";
-    public static final String WARFRAME_SOCKET_DATA = "warframe-socket-data";
+    public static final String WARFRAME_STATUS = "warframe-status";
     public static final String WARFRAME_GLOBAL_STATES = "global-states";
 
     public static final String WARFRAME = "warframe";
@@ -28,95 +21,6 @@ public class CacheUtils {
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
 
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
-
-    public static GlobalStates getGlobalState() throws DataNotInfoException {
-        GlobalStates data = cm.getCache(WARFRAME_SOCKET_DATA).get("data", GlobalStates.class);
-        if (data == null) {
-            throw new DataNotInfoException(I18nUtils.message("error.warframe.data.null"));
-        }
-        return data;
-    }
-
-    public static void setGlobalState(GlobalStates state) {
-        Objects.requireNonNull(cm.getCache(WARFRAME_SOCKET_DATA)).put("data", state);
-        FileUtils.writeFile("./data/status", JSON.toJSONBytes(state));
-    }
-
-    public static void setArbitration(List<ArbitrationPre> arbitrationList) {
-        cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION).put("data", arbitrationList);
-        FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(JSON.toJSONBytes(arbitrationList)));
-    }
-
-    public static void reloadArbitration(String key) {
-        fetchAndCacheArbitrationList(key);
-    }
-
-    /**
-     * 获取有价值的仲裁列表
-     *
-     * @return List<ArbitrationPre>
-     */
-    public static List<ArbitrationPre> getArbitrationList(String key) {
-        return loadArbitrationList(key);
-    }
-
-    private static List<ArbitrationPre> loadArbitrationList(String key) {
-
-        Cache cache = cm.getCache(WARFRAME_GLOBAL_STATES_ARBITRATION);
-        if (cache == null) {
-            return fetchAndCacheArbitrationList(key);
-        }
-        return Optional.ofNullable(cache.get("data")) // 获取 ValueWrapper
-                .map(Cache.ValueWrapper::get)              // 获取实际的值
-                .filter(Objects::nonNull)              // 确保值不为 Null
-                .filter(d -> d instanceof List)      // 确保数据是 List 类型
-                .map(d -> (List<ArbitrationPre>) d)  // 安全类型转换
-                .filter(list -> !list.isEmpty())     // 过滤空列表
-                .orElseGet(() -> {
-                    log.warn("缓存中 'data' 键不存在或数据无效，将从 API 重新获取数据。");
-                    return fetchAndCacheArbitrationList(key);
-                });
-    }
-
-    private static List<ArbitrationPre> fetchAndCacheArbitrationList(String key) {
-        List<ArbitrationPre> arbitrationList = ApiUrl.arbitrationPreList(key);
-        if (!arbitrationList.isEmpty()) {
-            setArbitration(arbitrationList);
-        }
-        return arbitrationList;
-    }
-
-    /**
-     * 获取仲裁
-     *
-     * @return 当前数据
-     */
-    public static Optional<GlobalStates.Arbitration> getArbitration(String key) {
-        List<ArbitrationPre> arbitrationList = loadArbitrationList(key);
-        if (arbitrationList.isEmpty()) {
-            return Optional.empty();
-        }
-        GlobalStates.Arbitration arbitration = new GlobalStates.Arbitration();
-        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
-        ArbitrationPre a = arbitrationList.stream()
-                //过滤掉过期的数据
-                .filter(ar -> ar.getExpiry().getTime() - milli > 0)
-                //判断两个时间相差的毫秒数，并取最小值的元素
-                .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
-                .orElse(null);
-        if (a == null) {
-            setArbitration(ApiUrl.arbitrationPreList(key));
-            return Optional.empty();
-        }
-        arbitration.setId(a.getId());
-        arbitration.setActivation(a.getActivation());
-        arbitration.setExpiry(a.getExpiry());
-        arbitration.setNode(a.getNode());
-        arbitration.setType(a.getType());
-        arbitration.setEnemy(a.getEnemy());
-
-        return Optional.of(arbitration);
-    }
 
 
     /**

@@ -1,7 +1,7 @@
 package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.config.AppConfig;
+import com.nyx.bot.common.config.AppConfig;
 import com.nyx.bot.utils.http.HttpUtils;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
-
+@SuppressWarnings("unused")
 @Component
 public class TimeZoneUtil {
 

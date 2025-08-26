@@ -1,10 +1,10 @@
 package com.nyx.bot.controller;
 
-import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.JwtUtil;
-import com.nyx.bot.core.SecurityUtils;
-import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.entity.sys.SysUser;
+import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.JwtUtil;
+import com.nyx.bot.common.core.SecurityUtils;
+import com.nyx.bot.common.core.controller.BaseController;
+import com.nyx.bot.modules.system.entity.SysUser;
 import jakarta.annotation.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

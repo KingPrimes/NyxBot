@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.4</version>
         <relativePath/>
     </parent>
 
@@ -24,22 +24,22 @@
 
     <properties>
         <java.version>21</java.version>
-        <oneSdk.version>2.4.1</oneSdk.version>
-        <fastJson2.version>2.0.57</fastJson2.version>
-        <xhtmlrenderer.version>9.11.6</xhtmlrenderer.version>
+        <oneSdk.version>2.4.7</oneSdk.version>
+        <fastJson2.version>2.0.58</fastJson2.version>
+        <xhtmlrenderer.version>9.13.2</xhtmlrenderer.version>
         <rhino.version>1.8.0</rhino.version>
-        <jsoup.version>1.19.1</jsoup.version>
+        <jsoup.version>1.21.1</jsoup.version>
         <monstercat.version>0.0.7</monstercat.version>
         <monstercat.os.version>1.2.2</monstercat.os.version>
-        <commons-text.varsion>1.13.0</commons-text.varsion>
-        <oshi.version>6.8.0</oshi.version>
+        <commons.varsion>1.14.0</commons.varsion>
+        <oshi.version>6.8.3</oshi.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <jjwt.version>0.12.6</jjwt.version>
-        <org.eclipse.jgit.version>7.2.1.202505142326-r</org.eclipse.jgit.version>
+        <jjwt.version>0.12.7</jjwt.version>
+        <org.eclipse.jgit.version>7.3.0.202506031305-r</org.eclipse.jgit.version>
     </properties>
 
     <dependencies>
-        <!-- 统一 Kotlin 版本 -->
+       <!--  统一 Kotlin 版本-->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -110,10 +110,24 @@
             <artifactId>spring-messaging</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
+            <artifactId>jjwt-api</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!--Http请求-->
@@ -168,6 +182,11 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.tukaani</groupId>
+            <artifactId>xz</artifactId>
+            <version>1.10</version>
+        </dependency>
         <!--获取系统信息-->
         <dependency>
             <groupId>com.github.oshi</groupId>
@@ -179,7 +198,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>${commons-text.varsion}</version>
+            <version>${commons.varsion}</version>
         </dependency>
 
         <!--One Bot SDK-->
@@ -254,10 +273,11 @@
             <artifactId>hibernate-validator</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>2.0.1.Final</version>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.1.1</version>
         </dependency>
 
         <!--图片识别-->

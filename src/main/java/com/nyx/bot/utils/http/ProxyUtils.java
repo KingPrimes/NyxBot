@@ -1,7 +1,7 @@
 package com.nyx.bot.utils.http;
 
 
-import com.nyx.bot.core.SpringValues;
+import com.nyx.bot.common.core.SpringValues;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,25 +23,25 @@ public class ProxyUtils {
     public static Proxy getEffectiveProxyForUrl() {
         // 1. 尝试从 JVM 参数获取
         Proxy proxy = fromJvmArgs();
-        log.debug("获取JVM代理：{}", proxy);
+        //log.debug("获取JVM代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 2. 尝试从环境变量获取 HTTP_PROXY / ALL_PROXY
         proxy = fromEnvVariables();
-        log.debug("获取环境代理：{}", proxy);
+        //log.debug("获取环境代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 3. 尝试读取系统代理（Windows / Linux / macOS）
         proxy = fromSystemProxy();
-        log.debug("获取系统代理：{}", proxy);
+        //log.debug("获取系统代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 4. 回退到 Spring 配置文件
         proxy = fromSpringConfig();
-        log.debug("获取Spring代理：{}", proxy);
+        //log.debug("获取Spring代理：{}", proxy);
         if (proxy != null) return proxy;
 
-        log.debug("无代理可用，返回默认无代理");
+        //log.debug("无代理可用，返回默认无代理");
         // 默认无代理
         return Proxy.NO_PROXY;
     }

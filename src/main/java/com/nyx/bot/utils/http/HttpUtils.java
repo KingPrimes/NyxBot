@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@SuppressWarnings("unused")
 public class HttpUtils {
     public static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
     public static final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
@@ -107,13 +108,17 @@ public class HttpUtils {
         return marketSendGet(url, param, MarketFormEnums.PC);
     }
 
+    public static Body marketSendGet(String url) {
+        return marketSendGet(url, "");
+    }
+
     public static Body marketSendGet(String url, String param, MarketFormEnums form) {
         Headers.Builder h = new Headers.Builder();
         h.add("Accept", "*/*");
         h.add("Content-Type", "application/json;charset=utf-8");
         h.add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
         h.add("Cache-Control", "no-cache");
-        h.add("Language", "en");
+        h.add("Language", "zh-hans");
         h.add("Platform", form.getForm());
         h.add("Origin", "https://warframe.market");
         h.add("Referer", "https://warframe.market/");

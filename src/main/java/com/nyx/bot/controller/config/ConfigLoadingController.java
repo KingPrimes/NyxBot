@@ -1,9 +1,9 @@
 package com.nyx.bot.controller.config;
 
-import com.nyx.bot.controller.config.bot.HandOff;
-import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.NyxConfig;
-import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.NyxConfig;
+import com.nyx.bot.common.core.controller.BaseController;
+import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import com.nyx.bot.utils.I18nUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

@@ -3,9 +3,9 @@ package com.nyx.bot.models;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.nyx.bot.core.ApiUrl;
-import com.nyx.bot.res.WorldState;
-import com.nyx.bot.res.worldstate.*;
+import com.nyx.bot.common.core.ApiUrl;
+import com.nyx.bot.modules.warframe.res.WorldState;
+import com.nyx.bot.modules.warframe.res.worldstate.*;
 import com.nyx.bot.utils.http.HttpUtils;
 import org.junit.jupiter.api.Test;
 
