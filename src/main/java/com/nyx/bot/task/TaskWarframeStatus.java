@@ -23,27 +23,25 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class TaskWarframeStatus {
+     @Value("${test.isTest}")
+    Boolean test;
+
     @Async("taskExecutor")
     @Scheduled(cron = "0/120 * * * * ?")
-    public void execute() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_STATUS);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            GlobalStates states = JSONObject.parseObject(body.getBody(), GlobalStates.class, JSONReader.Feature.SupportSmartMatch);
-            Optional<GlobalStates.Arbitration> arbitration = CacheUtils.getArbitration(
-                    SpringUtils.getBean(TokenKeysRepository.class)
-                            .findAll()
-                            .stream()
-                            .map(TokenKeys::getTks)
-                            .filter(tks -> !tks.isEmpty())
-                            .findAny()
-                            .orElse("")
-            );
-            if (states != null) {
-                arbitration.ifPresent(states::setArbitration);
-                WarframeSubscribe.isUpdated(states);
+    public void executeWarframeStatus() {
+        if (!test) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
+            if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                try {
+                    WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
+                    WarframeCache.setWarframeStatus(worldState);
+                    WarframeSubscribe.isUpdated(worldState);
+                } catch (JSONException e) {
+                    log.error("Warframe 状态数据解析错误: {}", e.getMessage());
+                }
+            } else {
+                log.error("Warframe 状态数据错误: {}", body.getBody());
             }
-        } else {
-            log.error("无法获取数据！");
         }
     }
 
