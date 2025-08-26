@@ -1,7 +1,7 @@
 package com.nyx.bot.handler;
 
 import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.core.AjaxResult;
+import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.ServletUtils;
 import jakarta.servlet.http.HttpServletRequest;

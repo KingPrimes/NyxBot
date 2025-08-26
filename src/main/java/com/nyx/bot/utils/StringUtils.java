@@ -1,12 +1,14 @@
 package com.nyx.bot.utils;
 
-import com.nyx.bot.core.Constants;
-import com.nyx.bot.core.text.StrFormatter;
+import com.nyx.bot.common.core.Constants;
+import com.nyx.bot.common.core.text.StrFormatter;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
 
+@SuppressWarnings("all")
 @Component
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
@@ -743,4 +745,65 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return str.replace("^", "").replace("$", "").trim();
     }
 
+    /**
+     * 将驼峰命名的字符串拆分为空格分隔的单词
+     * 示例: "GarudaPrimeBlueprint" -> "Garuda Prime Blueprint"
+     */
+    public static String splitCamelCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // 第一步：在大写字母前添加空格（处理连续大写的特殊情况）
+        String processed = input.replaceAll("(?<=\\D)(?=\\p{Upper})", " ");
+        // 第二步：确保每个单词首字母大写，其余字母小写（规范化）
+        return WordUtils.capitalizeFully(processed);
+    }
+
+    /**
+     * 保留最后一个 / 后的内容
+     *
+     * @param path 输入路径字符串
+     * @return 最后一个 / 后的内容；如果不存在 /，返回原字符串
+     */
+    public static String getLastValueAfterSlash(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+
+        int lastSlashIndex = path.lastIndexOf('/');
+        if (lastSlashIndex == -1) {
+            return path; // 没有斜杠，返回原字符串
+        }
+
+        return path.substring(lastSlashIndex + 1);
+    }
+
+    /**
+     * 保留路径中最后三个 / 的内容
+     *
+     * @param path 输入路径字符串
+     * @return 最后三段路径；若不足三段则返回全部
+     */
+    public static String getLastThreeSegments(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+
+        String[] parts = path.split("/");
+        int length = parts.length;
+
+        // 计算起始索引（取最后3段）
+        int startIndex = Math.max(0, length - 3);
+
+        StringBuilder result = new StringBuilder();
+        for (int i = startIndex; i < length; i++) {
+            result.append(parts[i]);
+            if (i < length - 1) {
+                result.append("/");
+            }
+        }
+
+        return result.toString();
+    }
 }

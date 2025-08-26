@@ -1,10 +1,10 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.entity.warframe.RivenTrend;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
+import com.nyx.bot.modules.warframe.entity.RivenTrend;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;

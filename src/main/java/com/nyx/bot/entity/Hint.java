@@ -1,7 +1,7 @@
 package com.nyx.bot.entity;
 
 
-import com.nyx.bot.core.dao.BaseEntity;
+import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

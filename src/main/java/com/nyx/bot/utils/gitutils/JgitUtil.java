@@ -15,7 +15,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Slf4j
+@SuppressWarnings("unused")
 public class JgitUtil {
 
     public static String lockPath = "./DataSource";
@@ -53,8 +53,6 @@ public class JgitUtil {
         ProxySelector defaultSelector = ProxyUtils.getProxySelector();
         ProxySelector.setDefault(defaultSelector);
     }
-
-    @NotNull
 
 
     /**

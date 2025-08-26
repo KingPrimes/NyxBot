@@ -4,7 +4,7 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.plugin.warframe.utils.RivenDispositionUpdates;
+import com.nyx.bot.modules.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.UpdateJarUtils;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
@@ -44,10 +44,10 @@ public class UpdatePlugin {
                 updateWarframeSister(bot, event);
                 break;
             }
-            case UPDATE_WARFRAME_TAR: {
-                updateWarframeTar(bot, event);
-                break;
-            }
+//            case UPDATE_WARFRAME_TAR: {
+//                updateWarframeTar(bot, event);
+//                break;
+//            }
             case UPDATE_JAR: {
                 updateJar(bot, event);
                 break;
@@ -70,7 +70,7 @@ public class UpdatePlugin {
 
     private static void updateWarframeResMarketItems(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::getMarket)
+        CompletableFuture.supplyAsync(WarframeDataSource::initOrdersItemsData)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "Market 已更新：" + items + " 条数据！", false);
@@ -110,7 +110,7 @@ public class UpdatePlugin {
 
     private static void updateWarframeSister(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::getWeapons)
+        CompletableFuture.supplyAsync(WarframeDataSource::getLichSisterWeapons)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "信条/赤毒武器 已更新：" + items + " 条数据！", false);
@@ -120,18 +120,18 @@ public class UpdatePlugin {
                 });
     }
 
-    private static void updateWarframeTar(Bot bot, AnyMessageEvent event) {
-        bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-            if (flag) {
-                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
-                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
-                );
-            } else {
-                bot.sendMsg(event, "翻译数据，更新失败！", false);
-            }
-        });
-    }
+//    private static void updateWarframeTar(Bot bot, AnyMessageEvent event) {
+//        bot.sendMsg(event, "已发布任务，正在更新！", false);
+//        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
+//            if (flag) {
+//                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
+//                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
+//                );
+//            } else {
+//                bot.sendMsg(event, "翻译数据，更新失败！", false);
+//            }
+//        });
+//    }
 
     private static void updateJar(Bot bot, AnyMessageEvent event) {
         log.debug("Updating the jar file");

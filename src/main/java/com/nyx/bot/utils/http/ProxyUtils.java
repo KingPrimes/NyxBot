@@ -1,7 +1,7 @@
 package com.nyx.bot.utils.http;
 
 
-import com.nyx.bot.core.SpringValues;
+import com.nyx.bot.common.core.SpringValues;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,25 +17,31 @@ import java.util.Set;
 public class ProxyUtils {
     /**
      * 获取可用的代理
+     *
      * @return Proxy 实例
      */
     public static Proxy getEffectiveProxyForUrl() {
         // 1. 尝试从 JVM 参数获取
         Proxy proxy = fromJvmArgs();
+        //log.debug("获取JVM代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 2. 尝试从环境变量获取 HTTP_PROXY / ALL_PROXY
         proxy = fromEnvVariables();
+        //log.debug("获取环境代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 3. 尝试读取系统代理（Windows / Linux / macOS）
         proxy = fromSystemProxy();
+        //log.debug("获取系统代理：{}", proxy);
         if (proxy != null) return proxy;
 
         // 4. 回退到 Spring 配置文件
         proxy = fromSpringConfig();
+        //log.debug("获取Spring代理：{}", proxy);
         if (proxy != null) return proxy;
 
+        //log.debug("无代理可用，返回默认无代理");
         // 默认无代理
         return Proxy.NO_PROXY;
     }
@@ -144,15 +150,22 @@ public class ProxyUtils {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             String proxyServer = null;
+            boolean proxyEnabled = false;
 
             while ((line = reader.readLine()) != null) {
                 if (line.contains("ProxyServer")) {
                     String[] parts = line.trim().split("\\s+");
                     proxyServer = parts.length > 2 ? parts[2] : null;
+                } else if (line.contains("ProxyEnable")) {
+                    String[] parts = line.trim().split("\\s+");
+                    if (parts.length > 2) {
+                        proxyEnabled = "0x1".equals(parts[2]) || "1".equals(parts[2]);
+                    }
                 }
             }
 
-            if (proxyServer != null && !proxyServer.isEmpty()) {
+            // 只有当代理启用且存在服务器地址时才返回代理
+            if (proxyEnabled && proxyServer != null && !proxyServer.isEmpty()) {
                 String[] hp = proxyServer.split(":");
                 if (hp.length >= 2) {
                     return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hp[0], Integer.parseInt(hp[1])));
@@ -160,8 +173,9 @@ public class ProxyUtils {
             }
         } catch (Exception ignored) {
         }
-        return null;
+        return null; // 否则继续向下查找
     }
+
 
     // endregion
 
@@ -188,11 +202,15 @@ public class ProxyUtils {
                 int port = Integer.parseInt(portStr);
 
                 return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+            } else {
+                // mode 不是 manual，说明未启用代理
+                return null;
             }
         } catch (Exception ignored) {
+            return null;
         }
-        return null;
     }
+
 
     // endregion
 
@@ -206,22 +224,26 @@ public class ProxyUtils {
             String line;
             String host = null;
             int port = -1;
+            boolean enabled = false;
 
             while ((line = reader.readLine()) != null) {
                 if (line.contains("Server")) {
                     host = line.split(":")[1].trim();
                 } else if (line.contains("Port")) {
                     port = Integer.parseInt(line.split(":")[1].trim());
+                } else if (line.contains("Enabled")) {
+                    enabled = line.split(":")[1].trim().equalsIgnoreCase("Yes");
                 }
             }
 
-            if (host != null && port > 0) {
+            if (enabled && host != null && port > 0) {
                 return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
             }
         } catch (Exception ignored) {
         }
         return null;
     }
+
     // endregion
 
     private static Proxy fromSpringConfig() {

@@ -1,7 +1,7 @@
 package com.nyx.bot.controller.config;
 
-import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.controller.BaseController;
+import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.entity.git.GitHubUserProvider;
 import com.nyx.bot.repo.git.GitHubUserProviderRepository;
 import com.nyx.bot.utils.I18nUtils;

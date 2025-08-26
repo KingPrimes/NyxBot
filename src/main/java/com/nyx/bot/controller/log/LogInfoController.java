@@ -1,13 +1,13 @@
 package com.nyx.bot.controller.log;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.core.AjaxResult;
-import com.nyx.bot.core.Views;
-import com.nyx.bot.core.controller.BaseController;
-import com.nyx.bot.core.page.TableDataInfo;
-import com.nyx.bot.entity.sys.LogInfo;
+import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.Views;
+import com.nyx.bot.common.core.controller.BaseController;
+import com.nyx.bot.common.core.page.TableDataInfo;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.repo.sys.LogInfoRepository;
+import com.nyx.bot.modules.system.entity.LogInfo;
+import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +28,7 @@ public class LogInfoController extends BaseController {
     @GetMapping("/codes")
     public AjaxResult info() {
         return success().put("data", Arrays.stream(Codes.values())
-                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getStr()), "value", c.name()))
+                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getComm()), "value", c.name()))
                 .collect(Collectors.toList())
         );
     }
