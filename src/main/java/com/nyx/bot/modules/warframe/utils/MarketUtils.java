@@ -236,8 +236,8 @@ public class MarketUtils {
         // 假设用户输入的是正确值，直接查询数据库
         var repository = SpringUtils.getBean(RivenItemsRepository.class);
         Optional<RivenItems> items = Optional.of(new RivenItems());
-        items.get().setItemName(key);
-        items = repository.findByItemName(key);
+        items.get().setName(key);
+        items = repository.findByName(key);
         log.debug("假设正确:{}", items.orElse(new RivenItems()));
         if (items.isPresent()) {
             return items.get();
@@ -251,7 +251,7 @@ public class MarketUtils {
         }
         Optional<Alias> a = alias.findByCn(key);
         if (a.isPresent()) {
-            items = repository.findByItemName(a.get().getEn());
+            items = repository.findByName(a.get().getEn());
             log.debug("别名:{}", items);
             if (items.isPresent()) {
                 return items.get();
@@ -261,14 +261,14 @@ public class MarketUtils {
         // 正则查询
         String start = String.valueOf(key.charAt(0));
         String end = String.valueOf(key.charAt(key.length() - 1));
-        items = repository.findByItemNameRegex("^" + start + ".*?" + end + ".*?");
+        items = repository.findByNameRegex("^" + start + ".*?" + end + ".*?");
         log.debug("正则查询:{}", items);
         if (items.isPresent()) {
             return items.get();
         }
 
         //最后查询所有以该字符开头的物品，并返回
-        List<RivenItems> itemsList = repository.itemNameLikes(start);
+        List<RivenItems> itemsList = repository.nameLikes(start);
         RivenItems finalItems = new RivenItems();
         finalItems.setItems(itemsList);
         log.debug("可能存在的值：{}", finalItems);
@@ -291,8 +291,8 @@ public class MarketUtils {
             }
             // 构建请求url
             String url = new MarketRivenParameter(
-                    riveItems.getUrlName(),
-                    riveItems.getItemName(),
+                    riveItems.getSlug(),
+                    riveItems.getName(),
                     "",
                     "",
                     MarketRivenParameter.Polarity.ANY,
@@ -307,7 +307,7 @@ public class MarketUtils {
                 log.debug("获取数据失败：{}", body.getCode().getMessage());
                 return marketRiven;
             }
-            var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+            var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
             log.debug("获取到的数据：\n{}", mr);
             // 解析返回数据
             return mr;
@@ -353,8 +353,8 @@ public class MarketUtils {
         log.debug("正面词条：{} ---- 负面词条:{}", statBuilder, not);
         // 构建请求url
         String url = new MarketRivenParameter(
-                riveItems.getUrlName(),
-                riveItems.getItemName(),
+                riveItems.getSlug(),
+                riveItems.getName(),
                 statBuilder.toString(),
                 not,
                 MarketRivenParameter.Polarity.ANY,
@@ -370,7 +370,7 @@ public class MarketUtils {
             log.debug("获取数据失败：{}", body.getCode().getMessage());
             return marketRiven;
         }
-        var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getItemName());
+        var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
         log.debug("获取到的数据：\n{}", mr);
         // 解析返回数据
         return mr;

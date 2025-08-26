@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.cache.ArbitrationCache;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.modules.warframe.entity.*;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
@@ -19,6 +18,7 @@ import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.res.Arbitration;
 import com.nyx.bot.modules.warframe.res.WorldState;
+import com.nyx.bot.modules.warframe.service.*;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@SuppressWarnings("all")
 public class WarframeDataSource {
 
     static final String DATA_SOURCE_PATH = JgitUtil.lockPath + "/warframe/";
@@ -69,7 +70,7 @@ public class WarframeDataSource {
                                         CompletableFuture.allOf(CompletableFuture.runAsync(WarframeDataSource::getAlias)
                                                 .thenRunAsync(WarframeDataSource::getRivenTion)
                                                 .thenRunAsync(WarframeDataSource::getRivenTionAlias)
-                                                //.thenRunAsync(WarframeDataSource::initTranslation)
+                                                .thenRunAsync(WarframeDataSource::initTranslation)
                                                 .thenRunAsync(WarframeDataSource::getRivenAnalyseTrend)
                                                 .thenRunAsync(WarframeDataSource::getRivenTrend)).join();
                                     }
@@ -78,7 +79,7 @@ public class WarframeDataSource {
                         CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
                                 .thenRunAsync(WarframeDataSource::initWarframeStatus)
                                 .thenRunAsync(WarframeDataSource::getEphemeras)
-                                .thenRunAsync(WarframeDataSource::getMarket)
+                                .thenRunAsync(WarframeDataSource::initOrdersItemsData)
                                 .thenRunAsync(WarframeDataSource::getLichSisterWeapons)
                                 .thenRunAsync(WarframeDataSource::getRivenWeapons)
                                 .thenRunAsync(WarframeDataSource::getRelics)
@@ -114,231 +115,28 @@ public class WarframeDataSource {
 
     //幻纹
     public static Integer getEphemeras() {
-        log.info("开始获取幻纹信息！");
-        int attempts = 0;
-        List<Ephemeras> ephemerasList = new ArrayList<>();
-        while (attempts < 3) {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("赤毒幻纹初始化不正确！未获得数据！尝试在 30 秒后再次获取它！");
-                sleepSeconds();
-                attempts++;
-                continue;
-            }
-            List<Ephemeras> ephemeras = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
-            if (!ephemeras.isEmpty()) {
-                ephemerasList.addAll(ephemeras);
-                break;
-            }
-        }
-        while (attempts < 3) {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS, ApiUrl.LANGUAGE_ZH_HANS);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("信条幻纹初始化不正确！未获得数据！尝试在 30 秒后再次获取它！");
-                sleepSeconds();
-                attempts++;
-                continue;
-            }
-            List<Ephemeras> ephemeras = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("ephemeras").toJavaList(Ephemeras.class, JSONReader.Feature.SupportSmartMatch);
-            if (!ephemeras.isEmpty()) {
-                ephemerasList.addAll(ephemeras);
-                break;
-            }
-        }
-        if (ephemerasList.isEmpty()) {
-            log.warn("幻纹初始化不正确！未获得数据！");
-            return -1;
-        }
-        EphemerasRepository repository = SpringUtils.getBean(EphemerasRepository.class);
-        if (!repository.findAll().isEmpty()) {
-            List<Ephemeras> all = repository.findAll();
-            List<Ephemeras> list = ephemerasList.stream()
-                    .filter(i -> !all.stream()
-                            .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName() + m.getElement(), value -> value))
-                            .containsKey(i.getItemName() + i.getUrlName() + i.getElement())
-                    ).toList();
-
-            log.info("总更新 Warframe.Ephemeras {} 数据！", list.size());
-            return repository.saveAll(list).size();
-        } else {
-            log.info("总更新 Warframe.Ephemeras {} 数据！", ephemerasList.size());
-            return repository.saveAll(ephemerasList).size();
-        }
+        return SpringUtils.getBean(EphemerasService.class).initEphemerasData();
     }
 
 
     //Market
-    public static Integer getMarket() {
-//        log.info("开始初始化Market市场数据!");
-//        int attempts = 0;
-//        while (attempts < 3) {
-//            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
-//            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-//                log.warn("Market市场初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-//                sleepSeconds();
-//                attempts++;
-//                continue;
-//            }
-//            List<OrdersItems> items = JSON.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("items").toJavaList(OrdersItems.class, JSONReader.Feature.SupportSmartMatch);
-//            OrdersItemsRepository ordersItem = SpringUtils.getBean(OrdersItemsRepository.class);
-//            if (!ordersItem.findAll().isEmpty()) {
-//                List<OrdersItems> all = ordersItem.findAll();
-//                List<OrdersItems> list = items.stream()
-//                        .filter(item -> !all.stream()
-//                                .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
-//                                .containsKey(item.getItemName() + item.getUrlName())).toList();
-//                log.info("总计更新 Warframe.Market {} 数据！", list.size());
-//                return ordersItem.saveAll(list).size();
-//            } else {
-//                log.info("总计更新 Warframe.Market {} 数据！", items.size());
-//                return ordersItem.saveAll(items).size();
-//
-//            }
-//        }
-//        log.warn("Market市场初始化错误！未获得数据！");
-        return -1;
+    public static Integer initOrdersItemsData() {
+        return SpringUtils.getBean(OrdersItemsService.class).initOrdersItemsData();
     }
 
     //赤毒武器/信条武器
     public static Integer getLichSisterWeapons() {
-        log.info("开始获取武器信息！");
-        int attempts = 0;
-        List<LichSisterWeapons> weaponsList = new ArrayList<>();
-        while (attempts < 3) {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("赤毒武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-                sleepSeconds();
-                attempts++;
-                continue;
-            }
-            List<LichSisterWeapons> weapons = JSONObject.parseObject(body.getBody())
-                    .getJSONObject("payload")
-                    .getJSONArray("weapons")
-                    .toJavaList(LichSisterWeapons.class, JSONReader.Feature.SupportSmartMatch);
-            if (!weapons.isEmpty()) {
-                weaponsList.addAll(weapons);
-                break;
-            }
-        }
-        attempts = 0;
-        while (attempts < 3) {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, ApiUrl.LANGUAGE_ZH_HANS);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.warn("信条武器信息初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-                sleepSeconds();
-                attempts++;
-                continue;
-            }
-            List<LichSisterWeapons> weapons = JSONObject.parseObject(body.getBody()).getJSONObject("payload").getJSONArray("weapons").toJavaList(LichSisterWeapons.class, JSONReader.Feature.SupportSmartMatch);
-            if (!weapons.isEmpty()) {
-                weaponsList.addAll(weapons);
-                break;
-            }
-        }
-
-        if (weaponsList.isEmpty()) {
-            log.warn("Market Purple Weapon 初始化错误！未获得数据！");
-            return -1;
-        }
-
-        LichSisterWeaponsRepository repository = SpringUtils.getBean(LichSisterWeaponsRepository.class);
-        if (!repository.findAll().isEmpty()) {
-            List<LichSisterWeapons> all = repository.findAll();
-            List<LichSisterWeapons> list = weaponsList.stream()
-                    .filter(item -> !all.stream()
-                            .collect(Collectors.toMap(m -> m.getItemName() + m.getUrlName(), value -> value))
-                            .containsKey(item.getItemName() + item.getUrlName())).toList();
-            log.info("总更新 Warframe.LichSisterWeapons {} 数据！", list.size());
-            return repository.saveAll(list).size();
-        } else {
-            log.info("总更新 Warframe.LichSisterWeapons {} 数据！", weaponsList.size());
-            return repository.saveAll(weaponsList).size();
-        }
+        return SpringUtils.getBean(LichSisterWeaponsService.class).initLichSisterWeaponsData();
     }
 
     //紫卡武器
     public static Integer getRivenWeapons() {
-//        log.info("开始获取 Market Purple Weapon 数据！");
-//        int attempts = 0;
-//        while (attempts < 3) {
-//            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_MARKET_RIVEN_ITEMS, ApiUrl.LANGUAGE_ZH_HANS);
-//            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-//                log.warn("市场紫卡武器初始化错误！未获得数据！尝试在 30 秒后再次获取它！");
-//                sleepSeconds();
-//                attempts++;
-//                continue;
-//            }
-//            //获取数据源
-//            List<RivenItems> items = JSON.parseObject(body.getBody())
-//                    .getJSONObject("payload")
-//                    .getJSONArray("items")
-//                    .toJavaList(RivenItems.class, JSONReader.Feature.SupportSmartMatch);
-//
-//            RivenItemsRepository repository = SpringUtils.getBean(RivenItemsRepository.class);
-//            AtomicInteger size = new AtomicInteger();
-//            //判断数据库表中是否有数据
-//            if (!repository.findAll().isEmpty()) {
-//                List<RivenItems> all = repository.findAll();
-//                //stream取差集，对比与数据库中不同的数据
-//                List<RivenItems> list = items.stream().filter(item ->
-//                                !all.stream()
-//                                        //采用Map Key的方式对比多属性不同的值
-//                                        .collect(Collectors.toMap(ri -> ri.getItemName() + "-" + ri.getIconFormat() + "-" + ri.getUrlName(), value -> value))
-//                                        .containsKey(item.getItemName() + "-" + item.getIconFormat() + "-" + item.getUrlName())
-//
-//                        )
-//                        //接受结果到List集合中
-//                        .toList();
-//                //便利结果集合
-//                list.forEach(item -> {
-//                    //到数据库中查询是否有这个值,如果有这个值则把ID付给要保存的新值
-//                    repository.findById(item.getId()).ifPresent(b -> item.setRivenId(b.getRivenId()));
-//                    //增加|修改值
-//                    repository.save(item);
-//                    //增加|修改值的数量
-//                    size.addAndGet(1);
-//                });
-//                log.info("总计更新 Warframe.Market Riven LichSisterWeapons {} 数据！", size);
-//                return size.get();
-//            } else {
-//                List<RivenItems> rivenItems = repository.saveAll(items);
-//                log.info("总计更新 Warframe.Market Riven LichSisterWeapons {} 数据！", rivenItems.size());
-//                return rivenItems.size();
-//            }
-//        }
-//        log.warn("Market Purple Weapon 初始化错误！未获得数据！");
-        return -1;
-
+        return SpringUtils.getBean(RivenItemsService.class).initRivenItemsData();
     }
 
     // 遗物
     public static Integer getRelics() {
-//        log.info("开始初始化 Relics 数据！");
-//        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_RELICS_DATA);
-//        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-//            List<Relics> relics = JSON.parseObject(body.getBody()).getJSONArray("relics").toJavaList(Relics.class).stream().filter(r -> r.getState().equals("Intact")).toList();
-//            relics = relics.stream().peek(r -> r.setRewards(r.getRewards().stream().peek(w -> w.setRelics(r)).toList())).toList();
-//            RelicsRepository repository = SpringUtils.getBean(RelicsRepository.class);
-//            if (!repository.findAll().isEmpty()) {
-//                List<Relics> all = repository.findAll();
-//                log.debug("Relics data is being filtered!");
-//                List<Relics> list = relics.stream().filter(item ->
-//                                !all.stream()
-//                                        .collect(Collectors.toMap(re -> re.getRelicsId() + re.getRewards().stream().map(RelicsRewards::getRewardId).toList(), value -> value))
-//                                        .containsKey(item.getRelicsId() + item.getRewards().stream().map(RelicsRewards::getRewardId).toList())
-//                        )
-//                        .toList();
-//                relics = repository.saveAll(list);
-//                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
-//            } else {
-//                relics = repository.saveAll(relics);
-//                log.info("总更新 Warframe.Relics {} 数据！", relics.size());
-//            }
-//            return relics.size();
-//
-//        }
-        return -1;
+        return SpringUtils.getBean(RelicsService.class).initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
     }
 
     //别名
@@ -481,7 +279,7 @@ public class WarframeDataSource {
         return flag;
     }
 
-    static void severExportFiles() {
+    public static void severExportFiles() {
         severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
     }
 
@@ -589,13 +387,14 @@ public class WarframeDataSource {
         try {
             object = JSON.parseObject(new FileInputStream(exportPath));
         } catch (FileNotFoundException e) {
+            log.error("{} 路径文件不存在", exportPath);
             throw new RuntimeException(e);
         }
         return object.getList(key, c);
     }
 
     void initStateTranslation() {
-        log.info("开始初始化 翻译 数据！");
+        log.debug("开始初始化 Lost 翻译 数据！");
         List<StateTranslation> stateTranslationList = new ArrayList<>();
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportCustoms_zh.json"), "ExportCustoms", StateTypeEnum.ALL));
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportDrones_zh.json"), "ExportDrones", StateTypeEnum.ALL));
@@ -625,7 +424,7 @@ public class WarframeDataSource {
         } catch (FileNotFoundException e) {
             log.error("state_translation.json文件不存在");
         }
-        log.info("初始化状态翻译完成");
+        log.debug("初始化Lost翻译完成");
     }
 
     void initNodes() {
