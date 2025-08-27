@@ -353,21 +353,21 @@ public class JgitUtil {
         if (!directory.exists()) {
             gitClone("main");
         }
-        Git git = openRpo(localPath);
-        if (provider == null) {
-            git.pull()
-                    .setRemoteBranchName("main")
-                    .setProgressMonitor(new LoggingProgressMonitor())
-                    .call();
-            git.close();
-            return;
+        try (Git git = openRpo(localPath)) {
+            if (provider == null) {
+                git.pull()
+                        .setRemoteBranchName("main")
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            } else {
+                git.pull()
+                        .setRemoteBranchName("main")
+                        .setCredentialsProvider(provider)
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            }
+            verifyRepositoryState(localPath);
         }
-        git.pull()
-                .setRemoteBranchName("main")
-                .setCredentialsProvider(provider)
-                .setProgressMonitor(new LoggingProgressMonitor())
-                .call();
-        git.close();
     }
 
     /**
@@ -381,21 +381,23 @@ public class JgitUtil {
         if (!directory.exists()) {
             gitClone(branch);
         }
-        Git git = openRpo(localPath);
-        if (provider == null) {
-            git.pull()
-                    .setRemoteBranchName("main")
-                    .setProgressMonitor(new LoggingProgressMonitor())
-                    .call();
-            git.close();
-            return;
+        try (Git git = openRpo(localPath)) {
+            if (provider == null) {
+                git.pull()
+                        .setRemoteBranchName("main")
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            } else {
+                git.pull()
+                        .setRemoteBranchName(branch)
+                        .setCredentialsProvider(provider)
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            }
+            verifyRepositoryState(localPath);
         }
-        git.pull()
-                .setRemoteBranchName(branch)
-                .setCredentialsProvider(provider)
-                .setProgressMonitor(new LoggingProgressMonitor())
-                .call();
-        git.close();
+
+
     }
 
     /**
@@ -404,48 +406,95 @@ public class JgitUtil {
      * @param branch 分支
      */
     public void gitClone(String branch) throws GitAPIException {
-        if (provider == null) {
-            Git git = Git.cloneRepository()
-                    .setURI(urlPath + ".git")
-                    .setTimeout(60)
-                    .setDirectory(new File(localPath))
-                    //设置是否克隆子仓库
-                    .setCloneSubmodules(true)
-                    //设置克隆分支
-                    .setBranch(branch)
-                    .setProgressMonitor(new LoggingProgressMonitor())
-                    .call();
+        Git git = null;
+        try {
+            if (provider == null) {
+                git = Git.cloneRepository()
+                        .setURI(urlPath + ".git")
+                        .setTimeout(60)
+                        .setDirectory(new File(localPath))
+                        //设置是否克隆子仓库
+                        .setCloneSubmodules(true)
+                        //设置克隆分支
+                        .setBranch(branch)
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            } else {
+                git = Git.cloneRepository()
+                        .setURI(urlPath + ".git")
+                        .setDirectory(new File(localPath))
+                        .setCredentialsProvider(provider)
+                        //设置是否克隆子仓库
+                        .setCloneSubmodules(true)
+                        //设置克隆分支
+                        .setBranch(branch)
+                        .setProgressMonitor(new LoggingProgressMonitor())
+                        .call();
+            }
+            // 验证拉取结果：检查仓库是否有效且HEAD引用存在
+            verifyRepositoryState(localPath);
+        } finally {
             //关闭源，以释放本地仓库锁
-            git.getRepository().close();
-            return;
+            if (git != null) {
+                git.getRepository().close();
+            }
         }
-        Git git = Git.cloneRepository()
-                .setURI(urlPath + ".git")
-                .setDirectory(new File(localPath))
-                .setCredentialsProvider(provider)
-                //设置是否克隆子仓库
-                .setCloneSubmodules(true)
-                //设置克隆分支
-                .setBranch(branch)
-                .setProgressMonitor(new LoggingProgressMonitor())
-                .call();
-        //关闭源，以释放本地仓库锁
-        git.getRepository().close();
+
     }
 
     /**
      * 克隆(Clone)
      */
     public void gitClone() throws GitAPIException {
-        Git git = Git.cloneRepository()
-                .setURI(urlPath + ".git")
-                .setDirectory(new File(localPath))
-                //设置是否克隆子仓库
-                .setCloneSubmodules(true)
-                .setProgressMonitor(new LoggingProgressMonitor())
-                .call();
-        //关闭源，以释放本地仓库锁
-        git.getRepository().close();
+        Git git = null;
+        try {
+            git = Git.cloneRepository()
+                    .setURI(urlPath + ".git")
+                    .setDirectory(new File(localPath))
+                    //设置是否克隆子仓库
+                    .setCloneSubmodules(true)
+                    .setProgressMonitor(new LoggingProgressMonitor())
+                    .call();
+        } finally {
+            //关闭源，以释放本地仓库锁
+            if (git != null) {
+                git.getRepository().close();
+            }
+        }
+    }
+
+    /**
+     * 验证仓库状态是否有效
+     *
+     * @param repoPath 仓库路径
+     * @throws GitAPIException 仓库状态异常时抛出
+     */
+    private void verifyRepositoryState(String repoPath) throws GitAPIException {
+        File gitDir = new File(repoPath, ".git");
+        if (!gitDir.exists() || !gitDir.isDirectory()) {
+            throw new GitAPIException("仓库验证失败：.git目录不存在") {
+            };
+        }
+
+        try (Repository repo = new FileRepositoryBuilder()
+                .setGitDir(gitDir)
+                .readEnvironment()
+                .findGitDir()
+                .build()) {
+            if (!repo.getObjectDatabase().exists()) {
+                throw new GitAPIException("仓库验证失败：对象数据库不存在") {
+                };
+            }
+
+            Ref headRef = repo.exactRef("HEAD");
+            if (headRef == null) {
+                throw new GitAPIException("仓库验证失败：HEAD引用不存在") {
+                };
+            }
+        } catch (IOException e) {
+            throw new GitAPIException("仓库验证失败：" + e.getMessage(), e) {
+            };
+        }
     }
 }
 
