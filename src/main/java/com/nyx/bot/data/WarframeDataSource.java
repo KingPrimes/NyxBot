@@ -9,10 +9,12 @@ import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.modules.warframe.entity.*;
+import com.nyx.bot.modules.warframe.entity.exprot.NightWave;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
 import com.nyx.bot.modules.warframe.repo.*;
+import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
@@ -57,37 +59,66 @@ public class WarframeDataSource {
 
     public static void init() {
         log.info("开始初始化数据！");
-        // allOf等待所有任务完成
-        CompletableFuture.allOf(
-                        // supplyAsync 异步获取数据,返回Boolean值用于下一个线程
-                        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource)
-                                // 根据上一个线程的返回值进行操作
-                                .thenAccept(flag -> {
-                                    if (flag) {
-                                        log.error("初始化数据模板，失败！请检查网络环境，程序即将自动结束。");
-                                        System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
-                                    } else {
-                                        CompletableFuture.allOf(CompletableFuture.runAsync(WarframeDataSource::getAlias)
-                                                .thenRunAsync(WarframeDataSource::getRivenTion)
-                                                .thenRunAsync(WarframeDataSource::getRivenTionAlias)
-                                                .thenRunAsync(WarframeDataSource::initTranslation)
-                                                .thenRunAsync(WarframeDataSource::getRivenAnalyseTrend)
-                                                .thenRunAsync(WarframeDataSource::getRivenTrend)).join();
-                                    }
-                                }),
-                        // 初始化网络数据
-                        CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
-                                .thenRunAsync(WarframeDataSource::initWarframeStatus)
-                                .thenRunAsync(WarframeDataSource::getEphemeras)
-                                .thenRunAsync(WarframeDataSource::initOrdersItemsData)
-                                .thenRunAsync(WarframeDataSource::getLichSisterWeapons)
-                                .thenRunAsync(WarframeDataSource::getRivenWeapons)
-                                .thenRunAsync(WarframeDataSource::getRelics)
-                ).thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
-                .thenRunAsync(() -> new WarframeDataSource().initNodes())
-                .thenRunAsync(() -> new WarframeDataSource().initWeapons())
-                .thenRunAsync(() -> new WarframeDataSource().initRewardPool())
-                .thenRun(() -> log.info("数据初始化完成！"));
+
+        // 1. 首先执行cloneDataSource
+        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
+                    if (flag) {
+                        log.error("初始化数据模板，失败！请检查网络环境");
+                        throw new RuntimeException("克隆数据模板失败");
+                    }
+                })
+                // 使用thenCompose确保severExportFiles在cloneDataSource完成后执行
+                .thenCompose(ignore -> CompletableFuture.supplyAsync(WarframeDataSource::severExportFiles)).thenAccept(flag -> {
+                    if (!flag) {
+                        log.error("获取导出数据文件失败！请检查网络环境");
+                        throw new RuntimeException("获取导出数据文件失败");
+                    }
+                })
+                // 3. severExportFiles完成后执行initStateTranslation
+                .thenCompose(ignore -> CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation()))
+                // 4. 剩余任务并行执行
+                .thenRunAsync(() -> {
+                    CompletableFuture.allOf(
+
+                                    CompletableFuture.runAsync(WarframeDataSource::getAlias),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
+                                    CompletableFuture.runAsync(WarframeDataSource::initTranslation),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
+
+
+                                    CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
+                                    CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
+                                    CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
+                                    CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
+
+
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRelics))
+                            .join();
+                })
+                // 所有任务完成后输出信息
+                .thenRun(() -> log.info("数据初始化完成！"))
+                // 异常处理
+                .exceptionally(ex -> {
+                    log.error("初始化过程中发生异常，正在回退操作...", ex);
+
+                    // 回退操作：清理已生成的文件
+                    FileUtils.delAllFile(EXPORT_PATH.formatted("").replace("%s", ""));
+                    FileUtils.delAllFile(JgitUtil.lockPath);
+                    FileUtils.deleteFile(LAMA_PATH);
+                    FileUtils.deleteFile(INDEX_PATH);
+                    FileUtils.deleteFile("./data/keys.json");
+
+                    log.error("回退操作完成，程序即将退出。");
+                    System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
+                    return null;
+                });
     }
 
     public static void initWarframeStatus() {
@@ -151,10 +182,7 @@ public class WarframeDataSource {
 
         Map<String, Alias> uniqueTranslations = createMap(aliasList, Alias::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<Alias> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(Alias::new)
-                .toList();
+        List<Alias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Alias::new).toList();
 
         log.info("总计更新 Warframe.Alias {} 数据！", aliasR.saveAll(list).size());
 
@@ -172,10 +200,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTion> uniqueTranslations = createMap(rivenTions, RivenTion::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTion> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTion::new)
-                .toList();
+        List<RivenTion> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTion::new).toList();
 
         log.info("总计更新 Warframe.RivenTion {} 数据！", records.saveAll(list).size());
         return list.size();
@@ -192,10 +217,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTionAlias> uniqueTranslations = createMap(rivenTionAliases, RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTionAlias> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTionAlias::new)
-                .toList();
+        List<RivenTionAlias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTionAlias::new).toList();
 
         log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", repository.saveAll(list).size());
         return list.size();
@@ -212,10 +234,7 @@ public class WarframeDataSource {
 
         Map<String, Translation> uniqueTranslations = createMap(translations, Translation::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<Translation> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(Translation::new)
-                .toList();
+        List<Translation> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Translation::new).toList();
         log.info("总计更新 Warframe.Translation {} 数据！", t.saveAll(list).size());
         return list.size();
     }
@@ -231,10 +250,7 @@ public class WarframeDataSource {
 
         Map<String, RivenAnalyseTrend> uniqueTranslations = createMap(translations, RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenAnalyseTrend> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenAnalyseTrend::new)
-                .toList();
+        List<RivenAnalyseTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenAnalyseTrend::new).toList();
 
         log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r.saveAll(list).size());
 
@@ -251,10 +267,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTrend> uniqueTranslations = createMap(rt, RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTrend> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTrend::new)
-                .toList();
+        List<RivenTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTrend::new).toList();
 
         log.info("总计更新 Warframe.RivenTrend {} 数据！", r.saveAll(list).size());
 
@@ -268,7 +281,7 @@ public class WarframeDataSource {
         for (String url : ApiUrl.DATA_SOURCE_GIT) {
             try {
                 log.debug("Clone data:{}", url);
-                JgitUtil git = JgitUtil.Build(url, "");
+                JgitUtil git = JgitUtil.Build(url, JgitUtil.lockPath);
                 git.pull();
                 flag = false;
                 break;
@@ -279,8 +292,8 @@ public class WarframeDataSource {
         return flag;
     }
 
-    public static void severExportFiles() {
-        severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
+    public static Boolean severExportFiles() {
+        return severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
     }
 
     /**
@@ -291,11 +304,12 @@ public class WarframeDataSource {
      * @param outPath      解压文件保存路径
      * @param exportPath   索引数据保存路径 ./data/export/%s
      */
-    private static void severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
+    private static Boolean severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
         Boolean files = getExportLZMAFiles(languagesKey, path);
         if (!files) {
-            return;
+            return false;
         }
+        Boolean falg = true;
         if (ZipUtils.unLzma(path, outPath)) {
             List<String> keys = FileUtils.readFileToList(outPath);
             compareTheHashAndSave(keys);
@@ -303,9 +317,10 @@ public class WarframeDataSource {
                 if (key.contains("ExportRecipes") || key.contains("ExportFusionBundles")) {
                     continue;
                 }
-                getExportFiles(key, exportPath.formatted(StringUtils.substring(key, 0, key.indexOf("!"))));
+                falg = getExportFiles(key, exportPath.formatted(StringUtils.substring(key, 0, key.indexOf("!"))));
             }
         }
+        return falg;
     }
 
     /**
@@ -332,13 +347,9 @@ public class WarframeDataSource {
             throw new RuntimeException(e);
         }
         return object.getList(key, StateTranslation.class).stream().filter(s -> !s.getName().isEmpty()).peek(s -> {
-                    s.setType(StateTypeEnum.RESOURCES);
-                    Arrays.stream(StateTypeEnum.values())
-                            .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
-                            .findFirst()
-                            .ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
-                })
-                .toList();
+            s.setType(StateTypeEnum.RESOURCES);
+            Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
+        }).toList();
     }
 
     /**
@@ -364,19 +375,11 @@ public class WarframeDataSource {
      */
     static Map<String, String> compareTheHashAndSave(List<String> keys) {
         String keysHashPath = "./data/keys.json";
-        Map<String, String> collect = keys.stream()
-                .map(key -> key.split("!", 2))
-                .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
             Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
-            return collect.entrySet().stream()
-                    .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue
-                    ));
+            return collect.entrySet().stream().filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (FileNotFoundException e) {
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
             return collect;
@@ -411,21 +414,27 @@ public class WarframeDataSource {
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
         str.saveAll(stateTranslationList);
         try {
-            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class)
-                    .stream()
-                    .peek(s -> {
-                        s.setType(StateTypeEnum.RESOURCES);
-                        Arrays.stream(StateTypeEnum.values())
-                                .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
-                                .findFirst()
-                                .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
-                    })
-                    .toList();
+            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class).stream().peek(s -> {
+                s.setType(StateTypeEnum.RESOURCES);
+                Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+            }).toList();
             str.saveAll(javaList);
         } catch (FileNotFoundException e) {
             log.error("state_translation.json文件不存在");
         }
         log.debug("初始化Lost翻译完成");
+    }
+
+    void initNightWave() {
+        log.debug("开始初始化  NightWave 数据！");
+        List<NightWave> javaList = null;
+        try {
+            javaList = JSON.parseObject(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json"))).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(NightWave.class);
+            int size = SpringUtils.getBean(NightWaveRepository.class).saveAll(javaList).size();
+            log.debug("初始化 NightWave 数据完成，共{}条", size);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     void initNodes() {
