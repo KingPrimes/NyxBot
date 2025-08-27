@@ -7,7 +7,6 @@ import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.modules.warframe.utils.RelicsImportUtil;
 import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -30,13 +29,9 @@ public class RelicsService {
     @Resource
     StateTranslationRepository str;
 
-
-    @Resource
-    EntityManager entityManager;
-
     public Integer initRelicsData(String filePath) {
         log.info("开始初始化遗物数据");
-        return new RelicsImportUtil(str, repository, entityManager).importRelicsData(filePath);
+        return new RelicsImportUtil(str, repository).importRelicsData(filePath);
     }
 
 

@@ -108,8 +108,8 @@ public class WarframeDataSource {
                     log.error("初始化过程中发生异常，正在回退操作...", ex);
 
                     // 回退操作：清理已生成的文件
-                    FileUtils.delAllFile(DATA_SOURCE_PATH);
                     FileUtils.delAllFile(EXPORT_PATH.formatted("").replace("%s", ""));
+                    FileUtils.delAllFile(JgitUtil.lockPath);
                     FileUtils.deleteFile(LAMA_PATH);
                     FileUtils.deleteFile(INDEX_PATH);
                     FileUtils.deleteFile("./data/keys.json");
@@ -298,7 +298,7 @@ public class WarframeDataSource {
         for (String url : ApiUrl.DATA_SOURCE_GIT) {
             try {
                 log.debug("Clone data:{}", url);
-                JgitUtil git = JgitUtil.Build(url, "");
+                JgitUtil git = JgitUtil.Build(url, JgitUtil.lockPath);
                 git.pull();
                 flag = false;
                 break;

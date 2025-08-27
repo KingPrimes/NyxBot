@@ -75,7 +75,7 @@ public class JgitUtil {
      * 构建 Jgit工具类 进行拉取操作
      */
     public static JgitUtil Build() {
-        return Build("https://github.com/KingPrimes/DataSource", "");
+        return Build("https://github.com/KingPrimes/DataSource", lockPath);
     }
 
     /**

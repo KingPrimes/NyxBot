@@ -214,7 +214,7 @@ public class FileUtils {
                 flag = true;
             }
         }
-        return file.delete();
+        return flag;
     }
 
 
