@@ -57,37 +57,67 @@ public class WarframeDataSource {
 
     public static void init() {
         log.info("开始初始化数据！");
-        // allOf等待所有任务完成
-        CompletableFuture.allOf(
-                        // supplyAsync 异步获取数据,返回Boolean值用于下一个线程
-                        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource)
-                                // 根据上一个线程的返回值进行操作
-                                .thenAccept(flag -> {
-                                    if (flag) {
-                                        log.error("初始化数据模板，失败！请检查网络环境，程序即将自动结束。");
-                                        System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
-                                    } else {
-                                        CompletableFuture.allOf(CompletableFuture.runAsync(WarframeDataSource::getAlias)
-                                                .thenRunAsync(WarframeDataSource::getRivenTion)
-                                                .thenRunAsync(WarframeDataSource::getRivenTionAlias)
-                                                .thenRunAsync(WarframeDataSource::initTranslation)
-                                                .thenRunAsync(WarframeDataSource::getRivenAnalyseTrend)
-                                                .thenRunAsync(WarframeDataSource::getRivenTrend)).join();
-                                    }
-                                }),
-                        // 初始化网络数据
-                        CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
-                                .thenRunAsync(WarframeDataSource::initWarframeStatus)
-                                .thenRunAsync(WarframeDataSource::getEphemeras)
-                                .thenRunAsync(WarframeDataSource::initOrdersItemsData)
-                                .thenRunAsync(WarframeDataSource::getLichSisterWeapons)
-                                .thenRunAsync(WarframeDataSource::getRivenWeapons)
-                                .thenRunAsync(WarframeDataSource::getRelics)
-                ).thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
-                .thenRunAsync(() -> new WarframeDataSource().initNodes())
-                .thenRunAsync(() -> new WarframeDataSource().initWeapons())
-                .thenRunAsync(() -> new WarframeDataSource().initRewardPool())
-                .thenRun(() -> log.info("数据初始化完成！"));
+
+        // 1. 首先执行cloneDataSource
+        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource)
+                .thenAccept(flag -> {
+                    if (flag) {
+                        log.error("初始化数据模板，失败！请检查网络环境");
+                        throw new RuntimeException("克隆数据模板失败");
+                    }
+                })
+                // 2. cloneDataSource完成后执行severExportFiles
+                .supplyAsync(WarframeDataSource::severExportFiles)
+                .thenAccept(flag -> {
+                    if (!flag) {
+                        log.error("获取导出数据文件失败！请检查网络环境");
+                        throw new RuntimeException("获取导出数据文件失败");
+                    }
+                })
+                // 3. severExportFiles完成后执行initStateTranslation
+                .thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
+                // 4. 剩余任务并行执行
+                .thenRunAsync(() -> {
+                    CompletableFuture.allOf(
+
+                            CompletableFuture.runAsync(WarframeDataSource::getAlias),
+                            CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
+                            CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
+                            CompletableFuture.runAsync(WarframeDataSource::initTranslation),
+                            CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
+                            CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
+
+
+                            CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
+                            CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
+                            CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
+                            CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
+                            CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
+
+
+                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
+                            CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
+                            CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
+                            CompletableFuture.runAsync(WarframeDataSource::getRelics)
+                    ).join();
+                })
+                // 所有任务完成后输出信息
+                .thenRun(() -> log.info("数据初始化完成！"))
+                // 异常处理
+                .exceptionally(ex -> {
+                    log.error("初始化过程中发生异常，正在回退操作...", ex);
+
+                    // 回退操作：清理已生成的文件
+                    FileUtils.delAllFile(DATA_SOURCE_PATH);
+                    FileUtils.delAllFile(EXPORT_PATH.formatted("").replace("%s", ""));
+                    FileUtils.deleteFile(LAMA_PATH);
+                    FileUtils.deleteFile(INDEX_PATH);
+                    FileUtils.deleteFile("./data/keys.json");
+
+                    log.error("回退操作完成，程序即将退出。");
+                    System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
+                    return null;
+                });
     }
 
     public static void initWarframeStatus() {
@@ -279,8 +309,8 @@ public class WarframeDataSource {
         return flag;
     }
 
-    public static void severExportFiles() {
-        severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
+    public static Boolean severExportFiles() {
+        return severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
     }
 
     /**
@@ -291,11 +321,12 @@ public class WarframeDataSource {
      * @param outPath      解压文件保存路径
      * @param exportPath   索引数据保存路径 ./data/export/%s
      */
-    private static void severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
+    private static Boolean severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
         Boolean files = getExportLZMAFiles(languagesKey, path);
         if (!files) {
-            return;
+            return false;
         }
+        Boolean falg = true;
         if (ZipUtils.unLzma(path, outPath)) {
             List<String> keys = FileUtils.readFileToList(outPath);
             compareTheHashAndSave(keys);
@@ -303,9 +334,10 @@ public class WarframeDataSource {
                 if (key.contains("ExportRecipes") || key.contains("ExportFusionBundles")) {
                     continue;
                 }
-                getExportFiles(key, exportPath.formatted(StringUtils.substring(key, 0, key.indexOf("!"))));
+                falg = getExportFiles(key, exportPath.formatted(StringUtils.substring(key, 0, key.indexOf("!"))));
             }
         }
+        return falg;
     }
 
     /**
