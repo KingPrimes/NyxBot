@@ -6,12 +6,12 @@ import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
-import com.nyx.bot.modules.warframe.entity.exprot.Nightwave;
+import com.nyx.bot.modules.warframe.entity.exprot.NightWave;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.NightwaveRepository;
+import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
@@ -51,7 +51,7 @@ public class TestInitData {
     NodesRepository nodesRepository;
 
     @Resource
-    NightwaveRepository nightwaveRepository;
+    NightWaveRepository nightwaveRepository;
 
     @Resource
     RewardPoolRepository rewardPoolRepository;
@@ -107,7 +107,7 @@ public class TestInitData {
 
     @Test
     void testInitNightwave() throws FileNotFoundException {
-        List<Nightwave> javaList = JSON.parseObject(new FileInputStream("./data/export/ExportSortieRewards_zh.json")).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(Nightwave.class);
+        List<NightWave> javaList = JSON.parseObject(new FileInputStream("./data/export/ExportSortieRewards_zh.json")).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(NightWave.class);
         nightwaveRepository.saveAll(javaList);
     }
 

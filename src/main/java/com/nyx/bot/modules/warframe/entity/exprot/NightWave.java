@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table
-public class Nightwave {
+public class NightWave {
     @Id
     @NotEmpty(message = "unique_name.not.empty")
     @JsonProperty("uniqueName")
