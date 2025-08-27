@@ -9,10 +9,12 @@ import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.modules.warframe.entity.*;
+import com.nyx.bot.modules.warframe.entity.exprot.NightWave;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
 import com.nyx.bot.modules.warframe.repo.*;
+import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
@@ -59,16 +61,14 @@ public class WarframeDataSource {
         log.info("开始初始化数据！");
 
         // 1. 首先执行cloneDataSource
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource)
-                .thenAccept(flag -> {
+        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
                     if (flag) {
                         log.error("初始化数据模板，失败！请检查网络环境");
                         throw new RuntimeException("克隆数据模板失败");
                     }
                 })
                 // 使用thenCompose确保severExportFiles在cloneDataSource完成后执行
-                .thenCompose(ignore -> CompletableFuture.supplyAsync(WarframeDataSource::severExportFiles))
-                .thenAccept(flag -> {
+                .thenCompose(ignore -> CompletableFuture.supplyAsync(WarframeDataSource::severExportFiles)).thenAccept(flag -> {
                     if (!flag) {
                         log.error("获取导出数据文件失败！请检查网络环境");
                         throw new RuntimeException("获取导出数据文件失败");
@@ -80,26 +80,27 @@ public class WarframeDataSource {
                 .thenRunAsync(() -> {
                     CompletableFuture.allOf(
 
-                            CompletableFuture.runAsync(WarframeDataSource::getAlias),
-                            CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
-                            CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
-                            CompletableFuture.runAsync(WarframeDataSource::initTranslation),
-                            CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
-                            CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
+                                    CompletableFuture.runAsync(WarframeDataSource::getAlias),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
+                                    CompletableFuture.runAsync(WarframeDataSource::initTranslation),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
 
 
-                            CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
-                            CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
-                            CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
-                            CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
-                            CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
+                                    CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
+                                    CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
+                                    CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
+                                    CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
 
 
-                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
-                            CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
-                            CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
-                            CompletableFuture.runAsync(WarframeDataSource::getRelics)
-                    ).join();
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
+                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
+                                    CompletableFuture.runAsync(WarframeDataSource::getRelics))
+                            .join();
                 })
                 // 所有任务完成后输出信息
                 .thenRun(() -> log.info("数据初始化完成！"))
@@ -181,10 +182,7 @@ public class WarframeDataSource {
 
         Map<String, Alias> uniqueTranslations = createMap(aliasList, Alias::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<Alias> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(Alias::new)
-                .toList();
+        List<Alias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Alias::new).toList();
 
         log.info("总计更新 Warframe.Alias {} 数据！", aliasR.saveAll(list).size());
 
@@ -202,10 +200,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTion> uniqueTranslations = createMap(rivenTions, RivenTion::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTion> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTion::new)
-                .toList();
+        List<RivenTion> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTion::new).toList();
 
         log.info("总计更新 Warframe.RivenTion {} 数据！", records.saveAll(list).size());
         return list.size();
@@ -222,10 +217,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTionAlias> uniqueTranslations = createMap(rivenTionAliases, RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTionAlias> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTionAlias::new)
-                .toList();
+        List<RivenTionAlias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTionAlias::new).toList();
 
         log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", repository.saveAll(list).size());
         return list.size();
@@ -242,10 +234,7 @@ public class WarframeDataSource {
 
         Map<String, Translation> uniqueTranslations = createMap(translations, Translation::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<Translation> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(Translation::new)
-                .toList();
+        List<Translation> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Translation::new).toList();
         log.info("总计更新 Warframe.Translation {} 数据！", t.saveAll(list).size());
         return list.size();
     }
@@ -261,10 +250,7 @@ public class WarframeDataSource {
 
         Map<String, RivenAnalyseTrend> uniqueTranslations = createMap(translations, RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenAnalyseTrend> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenAnalyseTrend::new)
-                .toList();
+        List<RivenAnalyseTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenAnalyseTrend::new).toList();
 
         log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r.saveAll(list).size());
 
@@ -281,10 +267,7 @@ public class WarframeDataSource {
 
         Map<String, RivenTrend> uniqueTranslations = createMap(rt, RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
 
-        List<RivenTrend> list = uniqueTranslations.values().stream()
-                .filter(item -> !allMap.containsKey(item.getEquation()))
-                .map(RivenTrend::new)
-                .toList();
+        List<RivenTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTrend::new).toList();
 
         log.info("总计更新 Warframe.RivenTrend {} 数据！", r.saveAll(list).size());
 
@@ -364,13 +347,9 @@ public class WarframeDataSource {
             throw new RuntimeException(e);
         }
         return object.getList(key, StateTranslation.class).stream().filter(s -> !s.getName().isEmpty()).peek(s -> {
-                    s.setType(StateTypeEnum.RESOURCES);
-                    Arrays.stream(StateTypeEnum.values())
-                            .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
-                            .findFirst()
-                            .ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
-                })
-                .toList();
+            s.setType(StateTypeEnum.RESOURCES);
+            Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
+        }).toList();
     }
 
     /**
@@ -396,19 +375,11 @@ public class WarframeDataSource {
      */
     static Map<String, String> compareTheHashAndSave(List<String> keys) {
         String keysHashPath = "./data/keys.json";
-        Map<String, String> collect = keys.stream()
-                .map(key -> key.split("!", 2))
-                .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
             Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
-            return collect.entrySet().stream()
-                    .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue
-                    ));
+            return collect.entrySet().stream().filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (FileNotFoundException e) {
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
             return collect;
@@ -443,21 +414,27 @@ public class WarframeDataSource {
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
         str.saveAll(stateTranslationList);
         try {
-            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class)
-                    .stream()
-                    .peek(s -> {
-                        s.setType(StateTypeEnum.RESOURCES);
-                        Arrays.stream(StateTypeEnum.values())
-                                .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
-                                .findFirst()
-                                .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
-                    })
-                    .toList();
+            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class).stream().peek(s -> {
+                s.setType(StateTypeEnum.RESOURCES);
+                Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+            }).toList();
             str.saveAll(javaList);
         } catch (FileNotFoundException e) {
             log.error("state_translation.json文件不存在");
         }
         log.debug("初始化Lost翻译完成");
+    }
+
+    void initNightWave() {
+        log.debug("开始初始化  NightWave 数据！");
+        List<NightWave> javaList = null;
+        try {
+            javaList = JSON.parseObject(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json"))).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(NightWave.class);
+            int size = SpringUtils.getBean(NightWaveRepository.class).saveAll(javaList).size();
+            log.debug("初始化 NightWave 数据完成，共{}条", size);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     void initNodes() {

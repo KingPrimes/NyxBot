@@ -7,7 +7,7 @@ import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.NightwaveRepository;
+import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.modules.warframe.res.enums.SyndicateEnum;
@@ -28,7 +28,7 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
+@SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Slf4j
 public class TestApi {
 
@@ -41,7 +41,7 @@ public class TestApi {
     NodesRepository nodesRepository;
 
     @Resource
-    NightwaveRepository nightwaveRepository;
+    NightWaveRepository nightwaveRepository;
 
     FileInputStream state = new FileInputStream("./data/state8.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
