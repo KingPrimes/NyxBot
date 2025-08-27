@@ -11,7 +11,6 @@ import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.utils.ListUtils;
 import com.nyx.bot.utils.StringUtils;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +37,12 @@ public class RelicsImportUtil {
 
     private final StateTranslationRepository stateTranslationRepository;
     private final RelicsRepository relicsRepository;
-    private final EntityManager entityManager;
 
     // 构造器注入依赖
     public RelicsImportUtil(StateTranslationRepository stateTranslationRepo,
-                            RelicsRepository relicsRepo,
-                            EntityManager entityMgr) {
+                            RelicsRepository relicsRepo) {
         this.stateTranslationRepository = stateTranslationRepo;
         this.relicsRepository = relicsRepo;
-        this.entityManager = entityMgr;
     }
 
     /**
@@ -254,10 +250,10 @@ public class RelicsImportUtil {
             item.put("uniqueName", rewardName);
             String name = StringUtils.getLastValueAfterSlash(rewardName);
             name = StringUtils.splitCamelCase(name)
-                    .replace("Blueprint","蓝图")
-                    .replace("Systems","系统")
-                    .replace("Chassis","机体")
-                    .replace("Helmet","头部神经光元")
+                    .replace("Blueprint", "蓝图")
+                    .replace("Systems", "系统")
+                    .replace("Chassis", "机体")
+                    .replace("Helmet", "头部神经光元")
             ;
             item.put("name", name); // 留空待翻译
             item.put("description", ""); // 留空待翻译
@@ -309,8 +305,6 @@ public class RelicsImportUtil {
         for (int i = 0; i < batches.size(); i++) {
             List<Relics> batch = batches.get(i);
             relicsRepository.saveAll(batch);
-            entityManager.flush();
-            entityManager.clear();
             log.info("完成第{}批插入，处理{}条记录", i + 1, batch.size());
         }
     }

@@ -75,7 +75,7 @@ public class TestInitData {
     @Transactional
     void testInitRelics() {
         Long start = System.currentTimeMillis();
-        RelicsImportUtil util = new RelicsImportUtil(str, relicsRepository, entityManager);
+        RelicsImportUtil util = new RelicsImportUtil(str, relicsRepository);
         Integer i1 = util.importRelicsData("./data/export/ExportRelicArcane_zh.json");
         log.info("已导入{}条数据", i1);
         Long end = System.currentTimeMillis();
@@ -136,19 +136,19 @@ public class TestInitData {
     @Test
     void initStateTranslation() throws FileNotFoundException {
         List<StateTranslation> stateTranslationList = new ArrayList<>();
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportFlavour_zh.json", "ExportFlavour", StateTypeEnum.ALL));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportGear_zh.json", "ExportGear", StateTypeEnum.GEAR));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportKeys_zh.json", "ExportKeys", StateTypeEnum.KEYS));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportRelicArcane_zh.json", "ExportRelicArcane", StateTypeEnum.ALL));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportResources_zh.json", "ExportResources", StateTypeEnum.RESOURCES));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSentinels_zh.json", "ExportSentinels", StateTypeEnum.SENTINELS));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSortieRewards_zh.json", "ExportOther", StateTypeEnum.OTHER));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportUpgrades_zh.json", "ExportUpgrades", StateTypeEnum.MODS));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWarframes_zh.json", "ExportWarframes", StateTypeEnum.WARFRAMES));
-//        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWeapons_zh.json", "ExportWeapons", StateTypeEnum.WEAPONS));
-        //FileUtils.writeFile("./data/st.json", JSON.toJSONString(stateTranslationList));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportFlavour_zh.json", "ExportFlavour", StateTypeEnum.ALL));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportGear_zh.json", "ExportGear", StateTypeEnum.GEAR));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportKeys_zh.json", "ExportKeys", StateTypeEnum.KEYS));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportRelicArcane_zh.json", "ExportRelicArcane", StateTypeEnum.ALL));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportResources_zh.json", "ExportResources", StateTypeEnum.RESOURCES));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSentinels_zh.json", "ExportSentinels", StateTypeEnum.SENTINELS));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportSortieRewards_zh.json", "ExportOther", StateTypeEnum.OTHER));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportUpgrades_zh.json", "ExportUpgrades", StateTypeEnum.MODS));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWarframes_zh.json", "ExportWarframes", StateTypeEnum.WARFRAMES));
+        stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportWeapons_zh.json", "ExportWeapons", StateTypeEnum.WEAPONS));
+        FileUtils.writeFile("./data/st.json", JSON.toJSONString(stateTranslationList));
         List<StateTranslation> javaList = JSON.parseArray(new FileInputStream("./data/state_translation.json")).toJavaList(StateTranslation.class)
                 .stream()
                 .peek(s -> {
