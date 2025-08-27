@@ -66,8 +66,8 @@ public class WarframeDataSource {
                         throw new RuntimeException("克隆数据模板失败");
                     }
                 })
-                // 2. cloneDataSource完成后执行severExportFiles
-                .supplyAsync(WarframeDataSource::severExportFiles)
+                // 使用thenCompose确保severExportFiles在cloneDataSource完成后执行
+                .thenCompose(ignore -> CompletableFuture.supplyAsync(WarframeDataSource::severExportFiles))
                 .thenAccept(flag -> {
                     if (!flag) {
                         log.error("获取导出数据文件失败！请检查网络环境");
@@ -75,7 +75,7 @@ public class WarframeDataSource {
                     }
                 })
                 // 3. severExportFiles完成后执行initStateTranslation
-                .thenRunAsync(() -> new WarframeDataSource().initStateTranslation())
+                .thenCompose(ignore -> CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation()))
                 // 4. 剩余任务并行执行
                 .thenRunAsync(() -> {
                     CompletableFuture.allOf(

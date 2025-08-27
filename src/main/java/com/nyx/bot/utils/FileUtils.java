@@ -182,50 +182,38 @@ public class FileUtils {
     }
 
     /**
-     * 删除指定文件夹下所有文件
+     * 删除指定文件夹下所有内容并删除该文件夹
      *
-     * @param path 路径
-     * @return 结果
+     * @param path 文件夹路径
+     * @return 是否成功删除文件夹
      */
     public static boolean delAllFile(String path) {
-        boolean flag = false;
         File file = new File(path);
+        // 路径不存在直接返回成功
         if (!file.exists()) {
-            return flag;
+            return true;
         }
+        // 不是目录返回失败
         if (!file.isDirectory()) {
-            return flag;
+            return false;
         }
-        String[] tempList = file.list();
-        File temp;
-        assert tempList != null;
-        for (String s : tempList) {
-            if (path.endsWith(File.separator)) {
-                temp = new File(path + s);
-            } else {
-                temp = new File(path + File.separator + s);
-            }
-            if (temp.isFile()) {
-                temp.delete();
-            }
-            if (temp.isDirectory()) {
-                delAllFile(path + "/" + s);// 先删除文件夹里面的文件
-                delFolder(path + "/" + s);// 再删除空文件夹
-                flag = true;
+
+        // 获取目录下所有文件/子目录
+        File[] files = file.listFiles();
+        if (files != null) {
+            for (File childFile : files) {
+                if (childFile.isFile()) {
+                    // 删除文件
+                    childFile.delete();
+                } else if (childFile.isDirectory()) {
+                    // 递归删除子目录（会删除子目录内容及本身）
+                    delAllFile(childFile.getAbsolutePath());
+                }
             }
         }
-        return flag;
-    }
 
-
-    private static void delFolder(String folderPath) {
-        try {
-            delAllFile(folderPath); // 删除完里面所有内容
-            java.io.File myFilePath = new java.io.File(folderPath);
-            myFilePath.delete(); // 删除空文件夹
-        } catch (Exception ignored) {
-
-        }
+        // 最后删除当前空文件夹
+        return file.delete();
     }
 
 
