@@ -96,7 +96,7 @@ server:
   shutdown: graceful
 logging:
   level:
-    com.nyx.bot: DEBUG
+    com.nyx.bot: #{debug ? 'DEBUG' : 'INFO'}
     com.mikuac.shiro: INFO
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF

@@ -19,12 +19,34 @@ public class TimeUtils {
         return sb.toString().trim();
     }
 
+    public static long timeDeltaToMinutes(long startMillis, long endMillis, String timezone) {
+        // 验证时区是否有效，如果无效则使用默认时区
+        if (!TimeZoneUtil.isValidTimeZone(timezone)) {
+            timezone = TimeZoneUtil.getEffectiveTimeZone();
+        }
+
+        // 计算时间差
+        long deltaMillis = Math.abs(endMillis - startMillis);
+        long seconds = deltaMillis / 1000;
+        seconds %= (24 * 3600);
+        seconds %= 3600;
+        return seconds / 60;
+    }
+
+    public static long timeDeltaToMinutes(long startMillis, long endMillis) {
+        return timeDeltaToMinutes(startMillis, endMillis, TimeZoneUtil.getEffectiveTimeZone());
+    }
+
+    public static long timeDeltaToMinutes(long startMillis) {
+        return timeDeltaToMinutes(startMillis, System.currentTimeMillis());
+    }
+
     /**
      * 计算两个时间戳之间的差异，并根据时区返回格式化的字符串结果
      *
      * @param startMillis 起始时间戳（毫秒）
-     * @param endMillis 结束时间戳（毫秒）
-     * @param timezone 时区ID
+     * @param endMillis   结束时间戳（毫秒）
+     * @param timezone    时区ID
      * @return 格式化的时间差字符串
      */
     public static String timeDeltaToString(long startMillis, long endMillis, String timezone) {
@@ -44,7 +66,7 @@ public class TimeUtils {
      * 计算两个时间戳之间的差异，使用系统默认时区
      *
      * @param startMillis 起始时间戳（毫秒）
-     * @param endMillis 结束时间戳（毫秒）
+     * @param endMillis   结束时间戳（毫秒）
      * @return 格式化的时间差字符串
      */
     public static String timeDeltaToString(long startMillis, long endMillis) {
@@ -54,7 +76,7 @@ public class TimeUtils {
     /**
      * 计算指定时间戳与当前时间的差异
      *
-     * @param millis 时间戳（毫秒）
+     * @param millis   时间戳（毫秒）
      * @param timezone 时区ID
      * @return 格式化的时间差字符串
      */
