@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
@@ -12,11 +13,10 @@ import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.modules.warframe.res.enums.SyndicateEnum;
 import com.nyx.bot.modules.warframe.res.worldstate.*;
+import com.nyx.bot.modules.warframe.service.MissionSubscribeService;
 import com.nyx.bot.modules.warframe.service.TranslationService;
 import com.nyx.bot.modules.warframe.utils.SyndicateMissionsUtils;
-import com.nyx.bot.utils.FileUtils;
-import com.nyx.bot.utils.StringUtils;
-import com.nyx.bot.utils.ZipUtils;
+import com.nyx.bot.utils.*;
 import com.nyx.bot.utils.http.HttpUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class TestApi {
     @Resource
     NightWaveRepository nightwaveRepository;
 
-    FileInputStream state = new FileInputStream("./data/state8.json");
+    FileInputStream state = new FileInputStream("./data/state10.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
@@ -79,7 +79,19 @@ public class TestApi {
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state8.json", body.getBody());
+            FileUtils.writeFile("./data/state10.json", body.getBody());
+        }
+    }
+
+    @Test
+    void testCetusCycle() {
+        CetusCycle cetusCycle = worldState.getCetusCycle();
+        log.info(JSON.toJSONString(cetusCycle));
+        long minutes = TimeUtils.timeDeltaToMinutes(cetusCycle.getExpiry().getEpochSecond() * 1000);
+        log.info("{}", TimeUtils.timeDeltaToString(cetusCycle.getExpiry().getEpochSecond() * 1000 - System.currentTimeMillis()));
+        log.info("{}", minutes);
+        if (minutes <= 18) {
+            SpringUtils.getBean(MissionSubscribeService.class).handleUpdate(SubscribeEnums.CETUS_CYCLE, worldState);
         }
     }
 
