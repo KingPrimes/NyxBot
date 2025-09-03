@@ -1,10 +1,10 @@
 package com.nyx.bot.modules.warframe.utils;
 
+import com.nyx.bot.enums.SubscribeEnums;
+import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.utils.SpringUtils;
@@ -47,7 +47,7 @@ public class WarframeSubscribeCheck {
         SubscribeParams params = new SubscribeParams();
 
         try {
-            log.info("订阅 参数解析：{}", raw);
+            log.debug("订阅 参数解析：{}", raw);
             // 必填参数：订阅类型
             if (parts.length < 1) throw new IllegalArgumentException();
             params.type = parseSubscribeType(parts[0]);

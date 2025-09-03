@@ -1,9 +1,9 @@
 package com.nyx.bot.modules.warframe.utils;
 
-import com.nyx.bot.modules.warframe.entity.RivenTrend;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
+import com.nyx.bot.modules.warframe.entity.RivenTrend;
 import com.nyx.bot.modules.warframe.repo.RivenTrendRepository;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
