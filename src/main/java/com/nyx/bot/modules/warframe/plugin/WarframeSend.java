@@ -1,5 +1,6 @@
 package com.nyx.bot.modules.warframe.plugin;
 
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.common.core.OneBotLogInfoData;
@@ -9,7 +10,6 @@ import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 import org.slf4j.Logger;
 
 public class WarframeSend {
@@ -20,7 +20,7 @@ public class WarframeSend {
                 bot, event);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             log.debug("群：{} 用户:{} 指令 {} 执行成功", event.getGroupId(), event.getUserId(), code.getComm());
             return;
         }
@@ -35,7 +35,7 @@ public class WarframeSend {
                 getLogInfoData(bot, event, code));
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             log.debug("群：{} 用户:{} 指令 {} 执行成功", event.getGroupId(), event.getUserId(), code.getComm());
         } else {
             sendErrorMsg(bot, event, body);
@@ -50,7 +50,7 @@ public class WarframeSend {
                 data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             log.debug("群：{} 用户:{} 指令 {} 执行成功", event.getGroupId(), event.getUserId(), data.getCodes().getComm());
         } else {
             sendErrorMsg(bot, event, body);

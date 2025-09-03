@@ -1,17 +1,17 @@
 package com.nyx.bot.modules.warframe.service.subscribe;
 
 import com.alibaba.fastjson2.JSON;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.common.core.OneBotLogInfoData;
-import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
-import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
+import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 
 public class SystemImage {
     /**
@@ -66,13 +66,14 @@ public class SystemImage {
 
     /**
      * 添加系统图片
-     * @param builder 消息构建器
-     * @param enums 类型
+     *
+     * @param builder   消息构建器
+     * @param enums     类型
      * @param subscribe 订阅组
-     * @param user 用户
-     * @param o 数据
+     * @param user      用户
+     * @param o         数据
      */
-    public static void addSystemImage(Msg builder, SubscribeEnums enums, MissionSubscribe subscribe, MissionSubscribeUser user, Object o) {
+    public static void addSystemImage(ArrayMsgUtils builder, SubscribeEnums enums, MissionSubscribe subscribe, MissionSubscribeUser user, Object o) {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post(
                 gestural(enums), new OneBotLogInfoData(
                         subscribe.getSubBotUid(),
@@ -85,7 +86,7 @@ public class SystemImage {
                         o != null ? JSON.toJSONString(o) : "")
         );
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            builder.imgBase64(body.getFile());
+            builder.img(body.getFile());
         }
     }
 }

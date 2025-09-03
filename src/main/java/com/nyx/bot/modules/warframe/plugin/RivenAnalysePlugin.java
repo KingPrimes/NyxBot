@@ -3,6 +3,7 @@ package com.nyx.bot.modules.warframe.plugin;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -13,7 +14,6 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.utils.RivenAttributeCompute;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ public class RivenAnalysePlugin {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postRivenAnalyseImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
         } else {
             WarframeSend.sendErrorMsg(bot, event, body);
         }
