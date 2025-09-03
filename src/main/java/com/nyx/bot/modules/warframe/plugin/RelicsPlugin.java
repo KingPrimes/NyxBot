@@ -23,6 +23,10 @@ public class RelicsPlugin {
     public void relics(Bot bot, AnyMessageEvent event) {
         OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_RELICS_PLUGIN);
         data.setData(event.getRawMessage().replaceAll(CommandConstants.WARFRAME_RELICS_CMD, "").trim());
+        if (data.getData().toLowerCase().contains("forma")) {
+            bot.sendMsg(event, "遗物查询不支持Forma类遗物", false);
+            return;
+        }
         WarframeSend.sendForData(bot, event, "postRelicsImage", data, log);
     }
 }
