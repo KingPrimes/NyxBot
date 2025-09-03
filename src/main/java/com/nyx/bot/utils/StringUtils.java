@@ -742,7 +742,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     public static String removeMatcher(String str) {
-        return str.replace("^", "").replace("$", "").trim();
+        return str.replace("^", "").replace("$", "").replace(".*?", "").trim();
     }
 
     /**
