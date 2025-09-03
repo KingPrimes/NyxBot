@@ -3,6 +3,7 @@ package com.nyx.bot.modules.warframe.plugin;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -12,7 +13,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribeCheck;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +36,7 @@ public class WarframeTaskSubscribePlugin {
             OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_SUBSCRIBE);
             HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postSubscribeHelp", data);
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             return;
         }
 
@@ -63,7 +63,7 @@ public class WarframeTaskSubscribePlugin {
             OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_UNSUBSCRIBE);
             HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postSubscribeHelp", data);
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             return;
         }
 

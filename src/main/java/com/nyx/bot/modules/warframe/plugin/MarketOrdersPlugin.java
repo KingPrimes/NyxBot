@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -15,7 +16,6 @@ import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -81,7 +81,7 @@ public class MarketOrdersPlugin {
                 data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
             log.debug("用户:{} 指令 {} 执行成功", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD);
         } else {
             WarframeSend.sendErrorMsg(bot, event, body);

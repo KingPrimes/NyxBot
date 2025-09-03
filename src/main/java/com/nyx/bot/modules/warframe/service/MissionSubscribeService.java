@@ -1,18 +1,18 @@
 package com.nyx.bot.modules.warframe.service;
 
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
+import com.nyx.bot.common.exception.ServiceException;
+import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.common.exception.ServiceException;
-import com.nyx.bot.modules.warframe.service.subscribe.*;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
 import com.nyx.bot.modules.warframe.res.WorldState;
-import com.nyx.bot.utils.onebot.Msg;
+import com.nyx.bot.modules.warframe.service.subscribe.*;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +110,9 @@ public class MissionSubscribeService {
      * @param newData 新数据
      */
     public void handleUpdate(SubscribeEnums type, WorldState newData) {
+        log.debug("处理更新 [type:{}]", type.getNAME());
         List<MissionSubscribe> subscriptions = subscribeRepository.findSubscriptions(type);
+        log.debug("订阅列表 [subscriptions:{}]", subscriptions);
         subscriptions.parallelStream().forEach(subscribe -> subscribe.getUsers().stream()
                 .filter(user -> isUserSubscribed(user, type))
                 .forEach(user -> CompletableFuture.runAsync(() ->
@@ -143,13 +145,15 @@ public class MissionSubscribeService {
                                      SubscribeEnums type,
                                      WorldState data) {
         try {
+            log.debug("构建消息 [subscribe:{}] [user:{}] [type:{}]", subscribe.getSubGroup(), user.getUserId(), type.getNAME());
             Bot bot = botContainer.robots.get(subscribe.getSubBotUid());
             if (bot == null) return;
-            Msg msg = Msg.builder()
+            ArrayMsgUtils msg = ArrayMsgUtils.builder()
                     .at(user.getUserId())
                     .text("您订阅的 " + type.getNAME() + " 已更新！\n");
             appendContentByType(msg, type, data, subscribe, user);
-            bot.sendGroupMsg(subscribe.getSubGroup(), msg.build(), false);
+            log.debug("发送消息 [subscribe:{}] [user:{}] [type:{}] [Msg:{}]", subscribe.getSubGroup(), user.getUserId(), type.getNAME(), msg.build());
+            bot.sendGroupMsg(subscribe.getSubGroup(), msg.build(), true);
         } catch (Exception e) {
             log.error("通知发送失败 [group:{}] [user:{}] [type:{}]",
                     subscribe.getSubGroup(), user.getUserId(), type, e);
@@ -165,7 +169,7 @@ public class MissionSubscribeService {
      * @param subscribe 订阅组
      * @param user      用户
      */
-    private void appendContentByType(Msg builder,
+    private void appendContentByType(ArrayMsgUtils builder,
                                      SubscribeEnums type,
                                      WorldState data,
                                      MissionSubscribe subscribe,
@@ -174,12 +178,12 @@ public class MissionSubscribeService {
         if (appender != null) {
             appender.appendContent(builder, type, data, subscribe, user);
         } else {
-           new MessageAppender(){
-               @Override
-               public void appendContent(Msg builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
-                   MessageAppender.super.appendContent(builder, enums, data, subscribe, user);
-               }
-           };
+            new MessageAppender() {
+                @Override
+                public void appendContent(ArrayMsgUtils builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
+                    MessageAppender.super.appendContent(builder, enums, data, subscribe, user);
+                }
+            };
         }
     }
 }

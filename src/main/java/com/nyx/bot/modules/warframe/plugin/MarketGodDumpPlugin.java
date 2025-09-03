@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.common.core.OneBotLogInfoData;
@@ -14,7 +15,6 @@ import com.nyx.bot.modules.warframe.res.Ducats;
 import com.nyx.bot.modules.warframe.utils.MarketUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +42,7 @@ public class MarketGodDumpPlugin {
         HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postMarketDucatsImage", data);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
         } else {
             WarframeSend.sendErrorMsg(bot, event, body);
         }
