@@ -1,4 +1,4 @@
-package com.nyx.bot.plugin.admin;
+package com.nyx.bot.modules.admin.utils;
 
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-public class UpdatePlugin {
+public class UpdateUtils {
 
     /**
      * 执行更新内容

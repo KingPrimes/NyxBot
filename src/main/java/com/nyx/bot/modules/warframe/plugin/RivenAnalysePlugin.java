@@ -3,19 +3,20 @@ package com.nyx.bot.modules.warframe.plugin;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
-import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.common.core.OneBotLogInfoData;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendModel;
 import com.nyx.bot.modules.warframe.utils.RivenAttributeCompute;
-import com.nyx.bot.utils.http.HttpUtils;
-import com.nyx.bot.utils.onebot.ImageUrlUtils;
+import com.nyx.bot.utils.HtmlToImage;
+import com.nyx.bot.utils.SendUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ import java.util.List;
 public class RivenAnalysePlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_ANALYSE_CMD)
-    public void rivenAnalyse(Bot bot, AnyMessageEvent event) {
+    public void rivenAnalyse(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         List<String> msgImgUrlList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
         if (msgImgUrlList.isEmpty()) {
             bot.sendMsg(event, "请在指令后方添加上您要查询的紫卡图片!", false);
@@ -38,14 +39,15 @@ public class RivenAnalysePlugin {
             bot.sendMsg(event, "查询紫卡图片一次性不可大于5张", false);
             return;
         }
-        OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_RIVEN_ANALYSE);
-        data.setData(RivenAttributeCompute.ocrRivenCompute(event));
-        HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postRivenAnalyseImage", data);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            bot.sendMsg(event,
-                    ArrayMsgUtils.builder().img(body.getFile()).build(), false);
-        } else {
-            WarframeSend.sendErrorMsg(bot, event, body);
-        }
+        byte[] bytes = postRivenAnalyseImage(RivenAttributeCompute.ocrRivenCompute(event));
+        SendUtils.send(bot, event, bytes, Codes.WARFRAME_RIVEN_ANALYSE, log);
+    }
+
+    private byte[] postRivenAnalyseImage(List<List<RivenAnalyseTrendModel>> lists) throws DataNotInfoException, HtmlToImageException {
+        return HtmlToImage.generateImage("html/rivenAnalyseTrend", () -> {
+            ModelMap modelMap = new ModelMap();
+            modelMap.put("data", lists);
+            return modelMap;
+        }).toByteArray();
     }
 }

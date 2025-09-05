@@ -1,10 +1,12 @@
 package com.nyx.bot.modules.warframe.plugin;
+
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.CommandConstants;
+import com.nyx.bot.utils.SendUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,6 @@ public class MarketSistersPlugin {
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SISTERS_CMD)
     public void marketSisters(Bot bot, AnyMessageEvent event) {
         //TODO 实现查询 Market Sisters 市场拍卖
-        WarframeSend.not(bot, event);
+        SendUtils.not(bot, event);
     }
 }
