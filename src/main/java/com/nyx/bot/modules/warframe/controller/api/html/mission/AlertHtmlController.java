@@ -33,22 +33,6 @@ public class AlertHtmlController {
         return "html/alerts";
     }
 
-//    private void getAlerts(List<GlobalStates.Alerts> alerts) {
-//        alerts.forEach(alert -> {
-//            GlobalStates.Alerts.Mission mission = alert.getMission();
-//            mission.setNode(mission.getNode().
-//                    replace(
-//                            StringUtils.quStr(mission.getNode()),
-//                            trans.enToZh(StringUtils.quStr(mission.getNode())
-//                            )
-//                    ));
-//            mission.setType(trans.enToZh(mission.getType()));
-//            GlobalStates.Alerts.Mission.Reward reward = mission.getReward();
-//            reward.getCountedItems().forEach(r -> r.setKey(trans.enToZh(r.getKey())));
-//            alert.setEta(DateUtils.getDiff((alert.getExpiry()), new Date(), true));
-//        });
-//    }
-
     @PostMapping("/postSubscribeAlertsHtml")
     public String postSubscribeFissuresHtml(Model model, @RequestBody List<Alert> alerts) {
         //getAlerts(alerts);

@@ -6,6 +6,7 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.CommandConstants;
+import com.nyx.bot.utils.SendUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,6 @@ public class TranslationPlugin {
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_TRA_CMD)
     public void translation(Bot bot, AnyMessageEvent event) {
         //TODO 实现翻译数据
-        WarframeSend.not(bot, event);
+        SendUtils.not(bot, event);
     }
 }

@@ -73,6 +73,11 @@ public class ArbitrationCache {
                 .filter(ar -> ar.getExpiry().getTime() - milli > 0)
                 //判断两个时间相差的毫秒数，并取最小值的元素
                 .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
+                .stream().peek(ar -> {
+                    ar.setEtc(DateUtils.getDiff((ar.getExpiry()), new Date(), true));
+                    ar.setEnemy(ar.getEnemy().replace("Infestation", "Infested"));
+                })
+                .findFirst()
                 .orElse(null);
         if (a == null) {
             fetchAndCacheArbitrationList();

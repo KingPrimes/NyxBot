@@ -153,7 +153,7 @@ public class MissionSubscribeService {
                     .text("您订阅的 " + type.getNAME() + " 已更新！\n");
             appendContentByType(msg, type, data, subscribe, user);
             log.debug("发送消息 [subscribe:{}] [user:{}] [type:{}] [Msg:{}]", subscribe.getSubGroup(), user.getUserId(), type.getNAME(), msg.buildCQ());
-            bot.sendGroupMsg(subscribe.getSubGroup(), msg.buildCQ(), true);
+            bot.sendGroupMsg(subscribe.getSubGroup(), msg.buildCQ(), false);
         } catch (Exception e) {
             log.error("通知发送失败 [group:{}] [user:{}] [type:{}]",
                     subscribe.getSubGroup(), user.getUserId(), type, e);

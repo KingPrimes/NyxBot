@@ -5,10 +5,22 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.nyx.bot.cache.WarframeCache;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
+import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
+import com.nyx.bot.modules.warframe.res.WorldState;
+import com.nyx.bot.modules.warframe.res.worldstate.Sortie;
+import com.nyx.bot.utils.HtmlToImage;
+import com.nyx.bot.utils.SendUtils;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
+
+import java.util.List;
 
 /**
  * 突击
@@ -17,10 +29,25 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SortiesPlugin {
+    @Resource
+    NodesRepository nodesRepository;
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SORTIES_CMD)
-    public void sortiesHandler(Bot bot, AnyMessageEvent event) {
-        WarframeSend.send(bot, event, "postAssaultImage", Codes.WARFRAME_SORTIES_PLUGIN, log);
+    public void sortiesHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+        SendUtils.send(bot, event, postAssaultImage(), Codes.WARFRAME_SORTIES_PLUGIN, log);
+    }
+
+    private byte[] postAssaultImage() throws DataNotInfoException, HtmlToImageException {
+        WorldState sgs = WarframeCache.getWarframeStatus();
+        List<Sortie> sorties = sgs.getSorties().stream()
+                .peek(s -> s.setVariants(s.getVariants().stream()
+                        .peek(v -> nodesRepository.findById(v.getNode())
+                                .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).toList())).toList();
+        return HtmlToImage.generateImage("html/assault", () -> {
+            ModelMap modelMap = new ModelMap();
+            modelMap.addAttribute("assault", sorties);
+            return modelMap;
+        }).toByteArray();
     }
 }

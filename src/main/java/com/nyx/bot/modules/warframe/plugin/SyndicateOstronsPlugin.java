@@ -5,10 +5,13 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.common.core.OneBotLogInfoData;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.res.enums.SyndicateEnum;
+import com.nyx.bot.modules.warframe.utils.SyndicateMissionsUtils;
+import com.nyx.bot.utils.SendUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +27,7 @@ public class SyndicateOstronsPlugin {
      */
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_OSTRONS_CMD)
-    public void cetusSyndicateHandler(Bot bot, AnyMessageEvent event) {
-        OneBotLogInfoData logInfoData = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_SYNDICATE_OSTRONS);
-        logInfoData.setData(SyndicateEnum.CetusSyndicate.name());
-        WarframeSend.sendForData(bot, event, "postSyndicateMissionsImage", logInfoData, log);
+    public void cetusSyndicateHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+       SendUtils.send(bot, event, SyndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.CetusSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
     }
 }

@@ -1,12 +1,17 @@
 package com.nyx.bot.modules.warframe.utils;
 
+import com.nyx.bot.cache.WarframeCache;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.res.enums.SyndicateEnum;
 import com.nyx.bot.modules.warframe.res.worldstate.SyndicateMission;
+import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ui.ModelMap;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,5 +45,14 @@ public class SyndicateMissionsUtils {
                     smr.set(sm);
                 });
         return smr.get();
+    }
+
+    public static byte[] postSyndicateEntratiImage(SyndicateEnum syndicateEnum) throws DataNotInfoException, HtmlToImageException {
+        SyndicateMission syndicateMissions = getSyndicateMissions(WarframeCache.getWarframeStatus().getSyndicateMissions(), syndicateEnum);
+        return HtmlToImage.generateImage("html/syndicateMissions", () -> {
+            ModelMap modelMap = new ModelMap();
+            modelMap.addAttribute("sm", syndicateMissions);
+            return modelMap;
+        }).toByteArray();
     }
 }

@@ -2,6 +2,7 @@ package com.nyx.bot.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.entity.Hint;
 import com.nyx.bot.repo.HintRepository;
@@ -9,6 +10,9 @@ import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.ui.ModelMap;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.simple.Graphics2DRenderer;
 
@@ -21,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
 
@@ -41,7 +46,7 @@ public class HtmlToImage {
             Graphics2DRenderer g2r = new Graphics2DRenderer(url);
             SharedContext sharedContext = g2r.getSharedContext();
             //设置图片清晰度
-            sharedContext.setDPI(72);
+            sharedContext.setDPI(150);
 
             sharedContext.setDotsPerPixel(2);
 
@@ -109,6 +114,7 @@ public class HtmlToImage {
      * @param html html 文档
      * @return 格式化之后的 html文档
      */
+    @SuppressWarnings("all")
     private static String outH(String html) {
         Hint hint = SpringUtils.getBean(HintRepository.class).randOne();
         html = html.replaceAll("<!--", "<xx>").replaceAll("-->", "</xx>");
@@ -122,23 +128,23 @@ public class HtmlToImage {
         if (!doc.getElementsByTag("w").isEmpty()) {
             html = new StringBuilder(html).replace(html.indexOf("<w>"), html.indexOf("</w>") + 4, "").toString().trim();
         }
-        html = html.replaceAll("/css/{0,}", "./css/")
-                .replaceAll("/img/{0,}", "./img/");
+        html = html.replaceAll("/css/{0,}", "./css/").replaceAll("/img/{0,}", "./img/");
         StringBuilder str = getBuilder(html, hint);
         return str.toString();
     }
 
+    @SuppressWarnings("all")
     private static StringBuilder getBuilder(String html, Hint hint) {
         StringBuilder str = new StringBuilder(html);
         if (str.indexOf("</body>") > 1) {
             if (hint != null) {
                 str.insert(str.indexOf("</body>"),
                         """
-                        <div style="width: 100%; bottom: 0; text-align: center;">
-                        Posted by:KingPrimes
-                        %s
-                        </div>
-                        """.formatted(hint.getHint())
+                                        <div style="width: 100%; bottom: 0; text-align: center;">
+                                                %s <br\\>
+                                                Posted by:KingPrimes
+                                        </div>
+                                """.formatted(hint.getHint())
                 );
             } else {
                 str.insert(str.indexOf("</body>"), """
@@ -179,6 +185,7 @@ public class HtmlToImage {
      * @param width        生成图片的宽度
      * @return 字节流
      */
+    @SuppressWarnings("all")
     private static ByteArrayOutputStream convertHtmlToImage(String htmlFilePath, int width) {
         try {
             File htmlFile = new File(htmlFilePath);
@@ -229,4 +236,59 @@ public class HtmlToImage {
         return tmpHtmlToImageByteArray(html, width);
     }
 
+    /**
+     * 通用模板图片生成方法
+     *
+     * @param templateName  Thymeleaf模板名称
+     * @param modelSupplier 模板数据提供者
+     * @return 图片字节流
+     */
+    public static ByteArrayOutputStream generateImage(String templateName, Supplier<ModelMap> modelSupplier) throws HtmlToImageException, DataNotInfoException {
+        // 通过SpringUtils获取Thymeleaf模板引擎
+        SpringTemplateEngine templateEngine = SpringUtils.getBean("customTemplateEngine");
+
+        // 获取模板数据
+        ModelMap model = modelSupplier.get();
+        if (model == null) {
+            throw new HtmlToImageException("模板数据不能为空");
+        }
+
+        // 创建Thymeleaf上下文并设置变量
+        Context context = new Context();
+        context.setVariables(model);
+        // 渲染HTML模板
+        String html = templateEngine.process(templateName, context);
+
+        // 生成图片字节流
+        return converseHtml(html);
+    }
+
+    /**
+     * 通用模板图片生成方法
+     *
+     * @param templateName Thymeleaf模板名称
+     * @param data         模板数据
+     * @param modelName    模板数据名称
+     * @return 图片字节流
+     */
+    public static byte[] generateImageBytes(String templateName, Object data, String modelName) throws HtmlToImageException, DataNotInfoException {
+        ModelMap model = new ModelMap();
+        model.put(modelName, data);
+        return generateImage(templateName, () -> model).toByteArray();
+    }
+
+    /**
+     * 直接通过HTML字符串生成图片
+     *
+     * @param html HTML字符串
+     * @return 图片流
+     */
+    private static ByteArrayOutputStream converseHtml(String html) throws HtmlToImageException {
+        if (html == null) {
+            throw new HtmlToImageException(I18nUtils.message("error.html.image"));
+        }
+        int width = getWidth(html);
+        html = outH(html);
+        return tmpHtmlToImageByteArray(html, width);
+    }
 }
