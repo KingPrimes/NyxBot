@@ -107,13 +107,14 @@ public class WarframeSubscribe {
 
                 // 夜灵平原
                 Optional.ofNullable(states.getCetusCycle()).ifPresent(cetusCycle -> CompletableFuture.runAsync(() -> {
-                    // 获取当前周期的过期时间戳（用于判断是否为新周期）
-                    long currentExpiry = old.getCetusCycle().getExpiry().getEpochSecond() * 1000;
-                    long minutes = TimeUtils.timeDeltaToMinutes(currentExpiry * 1000);
+                    // 获取当前周期的过期时间戳（使用新状态的expiry，单位：毫秒）
+                    long currentExpiry = cetusCycle.getExpiry().getEpochSecond() * 1000;
+                    // 计算剩余时间（修正：直接传入currentExpiry，无需重复*1000）
+                    long minutes = TimeUtils.timeDeltaToMinutes(currentExpiry);
                     // 条件：1. 剩余时间<=18分钟  2. 当前周期未触发过通知
                     if (minutes <= 18 && lastCetusExpiryNotified != currentExpiry) {
                         mss.handleUpdate(SubscribeEnums.CETUS_CYCLE, states);
-                        // 记录当前周期的过期时间戳，标记为已触发
+                        // 记录当前周期的过期时间戳，避免重复通知
                         lastCetusExpiryNotified = currentExpiry;
                     }
                 }));
