@@ -45,9 +45,9 @@ public class Runners {
             String password = StringUtils.getRandomString();
             // {bcrypt} 密码加密方式
             user.setPassword(new BCryptPasswordEncoder().encode(password));
-            log.info("\u001B[31m默认账号：admin 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", password);
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
+                log.info("\u001B[31m默认账号：admin 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", password);
                 userRepository.save(user);
             }
         }, AsyncBeanName.SERVICE);
