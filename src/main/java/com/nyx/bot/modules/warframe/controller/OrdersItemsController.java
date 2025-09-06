@@ -1,4 +1,4 @@
-package com.nyx.bot.modules.warframe.controller.data;
+package com.nyx.bot.modules.warframe.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.common.core.AjaxResult;
