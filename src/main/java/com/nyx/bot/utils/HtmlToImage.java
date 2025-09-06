@@ -6,7 +6,6 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.entity.Hint;
 import com.nyx.bot.repo.HintRepository;
-import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -205,35 +204,6 @@ public class HtmlToImage {
             log.error("html渲染字节流出错，文件路径：{}\n\t\t错误信息：{}", htmlFilePath, e.getMessage());
         }
         return null;
-    }
-
-    /**
-     * @param url Html Url地址
-     * @return 图片流
-     */
-    public static ByteArrayOutputStream converse(String url) throws HtmlToImageException {
-        String html = HttpUtils.sendGet(url).getBody();
-        if (html == null) {
-            throw new HtmlToImageException(I18nUtils.message("error.html.image"));
-        }
-        int width = getWidth(html);
-        html = outH(html);
-        return tmpHtmlToImageByteArray(html, width);
-
-    }
-
-    /**
-     * @param url Html Url地址
-     * @return 图片流
-     */
-    public static ByteArrayOutputStream conversePost(String url, String json) throws HtmlToImageException {
-        String html = HttpUtils.sendPost(url, json).getBody();
-        if (html == null) {
-            throw new HtmlToImageException(I18nUtils.message("error.html.image"));
-        }
-        int width = getWidth(html);
-        html = outH(html);
-        return tmpHtmlToImageByteArray(html, width);
     }
 
     /**
