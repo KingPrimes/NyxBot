@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
-import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -81,14 +80,7 @@ public class MarketOrdersPlugin {
         log.debug("用户:{} 指令 {} 执行参数 {}", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD, JSON.toJSONString(marketOrdersData));
 
         byte[] bytes = postMarketOrdersImage(marketOrdersData);
-        if (bytes.length > 0) {
-            bot.sendMsg(event,
-                    ArrayMsgUtils.builder().img(bytes).build(), false);
-            log.debug("用户:{} 指令 {} 执行成功", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD);
-        } else {
-            SendUtils.sendErrorMsg(bot, event, Codes.WARFRAME_MARKET_ORDERS_PLUGIN);
-            log.debug("用户:{} 指令 {} 执行失败", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD);
-        }
+        SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_ORDERS_PLUGIN, log);
     }
 
     private byte[] postMarketOrdersImage(MarketOrdersData data) throws DataNotInfoException, HtmlToImageException {
