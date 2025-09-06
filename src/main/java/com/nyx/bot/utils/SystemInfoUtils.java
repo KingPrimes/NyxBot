@@ -189,12 +189,17 @@ public class SystemInfoUtils {
      */
     public static String getJarVersion() {
         //return Objects.requireNonNull(JarManifest.manifestFromClasspath()).getMainAttributes().getValue("version");
-
+        String version = SystemInfoUtils.class
+                .getPackage()
+                .getImplementationVersion();
+        if (version != null && !version.isEmpty()) {
+            return version;
+        }
         // 1. 优先尝试从JAR包Manifest获取（生产环境）
         try {
             Manifest manifest = JarManifest.manifestFromClasspath();
             if (manifest != null) {
-                String version = manifest.getMainAttributes().getValue("version");
+                version = manifest.getMainAttributes().getValue("version");
                 if (version != null && !version.isEmpty()) {
                     return version;
                 }
