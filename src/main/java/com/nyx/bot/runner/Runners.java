@@ -9,10 +9,7 @@ import com.nyx.bot.modules.bot.entity.BotAdmin;
 import com.nyx.bot.modules.bot.repo.BotAdminRepository;
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
-import com.nyx.bot.utils.AsyncUtils;
-import com.nyx.bot.utils.DateUtils;
-import com.nyx.bot.utils.IoUtils;
-import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,8 +42,10 @@ public class Runners {
             SysUser user = new SysUser();
             user.setUserId(1L);
             user.setUserName("admin");
+            String password = StringUtils.getRandomString();
             // {bcrypt} 密码加密方式
-            user.setPassword(new BCryptPasswordEncoder().encode("admin123"));
+            user.setPassword(new BCryptPasswordEncoder().encode(password));
+            log.info("\u001B[31m默认账号：admin 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", password);
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
                 userRepository.save(user);
