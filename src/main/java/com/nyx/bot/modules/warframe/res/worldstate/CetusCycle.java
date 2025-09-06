@@ -25,6 +25,7 @@ public class CetusCycle {
     Instant expiry;
     Instant activation;
     String state;
+    String cycle;
     String timeLeft;
 
     /**
@@ -45,11 +46,13 @@ public class CetusCycle {
         long minutesCof = 1000 * 60;
         Instant expiry = now.plusMillis(Math.round((double) millisLeft / minutesCof) * minutesCof);
         String state = dayTime ? "白昼" : "夜晚";
+        String cycle = dayTime ? "day" : "night";
 
         this.setActivation(expiry.minusMillis(MAXIMUMS.get(state)));
         this.setExpiry(expiry);
         this.setIsDay(dayTime);
         this.setState(state);
+        this.setCycle(cycle);
         this.setTimeLeft(TimeUtils.timeDeltaToString(millisLeft));
     }
 

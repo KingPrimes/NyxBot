@@ -28,10 +28,10 @@
      ```
     - 以上链接为默认配置，若你使用了其他端口或域名，请自行修改
     - 你可以在web页面的配置中修改链接地址
-      1. 在 web页面配置中选择 **配置 -> 配置服务**
-      2. 在弹出的窗口中配置**端口号**与**地址**
-      3. 点击确定按钮
-      4. 之后重启NyxBot程序即可
+        1. 在 web页面配置中选择 **配置 -> 配置服务**
+        2. 在弹出的窗口中配置**端口号**与**地址**
+        3. 点击确定按钮
+        4. 之后重启NyxBot程序即可
 3. 设置消息上报格式为 **CQ码**
 4. 安装[Java21 Oracle](https://www.oracle.com/java/technologies/downloads/#java21)
    或 [Open Jdk 21](https://www.openlogic.com/openjdk-downloads)
@@ -44,20 +44,20 @@
    
    java -jar NyxBot.jar --server.port = 8080
    ```
-   
+
 8. [详细部署文档](https://kingprimes.top/posts/d99b802/)
 9. [云服务器推荐](#推广链接)
 
 # 配置
 
 1. 正常启动程序后会自动打开浏览器并跳转到 [配置页面 http://localhost:8080](http://localhost:8080)
-2. 在web页面登录 默认账号: **admin** 密码：**admin123**
+2. 在web页面登录 **初始账号密码请查看控制台输出日志**
 3. 默认是配置是白名单模式，请自行添加要使用机器人的群，**若不添加则发送任何指令机器人无响应**
 
-   - 在web中选择 **配置 -> 黑白名单 -> 群白名单**
-   - 点击添加按钮,则会弹出添加群的窗口
-   - 选择要添加的群,点击确定按钮即可
-   - 也可以直接切换成黑名单
+    - 在web中选择 **配置 -> 黑白名单 -> 群白名单**
+    - 点击添加按钮,则会弹出添加群的窗口
+    - 选择要添加的群,点击确定按钮即可
+    - 也可以直接切换成黑名单
 
 4. 所有的配置都可以在web页面进行修改
 
@@ -77,6 +77,7 @@ OneBot协议客户端
 
 ---
 
+# [开发文档](./开发文档.md)
 
 # 推广链接
 
@@ -90,13 +91,11 @@ OneBot协议客户端
 
 ### [腾讯云-618盛典](https://curl.qcloud.com/TyfmLYii)
 
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/KingPrimes/NyxBot.svg)](https://starchart.cc/KingPrimes/NyxBot)
 
 # 鸣谢
 
-- [warframe-status](https://github.com/WFCD/warframe-status) 开放的Warframe状态查询接口
 - [Shiro](https://github.com/MisakaTAT/Shiro) OneBot 协议Sdk
 - [RapidOcr-Java](https://github.com/MyMonsterCat/RapidOcr-Java) OCR 文字识别

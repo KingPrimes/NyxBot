@@ -3,18 +3,18 @@ package com.nyx.bot.modules.warframe.plugin;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.common.core.OneBotLogInfoData;
-import com.nyx.bot.enums.Codes;
+import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribeCheck;
-import com.nyx.bot.utils.http.HttpUtils;
-import com.nyx.bot.utils.onebot.ImageUrlUtils;
-import com.nyx.bot.utils.onebot.Msg;
+import com.nyx.bot.utils.HtmlToImage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
 
 /**
  * Warframe 任务订阅
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class WarframeTaskSubscribePlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD)
-    public void subscribe(Bot bot, AnyMessageEvent event) {
+    public void subscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
@@ -33,10 +33,8 @@ public class WarframeTaskSubscribePlugin {
         String str = event.getRawMessage().replace("订阅", "").replace(" ", "").trim();
 
         if (str.isEmpty()) {
-            OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_SUBSCRIBE);
-            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postSubscribeHelp", data);
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(postSubscribeHelp()).build(), false);
             return;
         }
 
@@ -52,7 +50,7 @@ public class WarframeTaskSubscribePlugin {
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_UNSUBSCRIBE_CMD)
-    public void unsubscribe(Bot bot, AnyMessageEvent event) {
+    public void unsubscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
@@ -60,10 +58,8 @@ public class WarframeTaskSubscribePlugin {
         String str = event.getRawMessage().replace("取消订阅", "").replace(" ", "").trim();
 
         if (str.isEmpty()) {
-            OneBotLogInfoData data = WarframeSend.getLogInfoData(bot, event, Codes.WARFRAME_UNSUBSCRIBE);
-            HttpUtils.Body body = ImageUrlUtils.builderBase64Post("postSubscribeHelp", data);
             bot.sendMsg(event,
-                    Msg.builder().imgBase64(body.getFile()).build(), false);
+                    ArrayMsgUtils.builder().img(postSubscribeHelp()).build(), false);
             return;
         }
 
@@ -74,4 +70,13 @@ public class WarframeTaskSubscribePlugin {
         bot.sendMsg(event, ms, false);
     }
 
+
+    private byte[] postSubscribeHelp() throws DataNotInfoException, HtmlToImageException {
+        return HtmlToImage.generateImage("html/subscriberHelp", () -> {
+            ModelMap modelMap = new ModelMap();
+            modelMap.put("sub", WarframeSubscribeCheck.getSubscribeEnums());
+            modelMap.put("type", WarframeSubscribeCheck.getSubscribeMissionTypeEnums());
+            return modelMap;
+        }).toByteArray();
+    }
 }

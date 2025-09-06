@@ -29,12 +29,12 @@ public class TestInitRelics {
 
     @Test
     void testSelectRelicsByName() {
-        repository.findByNameContaining("A11").forEach(System.out::println);
+        repository.findByNameContainingIgnoreCase("A11").forEach(System.out::println);
     }
 
     @Test
     void testSelectRelicsByRewardsName() {
-        repository.findByRelicRewardsRewardNameContaining("Zakti Prime Receiver").forEach(System.out::println);
+        repository.findByRelicRewardsRewardNameContainingIgnoreCase("Zakti Prime Receiver").forEach(System.out::println);
     }
 
     @Test
@@ -47,6 +47,7 @@ public class TestInitRelics {
         log.info("getTotalElements:{}", page.getTotalElements());
         log.info("getContent:{}", page.getContent());
     }
+
     @Test
     void testFindByItemNameLike() {
         System.out.println(JSON.toJSONString(rservice.findAllByRelicNameOrRewardsItemName("牛p头")));

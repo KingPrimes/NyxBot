@@ -54,21 +54,21 @@ public class RelicsService {
 
     public List<Relics> findAllByRelicNameOrRewardsItemName(String name) {
         // 默认精准查询遗物名称
-        var rs = repository.findByName(name);
+        var rs = repository.findByNameIgnoreCase(name);
         if (!rs.isEmpty()) {
             sort(rs);
             return rs;
         }
         log.debug("未查询到遗物名称为 {} 的遗物，进行模糊查询", name);
         // 如果未查询到，进行模糊查询
-        rs = repository.findByNameContaining(name);
+        rs = repository.findByNameContainingIgnoreCase(name);
         if (!rs.isEmpty()) {
             sort(rs);
             return rs;
         }
         log.debug("未查询到包含 {} 的遗物，进行奖励物品的模糊查询", name);
         // 如果遗物名称未查询到，进行奖励物品的查询
-        rs = repository.findByRelicRewardsRewardNameContaining(name);
+        rs = repository.findByRelicRewardsRewardNameContainingIgnoreCase(name);
         if (!rs.isEmpty()) {
             sort(rs);
             return rs;
@@ -82,7 +82,7 @@ public class RelicsService {
                 key.set(key.get().replace(a.getCn(), a.getEn()));
             }
         });
-        rs = repository.findByRelicRewardsRewardNameContaining(key.get());
+        rs = repository.findByRelicRewardsRewardNameContainingIgnoreCase(key.get());
         if (!rs.isEmpty()) {
             sort(rs);
             return rs;

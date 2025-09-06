@@ -2,6 +2,9 @@ package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -11,13 +14,21 @@ import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
 import oshi.util.Util;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
+import java.util.jar.Manifest;
 
+@Slf4j
 public class SystemInfoUtils {
 
     private static final int OSHI_WAIT_SECOND = 1000;
@@ -177,7 +188,55 @@ public class SystemInfoUtils {
      * @return 版本号
      */
     public static String getJarVersion() {
-        return Objects.requireNonNull(JarManifest.manifestFromClasspath()).getMainAttributes().getValue("version");
+        //return Objects.requireNonNull(JarManifest.manifestFromClasspath()).getMainAttributes().getValue("version");
+        String version = SystemInfoUtils.class
+                .getPackage()
+                .getImplementationVersion();
+        if (version != null && !version.isEmpty()) {
+            return version;
+        }
+        // 1. 优先尝试从JAR包Manifest获取（生产环境）
+        try {
+            Manifest manifest = JarManifest.manifestFromClasspath();
+            if (manifest != null) {
+                version = manifest.getMainAttributes().getValue("version");
+                if (version != null && !version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (Exception e) {
+            // 非JAR环境（如IDE运行）会进入此处，忽略异常继续尝试
+        }
+
+        // 2. IDE运行时直接解析pom.xml获取版本（开发环境）
+        try {
+            // 定位项目根目录下的pom.xml（IDEA运行时working directory通常为项目根目录）
+            File pomFile = new File("pom.xml");
+            if (pomFile.exists() && pomFile.isFile()) {
+                // 使用JDK内置XML解析器读取pom.xml
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(pomFile);
+                doc.getDocumentElement().normalize();
+
+                // 使用XPath精确定位项目根节点下的version标签
+                XPath xPath = XPathFactory.newInstance().newXPath();
+                XPathExpression expr = xPath.compile("/project/version"); // 直接定位项目自身版本
+                Node versionNode = (Node) expr.evaluate(doc, XPathConstants.NODE);
+
+                if (versionNode != null) {
+                    String projectVersion = versionNode.getTextContent().trim();
+                    if (!projectVersion.isEmpty()) {
+                        return projectVersion;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to read version from pom.xml", e);
+        }
+
+        // 3. 所有方式失败时返回默认值
+        return "unknown-version";
     }
 
     /**
