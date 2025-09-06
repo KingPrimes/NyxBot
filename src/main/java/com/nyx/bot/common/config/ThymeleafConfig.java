@@ -16,7 +16,7 @@ public class ThymeleafConfig {
     private SpringResourceTemplateResolver springResourceTemplateResolver;
 
     @Bean
-    public SpringResourceTemplateResolver springResourceTemplateResolver() {
+    public SpringResourceTemplateResolver customResourceTemplateResolver() {
         SpringResourceTemplateResolver str = new SpringResourceTemplateResolver();
         str.setPrefix("file:./DataSource/Template/");
         str.setSuffix(".html");
@@ -30,7 +30,7 @@ public class ThymeleafConfig {
 
     // 配置支持双路径的模板引擎
     @Bean(name = "customTemplateEngine")
-    public SpringTemplateEngine customTemplateEngine(@Qualifier("springResourceTemplateResolver")SpringResourceTemplateResolver customResourceTemplateResolver) {
+    public SpringTemplateEngine customTemplateEngine(@Qualifier("customResourceTemplateResolver")SpringResourceTemplateResolver customResourceTemplateResolver) {
         SpringTemplateEngine engine = new SpringTemplateEngine();
 
         // 添加默认解析器（优先级0）和自定义解析器（优先级1）
