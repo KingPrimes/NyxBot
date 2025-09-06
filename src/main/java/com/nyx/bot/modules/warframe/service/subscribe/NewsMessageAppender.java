@@ -10,8 +10,9 @@ public class NewsMessageAppender implements MessageAppender {
 
     @Override
     public void appendContent(ArrayMsgUtils builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
-        data.getEvents().forEach(n -> {
-
-        });
+        // TODO 新闻订阅
+//        data.getEvents().forEach(n -> {
+//
+//        });
     }
 }
