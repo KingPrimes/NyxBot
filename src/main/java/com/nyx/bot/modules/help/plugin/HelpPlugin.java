@@ -11,6 +11,7 @@ import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.utils.HtmlToImage;
+import com.nyx.bot.utils.SendUtils;
 import com.nyx.bot.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,8 +27,7 @@ public class HelpPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.HELP_CMD)
     public void helpHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
-        bot.sendMsg(event,
-                ArrayMsgUtils.builder().img(getHelpImage()).build(), false);
+        SendUtils.send(bot, event, getHelpImage(), Codes.HELP, log);
         bot.sendMsg(event, ArrayMsgUtils.builder()
                 .text("指令使用方法请查看以下文档：https://kingprimes.top/posts/1bb16eb")
                 .build(), false);

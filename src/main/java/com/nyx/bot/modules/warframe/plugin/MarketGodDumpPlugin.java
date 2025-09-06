@@ -31,7 +31,6 @@ public class MarketGodDumpPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD)
     public void marketGodDump(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD);
         Ducats ducats = MarketUtils.getDucats();
         if (Objects.isNull(ducats)) {
             log.debug("获取ducat失败");

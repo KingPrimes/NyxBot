@@ -34,7 +34,6 @@ public class MarketOrdersPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = {"/WM", "WM", "/市场", "市场", "/wm", "wm"})
     public void marketOrders(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD);
         String str = event.getMessage().trim();
         str = ShiroUtils.unescape(str).toUpperCase();
 

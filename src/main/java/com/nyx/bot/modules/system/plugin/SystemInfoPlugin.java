@@ -28,7 +28,6 @@ public class SystemInfoPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.CHECK_VERSION_CMD)
     public void systemInfoHandler(Bot bot, AnyMessageEvent event) throws UnknownHostException, DataNotInfoException, HtmlToImageException {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.CHECK_VERSION_CMD);
         SendUtils.send(bot, event, getSystemInfoImage(), Codes.CHECK_VERSION, log);
 
     }

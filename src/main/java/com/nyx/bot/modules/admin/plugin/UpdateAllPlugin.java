@@ -20,7 +20,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_HTML_CMD)
     public void updateHtmlHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_HTML_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_HTML);
         } else {
@@ -32,7 +31,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD)
     public void updateWarframeResMarketItemsHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_ITEMS);
         } else {
@@ -44,7 +42,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD)
     public void updateWarframeResMarketRivenHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_RIVEN);
         } else {
@@ -56,7 +53,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_RM_CMD)
     public void updateWarframeResRmHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_RM_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_RM);
         } else {
@@ -68,7 +64,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD)
     public void updateWarframeResRivenChangesHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RIVEN_CHANGES);
         } else {
@@ -80,7 +75,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_SISTER_CMD)
     public void updateWarframeSisterHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_SISTER_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_SISTER);
         } else {
@@ -92,7 +86,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_TAR_CMD)
     public void updateWarframeTarHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_TAR_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_TAR);
         } else {
@@ -104,7 +97,6 @@ public class UpdateAllPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_JAR_CMD)
     public void updateJarHandler(Bot bot, AnyMessageEvent event) {
-        log.debug("群：{} 用户:{} 使用了 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_JAR_CMD);
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_JAR);
         } else {
