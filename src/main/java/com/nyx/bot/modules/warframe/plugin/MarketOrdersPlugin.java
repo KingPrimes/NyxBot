@@ -7,6 +7,7 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -30,11 +31,11 @@ import org.springframework.ui.ModelMap;
 @Slf4j
 public class MarketOrdersPlugin {
     @AnyMessageHandler
-    @MessageHandlerFilter(startWith = {"/WM", "WM", "/市场", "市场", "/wm", "wm"})
+    @MessageHandlerFilter(startWith = {"/WM", "WM", "/市场", "市场", "/wm", "wm"},at = AtEnum.BOTH)
     public void marketOrders(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         String str = event.getMessage().trim();
         str = ShiroUtils.unescape(str).toUpperCase();
-
+        log.debug("用户:{} 输入了指令:{}", event.getUserId(), str);
         if (MatcherUtils.isSpecialSymbols(str)) {
             String orderItem = MatcherUtils.isOrderItem(str);
             if (orderItem.isEmpty()) {

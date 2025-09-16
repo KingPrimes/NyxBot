@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SyndicateEntratiPlugin {
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_ENTRATI_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_ENTRATI_CMD,at = AtEnum.BOTH)
     public void syndicateEntranceHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, SyndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.EntratiSyndicate), Codes.WARFRAME_SYNDICATE_ENTRATI, log);
     }

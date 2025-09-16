@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
@@ -33,7 +34,7 @@ public class SortiesPlugin {
     NodesRepository nodesRepository;
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SORTIES_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SORTIES_CMD,at = AtEnum.BOTH)
     public void sortiesHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postAssaultImage(), Codes.WARFRAME_SORTIES_PLUGIN, log);
     }

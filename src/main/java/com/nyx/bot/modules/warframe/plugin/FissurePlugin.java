@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -30,7 +31,7 @@ public class FissurePlugin {
      * 裂隙
      */
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_CMD,at = AtEnum.BOTH)
     public void activeMissionHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postFissuresImage(0), Codes.WARFRAME_ACTIVE_MISSION_PLUGIN, log);
     }
@@ -39,7 +40,7 @@ public class FissurePlugin {
      * 钢铁裂隙
      */
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_PATH_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_PATH_CMD,at = AtEnum.BOTH)
     public void activeMissionPathHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postFissuresImage(2), Codes.WARFRAME_ACTIVE_MISSION_PATH_PLUGIN, log);
     }
@@ -48,7 +49,7 @@ public class FissurePlugin {
      * 虚空风暴
      */
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_STORMS_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_STORMS_CMD,at = AtEnum.BOTH)
     public void steelPathHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postFissuresImage(1), Codes.WARFRAME_VOID_STORMS_PLUGIN, log);
     }

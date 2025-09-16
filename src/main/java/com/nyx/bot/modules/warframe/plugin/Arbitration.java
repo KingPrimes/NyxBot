@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.cache.ArbitrationCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
@@ -24,13 +25,13 @@ import org.springframework.ui.ModelMap;
 @Slf4j
 public class Arbitration {
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_CMD,at = AtEnum.BOTH)
     public void arbitrationHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, arbitrationImage(), Codes.WARFRAME_ARBITRATION_PLUGIN, log);
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_EX_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_EX_CMD,at = AtEnum.BOTH)
     public void arbitrationExHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postArbitrationExImage(), Codes.WARFRAME_ARBITRATION_EX_PLUGIN, log);
     }

@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -29,7 +30,7 @@ public class RivenDisUpdatePlugin {
     RivenTrendRepository repository;
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_DIS_UPDATE_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_DIS_UPDATE_CMD,at = AtEnum.BOTH)
     public void rivenDisUpdate(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postRivenDispositionUpdatesImage(), Codes.WARFRAME_RIVEN_DIS_UPDATE_PLUGIN, log);
     }
