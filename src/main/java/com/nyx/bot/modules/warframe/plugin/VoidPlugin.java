@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
@@ -39,7 +40,7 @@ public class VoidPlugin {
     NodesRepository nodesRepository;
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_CMD,at = AtEnum.BOTH)
     public void voidHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, postVoidImage(), Codes.WARFRAME_VOID_PLUGIN, log);
     }

@@ -6,6 +6,7 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -25,7 +26,7 @@ import java.util.Map;
 @Slf4j
 public class HelpPlugin {
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.HELP_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.HELP_CMD,at = AtEnum.BOTH)
     public void helpHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, getHelpImage(), Codes.HELP, log);
         bot.sendMsg(event, ArrayMsgUtils.builder()

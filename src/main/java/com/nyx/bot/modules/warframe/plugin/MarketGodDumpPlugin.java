@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
@@ -29,7 +30,7 @@ import java.util.Objects;
 @Slf4j
 public class MarketGodDumpPlugin {
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD,at = AtEnum.BOTH)
     public void marketGodDump(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         Ducats ducats = MarketUtils.getDucats();
         if (Objects.isNull(ducats)) {
