@@ -41,13 +41,15 @@ public class Runners {
         return args -> AsyncUtils.me().execute(() -> {
             SysUser user = new SysUser();
             user.setUserId(1L);
-            user.setUserName("admin");
-            String password = StringUtils.getRandomString();
+            // 获取随机字母不包含特殊字符
+            String name = StringUtils.getRandomLetters(6);
+            user.setUserName(name);
+            String password = StringUtils.getRandomString(8);
             // {bcrypt} 密码加密方式
             user.setPassword(new BCryptPasswordEncoder().encode(password));
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
-                log.info("\u001B[31m默认账号：admin 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", password);
+                log.info("\u001B[31m默认账号：{} 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", name, password);
                 userRepository.save(user);
             }
         }, AsyncBeanName.SERVICE);
