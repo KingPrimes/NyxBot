@@ -18,7 +18,6 @@ import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.SendUtils;
 import lombok.Data;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
@@ -110,9 +109,7 @@ public class MarketOrdersPlugin {
     }
 
     @Data
-    @Accessors
-    static
-    class MarketOrdersData {
+    static class MarketOrdersData {
         private MarketFormEnums form = MarketFormEnums.PC;
         private boolean isBy;
         private boolean isMax;
