@@ -97,8 +97,13 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Object MethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("MethodArgumentNotValidException:{} -{}", e.getBindingResult().getFieldError().getCode(),e.getBindingResult().getFieldError().getDefaultMessage());
-        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, e.getBindingResult().getFieldError().getDefaultMessage());
+        // 获取原始消息（可能是国际化key或普通文本）
+        String messageKey = e.getBindingResult().getFieldError().getDefaultMessage();
+        // 尝试进行国际化解析
+        String i18nMessage = I18nUtils.message(messageKey);
+        // 若解析结果与原始key相同，说明不是有效国际化key，直接使用原始消息；否则使用国际化结果
+        String finalMessage = i18nMessage.equals(messageKey) ? messageKey : i18nMessage;
+        return AjaxResult.error(HttpCodeEnum.INVALID_REQUEST, finalMessage);
     }
 
     @ResponseBody

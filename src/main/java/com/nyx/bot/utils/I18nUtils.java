@@ -1,6 +1,7 @@
 package com.nyx.bot.utils;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 public class I18nUtils {
@@ -19,7 +20,11 @@ public class I18nUtils {
      */
     public static String message(String code, Object... args) {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
-        return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        try{
+            return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        }catch (NoSuchMessageException e){
+            return code;
+        }
     }
 
     /**
