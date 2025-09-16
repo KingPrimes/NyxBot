@@ -98,6 +98,8 @@ logging:
   level:
     com.nyx.bot: #{debug ? 'DEBUG' : 'INFO'}
     com.mikuac.shiro: INFO
+    org.hibernate.SQL: INFO
+    org.springframework: INFO
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF
