@@ -1,8 +1,10 @@
 package com.nyx.bot.utils;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+@SuppressWarnings("unused")
 public class I18nUtils {
     private final MessageSource messageSource;
 
@@ -19,7 +21,11 @@ public class I18nUtils {
      */
     public static String message(String code, Object... args) {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
-        return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        try{
+            return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        }catch (NoSuchMessageException e){
+            return code;
+        }
     }
 
     /**
@@ -30,7 +36,7 @@ public class I18nUtils {
      */
     public static String errorTimeOut() {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
-        return messageSource.getMessage("error.timeout", null, LocaleContextHolder.getLocale());
+        return messageSource.getMessage("error.timeout", new Object[]{}, LocaleContextHolder.getLocale());
     }
 
     public String getMessage(String msgKey, Object[] args) {
@@ -38,7 +44,7 @@ public class I18nUtils {
     }
 
     public String getMessage(String msgKey) {
-        return messageSource.getMessage(msgKey, null, LocaleContextHolder.getLocale());
+        return messageSource.getMessage(msgKey, new Object[]{}, LocaleContextHolder.getLocale());
     }
 
     /**

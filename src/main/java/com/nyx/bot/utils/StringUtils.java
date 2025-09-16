@@ -706,7 +706,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
-     * 随机的字符串
+     * 随机的字符串包含特殊字符
      *
      * @param len 字符串长度
      * @return 字符串
@@ -723,7 +723,28 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
-     * 获取随机的字符串 4-17位
+     * 生成仅包含随机字母的字符串（不包含特殊字符和数字）
+     * @param length 字符串长度
+     * @return 随机字母字符串
+     */
+    public static String getRandomLetters(int length) {
+        if (length <= 0) {
+            return "";
+        }
+        // 字母字符集（包含大小写字母）
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            // 随机从字母集中选择字符
+            int index = random.nextInt(letters.length());
+            sb.append(letters.charAt(index));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 获取随机的字符串包含特殊字符 4-17位
      *
      * @return 字符串
      */

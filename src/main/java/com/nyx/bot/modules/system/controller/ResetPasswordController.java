@@ -10,7 +10,7 @@ import com.nyx.bot.utils.I18nUtils;
 import io.swagger.annotations.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -65,11 +65,15 @@ public class ResetPasswordController extends BaseController {
     @Data
     public static class ResetPassword {
         @NotEmpty(message = "controller.rest.password.old.not.empty")
+        @Size(min = 6, max = 18, message = "controller.rest.password.length")
         private String oldPassword;
+
         @NotEmpty(message = "controller.rest.password.new.not.empty")
-        @Min(value = 6, message = "controller.rest.password.length")
+        @Size(min = 6, max = 18, message = "controller.rest.password.length")
         private String newPassword;
+
         @NotEmpty(message = "controller.rest.password.confirm.not.empty")
+        @Size(min = 6, max = 18, message = "controller.rest.password.length")
         private String confirmPassword;
 
         public boolean isValid() {
