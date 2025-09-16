@@ -31,6 +31,7 @@ public class PluginHandlerException {
     }
 
     // 环绕通知，捕获异常并记录日志
+    @SuppressWarnings("unused")
     @Around(value = "pluginMethodPointcut(anyMessageHandler)", argNames = "joinPoint,anyMessageHandler")
     public Object aroundPluginMethod(ProceedingJoinPoint joinPoint, AnyMessageHandler anyMessageHandler) throws Throwable {
 
@@ -53,7 +54,8 @@ public class PluginHandlerException {
             log.debug("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
             if (CqMatcher.isCqAt(Objects.requireNonNull(event).getRawMessage())) {
                 CqParse build = CqParse.build(event.getRawMessage());
-                if (build.getCqAt().get(0).equals(Objects.requireNonNull(bot).getSelfId())) {
+                Bot finalBot = bot;
+                if (build.getCqAt().stream().anyMatch(a -> a.equals(Objects.requireNonNull(finalBot).getSelfId()))) {
                     event.setRawMessage(build.reovmCq().trim());
                     event.setMessage(build.reovmCq().trim());
                 }
