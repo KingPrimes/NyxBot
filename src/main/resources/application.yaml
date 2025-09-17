@@ -96,10 +96,13 @@ server:
   shutdown: graceful
 logging:
   level:
-    com.nyx.bot.**: #{debug ? 'DEBUG' : 'INFO'}
+    com.nyx.bot: INFO
     com.mikuac.shiro: INFO
     org.hibernate.SQL: INFO
     org.springframework: INFO
+    org.springframework.web.servlet: INFO
+    org.springframework.web.socket: INFO
+    org.springframework.boot.autoconfigure.logging: INFO
     io.github.mymonstercat: OFF
     org.xhtmlrenderer: OFF
     org.xnio.listener: OFF

@@ -9,9 +9,11 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("all")
 @Slf4j
 public class HandOff {
 
@@ -67,10 +69,18 @@ public class HandOff {
         }
     }
 
-    public static ConfigurableEnvironment getEnv() {
+    public static ConfigurableEnvironment getEnv(String[] args) {
         ConfigurableEnvironment env = new StandardEnvironment();
         NyxConfig config = getConfig();
         Map<String, Object> map = new HashMap<>();
+        String debugEnv = env.getProperty("DEBUG");
+        if (debugEnv == null || debugEnv.isEmpty()) {
+            debugEnv = env.getProperty("debug");
+        }
+        boolean isDebug = "true".equalsIgnoreCase(debugEnv) || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--debug"));
+        if (isDebug) {
+            map.put("logging.level.com.nyx.bot", "DEBUG");
+        }
         map.put("server.port", config.getServerPort()); // 设置新的端口号
         map.put("shiro.ws.server.enable", config.getIsServerOrClient());
         map.put("shiro.ws.server.url", config.getWsServerUrl());
