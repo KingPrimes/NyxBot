@@ -14,7 +14,7 @@ public class NyxBotApplicationTest {
     public static void main(String[] args) {
         // 使用自定义的环境实例启动 Spring 应用
         SpringApplication app = new SpringApplication(NyxBotApplicationTest.class);
-        app.setEnvironment(HandOff.getEnv());
+        app.setEnvironment(HandOff.getEnv(args));
         app.run(args);
         WarframeDataSource.initWarframeStatus();
     }
