@@ -47,6 +47,6 @@ body:
     attributes:
       placeholder: 请详细描述你遇到的bug，包括：
         什么情况下出现的？
-        具体的错误信息是什么？
+        具体的错误信息是什么？请发送debug日志，在启动参数后方添加 --debug 参数，Docker添加 DEBUG=true环境变量
         重现步骤是什么？
       label: 请详细描述你遇到的bug，包括：
