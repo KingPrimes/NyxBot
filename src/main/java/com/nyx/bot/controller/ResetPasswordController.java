@@ -1,4 +1,4 @@
-package com.nyx.bot.modules.system.controller;
+package com.nyx.bot.controller;
 
 import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.common.core.AjaxResult;

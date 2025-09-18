@@ -39,9 +39,13 @@ public class BotsService {
      */
     public AjaxResult getFriendList(Long botUid) {
         if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
-        return container.robots.containsKey(botUid)
-                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
-                : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+        try {
+            return container.robots.containsKey(botUid)
+                    ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
+                    : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+        } catch (Exception e) {
+            return new AjaxResult(HttpCodeEnum.ERROR, "获取好友列表失败,请手动输入管理员账号！");
+        }
     }
 
     /**
@@ -51,9 +55,13 @@ public class BotsService {
      */
     public AjaxResult getGroupList(Long botUid) {
         if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
-        return container.robots.containsKey(botUid)
-                ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
-                : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+        try {
+            return container.robots.containsKey(botUid)
+                    ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
+                    : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+        }catch (Exception e){
+            return new AjaxResult(HttpCodeEnum.ERROR,"获取群列表失败，请手动输入群账号！");
+        }
     }
 
     /**

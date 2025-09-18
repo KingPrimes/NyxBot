@@ -47,11 +47,11 @@ public class Alias extends BaseEntity {
     }
 
     public boolean isValidEnglish() {
-        return en.matches("^([a-zA-Z]+)(_&)?([0-9]+)?([a-zA-Z]+)?$");
+        return en.matches("^([a-zA-Z]+)([ _&])?([0-9]+)?([a-zA-Z]+)?$");
     }
 
     public boolean isValidChinese() {
-        return cn.matches("^[\\u4e00-\\u9fa5]+$");
+        return cn.matches("^[\\u4e00-\\u9fa5]+([ ·_&])?[\\u4e00-\\u9fa5]+$");
     }
 
     @JsonIgnore
