@@ -63,6 +63,8 @@ public class OrdersItemsService {
             JSONObject i18n = object.getJSONObject("i18n");
             JSONObject zhHansI18n = i18n != null ? i18n.getJSONObject("zh-hans") : null;
             String name = zhHansI18n != null ? zhHansI18n.getString("name") : object.getString("slug"); // 名称缺失时用slug兜底
+            String icon = zhHansI18n != null ? zhHansI18n.getString("icon") : null;
+            String thumb = zhHansI18n != null ? zhHansI18n.getString("thumb") : null;
 
             return new OrdersItems()
                     .setGameRef(gameRef)
@@ -72,8 +74,8 @@ public class OrdersItemsService {
                     .setMaxRank(object.getInteger("maxRank"))
                     .setDucats(object.getInteger("ducats"))
                     .setName(name)
-                    .setIcon(object.getString("icon"))
-                    .setThumb(object.getString("thumb"));
+                    .setIcon(icon)
+                    .setThumb(thumb);
         } catch (JSONException e) {
             log.error("解析物品数据失败: {}", object, e);
             return null; // 解析失败的物品跳过处理
