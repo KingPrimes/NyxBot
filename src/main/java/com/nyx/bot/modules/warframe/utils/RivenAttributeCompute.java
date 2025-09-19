@@ -148,6 +148,8 @@ public class RivenAttributeCompute {
                     } else {
                         weapon.setProductCategory(Weapons.ProductCategory.LongGuns);
                     }
+                } else  if (weapon.getDescription().contains("霰弹枪")) {
+                    weapon.setProductCategory(Weapons.ProductCategory.Shotguns);
                 } else {
                     model.setWeaponType(weapon.getProductCategory().getName());
                 }
