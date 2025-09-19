@@ -122,20 +122,6 @@ public class Weapons {
                 "磁力伤害", "病毒伤害", "腐蚀伤害", "虚空伤害", "Tau伤害", "DT_CINEMATIC", "DT_SHIELD_DRAIN",
                 "DT_HEALTH_DRAIN", "DT_ENERGY_DRAIN", "真实伤害"
         };
-
-        /*
-          // 与下面代码相同效果
-                  List<DamagePerShot> list = new ArrayList<>();
-                  for (int i = 0; i < damagePerShot.size(); i++) {
-                      if (this.damagePerShot.get(i) > 0) {
-                          list.add(new DamagePerShot()
-                                  .setName(DamageType[i])
-                                  .setDamage(this.damagePerShot.get(i))
-                                  );
-                      }
-                  }
-                  return list;
-         */
         return IntStream.range(0, damagePerShot.size())
                 .filter(i -> damagePerShot.get(i) > 0)
                 .mapToObj(i -> new DamagePerShot()
@@ -197,6 +183,8 @@ public class Weapons {
         SpaceMelee("Archwing近战武器"),
         SpecialItems("显赫武器"),
         CrewShipWeapons("星舰武器"),
+        SentinelWeapons("守护武器"),
+        Shotguns("霰弹枪"),
         ;
         final String name;
 

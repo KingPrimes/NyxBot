@@ -1,7 +1,9 @@
 package com.nyx.bot.utils.ocr;
 
+import com.benjaminwan.ocrlibrary.OcrResult;
 import io.github.mymonstercat.Model;
 import io.github.mymonstercat.ocr.InferenceEngine;
+import io.github.mymonstercat.ocr.config.ParamConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -39,9 +41,18 @@ public class OcrUtil {
     }
 
 
-    private static List<String> ocrPath(String imgPath) {
+    public static List<String> ocrPath(String imgPath) {
+        ParamConfig paramConfig = ParamConfig.getDefaultConfig();
+        paramConfig.setPadding(50);
+        paramConfig.setMaxSideLen(0);
+        paramConfig.setBoxScoreThresh(0.5F);
+        paramConfig.setBoxThresh(0.3F);
+        paramConfig.setUnClipRatio(2.0F);
+        paramConfig.setMostAngle(true);
         InferenceEngine engine = InferenceEngine.getInstance(Model.ONNX_PPOCR_V4);
-        return Arrays.stream(engine.runOcr(imgPath).getStrRes().split("\n")).toList();
+        OcrResult result = engine.runOcr(imgPath, paramConfig);
+        System.out.println(result.getTextBlocks());
+        return Arrays.stream(result.getStrRes().split("\n")).toList();
     }
 
     private static byte[] toByteArray(InputStream is) throws IOException {

@@ -1,14 +1,13 @@
 package com.nyx.bot.modules.warframe.utils;
 
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.enums.RivenTrendTypeEnum;
+import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendCompute;
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendModel;
 import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
-import com.nyx.bot.modules.warframe.entity.RivenTrend;
+import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.repo.RivenAnalyseTrendRepository;
-import com.nyx.bot.modules.warframe.repo.RivenTrendRepository;
-import com.nyx.bot.modules.warframe.service.TranslationService;
+import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.utils.RivenMatcherUtil;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ public class RivenAttributeCompute {
     /**
      * 处理识别数据
      */
-    private static List<RivenAnalyseTrendCompute> getRiven(List<List<String>> images) {
+    public static List<RivenAnalyseTrendCompute> getRiven(List<List<String>> images) {
         List<RivenAnalyseTrendCompute> trends = new ArrayList<>();
         for (List<String> image : images) {
             //紫卡类
@@ -121,28 +120,37 @@ public class RivenAttributeCompute {
     /**
      * 计算紫卡加成数据
      */
-    private static List<List<RivenAnalyseTrendModel>> setAttributeNumber(List<RivenAnalyseTrendCompute> trends) {
+    public static List<List<RivenAnalyseTrendModel>> setAttributeNumber(List<RivenAnalyseTrendCompute> trends) {
         //存放多张紫卡
         List<List<RivenAnalyseTrendModel>> rives = new ArrayList<>();
         //遍历识别处理后的数据
         for (RivenAnalyseTrendCompute trend : trends) {
-            //查询武器的英文名称
-            String weaponsName_En = SpringUtils.getBean(TranslationService.class).zhToEn(trend.getWeaponsName());
-            //具体的紫卡倾向
-            List<RivenTrend> likeTrendName = SpringUtils.getBean(RivenTrendRepository.class).findLikeTrendName(weaponsName_En);
-            //存放计算完毕的紫卡
             List<RivenAnalyseTrendModel> models = new ArrayList<>();
-            //遍历查询到的所有武器
-            for (RivenTrend rivenTrend : likeTrendName) {
+            String weaponName = trend.getWeaponsName();
+            if (weaponName.contains("淞")) {
+                weaponName = weaponName.replace("淞", "凇");
+            }
+            List<Weapons> weapons = SpringUtils.getBean(WeaponsRepository.class).findByNameContaining(weaponName);
+            weapons.forEach(weapon -> {
+                Double omegaAttenuation = weapon.getOmegaAttenuation();
+                log.debug("武器名称：{}，武器类型：{}，紫卡倾向：{}", weapon.getName(), weapon.getProductCategory().getName(), omegaAttenuation);
                 RivenAnalyseTrendModel model = new RivenAnalyseTrendModel();
-                RivenTrendTypeEnum weaponsType = rivenTrend.getType();
-                model.setWeaponName(rivenTrend.getTraCh());
+                model.setWeaponName(weapon.getName());
                 model.setRivenName(trend.getRivenName());
-                model.setNewDot(rivenTrend.getNewDot());
-                model.setNewNum(rivenTrend.getNewNum());
-                model.setOldDot(rivenTrend.getOldDot());
-                model.setOldNum(rivenTrend.getOldNum());
-                model.setWeaponType(weaponsType.getDesc());
+                model.setNewNum(omegaAttenuation);
+                model.setNewDot(RivenTrendEnum.getRivenTrendDot(omegaAttenuation));
+                model.setWeaponType(weapon.getProductCategory().getName());
+                if (weapon.getProductCategory().equals(Weapons.ProductCategory.SentinelWeapons)) {
+                    if (weapon.getDescription().contains("霰弹枪")) {
+                        weapon.setProductCategory(Weapons.ProductCategory.Shotguns);
+                    } else if (weapon.getDescription().contains("近战") || weapon.getName().contains("分离")) {
+                        weapon.setProductCategory(Weapons.ProductCategory.Melee);
+                    } else {
+                        weapon.setProductCategory(Weapons.ProductCategory.LongGuns);
+                    }
+                } else {
+                    model.setWeaponType(weapon.getProductCategory().getName());
+                }
                 //具体词条数据
                 List<RivenAnalyseTrendModel.Attribute> attributes = new ArrayList<>();
                 //计算各数值的数据
@@ -195,22 +203,21 @@ public class RivenAttributeCompute {
                             attributeModel.setAttr(attribute.getAttribute());
                             attributeModel.setName(attribute.getName());
                             RivenAnalyseTrend analyseTrendT = analyseTrend.orElse(new RivenAnalyseTrend());
-                            /*boolean isNag = attribute.getAttribute() < 0 *//*|| (MatchUtil.whetherItIsDiscrimination(attribute.getAttributeName()) && attribute.getAttribute() > 0)*//*;*/
                             // 用于判断最后一个词条是否是歧视属性
                             boolean isNag = index >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()) || attribute.getAttribute() < 0 : attribute.getAttribute() < 0;
-                            log.debug("当前武器名称：{}", rivenTrend.getTraCh());
+                            log.debug("当前武器名称：{}", weapon.getName());
                             log.debug("当前下标是否大于等于2：{}", index >= 2);
                             log.debug("当前属性是否是歧视属性:{}", RivenMatcherUtil.whetherItIsDiscrimination(attribute.getAttributeName()));
                             log.debug("当前属性是否时负数：{}", attribute.getAttribute() < 0);
                             log.debug("当前属性是否是负属性：{} --- 当前下标:{} -- 当前属性值:{} ---当前属性名称：{}\n", isNag, index, attribute.getAttribute(), attribute.getAttributeName());
 
-                            switch (weaponsType) {
-                                case MELEE -> {
+                            switch (weapon.getProductCategory()) {
+                                case Melee -> {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
                                                             analyseTrendT.getMelle(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -221,7 +228,7 @@ public class RivenAttributeCompute {
                                             String.valueOf(
                                                     attribute.getHighAttribute(
                                                             analyseTrendT.getMelle(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -230,12 +237,12 @@ public class RivenAttributeCompute {
                                     );
                                     attributeModel.setAttrDiff(attrDiff(attribute));
                                 }
-                                case RIFLE -> {
+                                case LongGuns -> {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
                                                             analyseTrendT.getRifle(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -246,7 +253,7 @@ public class RivenAttributeCompute {
                                             String.valueOf(
                                                     attribute.getHighAttribute(
                                                             analyseTrendT.getRifle(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -256,12 +263,12 @@ public class RivenAttributeCompute {
 
                                     attributeModel.setAttrDiff(attrDiff(attribute));
                                 }
-                                case PISTOL -> {
+                                case Pistols -> {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
                                                             analyseTrendT.getPistol(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -272,7 +279,7 @@ public class RivenAttributeCompute {
                                             String.valueOf(
                                                     attribute.getHighAttribute(
                                                             analyseTrendT.getPistol(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -281,12 +288,12 @@ public class RivenAttributeCompute {
                                     );
                                     attributeModel.setAttrDiff(attrDiff(attribute));
                                 }
-                                case ARCHGUN -> {
+                                case SpaceGuns, SpaceMelee -> {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
                                                             analyseTrendT.getArchwing(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -297,7 +304,7 @@ public class RivenAttributeCompute {
                                             String.valueOf(
                                                     attribute.getHighAttribute(
                                                             analyseTrendT.getArchwing(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -306,12 +313,12 @@ public class RivenAttributeCompute {
                                     );
                                     attributeModel.setAttrDiff(attrDiff(attribute));
                                 }
-                                case SHOTGUN -> {
+                                case Shotguns -> {
                                     attributeModel.setLowAttr(
                                             String.valueOf(
                                                     attribute.getLowAttribute(
                                                             analyseTrendT.getShotgun(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -322,7 +329,7 @@ public class RivenAttributeCompute {
                                             String.valueOf(
                                                     attribute.getHighAttribute(
                                                             analyseTrendT.getShotgun(),
-                                                            rivenTrend.getNewNum(),
+                                                            omegaAttenuation,
                                                             trend.getAttributes().size(),
                                                             attribute.getNag(),
                                                             isNag
@@ -336,13 +343,12 @@ public class RivenAttributeCompute {
                         });
                 model.setAttributes(attributes);
                 models.add(model);
-            }
+            });
             rives.add(models);
         }
         return rives;
     }
 
-    // 计算紫卡属性的高低
     private static String attrDiff(RivenAnalyseTrendCompute.Attribute attribute) {
         String name = attribute.getName();
         if (name.contains("Infested") || name.contains("Corpus") || name.contains("Grinner") || name.contains("Grineer")) {

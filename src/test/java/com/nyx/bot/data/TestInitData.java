@@ -112,6 +112,11 @@ public class TestInitData {
     }
 
     @Test
+    void testInitWeapons(){
+        new WarframeDataSource().initWeapons();
+    }
+
+    @Test
     void testInitExprot2() {
         log.info("Customs:{}", JSON.toJSONString(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL)));
         log.info("Drones:{}", JSON.toJSONString(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL)));
