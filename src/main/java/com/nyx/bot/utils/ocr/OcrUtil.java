@@ -22,6 +22,7 @@ public class OcrUtil {
      * @param url 图片url
      * @return 识别结果
      */
+
     public static List<String> ocr(String url) {
         List<String> strings;
         UUID uuid = UUID.randomUUID();
@@ -36,7 +37,8 @@ public class OcrUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        file.delete();
+        @SuppressWarnings("unused")
+        boolean deleted = file.delete();
         return strings;
     }
 

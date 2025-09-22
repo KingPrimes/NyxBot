@@ -13,7 +13,7 @@ import static com.nyx.bot.modules.warframe.entity.exprot.Weapons.ProductCategory
 public interface AttributeCalculator {
    Map<Weapons.ProductCategory, AttributeCalculator> CALCULATORS =
             Map.of(
-                    Pistols,    WeaponSetters::setPistols,
+                    Pistols, WeaponSetters::setPistols,
                     LongGuns, WeaponSetters::setLongGuns,
                     Melee,  WeaponSetters::setMelee,
                     SpaceGuns, WeaponSetters::setSpaceGuns,
@@ -28,6 +28,5 @@ public interface AttributeCalculator {
                    RivenAnalyseTrendModel.Attribute model,
                    double omegaAttenuation,
                    RivenAnalyseTrend analyseTrend,
-                   int totalAttributes,
-                   int index);
+                   int totalAttributes);
 }

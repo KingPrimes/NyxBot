@@ -22,7 +22,6 @@ import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -41,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Rollback(false)
 @Slf4j
+@SuppressWarnings("unused")
 public class TestInitData {
 
     @Resource
@@ -63,8 +63,6 @@ public class TestInitData {
     @Resource
     RelicsRepository relicsRepository;
 
-    @Resource
-    EntityManager entityManager;
     @Test
     void initAlias() {
         WarframeDataSource.getRivenTrend();

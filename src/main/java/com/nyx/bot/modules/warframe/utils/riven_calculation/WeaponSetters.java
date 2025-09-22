@@ -16,7 +16,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setPistols(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setPistols(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -54,7 +54,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setLongGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setLongGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -92,7 +92,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -130,7 +130,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setSpaceGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setSpaceGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -168,7 +168,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setSpaceMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setSpaceMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -206,8 +206,8 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setSpecialItems(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
-        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i, index);
+    public static void setSpecialItems(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
+        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i);
     }
 
     /**
@@ -219,8 +219,8 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setCrewShipWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
-        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i, index);
+    public static void setCrewShipWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
+        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i);
     }
 
     /**
@@ -232,7 +232,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setSentinelWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setSentinelWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -270,7 +270,7 @@ public class WeaponSetters {
      * @param rivenAnalyseTrend 武器分析趋势
      * @param i                 武器属性索引
      */
-    public static void setShotguns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    public static void setShotguns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
         model.setLowAttr(
                 String.valueOf(
                         attr.getLowAttribute(
@@ -299,7 +299,7 @@ public class WeaponSetters {
         );
     }
 
-    private static void setRivenAnalyseTrend(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i, int index) {
+    private static void setRivenAnalyseTrend(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
 
     }
 }

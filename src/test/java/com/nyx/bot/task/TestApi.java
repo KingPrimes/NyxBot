@@ -56,7 +56,7 @@ public class TestApi {
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
-            Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
+            var map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
             return collect.entrySet().stream()
                     .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
@@ -203,9 +203,7 @@ public class TestApi {
                     nodesRepository.findById(v.getNode()).ifPresentOrElse(nodes -> {
                         am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
                         am.setMissionType(nodes.getMissionType());
-                    }, () -> {
-                        am.setNode(v.getNode());
-                    });
+                    }, () -> am.setNode(v.getNode()));
                     am.set_id(v.get_id());
                     am.setActivation(v.getActivation());
                     am.setExpiry(v.getExpiry());
