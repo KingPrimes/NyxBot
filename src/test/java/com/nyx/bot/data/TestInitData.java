@@ -139,6 +139,21 @@ public class TestInitData {
     }
 
     @Test
+    void initStateTranslationData() throws FileNotFoundException {
+        List<StateTranslation> javaList = JSON.parseArray(new FileInputStream("./data/state_translation.json")).toJavaList(StateTranslation.class)
+                .stream()
+                .peek(s -> {
+                    s.setType(StateTypeEnum.RESOURCES);
+                    Arrays.stream(StateTypeEnum.values())
+                            .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
+                            .findFirst()
+                            .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+                })
+                .toList();
+        str.saveAll(javaList);
+    }
+
+    @Test
     void initStateTranslation() throws FileNotFoundException {
         List<StateTranslation> stateTranslationList = new ArrayList<>();
         stateTranslationList.addAll(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL));
