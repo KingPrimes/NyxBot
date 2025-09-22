@@ -2,7 +2,7 @@ package com.nyx.bot.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.utils.ocr.OcrUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
