@@ -51,7 +51,6 @@ public class OcrUtil {
         paramConfig.setMostAngle(true);
         InferenceEngine engine = InferenceEngine.getInstance(Model.ONNX_PPOCR_V4);
         OcrResult result = engine.runOcr(imgPath, paramConfig);
-        System.out.println(result.getTextBlocks());
         return Arrays.stream(result.getStrRes().split("\n")).toList();
     }
 
