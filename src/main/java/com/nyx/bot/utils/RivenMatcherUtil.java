@@ -102,6 +102,37 @@ public class RivenMatcherUtil {
     }
 
     /**
+     * 判断是否为"值为负时是正属性"的特殊属性（如"武器后坐力"）
+     * 规则：数值为正数 → 负属性；数值为负数 → 正属性
+     */
+    public static boolean isInvertedAttribute(String attributeName) {
+        if (attributeName == null) return false;
+        // 特殊属性列表：可扩展其他类似逻辑的属性（如"弹药消耗"等）
+        String[] invertedAttributes = {"后坐力"};
+        for (String attr : invertedAttributes) {
+            if (attributeName.contains(attr)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 统一判定属性是否为负属性（含特殊属性反转逻辑）
+     * @param attributeName 属性名称
+     * @param attributeValue 属性值
+     * @return true=负属性，false=正属性
+     */
+    public static boolean isNegativeAttribute(String attributeName, double attributeValue) {
+        // 特殊属性（如"武器后坐力"）：值为正→负属性，值为负→正属性
+        if (isInvertedAttribute(attributeName)) {
+            return attributeValue > 0;
+        }
+        // 普通属性：值为负→负属性
+        return attributeValue < 0;
+    }
+
+    /**
      * 检测是否是紫卡名称
      */
     public static boolean isRivenName(String str) {

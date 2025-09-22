@@ -1,5 +1,8 @@
 package com.nyx.bot.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum RivenTrendEnum {
     RIVEN_TREND_1("●○○○○"),
     RIVEN_TREND_2("●●○○○"),

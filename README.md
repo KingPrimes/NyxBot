@@ -85,7 +85,7 @@ OneBot协议客户端
 
 ## 首推 [阿里云-折扣专区](https://www.aliyun.com/minisite/goods?userCode=8dt5pt0g&share_source=copy_link) 和 [腾讯云-618盛典](https://curl.qcloud.com/TyfmLYii)
 
-### [阿里云-精选特惠](https://www.aliyun.com/daily-act/ecs/activity_selection?userCode=8dt5pt0g)
+### [阿里云-新用户八折优惠](https://www.aliyun.com/minisite/goods?userCode=8dt5pt0g)
 
 ### [阿里云-折扣专区](https://www.aliyun.com/minisite/goods?userCode=8dt5pt0g&share_source=copy_link)
 

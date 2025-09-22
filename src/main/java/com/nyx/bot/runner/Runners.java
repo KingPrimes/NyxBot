@@ -44,7 +44,7 @@ public class Runners {
             // 获取随机字母不包含特殊字符
             String name = StringUtils.getRandomLetters(6);
             user.setUserName(name);
-            String password = StringUtils.getRandomString(8);
+            String password = StringUtils.getRandomLetters(8);
             // {bcrypt} 密码加密方式
             user.setPassword(new BCryptPasswordEncoder().encode(password));
             List<SysUser> all = userRepository.findAll();

@@ -22,7 +22,6 @@ import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -41,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Rollback(false)
 @Slf4j
+@SuppressWarnings("unused")
 public class TestInitData {
 
     @Resource
@@ -63,8 +63,6 @@ public class TestInitData {
     @Resource
     RelicsRepository relicsRepository;
 
-    @Resource
-    EntityManager entityManager;
     @Test
     void initAlias() {
         WarframeDataSource.getRivenTrend();
@@ -112,6 +110,11 @@ public class TestInitData {
     }
 
     @Test
+    void testInitWeapons(){
+        new WarframeDataSource().initWeapons();
+    }
+
+    @Test
     void testInitExprot2() {
         log.info("Customs:{}", JSON.toJSONString(parsingExportJsonToStateTranslation("./data/export/ExportCustoms_zh.json", "ExportCustoms", StateTypeEnum.ALL)));
         log.info("Drones:{}", JSON.toJSONString(parsingExportJsonToStateTranslation("./data/export/ExportDrones_zh.json", "ExportDrones", StateTypeEnum.ALL)));
@@ -131,6 +134,21 @@ public class TestInitData {
     void initNodes() throws FileNotFoundException {
         List<Nodes> nodesList = JSON.parseArray(new FileInputStream("./data/nodes.json")).toJavaList(Nodes.class);
         nodesRepository.saveAll(nodesList);
+    }
+
+    @Test
+    void initStateTranslationData() throws FileNotFoundException {
+        List<StateTranslation> javaList = JSON.parseArray(new FileInputStream("./data/state_translation.json")).toJavaList(StateTranslation.class)
+                .stream()
+                .peek(s -> {
+                    s.setType(StateTypeEnum.RESOURCES);
+                    Arrays.stream(StateTypeEnum.values())
+                            .filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY()))
+                            .findFirst()
+                            .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+                })
+                .toList();
+        str.saveAll(javaList);
     }
 
     @Test

@@ -12,7 +12,7 @@ import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendModel;
-import com.nyx.bot.modules.warframe.utils.RivenAttributeCompute;
+import com.nyx.bot.modules.warframe.utils.riven_calculation.RivenAttributeCompute;
 import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.SendUtils;
 import lombok.extern.slf4j.Slf4j;

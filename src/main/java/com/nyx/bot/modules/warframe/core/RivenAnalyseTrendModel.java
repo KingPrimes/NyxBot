@@ -1,5 +1,6 @@
 package com.nyx.bot.modules.warframe.core;
 
+import com.nyx.bot.enums.RivenTrendEnum;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -12,10 +13,15 @@ public class RivenAnalyseTrendModel {
     String rivenName;
     String newDot;
     Double newNum;
-    String oldDot;
-    Double oldNum;
     String weaponType;
     List<Attribute> attributes;
+
+    public String getNewDot() {
+        if (newNum != null) {
+            return RivenTrendEnum.getRivenTrendDot(newNum);
+        }
+        return RivenTrendEnum.RIVEN_TREND_1.getDoc();
+    }
 
     @Override
     public String toString() {
@@ -24,8 +30,6 @@ public class RivenAnalyseTrendModel {
                 .append("rivenName", rivenName)
                 .append("newDot", newDot)
                 .append("newNum", newNum)
-                .append("oldDot", oldDot)
-                .append("oldNum", oldNum)
                 .append("weaponType", weaponType)
                 .append("attributes", attributes)
                 .toString();
