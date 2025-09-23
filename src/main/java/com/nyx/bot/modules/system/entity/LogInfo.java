@@ -70,4 +70,25 @@ public class LogInfo extends BaseEntity implements Serializable {
     public LogInfo() {
         super();
     }
+
+    public LogInfo(Long id, LogTitleEnum title, String code, String permissions, String businessType, Long botUid, Long groupUid, Long userUid, String rawMsg, String url, String method, String requestMethod, Long runTime, String param, String result, Integer status, String errorMsg, Date logTime) {
+        this.id = id;
+        this.title = title;
+        this.code = code;
+        this.permissions = permissions;
+        this.businessType = businessType;
+        this.botUid = botUid;
+        this.groupUid = groupUid;
+        this.userUid = userUid;
+        this.rawMsg = rawMsg;
+        this.url = url;
+        this.method = method;
+        this.requestMethod = requestMethod;
+        this.runTime = runTime;
+        this.param = param;
+        this.result = result;
+        this.status = status;
+        this.errorMsg = errorMsg;
+        this.logTime = logTime;
+    }
 }
