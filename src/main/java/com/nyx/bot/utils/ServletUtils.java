@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServletUtils {
@@ -25,42 +26,42 @@ public class ServletUtils {
      * 获取String参数
      */
     public static String getParameter(String name) {
-        return getRequest().map(request -> request.getParameter(name)).orElse("");
+        return mapRequest(req -> req.getParameter(name), "");
     }
 
     /**
      * 获取String参数
      */
     public static String getParameter(String name, String defaultValue) {
-        return Convert.toStr(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
+        return mapRequest(req -> req.getParameter(name), defaultValue);
     }
 
     /**
      * 获取Integer参数
      */
     public static Integer getParameterToInt(String name) {
-        return Convert.toInt(getRequest().map(request -> request.getParameter(name)).orElse(""));
+        return Convert.toInt(mapRequest(req -> req.getParameter(name), 0));
     }
 
     /**
      * 获取Integer参数
      */
     public static Integer getParameterToInt(String name, Integer defaultValue) {
-        return Convert.toInt(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
+        return Convert.toInt(mapRequest(req -> req.getParameter(name), defaultValue));
     }
 
     /**
      * 获取Boolean参数
      */
     public static Boolean getParameterToBool(String name) {
-        return Convert.toBool(getRequest().map(request -> request.getParameter(name)).orElse(""));
+        return Convert.toBool(mapRequest(req -> req.getParameter(name), false));
     }
 
     /**
      * 获取Boolean参数
      */
     public static Boolean getParameterToBool(String name, Boolean defaultValue) {
-        return Convert.toBool(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
+        return Convert.toBool(mapRequest(req -> req.getParameter(name), defaultValue));
     }
 
     /**
@@ -95,6 +96,10 @@ public class ServletUtils {
     public static ServletRequestAttributes getRequestAttributes() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         return (ServletRequestAttributes) attributes;
+    }
+
+    private static <T> T mapRequest(Function<HttpServletRequest, T> fn, T defaultValue) {
+        return (T) getRequest().map(fn).orElse(defaultValue);
     }
 
     /**

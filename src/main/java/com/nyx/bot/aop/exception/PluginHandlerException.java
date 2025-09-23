@@ -96,38 +96,25 @@ public class PluginHandlerException {
      */
     private void recordPluginLog(ProceedingJoinPoint joinPoint, String cmd, Bot bot, AnyMessageEvent event, long startTime, Exception ex) {
         try {
-            LogInfo logInfo = new LogInfo();
-            logInfo.setTitle(LogTitleEnum.PLUGIN);
-            logInfo.setStatus(BusinessStatus.SUCCESS.ordinal());
-            logInfo.setUrl(""); // 标记为插件请求
-            logInfo.setMethod("Plugin"); // 插件请求方式
-            logInfo.setBusinessType(BusinessType.PLUGIN.getType());
-            // 异常处理
-            if (ex != null) {
-                logInfo.setStatus(BusinessStatus.FAIL.ordinal());
-                logInfo.setErrorMsg(ex.getMessage());
-            }
-
             // 设置方法信息
             String className = joinPoint.getTarget().getClass().getName();
             String methodName = joinPoint.getSignature().getName();
-            logInfo.setRequestMethod(className + "." + methodName + "()");
-
-            // 设置执行时间
-            logInfo.setRunTime(System.currentTimeMillis() - startTime);
-
-            // 设置插件特有信息
-            logInfo.setCode(cmd);
-            if (event != null) {
-                logInfo.setUserUid(event.getUserId());
-                logInfo.setGroupUid(event.getGroupId());
-                logInfo.setRawMsg(event.getRawMessage());
-            }
-            if (bot != null) {
-                logInfo.setBotUid(bot.getSelfId());
-            }
-
-            logInfo.setLogTime(new Date());
+            LogInfo logInfo = LogInfo.builder()
+                    .title(LogTitleEnum.PLUGIN)
+                    .status(ex != null ? BusinessStatus.FAIL.ordinal() : BusinessStatus.SUCCESS.ordinal())
+                    .errorMsg(ex != null ? ex.getMessage() : null)
+                    .url("")
+                    .method("Plugin")
+                    .businessType(BusinessType.PLUGIN.getType())
+                    .requestMethod(className + "." + methodName + "()")
+                    .runTime(System.currentTimeMillis() - startTime)
+                    .code(cmd)
+                    .userUid(event != null ? event.getUserId() : null)
+                    .groupUid(event != null ? event.getGroupId() : null)
+                    .rawMsg(event != null ? event.getRawMessage() : null)
+                    .botUid(bot != null ? bot.getSelfId() : null)
+                    .logTime(new Date())
+                    .build();
 
             // 异步保存日志
             AsyncUtils.me().execute(() -> SpringUtils.getBean(LogInfoRepository.class).save(logInfo));

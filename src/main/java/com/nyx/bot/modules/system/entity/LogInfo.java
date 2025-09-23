@@ -5,6 +5,7 @@ import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import com.nyx.bot.enums.LogTitleEnum;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,6 +16,7 @@ import java.util.Date;
  * 日志信息
  */
 @EqualsAndHashCode(callSuper = true)
+@Builder
 @Data
 @Entity
 @Table
@@ -64,4 +66,8 @@ public class LogInfo extends BaseEntity implements Serializable {
     String errorMsg;
     // 日志时间
     Date logTime;
+
+    public LogInfo() {
+        super();
+    }
 }
