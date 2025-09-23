@@ -33,6 +33,7 @@ public class SortiesPlugin {
     @Resource
     NodesRepository nodesRepository;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SORTIES_CMD,at = AtEnum.BOTH)
     public void sortiesHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class AlertsPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ALERTS_CMD,at = AtEnum.BOTH)
     public void alertsHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

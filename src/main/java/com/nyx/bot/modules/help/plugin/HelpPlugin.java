@@ -25,6 +25,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class HelpPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.HELP_CMD,at = AtEnum.BOTH)
     public void helpHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

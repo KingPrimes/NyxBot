@@ -24,8 +24,10 @@ import org.springframework.ui.ModelMap;
 @Component
 @Slf4j
 public class WarframeTaskSubscribePlugin {
+
+
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD, at = AtEnum.BOTH)
     public void subscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
@@ -48,6 +50,7 @@ public class WarframeTaskSubscribePlugin {
 
         bot.sendMsg(event, ms, false);
     }
+
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_UNSUBSCRIBE_CMD)

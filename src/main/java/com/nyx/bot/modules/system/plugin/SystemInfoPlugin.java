@@ -26,11 +26,11 @@ import java.net.UnknownHostException;
 public class SystemInfoPlugin {
 
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.CHECK_VERSION_CMD,at = AtEnum.BOTH)
     public void systemInfoHandler(Bot bot, AnyMessageEvent event) throws UnknownHostException, DataNotInfoException, HtmlToImageException {
         SendUtils.send(bot, event, getSystemInfoImage(), Codes.CHECK_VERSION, log);
-
     }
 
     private byte[] getSystemInfoImage() throws UnknownHostException, DataNotInfoException, HtmlToImageException {

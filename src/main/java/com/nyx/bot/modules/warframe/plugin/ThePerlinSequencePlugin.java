@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ThePerlinSequencePlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_THE_PERLIN_SEQUENCE_CMD,at = AtEnum.BOTH)
     public void thePerlinSequence(Bot bot, AnyMessageEvent event) {

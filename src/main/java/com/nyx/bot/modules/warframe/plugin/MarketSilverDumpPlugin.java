@@ -29,6 +29,8 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class MarketSilverDumpPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_SILVER_DUMP_CMD,at = AtEnum.BOTH)
     public void marketSilverDumpHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

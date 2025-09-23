@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SyndicateEntratiPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_ENTRATI_CMD,at = AtEnum.BOTH)
     public void syndicateEntranceHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

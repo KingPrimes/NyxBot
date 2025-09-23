@@ -33,6 +33,7 @@ public class LiteSoritePlugin {
     @Resource
     NodesRepository node;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LITE_SORITE_CMD,at = AtEnum.BOTH)
     public void liteSoriteHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

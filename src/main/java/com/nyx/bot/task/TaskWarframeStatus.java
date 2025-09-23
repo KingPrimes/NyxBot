@@ -7,7 +7,6 @@ import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.res.WorldState;
-import com.nyx.bot.modules.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribe;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +40,13 @@ public class TaskWarframeStatus {
         }
     }
 
-    @Async("taskExecutor")
-    @Scheduled(cron = "0 0 0 1/5 * ? ")
-    public void executeRivenTrend() {
-        if (Math.random() < 0.5) {
-            new RivenDispositionUpdates().upRivenTrend();
-        }
-    }
+//    @Async("taskExecutor")
+//    @Scheduled(cron = "0 0 0 1/5 * ? ")
+//    public void executeRivenTrend() {
+//        if (Math.random() < 0.5) {
+//            new RivenDispositionUpdates().upRivenTrend();
+//        }
+//    }
 
     /**
      * 定时更新数据

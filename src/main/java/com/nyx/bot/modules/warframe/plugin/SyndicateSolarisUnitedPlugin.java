@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SyndicateSolarisUnitedPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_SOLARIS_UNITED_CMD,at = AtEnum.BOTH)
     public void syndicateSolarisUnitedHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

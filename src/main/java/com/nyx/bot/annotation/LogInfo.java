@@ -1,7 +1,7 @@
 package com.nyx.bot.annotation;
 
 import com.nyx.bot.enums.BusinessType;
-import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.LogTitleEnum;
 import com.nyx.bot.enums.PermissionsEnums;
 
 import java.lang.annotation.*;
@@ -17,12 +17,12 @@ public @interface LogInfo {
     /**
      * 模块
      */
-    String title() default "其它";
+    LogTitleEnum title() default LogTitleEnum.CONTROLLER;
 
     /**
      * 执行的命令
      */
-    Codes codes() default Codes.HELP;
+    String code() default "";
 
     /**
      * 操作
@@ -31,16 +31,6 @@ public @interface LogInfo {
 
     //用户等级
     PermissionsEnums permissions() default PermissionsEnums.OTHER;
-
-    /**
-     * 请求得群组
-     */
-    long group() default 0;
-
-    /**
-     * 请求得人员
-     */
-    long user() default 0;
 
     /**
      * 是否保存请求的参数

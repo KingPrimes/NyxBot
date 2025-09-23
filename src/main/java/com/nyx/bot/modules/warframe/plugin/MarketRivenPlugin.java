@@ -25,6 +25,8 @@ import org.springframework.ui.ModelMap;
 @Component
 @Slf4j
 public class MarketRivenPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_RIVEN_CMD,at = AtEnum.BOTH)
     public void marketRiven(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

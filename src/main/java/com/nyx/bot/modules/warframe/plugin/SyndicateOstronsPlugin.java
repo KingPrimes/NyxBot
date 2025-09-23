@@ -26,6 +26,8 @@ public class SyndicateOstronsPlugin {
     /**
      * 希图斯 赏金
      */
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_OSTRONS_CMD,at = AtEnum.BOTH)
     public void cetusSyndicateHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

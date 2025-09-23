@@ -30,6 +30,8 @@ import org.springframework.ui.ModelMap;
 @Component
 @Slf4j
 public class MarketOrdersPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = {"/WM", "WM", "/市场", "市场", "/wm", "wm"},at = AtEnum.BOTH)
     public void marketOrders(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

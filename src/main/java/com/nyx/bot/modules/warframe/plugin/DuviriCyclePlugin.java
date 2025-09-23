@@ -34,6 +34,7 @@ public class DuviriCyclePlugin {
     @Resource
     TranslationService repository;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_DUVIRI_CYCLE_CMD,at = AtEnum.BOTH)
     public void duviriCycle(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

@@ -28,6 +28,7 @@ public class AllCyclePlugin {
     /**
      * 平原时间
      */
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ALL_CYCLE_CMD,at = AtEnum.BOTH)
     public void allCycleHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

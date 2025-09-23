@@ -38,6 +38,7 @@ public class InvasionPlugin {
     @Resource
     StateTranslationRepository str;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_INVASIONS_CMD,at = AtEnum.BOTH)
     public void invasionHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

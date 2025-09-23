@@ -30,6 +30,7 @@ public class FissurePlugin {
     /**
      * 裂隙
      */
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_CMD,at = AtEnum.BOTH)
     public void activeMissionHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
@@ -39,6 +40,7 @@ public class FissurePlugin {
     /**
      * 钢铁裂隙
      */
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ACTIVE_MISSION_PATH_CMD,at = AtEnum.BOTH)
     public void activeMissionPathHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
@@ -48,6 +50,7 @@ public class FissurePlugin {
     /**
      * 虚空风暴
      */
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_STORMS_CMD,at = AtEnum.BOTH)
     public void steelPathHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

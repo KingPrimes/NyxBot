@@ -2,19 +2,16 @@ package com.nyx.bot.aop;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.annotation.LogInfo;
-import com.nyx.bot.common.core.OneBotLogInfoData;
 import com.nyx.bot.enums.BusinessStatus;
 import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -58,8 +55,7 @@ public class LogInfoAspect {
             // *========数据库日志=========*//
             com.nyx.bot.modules.system.entity.LogInfo logInfo = new com.nyx.bot.modules.system.entity.LogInfo();
             logInfo.setStatus(BusinessStatus.SUCCESS.ordinal());
-            // 请求的地址
-            logInfo.setUrl(StringUtils.substring(ServletUtils.getRequest().getRequestURI(), 0, 255));
+            ServletUtils.getRequest().ifPresentOrElse(r -> logInfo.setUrl(StringUtils.substring(r.getRequestURI(), 0, 255)), () -> logInfo.setUrl(""));
 
             if (e != null) {
                 logInfo.setStatus(BusinessStatus.FAIL.ordinal());
@@ -69,8 +65,10 @@ public class LogInfoAspect {
             String className = joinPoint.getTarget().getClass().getName();
             String methodName = joinPoint.getSignature().getName();
             logInfo.setRequestMethod(className + "." + methodName + "()");
-            // 设置请求方式
-            logInfo.setMethod(ServletUtils.getRequest().getMethod());
+
+            ServletUtils.getRequest().ifPresentOrElse(r -> logInfo.setMethod(r.getMethod()), () -> logInfo.setMethod("Bot"));
+
+
             logInfo.setRunTime(runTime);
             // 处理设置注解上的参数
             getControllerMethodDescription(joinPoint, controllerLog, logInfo, jsonResult);
@@ -80,7 +78,7 @@ public class LogInfoAspect {
         } catch (Exception exp) {
             // 记录本地异常日志
             log.error("==前置通知异常==");
-            log.error("异常信息:{}", exp.getMessage());
+            log.error("异常信息:{}", exp.getMessage(), exp);
         }
     }
 
@@ -93,14 +91,8 @@ public class LogInfoAspect {
     public void getControllerMethodDescription(JoinPoint joinPoint, LogInfo log, com.nyx.bot.modules.system.entity.LogInfo logInfo, Object jsonResult) {
         // 设置action动作
         logInfo.setBusinessType(log.businessType().getType());
-        // 设置标题
         logInfo.setTitle(log.title());
-        // 执行的命令
-        logInfo.setCodes(log.codes());
-        // 请求的群组
-        logInfo.setGroupUid(logInfo.getGroupUid());
-        // 请求的用户
-        logInfo.setUserUid(logInfo.getUserUid());
+        logInfo.setCode(log.code());
         // 是否需要保存request，参数和值
         if (log.isSaveRequestData()) {
             // 获取参数的信息，传入到数据库中。
@@ -119,42 +111,20 @@ public class LogInfoAspect {
      * @param logInfo 操作日志
      */
     private void setRequestValue(JoinPoint joinPoint, com.nyx.bot.modules.system.entity.LogInfo logInfo) {
-        Map<String, String[]> map = ServletUtils.getRequest().getParameterMap();
-        if (StringUtils.isNotEmpty(map)) {
-            String params = JSONObject.toJSONString(map);
-            logInfo.setParam(params);
-        } else {
+        ServletUtils.getRequest().ifPresentOrElse(r -> {
+            Map<String, String[]> map = r.getParameterMap();
+            if (StringUtils.isNotEmpty(map)) {
+                String params = JSONObject.toJSONString(map);
+                logInfo.setParam(params);
+            }
+        }, () -> {
             Object args = joinPoint.getArgs();
             if (StringUtils.isNotNull(args)) {
-                Signature signature = joinPoint.getSignature();
-                MethodSignature methodSignature = (MethodSignature) signature;
-                String[] parameterNames = methodSignature.getParameterNames();
                 Object[] value = joinPoint.getArgs();
-                for (int i = 0; i < parameterNames.length; i++) {
-                    if (StringUtils.isNotNull(parameterNames[i]) && StringUtils.isNotNull(value[i])) {
-                        switch (parameterNames[i]) {
-                            case "bot" -> logInfo.setBotUid(Long.valueOf(value[i].toString()));
-                            case "group" -> logInfo.setGroupUid(Long.valueOf(value[i].toString()));
-                            case "rawMsg" -> logInfo.setRawMsg(value[i].toString());
-                            case "user" -> logInfo.setUserUid(Long.valueOf(value[i].toString()));
-                            case "data" -> {
-                                if (value[i] instanceof OneBotLogInfoData data) {
-                                    logInfo.setBotUid(data.getBotUid());
-                                    logInfo.setUserUid(data.getUserUid());
-                                    logInfo.setRawMsg(data.getRawMsg());
-                                    logInfo.setGroupUid(data.getGroupUid());
-                                    logInfo.setPermissions(data.getPermissionsEnums().getStr());
-                                }
-                            }
-                            default -> {
-                            }
-                        }
-                    }
-                }
                 String params = argsArrayToString(value);
                 logInfo.setParam(StringUtils.substring(params, 0, 2000));
             }
-        }
+        });
     }
 
 

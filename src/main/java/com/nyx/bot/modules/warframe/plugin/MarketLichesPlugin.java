@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class MarketLichesPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LICHES_CMD,at = AtEnum.BOTH)
     public void marketLiches(Bot bot, AnyMessageEvent event) {
