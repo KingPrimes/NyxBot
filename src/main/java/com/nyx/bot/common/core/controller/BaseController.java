@@ -80,14 +80,14 @@ public class BaseController {
      * 获取request
      */
     public HttpServletRequest getRequest() {
-        return ServletUtils.getRequest();
+        return ServletUtils.getRequest().orElse(null);
     }
 
     /**
      * 获取response
      */
     public HttpServletResponse getResponse() {
-        return ServletUtils.getResponse();
+        return ServletUtils.getResponse().orElse(null);
     }
 
     /**

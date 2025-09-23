@@ -3,7 +3,7 @@ package com.nyx.bot.modules.system.entity;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
-import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.LogTitleEnum;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,10 +24,11 @@ public class LogInfo extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    // 请求的模块
-    String title;
+
+    LogTitleEnum title;
+
     // 操作指令
-    Codes codes;
+    String code;
     // 用户等级
     String permissions;
     // 操作类型

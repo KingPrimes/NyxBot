@@ -23,7 +23,8 @@ import org.springframework.ui.ModelMap;
 @Shiro
 @Component
 @Slf4j
-public class Arbitration {
+public class ArbitrationPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_CMD,at = AtEnum.BOTH)
     public void arbitrationHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

@@ -28,7 +28,7 @@ public class ArbitrationCache {
     /**
      * 获取有价值的仲裁列表
      *
-     * @return List<Arbitration>
+     * @return List<ArbitrationPlugin>
      */
     public static List<Arbitration> getArbitrationList() {
         return loadArbitrationList().stream().filter(Arbitration::isWorth).limit(10).peek(a -> a.setEtc(DateUtils.getDiff((a.getExpiry()), new Date(), true))).toList();

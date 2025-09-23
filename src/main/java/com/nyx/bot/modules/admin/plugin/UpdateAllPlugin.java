@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class UpdateAllPlugin {
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_HTML_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_HTML_CMD, at = AtEnum.BOTH)
     public void updateHtmlHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_HTML);
@@ -30,7 +30,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD, at = AtEnum.BOTH)
     public void updateWarframeResMarketItemsHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_ITEMS);
@@ -41,7 +41,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD, at = AtEnum.BOTH)
     public void updateWarframeResMarketRivenHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_RIVEN);
@@ -52,7 +52,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_RM_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_RM_CMD, at = AtEnum.BOTH)
     public void updateWarframeResRmHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_RM);
@@ -63,7 +63,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD, at = AtEnum.BOTH)
     public void updateWarframeResRivenChangesHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RIVEN_CHANGES);
@@ -74,7 +74,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_SISTER_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_SISTER_CMD, at = AtEnum.BOTH)
     public void updateWarframeSisterHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_SISTER);
@@ -85,7 +85,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_TAR_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_TAR_CMD, at = AtEnum.BOTH)
     public void updateWarframeTarHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_TAR);
@@ -96,7 +96,7 @@ public class UpdateAllPlugin {
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_JAR_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_JAR_CMD, at = AtEnum.BOTH)
     public void updateJarHandler(Bot bot, AnyMessageEvent event) {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_JAR);

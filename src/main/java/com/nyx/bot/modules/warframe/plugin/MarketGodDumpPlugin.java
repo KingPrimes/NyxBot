@@ -29,6 +29,7 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class MarketGodDumpPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD,at = AtEnum.BOTH)
     public void marketGodDump(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

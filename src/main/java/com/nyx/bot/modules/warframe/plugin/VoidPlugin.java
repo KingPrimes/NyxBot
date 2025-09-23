@@ -39,6 +39,7 @@ public class VoidPlugin {
     @Resource
     NodesRepository nodesRepository;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_CMD,at = AtEnum.BOTH)
     public void voidHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

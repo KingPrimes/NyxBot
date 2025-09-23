@@ -25,6 +25,8 @@ import org.springframework.ui.ModelMap;
 @Component
 @Slf4j
 public class SteelPathPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_STEEL_PATH_CMD,at = AtEnum.BOTH)
     public void steelPathHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

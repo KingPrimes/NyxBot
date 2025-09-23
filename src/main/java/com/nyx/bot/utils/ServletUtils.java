@@ -12,8 +12,9 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 public class ServletUtils {
     /**
      * 定义移动端请求的所有可能类型
@@ -24,63 +25,71 @@ public class ServletUtils {
      * 获取String参数
      */
     public static String getParameter(String name) {
-        return getRequest().getParameter(name);
+        return getRequest().map(request -> request.getParameter(name)).orElse("");
     }
 
     /**
      * 获取String参数
      */
     public static String getParameter(String name, String defaultValue) {
-        return Convert.toStr(getRequest().getParameter(name), defaultValue);
+        return Convert.toStr(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
     }
 
     /**
      * 获取Integer参数
      */
     public static Integer getParameterToInt(String name) {
-        return Convert.toInt(getRequest().getParameter(name));
+        return Convert.toInt(getRequest().map(request -> request.getParameter(name)).orElse(""));
     }
 
     /**
      * 获取Integer参数
      */
     public static Integer getParameterToInt(String name, Integer defaultValue) {
-        return Convert.toInt(getRequest().getParameter(name), defaultValue);
+        return Convert.toInt(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
     }
 
     /**
      * 获取Boolean参数
      */
     public static Boolean getParameterToBool(String name) {
-        return Convert.toBool(getRequest().getParameter(name));
+        return Convert.toBool(getRequest().map(request -> request.getParameter(name)).orElse(""));
     }
 
     /**
      * 获取Boolean参数
      */
     public static Boolean getParameterToBool(String name, Boolean defaultValue) {
-        return Convert.toBool(getRequest().getParameter(name), defaultValue);
+        return Convert.toBool(getRequest().map(request -> request.getParameter(name)).orElse(""), defaultValue);
     }
 
     /**
      * 获取request
      */
-    public static HttpServletRequest getRequest() {
-        return getRequestAttributes().getRequest();
+    public static Optional<HttpServletRequest> getRequest() {
+        ServletRequestAttributes attributes = getRequestAttributes();
+        if (attributes != null) {
+            return Optional.of(attributes.getRequest());
+        }
+        return Optional.empty();
     }
 
     /**
      * 获取response
      */
-    public static HttpServletResponse getResponse() {
-        return getRequestAttributes().getResponse();
+    public static Optional<HttpServletResponse> getResponse() {
+        ServletRequestAttributes attributes = getRequestAttributes();
+        if (attributes != null) {
+            return Optional.of(attributes.getResponse());
+        }
+        return Optional.empty();
     }
 
     /**
      * 获取session
      */
-    public static HttpSession getSession() {
-        return getRequest().getSession();
+    public static Optional<HttpSession> getSession() {
+        return getRequest().map(HttpServletRequest::getSession);
     }
 
     public static ServletRequestAttributes getRequestAttributes() {

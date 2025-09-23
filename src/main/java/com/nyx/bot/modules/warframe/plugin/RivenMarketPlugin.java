@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class RivenMarketPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_MARKET_CMD,at = AtEnum.BOTH)
     public void rivenMarket(Bot bot, AnyMessageEvent event) {

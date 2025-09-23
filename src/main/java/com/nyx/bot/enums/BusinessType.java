@@ -47,6 +47,8 @@ public enum BusinessType {
      * 生成图片
      */
     IMAGE("生成图片"),
+
+    PLUGIN("插件"),
     ;
     final String type;
 

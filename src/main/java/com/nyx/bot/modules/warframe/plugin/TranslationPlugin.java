@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class TranslationPlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_TRA_CMD,at = AtEnum.BOTH)
     public void translation(Bot bot, AnyMessageEvent event) {

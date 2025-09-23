@@ -6,6 +6,7 @@ import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.page.TableDataInfo;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.enums.LogTitleEnum;
 import com.nyx.bot.modules.system.entity.LogInfo;
 import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.StringUtils;
@@ -28,17 +29,26 @@ public class LogInfoController extends BaseController {
     @GetMapping("/codes")
     public AjaxResult info() {
         return success().put("data", Arrays.stream(Codes.values())
-                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getComm()), "value", c.name()))
+                .map(c -> Map.of("label", StringUtils.removeMatcher(c.getComm()), "value", StringUtils.removeMatcher(c.getComm())))
                 .collect(Collectors.toList())
         );
+    }
+
+    @GetMapping("/titles")
+    public AjaxResult logTitle() {
+        return success().put("data", Arrays.stream(LogTitleEnum.values())
+                .map(t -> Map.of("label", t.getTitle(), "value", t.name()))
+                .toList());
     }
 
     // 分页条件查询
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody LogInfo info) {
+        log.debug("日志信息查询: {}", info);
         return getDataTable(repository.findAllPageable(
-                info.getCodes(),
+                info.getTitle(),
+                info.getCode(),
                 info.getGroupUid(),
                 PageRequest.of(info.getCurrent() - 1, info.getSize())));
     }

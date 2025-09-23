@@ -5,6 +5,13 @@ import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.nyx.bot.enums.BusinessStatus;
+import com.nyx.bot.enums.BusinessType;
+import com.nyx.bot.enums.LogTitleEnum;
+import com.nyx.bot.modules.system.entity.LogInfo;
+import com.nyx.bot.modules.system.repo.LogInfoRepository;
+import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
@@ -18,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 
 @Aspect
@@ -50,6 +58,9 @@ public class PluginHandlerException {
                 event = e;
             }
         }
+        long startTime = System.currentTimeMillis();
+        Exception ex = null;
+        Object result = null;
         try {
             log.debug("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
             if (CqMatcher.isCqAt(Objects.requireNonNull(event).getRawMessage())) {
@@ -60,12 +71,13 @@ public class PluginHandlerException {
                     event.setMessage(build.reovmCq().trim());
                 }
             }
+            startTime = System.currentTimeMillis();
             // 执行目标方法
             return joinPoint.proceed(new Object[]{bot, event});
-        } catch (Exception ex) {
-
+        } catch (Exception e) {
+            ex = e;
             log.debug("捕获到@AnyMessageHandler注解方法的异常。方法: {}, 参数: {}, 异常信息: {}",
-                    joinPoint.getSignature().toShortString(), Arrays.toString(args), ex.getMessage(), ex);
+                    joinPoint.getSignature().toShortString(), Arrays.toString(args), ex.getMessage(), e);
 
             if (bot != null && event != null) {
                 ArrayMsgUtils ams = ArrayMsgUtils.builder();
@@ -74,6 +86,53 @@ public class PluginHandlerException {
                 bot.sendMsg(event, ams.build(), false);
             }
             return 0;
+        } finally {
+            recordPluginLog(joinPoint, cmd, bot, event, startTime, ex);
+        }
+    }
+
+    /**
+     * 记录插件操作日志
+     */
+    private void recordPluginLog(ProceedingJoinPoint joinPoint, String cmd, Bot bot, AnyMessageEvent event, long startTime, Exception ex) {
+        try {
+            LogInfo logInfo = new LogInfo();
+            logInfo.setTitle(LogTitleEnum.PLUGIN);
+            logInfo.setStatus(BusinessStatus.SUCCESS.ordinal());
+            logInfo.setUrl(""); // 标记为插件请求
+            logInfo.setMethod("Plugin"); // 插件请求方式
+            logInfo.setBusinessType(BusinessType.PLUGIN.getType());
+            // 异常处理
+            if (ex != null) {
+                logInfo.setStatus(BusinessStatus.FAIL.ordinal());
+                logInfo.setErrorMsg(ex.getMessage());
+            }
+
+            // 设置方法信息
+            String className = joinPoint.getTarget().getClass().getName();
+            String methodName = joinPoint.getSignature().getName();
+            logInfo.setRequestMethod(className + "." + methodName + "()");
+
+            // 设置执行时间
+            logInfo.setRunTime(System.currentTimeMillis() - startTime);
+
+            // 设置插件特有信息
+            logInfo.setCode(cmd);
+            if (event != null) {
+                logInfo.setUserUid(event.getUserId());
+                logInfo.setGroupUid(event.getGroupId());
+                logInfo.setRawMsg(event.getRawMessage());
+            }
+            if (bot != null) {
+                logInfo.setBotUid(bot.getSelfId());
+            }
+
+            logInfo.setLogTime(new Date());
+
+            // 异步保存日志
+            AsyncUtils.me().execute(() -> SpringUtils.getBean(LogInfoRepository.class).save(logInfo));
+        } catch (Exception exp) {
+            log.error("插件日志记录异常", exp);
         }
     }
 }

@@ -29,6 +29,7 @@ public class RivenDisUpdatePlugin {
     @Resource
     RivenTrendRepository repository;
 
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_DIS_UPDATE_CMD,at = AtEnum.BOTH)
     public void rivenDisUpdate(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

@@ -28,6 +28,8 @@ import java.util.List;
 @Component
 @Slf4j
 public class RivenAnalysePlugin {
+
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_ANALYSE_CMD, at = AtEnum.BOTH)
     public void rivenAnalyse(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {

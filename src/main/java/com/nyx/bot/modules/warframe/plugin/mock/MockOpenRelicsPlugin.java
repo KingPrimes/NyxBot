@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class MockOpenRelicsPlugin {
+
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_OPEN_RELICS_CMD)
     public void openRelics(Bot bot, AnyMessageEvent event) {
