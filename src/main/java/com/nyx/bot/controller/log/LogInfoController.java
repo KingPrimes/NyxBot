@@ -45,7 +45,6 @@ public class LogInfoController extends BaseController {
     @PostMapping("/list")
     @JsonView(Views.View.class)
     public TableDataInfo list(@RequestBody LogInfo info) {
-        log.debug("日志信息查询: {}", info);
         return getDataTable(repository.findAllPageable(
                 info.getTitle(),
                 info.getCode(),
