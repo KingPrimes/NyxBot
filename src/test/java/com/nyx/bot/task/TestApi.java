@@ -390,39 +390,6 @@ public class TestApi {
     }
 
     @Test
-    void testKnownCalendarSeasons() {
-        List<KnownCalendarSeasons> knownCalendarSeasons = worldState.getKnownCalendarSeasons();
-
-        // 调用实体类自带的处理方法（替代原TestApi中的复杂逻辑）
-        knownCalendarSeasons = knownCalendarSeasons.stream().peek(season -> {
-            season.processDays();
-            // 仅保留依赖仓库的事件处理逻辑（实体类无法持有仓库依赖）
-            season.setDays(season.getDays().stream().peek(day -> day.setEvents(
-                    day.getEvents().stream().peek(e -> {
-                        switch (e.getType()) {
-                            case CET_CHALLENGE:
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(e.getChallenge()))
-                                        .ifPresent(s -> e.setChallenge_info(new KnownCalendarSeasons.Challenge()
-                                                .setName(s.getName()).setChallenge(s.getDescription())));
-                                break;
-                            case CET_REWARD:
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(e.getReward()))
-                                        .ifPresent(s -> e.setReward(s.getName()));
-                                break;
-                            case CET_UPGRADE:
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(e.getUpgrade()))
-                                        .ifPresent(s -> e.setUpgrade_info(new KnownCalendarSeasons.Upgrade()
-                                                .setName(s.getName()).setUpgrade(s.getDescription())));
-                                break;
-                        }
-                    }).toList()
-            )).toList());
-        }).toList();
-
-        log.info("KnownCalendarSeasons:{}", JSON.toJSONString(knownCalendarSeasons));
-    }
-
-    @Test
     void testUnzip() {
         Boolean zh = HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted("zh"), "./data/lzma/index_zh.txt.lzma");
         log.info("文件获取状态:{}", zh);

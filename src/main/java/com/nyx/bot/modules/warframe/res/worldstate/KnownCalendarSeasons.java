@@ -1,16 +1,20 @@
 package com.nyx.bot.modules.warframe.res.worldstate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Accessors(chain = true)
 public class KnownCalendarSeasons extends BastWorldState {
 
     @JsonProperty("Days")
@@ -23,10 +27,13 @@ public class KnownCalendarSeasons extends BastWorldState {
     private Integer version;
     @JsonProperty("UpgradeAvaliabilityRequirements")
     private List<String> upgradeAvaliabilityRequirements;
+    @JsonProperty("MonthDays")
+    private Map<?, ?> monthDays;
 
     /**
      * 处理Days数据，计算自然月和日期
      */
+    @JsonIgnore
     public void processDays() {
         if (days == null || days.isEmpty() || season == null) {
             return; // 空数据保护
@@ -58,14 +65,43 @@ public class KnownCalendarSeasons extends BastWorldState {
                 .thenComparingInt(Days::getDay));
     }
 
+    @JsonIgnore
+    public KnownCalendarSeasons copy() {
+        KnownCalendarSeasons copy = new KnownCalendarSeasons();
+        // 拷贝基础属性
+        copy.set_id(this.get_id());
+        copy.setSeason(this.getSeason());
+        copy.setYearIteration(this.getYearIteration());
+        copy.setVersion(this.getVersion());
+        copy.setActivation(this.getActivation());
+        copy.setExpiry(this.getExpiry());
+        copy.setUpgradeAvaliabilityRequirements(this.getUpgradeAvaliabilityRequirements());
+        // 深拷贝 Days 列表
+        if (this.days != null) {
+            List<Days> copiedDays = new ArrayList<>(this.days.size()); // 预指定容量
+            for (Days day : this.days) {
+                copiedDays.add(day.copy());
+            }
+            copy.setDays(copiedDays);
+        }
+        return copy;
+    }
+
     // conclaveChallenges
+    @Getter
     public enum DaysTypeEnum {
         // 任务
-        CET_CHALLENGE,
+        CET_CHALLENGE("任务"),
         // 奖励
-        CET_REWARD,
+        CET_REWARD("奖励"),
         // 加成
-        CET_UPGRADE,
+        CET_UPGRADE("加成"),
+        ;
+        private final String displayName;
+
+        DaysTypeEnum(String displayName) {
+            this.displayName = displayName;
+        }
 
     }
 
@@ -88,6 +124,7 @@ public class KnownCalendarSeasons extends BastWorldState {
     }
 
     @Data
+    @Accessors(chain = true)
     public static class Days {
         @JsonProperty("day")
         private Integer day;
@@ -95,9 +132,26 @@ public class KnownCalendarSeasons extends BastWorldState {
         private List<Events> events;
         @JsonProperty("month")
         private Integer month;
+
+        @JsonIgnore
+        public Days copy() {
+            Days copy = new Days();
+            copy.setDay(this.day);
+            copy.setMonth(this.month);
+            // 深拷贝 Events 列表
+            if (this.events != null) {
+                List<Events> copiedEvents = new ArrayList<>(this.events.size()); // 预指定容量
+                for (Events event : this.events) {
+                    copiedEvents.add(event.copy());
+                }
+                copy.setEvents(copiedEvents);
+            }
+            return copy;
+        }
     }
 
     @Data
+    @Accessors(chain = true)
     public static class Events {
         @JsonProperty("type")
         private DaysTypeEnum type;
@@ -106,28 +160,29 @@ public class KnownCalendarSeasons extends BastWorldState {
         @JsonProperty("challenge")
         private String challenge;
 
-        @JsonProperty("challenge_info")
-        private Challenge challenge_info;
+        @JsonProperty("challengeInfo")
+        private Challenge challengeInfo;
+        @JsonProperty("upgradeInfo")
+        private Upgrade upgradeInfo;
 
         @JsonProperty("upgrade")
         private String upgrade;
 
-        @JsonProperty("upgrade_info")
-        private Upgrade upgrade_info;
+        @JsonIgnore
+        public Events copy() {
+            Events copy = new Events();
+            copy.setType(this.type);
+            copy.setChallenge(this.challenge);
+            copy.setReward(this.reward);
+            copy.setUpgrade(this.upgrade);
+            return copy;
+        }
 
-    }
+        public record Challenge(String name, String challenge) {
+        }
 
-    @Data
-    @Accessors(chain = true)
-    public static class Challenge {
-        String name;
-        String challenge;
-    }
+        public record Upgrade(String name, String upgrade) {
+        }
 
-    @Data
-    @Accessors(chain = true)
-    public static class Upgrade {
-        String name;
-        String upgrade;
     }
 }

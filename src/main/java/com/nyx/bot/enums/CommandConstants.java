@@ -44,6 +44,7 @@ public class CommandConstants {
     public static final String WARFRAME_RELICS_CMD = "^核桃.*?|^查核桃.*?";
     public static final String WARFRAME_OPEN_RELICS_CMD = "^开核桃|^砸核桃";
     public static final String WARFRAME_RIVEN_ANALYSE_CMD = "^紫卡分析.*?|^分析紫卡.*?";
+    public static final String WARFRAME_KNOWN_CALENDAR_SEASONS_CMD = "^1999$|^日历$";
     public static final String WARFRAME_SUBSCRIBE_CMD = "^订阅.*?([0-9]+)? ?-? ?([0-9]+)?";
     public static final String WARFRAME_UNSUBSCRIBE_CMD = "^取消订阅.*?([0-9]+)? ?-? ?([0-9]+)?";
 }

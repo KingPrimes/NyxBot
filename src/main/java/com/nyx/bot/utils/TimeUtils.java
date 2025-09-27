@@ -1,5 +1,11 @@
 package com.nyx.bot.utils;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+@SuppressWarnings("unused")
 public class TimeUtils {
     public static String timeDeltaToString(long millis) {
         long seconds = millis / 1000;
@@ -20,17 +26,9 @@ public class TimeUtils {
     }
 
     public static long timeDeltaToMinutes(long startMillis, long endMillis, String timezone) {
-        // 验证时区是否有效，如果无效则使用默认时区
-        if (!TimeZoneUtil.isValidTimeZone(timezone)) {
-            timezone = TimeZoneUtil.getEffectiveTimeZone();
-        }
-
-        // 计算时间差
-        long deltaMillis = Math.abs(endMillis - startMillis);
-        long seconds = deltaMillis / 1000;
-        seconds %= (24 * 3600);
-        seconds %= 3600;
-        return seconds / 60;
+        // 计算两个时区时间的分钟差（考虑时区偏移和夏令时）
+        Duration duration = calculateTimeDelta(startMillis, endMillis, timezone);
+        return Math.abs(duration.toMinutes());
     }
 
     public static long timeDeltaToMinutes(long startMillis, long endMillis) {
@@ -50,16 +48,26 @@ public class TimeUtils {
      * @return 格式化的时间差字符串
      */
     public static String timeDeltaToString(long startMillis, long endMillis, String timezone) {
-        // 验证时区是否有效，如果无效则使用默认时区
+        // 计算时区时间差（毫秒）并格式化
+        Duration duration = calculateTimeDelta(startMillis, endMillis, timezone);
+        long deltaMillis = Math.abs(duration.toMillis());
+
+        // 使用现有的方法格式化时间差
+        return timeDeltaToString(deltaMillis);
+    }
+
+    private static Duration calculateTimeDelta(long startMillis, long endMillis, String timezone) {
         if (!TimeZoneUtil.isValidTimeZone(timezone)) {
             timezone = TimeZoneUtil.getEffectiveTimeZone();
         }
 
-        // 计算时间差
-        long deltaMillis = Math.abs(endMillis - startMillis);
+        // 使用时区参数计算时间差（核心修改）
+        ZoneId zoneId = ZoneId.of(timezone);
+        ZonedDateTime startZoned = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startMillis), zoneId);
+        ZonedDateTime endZoned = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endMillis), zoneId);
 
-        // 使用现有的方法格式化时间差
-        return timeDeltaToString(deltaMillis);
+        // 计算时区时间差（毫秒）并格式化
+        return Duration.between(startZoned, endZoned);
     }
 
     /**

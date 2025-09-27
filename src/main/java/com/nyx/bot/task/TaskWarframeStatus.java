@@ -24,29 +24,19 @@ public class TaskWarframeStatus {
     @Async("taskExecutor")
     @Scheduled(cron = "0/120 * * * * ?")
     public void executeWarframeStatus() {
-        if (!test) {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-            if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                try {
-                    WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
-                    WarframeCache.setWarframeStatus(worldState);
-                    WarframeSubscribe.isUpdated(worldState);
-                } catch (JSONException e) {
-                    log.error("Warframe 状态数据解析错误: {}", e.getMessage());
-                }
-            } else {
-                log.error("Warframe 状态数据错误: {}", body.getBody());
+        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
+        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            try {
+                WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
+                WarframeCache.setWarframeStatus(worldState);
+                WarframeSubscribe.isUpdated(worldState);
+            } catch (JSONException e) {
+                log.error("Warframe 状态数据解析错误: {}", e.getMessage());
             }
+        } else {
+            log.error("Warframe 状态数据错误: {}", body.getBody());
         }
     }
-
-//    @Async("taskExecutor")
-//    @Scheduled(cron = "0 0 0 1/5 * ? ")
-//    public void executeRivenTrend() {
-//        if (Math.random() < 0.5) {
-//            new RivenDispositionUpdates().upRivenTrend();
-//        }
-//    }
 
     /**
      * 定时更新数据
@@ -54,7 +44,7 @@ public class TaskWarframeStatus {
     @Async("taskExecutor")
     @Scheduled(cron = "0 0 0 1/3 * ? ")
     public void executeDataSourcePullRandom() {
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.5 && !test) {
             WarframeDataSource.init();
         }
     }

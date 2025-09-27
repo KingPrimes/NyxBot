@@ -3,9 +3,11 @@ package com.nyx.bot.modules.warframe.res.worldstate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @SuppressWarnings("unused")
 @Data
+@Accessors(chain = true)
 public class BastWorldState {
     @JsonProperty("_id")
     private Id _id;

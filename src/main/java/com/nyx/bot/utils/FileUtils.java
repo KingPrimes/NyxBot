@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@SuppressWarnings("all")
 @Slf4j
 public class FileUtils {
     //读取文件到字符串
@@ -71,9 +72,14 @@ public class FileUtils {
      * @param content  要写入的内容
      */
     public static void writeFile(String fileName, String content) {
-        File file = new File(fileName);
-        try (FileOutputStream stream = new FileOutputStream(file)) {
-            stream.write(content.getBytes(StandardCharsets.UTF_8));
+        Path path = Paths.get(fileName);
+        try {
+            //判断目录是否存在不存在则创建
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+            }
+            Files.writeString(path, content, StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("写入文件错误:{}", e.getMessage());
         }
