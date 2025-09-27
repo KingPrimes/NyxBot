@@ -87,7 +87,12 @@ public class PluginHandlerException {
             }
             return 0;
         } finally {
-            recordPluginLog(joinPoint, cmd, bot, event, startTime, ex);
+            Bot finalBot1 = bot;
+            AnyMessageEvent finalEvent = event;
+            long finalStartTime = startTime;
+            Exception finalEx = ex;
+            // 异步保存日志
+            AsyncUtils.me().execute(() -> recordPluginLog(joinPoint, cmd, finalBot1, finalEvent, finalStartTime, finalEx));
         }
     }
 
@@ -116,8 +121,8 @@ public class PluginHandlerException {
                     .logTime(new Date())
                     .build();
 
-            // 异步保存日志
-            AsyncUtils.me().execute(() -> SpringUtils.getBean(LogInfoRepository.class).save(logInfo));
+
+            SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
         } catch (Exception exp) {
             log.error("插件日志记录异常", exp);
         }

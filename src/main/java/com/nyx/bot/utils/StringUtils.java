@@ -577,6 +577,53 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
+     * 删除字符串中两个标记字符之间的子字符串（保留标记字符）
+     *
+     * @param str     原始字符串
+     * @param marker1 起始标记字符
+     * @param marker2 结束标记字符
+     * @return 处理后的字符串，如果未找到标记对则返回原始字符串
+     */
+    public static String deleteBetween(String str, char marker1, char marker2) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        int start = str.indexOf(marker1);
+        if (start == -1) {
+            return str;
+        }
+        int end = str.indexOf(marker2, start + 1);
+        if (end == -1) {
+            return str;
+        }
+        return str.substring(0, start + 1) + str.substring(end);
+    }
+
+    /**
+     * 删除字符串中两个标记字符及其之间的子字符串（不保留标记字符）
+     *
+     * @param str     原始字符串
+     * @param marker1 起始标记字符
+     * @param marker2 结束标记字符
+     * @return 处理后的字符串，如果未找到标记对则返回原始字符串
+     */
+    public static String deleteBetweenAndMarkers(String str, char marker1, char marker2) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        int start = str.indexOf(marker1);
+        if (start == -1) {
+            return str;
+        }
+        int end = str.indexOf(marker2, start + 1);
+        if (end == -1) {
+            return str;
+        }
+        // 截取标记1之前的部分和标记2之后的部分进行拼接
+        return str.substring(0, start) + str.substring(end + 1);
+    }
+
+    /**
      * 取两个文本之间的文本值
      *
      * @param text  源文本 比如：源文本 = 12345
@@ -724,6 +771,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     /**
      * 生成仅包含随机字母的字符串（不包含特殊字符和数字）
+     *
      * @param length 字符串长度
      * @return 随机字母字符串
      */
