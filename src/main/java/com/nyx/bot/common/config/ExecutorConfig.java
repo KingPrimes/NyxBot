@@ -56,7 +56,7 @@ public class ExecutorConfig {
 
         // 拒绝策略保持不变
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
         executor.setAwaitTerminationSeconds(120);
         //执行初始化
         executor.initialize();
@@ -95,7 +95,7 @@ public class ExecutorConfig {
 
         // 拒绝策略
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
         executor.setAwaitTerminationSeconds(2);
         //执行初始化
         executor.initialize();

@@ -120,7 +120,6 @@ public class AjaxResult extends HashMap<String, Object> {
     /**
      * 返回错误消息
      *
-     * @return
      */
     public static AjaxResult error() {
         return AjaxResult.error(I18nUtils.message("controller.error"));
@@ -189,10 +188,16 @@ public class AjaxResult extends HashMap<String, Object> {
         return this;
     }
 
+    public AjaxResult data(Object value){
+        super.put(DATA_TAG,value);
+        return this;
+    }
+
     public String getMsg(){
         return (String) this.get(MSG_TAG);
     }
 
+    @SuppressWarnings("unused")
     public String toJsonString() {
         return JSON.toJSONString(this);
     }
