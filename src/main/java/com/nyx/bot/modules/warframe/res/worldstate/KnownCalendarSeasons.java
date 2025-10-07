@@ -38,10 +38,8 @@ public class KnownCalendarSeasons extends BastWorldState {
         if (days == null || days.isEmpty() || season == null) {
             return; // 空数据保护
         }
-
-        SeasonEnum currentSeason = getSeason();
-        int startMonth = currentSeason.getStartMonth();
-        int[] seasonMonthDays = currentSeason.getMonthDays();
+        int startMonth = 1;
+        int[] seasonMonthDays = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
         // 1. 计算每个Days的自然月和日期
         for (Days day : days) {
@@ -49,8 +47,8 @@ public class KnownCalendarSeasons extends BastWorldState {
             int monthIndex = 0;
             int remainingDays = seasonDay;
 
-            // 计算月份索引（0-2，对应季节内的3个自然月）
-            while (monthIndex < seasonMonthDays.length && remainingDays > seasonMonthDays[monthIndex]) {
+            // 计算月份索引
+            while (monthIndex < seasonMonthDays.length && remainingDays >= seasonMonthDays[monthIndex]) {
                 remainingDays -= seasonMonthDays[monthIndex];
                 monthIndex++;
             }
@@ -107,19 +105,15 @@ public class KnownCalendarSeasons extends BastWorldState {
 
     @Getter
     public enum SeasonEnum {
-        CST_FALL("秋季", 10, new int[]{31, 30, 31}),  // 秋季: 10-12月 (天数数组)
-        CST_SPRING("春季", 4, new int[]{30, 31, 30}),   // 春季: 4-6月
-        CST_SUMMER("夏季", 7, new int[]{31, 31, 30}),   // 夏季: 7-9月
-        CST_WINTER("冬季", 1, new int[]{31, 28, 31});   // 冬季: 1-3月
+        CST_FALL("秋季"),  // 秋季: 10-12月 (天数数组)
+        CST_SUMMER("夏季"),   // 夏季: 7-9月
+        CST_SPRING("春季"),   // 春季: 4-6月
+        CST_WINTER("冬季");   // 冬季: 1-3月
 
         private final String name;
-        private final int startMonth;  // 季节起始自然月
-        private final int[] monthDays;  // 季节包含的3个自然月天数
 
-        SeasonEnum(String name, int startMonth, int[] monthDays) {
+        SeasonEnum(String name) {
             this.name = name;
-            this.startMonth = startMonth;
-            this.monthDays = monthDays;
         }
     }
 
