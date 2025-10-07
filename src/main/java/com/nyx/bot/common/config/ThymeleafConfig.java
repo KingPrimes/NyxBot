@@ -1,7 +1,6 @@
 package com.nyx.bot.common.config;
 
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -28,15 +27,29 @@ public class ThymeleafConfig {
         return str;
     }
 
+    @Bean
+    public SpringResourceTemplateResolver customResourceTemplateResolverForSVG() {
+        SpringResourceTemplateResolver str = new SpringResourceTemplateResolver();
+        str.setPrefix("file:./DataSource/Template/");
+        str.setSuffix(".svg");
+        str.setTemplateMode(TemplateMode.XML);
+        str.setCharacterEncoding("UTF-8");
+        str.setOrder(2);
+        str.setCacheable(false);
+        str.setCheckExistence(true);
+        return str;
+    }
+
     // 配置支持双路径的模板引擎
     @Bean(name = "customTemplateEngine")
-    public SpringTemplateEngine customTemplateEngine(@Qualifier("customResourceTemplateResolver")SpringResourceTemplateResolver customResourceTemplateResolver) {
+    public SpringTemplateEngine customTemplateEngine() {
         SpringTemplateEngine engine = new SpringTemplateEngine();
 
         // 添加默认解析器（优先级0）和自定义解析器（优先级1）
         // 模板引擎会按order从小到大依次查找模板
         engine.addTemplateResolver(springResourceTemplateResolver); // 默认路径（order=0）
-        engine.addTemplateResolver(customResourceTemplateResolver); // 自定义路径（order=1）
+        engine.addTemplateResolver(customResourceTemplateResolver()); // 自定义路径（order=1）
+        engine.addTemplateResolver(customResourceTemplateResolverForSVG()); // 自定义路径（order=2）
 
         return engine;
     }
