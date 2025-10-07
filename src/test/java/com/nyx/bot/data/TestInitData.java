@@ -245,6 +245,7 @@ public class TestInitData {
     /**
      * 获取DE官方数据文件并保存到本地
      */
+    @Test
     void severExportFiles() {
         String path = "./data/lzma/index_zh.txt.lzma";
         String outPath = "./data/lzma/index_zh.txt";

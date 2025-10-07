@@ -51,19 +51,11 @@ public class TestApi {
 
     static Map<String, String> compareTheHashAndSave(List<String> keys) {
         String keysHashPath = "./data/keys.json";
-        Map<String, String> collect = keys.stream()
-                .map(key -> key.split("!", 2))
-                .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
             var map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
-            return collect.entrySet().stream()
-                    .filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey())))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue
-                    ));
+            return collect.entrySet().stream().filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (FileNotFoundException e) {
             FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
             return collect;
@@ -109,12 +101,7 @@ public class TestApi {
      */
     @Test
     void testStateDailyDeals() {
-        worldState.getDailyDeals().stream().peek(i ->
-                        str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s ->
-                                i.setItem(s.getName()))).findFirst()
-                .ifPresent(d ->
-                        log.info(JSON.toJSONString(d, JSONWriter.Feature.PrettyFormatWith4Space))
-                );
+        worldState.getDailyDeals().stream().peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()))).findFirst().ifPresent(d -> log.info(JSON.toJSONString(d, JSONWriter.Feature.PrettyFormatWith4Space)));
     }
 
     /**
@@ -137,34 +124,13 @@ public class TestApi {
      */
     @Test
     void testStateInvasions() {
-        List<Invasion> list = worldState.getInvasions().stream()
-                .filter(i -> !i.getCompleted())
-                .peek(d -> {
-                            nodesRepository.findById(d.getNode())
-                                    .ifPresent(nodes -> d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-                            List<Reward.Item> items = d.getDefenderReward().getCountedItems()
-                                    .stream()
-                                    .filter(Objects::nonNull)
-                                    .peek(i ->
-                                            str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))
-                                    )
-                                    .toList();
-                            d.getDefenderReward().setCountedItems(items);
+        List<Invasion> list = worldState.getInvasions().stream().filter(i -> !i.getCompleted()).peek(d -> {
+            nodesRepository.findById(d.getNode()).ifPresent(nodes -> d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+            List<Reward.Item> items = d.getDefenderReward().getCountedItems().stream().filter(Objects::nonNull).peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))).toList();
+            d.getDefenderReward().setCountedItems(items);
 
-                            d.setAttackerReward(d.getAttackerReward().stream()
-                                    .filter(Objects::nonNull)
-                                    .peek(r -> r.setCountedItems(
-                                            r.getCountedItems()
-                                                    .stream()
-                                                    .filter(Objects::nonNull)
-                                                    .peek(i ->
-                                                            str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName()))
-                                                                    .ifPresent(s -> i.setName(s.getName()))
-                                                    )
-                                                    .toList()
-                                    )).toList());
-                        }
-                ).toList();
+            d.setAttackerReward(d.getAttackerReward().stream().filter(Objects::nonNull).peek(r -> r.setCountedItems(r.getCountedItems().stream().filter(Objects::nonNull).peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))).toList())).toList());
+        }).toList();
         log.info(JSON.toJSONString(list));
     }
 
@@ -173,21 +139,9 @@ public class TestApi {
      */
     @Test
     void testStateActiveMissions() {
-        List<ActiveMission> hard = worldState.getActiveMissions().stream()
-                .filter(m -> Objects.nonNull(m.getHard()) && m.getHard())
-                .peek(m ->
-                        nodesRepository.findById(m.getNode()).ifPresent(nodes ->
-                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
-                .sorted(Comparator.comparing(ActiveMission::getVoidEnum))
-                .toList();
+        List<ActiveMission> hard = worldState.getActiveMissions().stream().filter(m -> Objects.nonNull(m.getHard()) && m.getHard()).peek(m -> nodesRepository.findById(m.getNode()).ifPresent(nodes -> m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
         log.info("ActiveMissions Hard:{}", JSON.toJSONString(hard));
-        List<ActiveMission> list = worldState.getActiveMissions().stream()
-                .filter(m -> !Objects.nonNull(m.getHard()))
-                .peek(m ->
-                        nodesRepository.findById(m.getNode()).ifPresent(nodes ->
-                                m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
-                .sorted(Comparator.comparing(ActiveMission::getVoidEnum))
-                .toList();
+        List<ActiveMission> list = worldState.getActiveMissions().stream().filter(m -> !Objects.nonNull(m.getHard())).peek(m -> nodesRepository.findById(m.getNode()).ifPresent(nodes -> m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
 
         log.info("ActiveMissions:{}", JSON.toJSONString(list));
     }
@@ -197,20 +151,18 @@ public class TestApi {
      */
     @Test
     void testVoidStorms() {
-        List<ActiveMission> list = worldState.getVoidStorms().stream()
-                .map(v -> {
-                    ActiveMission am = new ActiveMission();
-                    nodesRepository.findById(v.getNode()).ifPresentOrElse(nodes -> {
-                        am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                        am.setMissionType(nodes.getMissionType());
-                    }, () -> am.setNode(v.getNode()));
-                    am.set_id(v.get_id());
-                    am.setActivation(v.getActivation());
-                    am.setExpiry(v.getExpiry());
-                    am.setModifier(v.getVoidEnum());
-                    return am;
-                })
-                .sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
+        List<ActiveMission> list = worldState.getVoidStorms().stream().map(v -> {
+            ActiveMission am = new ActiveMission();
+            nodesRepository.findById(v.getNode()).ifPresentOrElse(nodes -> {
+                am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+                am.setMissionType(nodes.getMissionType());
+            }, () -> am.setNode(v.getNode()));
+            am.set_id(v.get_id());
+            am.setActivation(v.getActivation());
+            am.setExpiry(v.getExpiry());
+            am.setModifier(v.getVoidEnum());
+            return am;
+        }).sorted(Comparator.comparing(ActiveMission::getVoidEnum)).toList();
         log.info(JSON.toJSONString(list));
     }
 
@@ -220,9 +172,7 @@ public class TestApi {
     @Test
     void testSeasonInfo() {
         SeasonInfo seasonInfo = worldState.getSeasonInfo();
-        seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c ->
-                        nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave))
-                .toList());
+        seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c -> nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave)).toList());
         log.info(JSON.toJSONString(seasonInfo));
     }
 
@@ -240,20 +190,12 @@ public class TestApi {
      */
     @Test
     void testVoidTraders() {
-        List<VoidTrader> list = worldState.getVoidTraders().stream()
-                .peek(v -> {
-                    nodesRepository.findById(v.getNode())
-                            .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-                    if (v.getManifest() != null && !v.getManifest().isEmpty()) {
-                        v.setManifest(v.getManifest()
-                                .stream()
-                                .peek(i ->
-                                        str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem()))
-                                                .ifPresent(s -> i.setItem(s.getName())))
-                                .toList()
-                        );
-                    }
-                }).toList();
+        List<VoidTrader> list = worldState.getVoidTraders().stream().peek(v -> {
+            nodesRepository.findById(v.getNode()).ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+            if (v.getManifest() != null && !v.getManifest().isEmpty()) {
+                v.setManifest(v.getManifest().stream().peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName()))).toList());
+            }
+        }).toList();
         log.info(JSON.toJSONString(list));
     }
 
@@ -261,33 +203,17 @@ public class TestApi {
     // ScheduleInfo 时间表信息
     @Test
     void testPrimeVaultTrader() {
-        List<PrimeVaultTrader> primeVaultTraders = worldState.getPrimeVaultTraders()
-                .stream()
-                .peek(p -> nodesRepository.findById(p.getNode())
-                        .ifPresent(nodes -> p.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
-                .peek(p -> {
-                    p.setManifest(p.getManifest().stream().peek(m ->
-                            str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType()))
-                                    .ifPresent(s -> m.setItemType(s.getName()))).collect(Collectors.toList()));
-                    p.setEvergreenManifest(p.getEvergreenManifest().stream().peek(m ->
-                            str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType()))
-                                    .ifPresent(s -> m.setItemType(s.getName()))).collect(Collectors.toList()));
-                    p.setScheduleInfos(p.getScheduleInfos().stream().peek(m ->
-                            str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItem()))
-                                    .ifPresent(s -> m.setItem(s.getName()))).collect(Collectors.toList()));
-                })
-                .collect(Collectors.toList());
+        List<PrimeVaultTrader> primeVaultTraders = worldState.getPrimeVaultTraders().stream().peek(p -> nodesRepository.findById(p.getNode()).ifPresent(nodes -> p.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).peek(p -> {
+            p.setManifest(p.getManifest().stream().peek(m -> str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType())).ifPresent(s -> m.setItemType(s.getName()))).collect(Collectors.toList()));
+            p.setEvergreenManifest(p.getEvergreenManifest().stream().peek(m -> str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItemType())).ifPresent(s -> m.setItemType(s.getName()))).collect(Collectors.toList()));
+            p.setScheduleInfos(p.getScheduleInfos().stream().peek(m -> str.findByUniqueName(StringUtils.getLastThreeSegments(m.getItem())).ifPresent(s -> m.setItem(s.getName()))).collect(Collectors.toList()));
+        }).collect(Collectors.toList());
         log.info(JSON.toJSONString(primeVaultTraders));
     }
 
     @Test
     void testFlashSale() {
-        List<FlashSale> flashSales = worldState.getFlashSales()
-                .stream()
-                .peek(f ->
-                        str.findByUniqueName(StringUtils.getLastThreeSegments(f.getTypeName()))
-                                .ifPresent(s -> f.setTypeName(s.getName())))
-                .toList();
+        List<FlashSale> flashSales = worldState.getFlashSales().stream().peek(f -> str.findByUniqueName(StringUtils.getLastThreeSegments(f.getTypeName())).ifPresent(s -> f.setTypeName(s.getName()))).toList();
         log.info(JSON.toJSONString(flashSales));
     }
 
@@ -296,13 +222,7 @@ public class TestApi {
      */
     @Test
     void testSorties() {
-        List<Sortie> list = worldState.getSorties().stream()
-                .peek(s -> s.setVariants(s.getVariants().stream()
-                        .peek(v ->
-                                nodesRepository.findById(v.getNode())
-                                        .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
-                        .toList()))
-                .toList();
+        List<Sortie> list = worldState.getSorties().stream().peek(s -> s.setVariants(s.getVariants().stream().peek(v -> nodesRepository.findById(v.getNode()).ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).toList())).toList();
         log.info("Sorties:{}", JSON.toJSONString(list, JSONWriter.Feature.PrettyFormatWith4Space));
     }
 
@@ -311,13 +231,7 @@ public class TestApi {
      */
     @Test
     void testLiteSorties() {
-        List<LiteSorite> list = worldState.getLiteSorties().stream()
-                .peek(s ->
-                        s.setMissions(s.getMissions().stream()
-                                .peek(v -> nodesRepository.findById(v.getNode())
-                                        .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")")))
-                                .toList()))
-                .toList();
+        List<LiteSorite> list = worldState.getLiteSorties().stream().peek(s -> s.setMissions(s.getMissions().stream().peek(v -> nodesRepository.findById(v.getNode()).ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"))).toList())).toList();
         log.info("LiteSorties:{}", JSON.toJSONString(list, JSONWriter.Feature.PrettyFormatWith4Space));
     }
 
@@ -327,38 +241,38 @@ public class TestApi {
     @Test
     void testGoals() {
         List<Goal> list = worldState.getGoals().stream().peek(g -> {
-            nodesRepository.findById(g.getNode()).ifPresent(nodes -> g.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-
+            if (g.getNode() != null && !g.getNode().isEmpty()) {
+                nodesRepository.findById(g.getNode()).ifPresent(nodes -> g.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+            }
+            List<Reward> rewardList = new ArrayList<>();
             if (g.getMissionKeyName().isEmpty() && !g.getScoreLocTag().isEmpty()) {
                 str.findByUniqueName(g.getScoreLocTag()).ifPresent(s -> {
                     g.setMissionKeyName(s.getName());
                     g.setDesc(s.getDescription());
                 });
-            } else {
+            } else if (!g.getMissionKeyName().isEmpty()) {
                 str.findByUniqueName(g.getMissionKeyName()).ifPresent(s -> {
                     g.setMissionKeyName(s.getName());
                     g.setDesc(s.getDescription());
                 });
             }
-            List<Reward> rewardList = new ArrayList<>(g.getInterimRewards().stream().peek(r -> {
-                r.setCountedItems(r.getCountedItems().stream().peek(i ->
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
-                        .toList());
-                r.setItems(r.getItems().stream().map(i -> {
-                    StateTranslation stateTranslation = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
-                    if (stateTranslation == null) {
-                        return i;
-                    }
-                    return stateTranslation.getName();
+            if (g.getInterimRewards() != null) {
+                rewardList = new ArrayList<>(g.getInterimRewards().stream().peek(r -> {
+                    r.setCountedItems(r.getCountedItems().stream().peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))).toList());
+                    r.setItems(r.getItems().stream().map(i -> {
+                        StateTranslation stateTranslation = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
+                        if (stateTranslation == null) {
+                            return i;
+                        }
+                        return stateTranslation.getName();
+                    }).toList());
                 }).toList());
-            }).toList());
+            }
+
 
             Reward reward = g.getReward();
             if (reward != null) {
-                reward.setCountedItems(reward.getCountedItems().stream().peek(i ->
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName()))
-                                        .ifPresent(s -> i.setName(s.getName())))
-                        .toList());
+                reward.setCountedItems(reward.getCountedItems().stream().peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))).toList());
                 reward.setItems(reward.getItems().stream().map(i -> {
                     StateTranslation s = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
                     if (s == null) {
@@ -371,9 +285,7 @@ public class TestApi {
             }
             Reward breward = g.getBonusReward();
             if (breward != null) {
-                breward.setCountedItems(breward.getCountedItems().stream().peek(i ->
-                                str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
-                        .toList());
+                breward.setCountedItems(breward.getCountedItems().stream().peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName()))).toList());
                 breward.setItems(breward.getItems().stream().map(i -> {
                     StateTranslation s = str.findByUniqueName(StringUtils.getLastThreeSegments(i)).orElse(null);
                     if (s == null) {
@@ -383,8 +295,9 @@ public class TestApi {
                 }).toList());
                 g.setBonusReward(breward);
                 g.setInterimRewards(rewardList);
+                rewardList.add(breward);
             }
-            rewardList.add(breward);
+
         }).toList();
         log.info("Goals:{}", JSON.toJSONString(list));
     }

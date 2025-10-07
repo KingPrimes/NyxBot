@@ -24,17 +24,19 @@ public class TaskWarframeStatus {
     @Async("taskExecutor")
     @Scheduled(cron = "0/120 * * * * ?")
     public void executeWarframeStatus() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            try {
-                WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
-                WarframeCache.setWarframeStatus(worldState);
-                WarframeSubscribe.isUpdated(worldState);
-            } catch (JSONException e) {
-                log.error("Warframe 状态数据解析错误: {}", e.getMessage());
+        if (!test) {
+            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
+            if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+                try {
+                    WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
+                    WarframeCache.setWarframeStatus(worldState);
+                    WarframeSubscribe.isUpdated(worldState);
+                } catch (JSONException e) {
+                    log.error("Warframe 状态数据解析错误: {}", e.getMessage());
+                }
+            } else {
+                log.error("Warframe 状态数据错误: {}", body.getBody());
             }
-        } else {
-            log.error("Warframe 状态数据错误: {}", body.getBody());
         }
     }
 

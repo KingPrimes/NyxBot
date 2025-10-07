@@ -92,7 +92,7 @@ shiro:
   debug: false
 server:
   port: 8080
-  shutdown: graceful
+  shutdown: immediate
 logging:
   level:
     com.nyx.bot: DEBUG

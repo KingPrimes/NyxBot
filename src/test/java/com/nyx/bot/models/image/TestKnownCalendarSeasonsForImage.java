@@ -80,7 +80,9 @@ public class TestKnownCalendarSeasonsForImage {
     }
 
     private byte[] postKnownCalendarSeasonsImage() throws DataNotInfoException, HtmlToImageException {
-        List<KnownCalendarSeasons> seasons = worldState.getKnownCalendarSeasons().stream()
+        List<KnownCalendarSeasons> knownCalendarSeasons = worldState.getKnownCalendarSeasons();
+        //log.info("knownCalendarSeasons:{}", JSON.toJSONString(knownCalendarSeasons));
+        List<KnownCalendarSeasons> seasons = knownCalendarSeasons.stream()
                 .map(KnownCalendarSeasons::copy) // 使用优化后的copy方法
                 .peek(this::processSeason) // 提取处理逻辑为独立方法
                 .toList();
