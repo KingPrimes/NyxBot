@@ -269,10 +269,6 @@ public class HttpUtils {
                         log.error("文件下载超时: {}", e.getMessage());
                         future.complete(false);
                         future.completeExceptionally(e);
-                    } catch (IOException e) {
-                        log.error("文件下载IO异常: {}", e.getMessage());
-                        future.complete(false);
-                        future.completeExceptionally(e);
                     }
                 }
             });
