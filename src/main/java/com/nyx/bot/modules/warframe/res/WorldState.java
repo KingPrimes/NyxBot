@@ -182,7 +182,7 @@ public class WorldState {
     private Instant getBountiesEndDate(SyndicateEnum key) {
         return this.getSyndicateMissions()
                 .stream()
-                .filter(s -> s.getTag().equals(key))
+                .filter(s -> s.getTag() != null && s.getTag().equals(key))
                 .findFirst()
                 .map(s -> s.getExpiry().getEpochSecond())
                 .orElse(Instant.now());
