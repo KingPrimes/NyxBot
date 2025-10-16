@@ -83,7 +83,7 @@ public class HttpUtils {
                     //链接超时
                     .connectTimeout(60, TimeUnit.SECONDS)
                     //读取超时
-                    .readTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(240, TimeUnit.SECONDS)
                     .sslSocketFactory(sslSocketFactory, trustAllCerts)
                     .hostnameVerifier((home, seen) -> true)
                     .build();
@@ -256,7 +256,7 @@ public class HttpUtils {
                     try (InputStream in = body.byteStream();
                          FileOutputStream out = new FileOutputStream(outputFile)) {
 
-                        byte[] buffer = new byte[4096];
+                        byte[] buffer = new byte[1024];
                         int bytesRead;
                         while ((bytesRead = in.read(buffer)) != -1) {
                             out.write(buffer, 0, bytesRead);
@@ -265,6 +265,10 @@ public class HttpUtils {
                             printDownloadProgress(fileSize, downloaded);
                         }
                         future.complete(true);
+                    } catch (InterruptedIOException e) {
+                        log.error("文件下载超时: {}", e.getMessage());
+                        future.complete(false);
+                        future.completeExceptionally(e);
                     }
                 }
             });
