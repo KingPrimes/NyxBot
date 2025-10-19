@@ -81,7 +81,7 @@ public class ApiUrl {
      * @return 返回信息
      */
     public static HttpUtils.Body marketOrders(String key, String from) {
-        String url = "https://api.warframe.market/v1/items/" + key + "/orders?include=item";
+        String url = "https://api.warframe.market/v2/orders/item/" + key;
         return HttpUtils.sendGet(url, Headers.of("platform", from));
     }
 
