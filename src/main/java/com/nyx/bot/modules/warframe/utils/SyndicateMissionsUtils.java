@@ -28,14 +28,15 @@ public class SyndicateMissionsUtils {
      */
     public static SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
         AtomicReference<SyndicateMission> smr = new AtomicReference<>(new SyndicateMission());
-        sms.stream().filter(sm -> sm.getTag().equals(se))
+        sms.stream()
+                .filter(sm -> sm.getTag() != null && sm.getTag().equals(se))
                 .filter(sm -> sm.getJobs() != null && !sm.getJobs().isEmpty())
                 .findFirst()
                 .ifPresent(sm -> {
                     sm.setJobs(sm.getJobs().stream()
                             .peek(j ->
                                     SpringUtils.getBean(StateTranslationRepository.class)
-                                            .findByUniqueName(StringUtils.getLastThreeSegments(j.getType()!= null?j.getType():j.getLocationTag()))
+                                            .findByUniqueName(StringUtils.getLastThreeSegments(j.getType() != null ? j.getType() : j.getLocationTag()))
                                             .ifPresent(s -> {
                                                 j.setType(s.getName());
                                                 j.setDesc(s.getDescription());
