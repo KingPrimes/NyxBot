@@ -73,6 +73,10 @@ public class OrdersItemsService {
                     .setBulkTradable(object.getBooleanValue("bulkTradable")) // 布尔值默认false
                     .setMaxRank(object.getInteger("maxRank"))
                     .setDucats(object.getInteger("ducats"))
+                    .setVaulted(object.getBooleanValue("vaulted"))
+                    .setMaxAmberStars(object.getInteger("maxAmberStars"))
+                    .setMaxCyanStars(object.getInteger("maxCyanStars"))
+                    .setBaseEndo(object.getInteger("baseEndo"))
                     .setName(name)
                     .setIcon(icon)
                     .setThumb(thumb);

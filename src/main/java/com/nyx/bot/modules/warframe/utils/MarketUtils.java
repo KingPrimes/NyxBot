@@ -7,20 +7,22 @@ import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.*;
 import com.nyx.bot.modules.warframe.repo.*;
 import com.nyx.bot.modules.warframe.res.Ducats;
-import com.nyx.bot.modules.warframe.res.MarketOrders;
 import com.nyx.bot.modules.warframe.res.MarketRiven;
+import com.nyx.bot.modules.warframe.res.enums.MarketStatusEnum;
+import com.nyx.bot.modules.warframe.res.enums.TransactionEnum;
+import com.nyx.bot.modules.warframe.res.market.BaseOrder;
+import com.nyx.bot.modules.warframe.res.market.BaseOrderObjet;
+import com.nyx.bot.modules.warframe.res.market.OrderWithUser;
 import com.nyx.bot.modules.warframe.resp.MarketRivenParameter;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -33,7 +35,7 @@ public class MarketUtils {
      * @param key 物品名称
      * @return 处理后的结果
      */
-    public static Market to(String key) {
+    private static Market toDataBase(String key) {
         Market market = new Market();
 
         AliasRepository aliasRepository = SpringUtils.getBean(AliasRepository.class);
@@ -56,8 +58,7 @@ public class MarketUtils {
             //直接使用别名模糊查询
             items = itemsRepository.findByItemNameLike(key);
             if (items.isPresent()) {
-                market.setItemName(items.get().getName());
-                market.setKey(items.get().getSlug());
+                market.setItem(items.get());
                 return market;
             }
 
@@ -67,8 +68,7 @@ public class MarketUtils {
 
             items = itemsRepository.findByItemNameLike(key);
             if (items.isPresent()) {
-                market.setKey(items.get().getSlug());
-                market.setItemName(items.get().getName());
+                market.setItem(items.get());
                 return market;
             }
 
@@ -78,8 +78,7 @@ public class MarketUtils {
             //正则查询
             items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
             if (items.isPresent()) {
-                market.setItemName(items.get().getName());
-                market.setKey(items.get().getSlug());
+                market.setItem(items.get());
                 return market;
 
             } else {
@@ -88,8 +87,7 @@ public class MarketUtils {
                 //正则查询
                 items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
                 if (items.isPresent()) {
-                    market.setItemName(items.get().getName());
-                    market.setKey(items.get().getSlug());
+                    market.setItem(items.get());
                     return market;
                 }
             }
@@ -118,110 +116,104 @@ public class MarketUtils {
         }
     }
 
+    public static Market toSet(String key, String form) {
+        Market dataBase = toDataBase(key);
+        if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
+            return dataBase;
+        }
+        log.debug("查询参数 Key:{}", dataBase.getItem().getSlug());
+        HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getItem().getSlug(), form);
+        log.debug("查询结果:{}", body.getBody());
+        if (Objects.requireNonNull(body.getCode()) == HttpCodeEnum.SUCCESS) {
+            BaseOrderObjet<?> baseOrder = JSONObject.parseObject(body.getBody(), BaseOrderObjet.class, JSONReader.Feature.SupportSmartMatch);
+            JSONObject dataJson = (JSONObject) baseOrder.getData();
+            BaseOrderObjet.Data<?> data = dataJson.toJavaObject(BaseOrderObjet.Data.class, JSONReader.Feature.SupportSmartMatch);
+            data.getItems().stream()
+                    .map(item -> {
+                        if (item instanceof JSONObject) {
+                            return ((JSONObject) item).toJavaObject(OrdersItems.class);
+                        } else {
+                            return JSONObject.parseObject(item.toString(), OrdersItems.class);
+                        }
+                    })
+                    .filter(o -> dataBase.getItem().getId().equals(o.getId()))
+                    .findAny()
+                    .ifPresent(o -> {
+                        OrdersItems item = dataBase.getItem();
+                        item.setReqMasteryRank(o.getReqMasteryRank());
+                        item.setTradingTax(o.getTradingTax());
+                        dataBase.setItem(item);
+                    });
+        } else {
+            throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
+        }
+        return dataBase;
+    }
 
     /**
      * 查询Warframe.Market物品 并处理结果
      *
-     * @param from  平台
-     * @param key   url_name
-     * @param isBy  是否是买家
-     * @param isMax 是否是最大值
+     * @param from   平台
+     * @param isBy   是否是买家
+     * @param isMax  是否是最大值
+     * @param market 查询到的物品
      * @return 处理后的结果
      */
-    public static MarketOrders market(String from, String key, Boolean isBy, Boolean isMax) {
+    public static BaseOrder<OrderWithUser> market(String from, Boolean isBy, Boolean isMax, Market market) {
+        String key = market.getItem().getSlug();
+        log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
-        MarketOrders orders = new MarketOrders();
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            orders.setCode(body.getCode().name());
-            return orders;
-        }
-
-        orders = JSONObject.parseObject(body.getBody(), MarketOrders.class, JSONReader.Feature.SupportSmartMatch);
-
-        orders.setCode(body.getCode().name());
-
-        orders.getPayload().setOrders(orders(orders, isBy, isMax));
-
-        List<MarketOrders.ItemsInSet> itemsInSets = new ArrayList<>();
-
-        orders.getInclude().getItem().getItemsInSet()
-                .stream()
-                .filter(item -> item.getUrlName().equals(key))
-                .findFirst()
-                .ifPresent(itemsInSets::add);
-
-        orders.getInclude().getItem().setItemsInSet(itemsInSets);
-
-        return orders;
-    }
-
-    /**
-     * 排序查询结果
-     *
-     * @param order 元数据
-     * @param isBy  买/卖
-     * @param isMax 是否为满级
-     * @return 排序后得结果
-     */
-    static List<MarketOrders.Orders> orders(MarketOrders order, Boolean isBy, Boolean isMax) {
-        AtomicInteger max = new AtomicInteger();
-        boolean flag = order.getPayload().getOrders().get(0).getModRank() != null;
-
-        if (isMax && flag) {
-            order.getPayload().getOrders().forEach(orders -> {
-                if (max.get() < orders.getModRank()) {
-                    max.set(orders.getModRank());
-                }
-            });
-        }
-        return isByOrSell(order, isBy, isMax, flag, max.get());
-    }
-
-    /**
-     * 筛选买卖是否为满级
-     *
-     * @param order 元数据
-     * @param isBy  买卖
-     * @param isMax 是否为满级
-     * @param flag  是否查询满级
-     * @param max   MOD得最大等级
-     */
-    static List<MarketOrders.Orders> isByOrSell(MarketOrders order, Boolean isBy, Boolean isMax, Boolean flag, Integer max) {
-        if (isBy) {
-            if (isMax && flag) {
-                return order.getPayload().getOrders()
-                        .stream()
-                        //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
-                        .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy") && Objects.equals(orders.getModRank(), max))
+        BaseOrder<OrderWithUser> owu = new BaseOrder<>();
+        switch (body.getCode()) {
+            case SUCCESS -> {
+                BaseOrder<?> ow = JSONObject.parseObject(body.getBody(), BaseOrder.class, JSONReader.Feature.SupportSmartMatch);
+                List<OrderWithUser> list = ow.getData().stream()
+                        // 转换类型
+                        .map(item -> {
+                            if (item instanceof JSONObject) {
+                                return ((JSONObject) item).toJavaObject(OrderWithUser.class);
+                            } else {
+                                return JSONObject.parseObject(item.toString(), OrderWithUser.class);
+                            }
+                        })
+                        // 筛选离线用户
+                        .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
+                        // 筛选物品
+                        .filter(o -> o.getItemId().equals(market.getItem().getId()))
+                        // 筛选类型
+                        .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
+                        // 筛选等级
+                        .filter(o -> {
+                            if (isMax) {
+                                // 筛选Mod等级
+                                if (o.getRank() != null) {
+                                    return o.getRank().equals(market.getItem().getMaxRank());
+                                }
+                                // 筛选 阿耶檀识 星星数量
+                                if (o.getAmberStars() != null && o.getCyanStars() != null) {
+                                    return o.getAmberStars().equals(market.getItem().getMaxRank()) && o.getCyanStars().equals(market.getItem().getMaxRank());
+                                }
+                            }
+                            return true;
+                        })
+                        // 排序物品
                         .sorted((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()))
+                        // 限制数量
                         .limit(8)
+                        // 转换为结果
                         .toList();
-            } else {
-                return order.getPayload().getOrders()
-                        .stream()
-                        //过滤 寻找所有非不在线玩家，并是购买订单，并且是满级的物品
-                        .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("buy"))
-                        .sorted((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()))
-                        .limit(8)
-                        .toList();
+                owu.setData(list);
+                owu.setApiVersion(ow.getApiVersion());
+                owu.setError(ow.getError());
+                return owu;
             }
-        } else {
-            if (isMax && flag) {
-                return order.getPayload().getOrders()
-                        .stream()
-                        //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
-                        .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell") && Objects.equals(orders.getModRank(), max))
-                        .sorted(Comparator.comparingInt(MarketOrders.Orders::getPlatinum))
-                        .limit(8)
-                        .toList();
-            } else {
-                return order.getPayload().getOrders()
-                        .stream()
-                        //过滤 寻找所有非不在线玩家，并是出售订单，并且是满级的物品
-                        .filter(orders -> !orders.getUser().getStatus().equals("offline") && orders.getOrderType().equals("sell"))
-                        .sorted(Comparator.comparingInt(MarketOrders.Orders::getPlatinum))
-                        .limit(8)
-                        .toList();
+            case TOO_MANY_REQUESTS -> {
+                owu.setError("触发速率限制，请稍后再次尝试查询。");
+                return owu;
+            }
+            default -> {
+                owu.setError("查询出现错误");
+                return owu;
             }
         }
     }
@@ -428,19 +420,11 @@ public class MarketUtils {
     }
 
     @Data
+    @Accessors(chain = true)
     public static class Market {
-        String key;
-        String itemName;
+        OrdersItems item;
         List<String> possibleItems;
-
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                    .append("key", key)
-                    .append("itemName", itemName)
-                    .append("possibleItems", possibleItems)
-                    .toString();
-        }
     }
+
 
 }

@@ -27,6 +27,14 @@ public enum HttpCodeEnum {
     INVALID_PASSWORD(400, "无效密码"),
     INVALID_CODE(400, "无效验证码"),
     INVALID_ID(400, "无效id"),
+    /**
+     * 429 Too Many Requests
+     */
+    TOO_MANY_REQUESTS(429, "请求过于频繁"),
+    /**
+     * 509 Bandwidth Limit Exceeded
+     */
+    BANDWIDTH_LIMIT_EXCEEDED(509, "请求带宽超出限制"),
     ;
 
     private final int code;
@@ -38,12 +46,11 @@ public enum HttpCodeEnum {
     }
 
     public static HttpCodeEnum getCode(int code) {
-        HttpCodeEnum[] values = HttpCodeEnum.values();
-        List<HttpCodeEnum> collect = Arrays.stream(values).filter(v -> v.code == code).toList();
+        List<HttpCodeEnum> collect = Arrays.stream(HttpCodeEnum.values()).filter(v -> v.code == code).toList();
         if (collect.isEmpty()) {
             return HttpCodeEnum.ERROR;
         }
-        return collect.get(0);
+        return collect.getFirst();
     }
 
 }
