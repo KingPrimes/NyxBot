@@ -8,6 +8,8 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
+
 @SuppressWarnings("unused")
 @Data
 public class WorldState {
@@ -182,7 +184,7 @@ public class WorldState {
     private Instant getBountiesEndDate(SyndicateEnum key) {
         return this.getSyndicateMissions()
                 .stream()
-                .filter(s -> s.getTag() != null && s.getTag().equals(key))
+                .filter(sm -> Objects.equals(sm.getTag(),key))
                 .findFirst()
                 .map(s -> s.getExpiry().getEpochSecond())
                 .orElse(Instant.now());
