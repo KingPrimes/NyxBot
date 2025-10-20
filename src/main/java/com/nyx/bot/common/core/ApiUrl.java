@@ -12,6 +12,7 @@ import okhttp3.Headers;
 
 import java.util.Collections;
 import java.util.List;
+
 @SuppressWarnings("unused")
 @Slf4j
 public class ApiUrl {
@@ -81,7 +82,18 @@ public class ApiUrl {
      * @return 返回信息
      */
     public static HttpUtils.Body marketOrders(String key, String from) {
-        String url = "https://api.warframe.market/v1/items/" + key + "/orders?include=item";
+        String url = "https://api.warframe.market/v2/orders/item/" + key;
+        return HttpUtils.sendGet(url, Headers.of("platform", from, "Crossplay", "true"));
+    }
+
+    /**
+     * Market 查询物品详细信息
+     *
+     * @param key 物品名称
+     * @return 物品详细信息
+     */
+    public static HttpUtils.Body marketOrdersSet(String key, String from) {
+        String url = "https://api.warframe.market/v2/item/%s/set".formatted(key);
         return HttpUtils.sendGet(url, Headers.of("platform", from));
     }
 
