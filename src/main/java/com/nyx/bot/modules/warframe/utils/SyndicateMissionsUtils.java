@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.ModelMap;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -28,15 +29,15 @@ public class SyndicateMissionsUtils {
      */
     public static SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
         AtomicReference<SyndicateMission> smr = new AtomicReference<>(new SyndicateMission());
+        StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
         sms.stream()
-                .filter(sm -> sm.getTag() != null && sm.getTag().equals(se))
+                .filter(sm -> Objects.equals(sm.getTag(),se))
                 .filter(sm -> sm.getJobs() != null && !sm.getJobs().isEmpty())
                 .findFirst()
                 .ifPresent(sm -> {
                     sm.setJobs(sm.getJobs().stream()
                             .peek(j ->
-                                    SpringUtils.getBean(StateTranslationRepository.class)
-                                            .findByUniqueName(StringUtils.getLastThreeSegments(j.getType() != null ? j.getType() : j.getLocationTag()))
+                                    str.findByUniqueName(StringUtils.getLastThreeSegments(j.getType() != null ? j.getType() : j.getLocationTag()))
                                             .ifPresent(s -> {
                                                 j.setType(s.getName());
                                                 j.setDesc(s.getDescription());
