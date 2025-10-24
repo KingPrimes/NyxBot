@@ -49,3 +49,5 @@ logs
 locate.yaml
 /src/main/resources/templates/**
 /src/main/resources/static/**
+/src/test/resources/templates/**
+/src/test/resources/static/**

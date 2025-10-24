@@ -69,7 +69,6 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = BadCredentialsException.class)
     public Object BadCredentialsException(BadCredentialsException e) {
-        log.warn("BadCredentialsException", e);
         return AjaxResult.error(HttpCodeEnum.FAIL, e.getMessage());
     }
 

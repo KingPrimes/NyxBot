@@ -22,7 +22,7 @@ public class TaskWarframeStatus {
     Boolean test;
 
     @Async("taskExecutor")
-    @Scheduled(cron = "0/120 * * * * ?")
+    @Scheduled(cron = "0 0/2 * * * ?")
     public void executeWarframeStatus() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {

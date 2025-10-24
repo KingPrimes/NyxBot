@@ -197,7 +197,7 @@ public class MarketUtils {
                             return true;
                         })
                         // 排序物品
-                        .sorted((o1, o2) -> o2.getPlatinum().compareTo(o1.getPlatinum()))
+                        .sorted(isBy ? Comparator.comparing(OrderWithUser::getPlatinum).reversed() : Comparator.comparing(OrderWithUser::getPlatinum))
                         // 限制数量
                         .limit(8)
                         // 转换为结果
