@@ -93,6 +93,8 @@ shiro:
   debug: false
 server:
   port: 8080
+  http2:
+    enabled: true
   shutdown: graceful
 logging:
   level:

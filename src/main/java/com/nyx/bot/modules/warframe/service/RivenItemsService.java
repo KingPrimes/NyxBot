@@ -60,7 +60,7 @@ public class RivenItemsService {
             String rivenType = object.getString("rivenType");
             Double disposition = object.getDouble("disposition");
             Integer reqMasteryRank = object.getInteger("reqMasteryRank");
-            if (StringUtils.isAnyBlank(id, slug, gameRef, group, rivenType, disposition.toString(), reqMasteryRank.toString())) {
+            if (StringUtils.isAnyBlank(id, slug, gameRef, group, disposition.toString(), reqMasteryRank.toString())) {
                 log.warn("物品关键信息缺失，跳过处理: {}", object);
                 return null;
             }

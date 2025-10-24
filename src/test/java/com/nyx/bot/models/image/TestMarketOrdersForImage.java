@@ -26,7 +26,7 @@ public class TestMarketOrdersForImage {
 
     private static final String TEST_IMAGE_PATH = "./data/market_orders.png";
     String form = "pc";
-    String key = "nova";
+    String key = "鹦鹉螺";
     Boolean isBy = false;
     Boolean isMax = false;
 
@@ -47,7 +47,7 @@ public class TestMarketOrdersForImage {
             modelMap.put("items", market.getPossibleItems());
             return HtmlToImage.generateImage("html/marketPossibleItems", () -> modelMap).toByteArray();
         }
-        BaseOrder<OrderWithUser> order = MarketUtils.market(key, isBy, isMax, market);
+        BaseOrder<OrderWithUser> order = MarketUtils.market(form, isBy, isMax, market);
         List<OrderWithUser> ows = order.getData();
         OrdersItems oi = market.getItem();
         modelMap.addAttribute("ducats", oi.getDucats());

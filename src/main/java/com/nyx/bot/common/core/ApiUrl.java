@@ -82,7 +82,8 @@ public class ApiUrl {
      * @return 返回信息
      */
     public static HttpUtils.Body marketOrders(String key, String from) {
-        String url = "https://api.warframe.market/v2/orders/item/" + key;
+        String url = "https://api.warframe.market/v2/orders/item/%s".formatted(key);
+        log.debug("MarketOrderURL:{}", url);
         return HttpUtils.sendGet(url, Headers.of("platform", from, "Crossplay", "true"));
     }
 
@@ -94,6 +95,7 @@ public class ApiUrl {
      */
     public static HttpUtils.Body marketOrdersSet(String key, String from) {
         String url = "https://api.warframe.market/v2/item/%s/set".formatted(key);
+        log.debug("MarketOrderSetURL:{}", url);
         return HttpUtils.sendGet(url, Headers.of("platform", from));
     }
 
