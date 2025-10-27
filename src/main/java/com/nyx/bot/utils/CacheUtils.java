@@ -95,20 +95,24 @@ public class CacheUtils {
      * @param unit      时间单位
      */
     public static void putWithExpiry(String cacheName, Object key, Object value, long duration, TimeUnit unit) {
-        Cache springCache = cm.getCache(cacheName);
-        if (springCache instanceof SpringCache2kCache) {
-            // 获取 Cache2k 原生缓存实例
-            org.cache2k.Cache<Object, Object> nativeCache = ((SpringCache2kCache) springCache).getNativeCache();
-            long expiryTime = System.currentTimeMillis() + unit.toMillis(duration);
-            // 通过 EntryProcessor 设置值和过期时间
-            nativeCache.invoke(key, entry -> {
-                entry.setValue(value);
-                entry.setExpiryTime(expiryTime);
-                return entry;
-            });
-        } else {
-            // 非 Cache2k 缓存实现时的回退逻辑
-            springCache.put(key, value);
+        try {
+            Cache springCache = cm.getCache(cacheName);
+            if (springCache instanceof SpringCache2kCache) {
+                // 获取 Cache2k 原生缓存实例
+                org.cache2k.Cache<Object, Object> nativeCache = ((SpringCache2kCache) springCache).getNativeCache();
+                long expiryTime = System.currentTimeMillis() + unit.toMillis(duration);
+                // 通过 EntryProcessor 设置值和过期时间
+                nativeCache.invoke(key, entry -> {
+                    entry.setValue(value);
+                    entry.setExpiryTime(expiryTime);
+                    return entry;
+                });
+            } else {
+                // 非 Cache2k 缓存实现时的回退逻辑
+                springCache.put(key, value);
+            }
+        } catch (IllegalStateException e) {
+            log.warn("CacheManager已关闭，无法设置带过期时间的缓存: {}", cacheName);
         }
     }
 }

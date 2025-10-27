@@ -172,7 +172,7 @@ public class HtmlToImage {
             os.flush();
             os.close();
         } catch (Exception e) {
-            log.error("生成临时文件出错\n\t\t地址：{}\n\t\t错误信息：{}", path, e.getMessage());
+            log.error("生成临时文件出错\n\t\t地址：{}", path, e);
         }
         return convertHtmlToImage(path, width);
     }
@@ -201,7 +201,7 @@ public class HtmlToImage {
             htmlFile.delete();
             return os;
         } catch (Exception e) {
-            log.error("html渲染字节流出错，文件路径：{}\n\t\t错误信息：{}", htmlFilePath, e.getMessage());
+            log.error("html渲染字节流出错，文件路径：{}", htmlFilePath, e);
         }
         return null;
     }

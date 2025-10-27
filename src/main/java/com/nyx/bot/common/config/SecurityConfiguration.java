@@ -78,7 +78,7 @@ public class SecurityConfiguration {
                 // 配置跨域资源共享
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 配置无状态的会话管理
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 //配置拦截规则
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -86,10 +86,6 @@ public class SecurityConfiguration {
                                 "/index",
                                 "/static/**",
                                 "/auth/login",
-                                // 用于生成图片的接口
-                                "/api/**",
-                                // 用于生成图片的接口
-                                "/private/**",
                                 // 机器人链接接口
                                 shiro
                         ).permitAll()

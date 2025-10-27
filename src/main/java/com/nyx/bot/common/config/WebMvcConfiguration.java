@@ -19,8 +19,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
                 .addResourceLocations("classpath:/resources/")
-                .addResourceLocations("classpath:/public/")
-                .addResourceLocations("file:" + "./nyxTemplates/");
+                .addResourceLocations("classpath:/public/");
         super.addResourceHandlers(registry);
     }
 
