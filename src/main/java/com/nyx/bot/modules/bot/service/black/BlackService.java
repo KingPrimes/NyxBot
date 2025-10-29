@@ -65,6 +65,15 @@ public class BlackService {
         return 1;
     }
 
+
+    public boolean hasBlackGroup() {
+        return repository.count() > 0;
+    }
+
+    public boolean hasBlackProve() {
+        return proveBlackRepository.count() > 0;
+    }
+
     public int removeProve(Long id) {
         if (id != null) {
             proveBlackRepository.deleteById(id);

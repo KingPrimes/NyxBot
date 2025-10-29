@@ -59,8 +59,8 @@ public class BotsService {
             return container.robots.containsKey(botUid)
                     ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
                     : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
-        }catch (Exception e){
-            return new AjaxResult(HttpCodeEnum.ERROR,"获取群列表失败，请手动输入群账号！");
+        } catch (Exception e) {
+            return new AjaxResult(HttpCodeEnum.ERROR, "获取群列表失败，请手动输入群账号！");
         }
     }
 
@@ -75,11 +75,35 @@ public class BotsService {
      * @return 是否存在名单中
      */
     public boolean isCheck(Long group, Long prove) {
-        // 白名单中存在时，返回true
-        if (ws.isWhite(group, prove)) return true;
-        // 黑名单中存在，则返回false
-        if (!bs.isBlack(group, prove)) return false;
-        // 默认返回 true
+        // 检查是否配置了白名单
+        boolean hasWhiteGroup = ws.hasWhiteGroup();
+        boolean hasWhiteProve = ws.hasWhiteProve();
+
+        // 检查是否配置了黑名单
+        boolean hasBlackGroup = bs.hasBlackGroup();
+        boolean hasBlackProve = bs.hasBlackProve();
+
+        // 当黑白名单都有数据时，白名单优先，黑名单次之
+        if ((hasWhiteGroup || hasWhiteProve) && (hasBlackGroup || hasBlackProve)) {
+            // 如果在白名单中，允许通过
+            if (ws.isWhite(group, prove)) {
+                return true;
+            }
+            // 如果不在白名单中，检查是否在黑名单中
+            return bs.isBlack(group, prove);
+        }
+
+        // 如果只配置了白名单，则只允许白名单中的内容通过
+        if (hasWhiteGroup || hasWhiteProve) {
+            return ws.isWhite(group, prove);
+        }
+
+        // 如果只配置了黑名单，则黑名单中的内容不允许通过
+        if (hasBlackGroup || hasBlackProve) {
+            return bs.isBlack(group, prove);
+        }
+
+        // 当黑白名单都没有数据时，默认放行
         return true;
     }
 }

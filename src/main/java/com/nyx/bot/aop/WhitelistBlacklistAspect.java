@@ -12,29 +12,34 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class BlackCheckAspect {
+public class WhitelistBlacklistAspect {
 
     @Resource
     BotsService bs;
 
-    //黑白名单过滤
+    // 白名单和黑名单过滤切面
     @Around(value = "execution(* com.nyx.bot.modules.*.plugin.*.*Handler(..))")
     public Object handler(ProceedingJoinPoint pjp) {
         try {
             for (Object arg : pjp.getArgs()) {
-                if (arg instanceof AnyMessageEvent) {
-                    if (bs.isCheck(((AnyMessageEvent) arg).getGroupId(), ((AnyMessageEvent) arg).getUserId())) {
-                        return pjp.proceed();
+                switch (arg) {
+                    case AnyMessageEvent any -> {
+                        if (bs.isCheck(any.getGroupId(), any.getUserId())) {
+                            return pjp.proceed();
+                        }
                     }
-                }
-                if (arg instanceof GroupMessageEvent) {
-                    if (bs.isCheck(((GroupMessageEvent) arg).getGroupId(), ((GroupMessageEvent) arg).getUserId())) {
-                        return pjp.proceed();
+                    case GroupMessageEvent group -> {
+                        if (bs.isCheck(group.getGroupId(), group.getUserId())) {
+                            return pjp.proceed();
+                        }
                     }
-                }
-                if (arg instanceof PrivateMessageEvent) {
-                    if (bs.isCheck(0L, ((PrivateMessageEvent) arg).getUserId())) {
-                        return pjp.proceed();
+                    case PrivateMessageEvent privateMessageEvent -> {
+                        if (bs.isCheck(0L, privateMessageEvent.getUserId())) {
+                            return pjp.proceed();
+                        }
+                    }
+                    default -> {
+                        return 0;
                     }
                 }
             }
