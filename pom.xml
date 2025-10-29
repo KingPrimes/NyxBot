@@ -14,7 +14,7 @@
     <artifactId>NyxBot</artifactId>
 
 
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 
     <name>${project.artifactId}</name>
 
@@ -168,7 +168,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
         </dependency>
 
         <dependency>
@@ -266,7 +265,6 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <version>3.1.1</version>
         </dependency>
 
         <!--图片识别-->

@@ -62,7 +62,14 @@ public class WhiteService {
         if (id != null) {
             proveWhiteRepository.deleteById(id);
         }
+    }
 
+    public boolean hasWhiteGroup() {
+        return groupWhiteRepository.count() > 0;
+    }
+
+    public boolean hasWhiteProve() {
+        return proveWhiteRepository.count() > 0;
     }
 
     public boolean isWhite(Long group, Long prove) {
