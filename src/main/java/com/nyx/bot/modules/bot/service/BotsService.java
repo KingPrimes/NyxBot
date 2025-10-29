@@ -76,17 +76,15 @@ public class BotsService {
      */
     public boolean isCheck(Long group, Long prove) {
         // 检查是否配置了白名单
-        boolean hasWhiteGroup = ws.hasWhiteGroup();
-        boolean hasWhiteProve = ws.hasWhiteProve();
+        boolean whiteEnabled = ws.hasWhiteGroup() || ws.hasWhiteProve();
 
         // 检查是否配置了黑名单
-        boolean hasBlackGroup = bs.hasBlackGroup();
-        boolean hasBlackProve = bs.hasBlackProve();
+        boolean blackEnabled = bs.hasBlackGroup() || bs.hasBlackProve();
 
         // 当黑白名单都有数据时，白名单优先，黑名单次之
-        if ((hasWhiteGroup || hasWhiteProve) && (hasBlackGroup || hasBlackProve)) {
+        if (whiteEnabled && blackEnabled) {
             // 如果在白名单中，允许通过
-            if (ws.isWhite(group, prove)) {
+            if (ws.isWhite(group, prove) && !bs.isBlack(group, prove)) {
                 return true;
             }
             // 如果不在白名单中，检查是否在黑名单中
@@ -94,12 +92,12 @@ public class BotsService {
         }
 
         // 如果只配置了白名单，则只允许白名单中的内容通过
-        if (hasWhiteGroup || hasWhiteProve) {
+        if (whiteEnabled) {
             return ws.isWhite(group, prove);
         }
 
         // 如果只配置了黑名单，则黑名单中的内容不允许通过
-        if (hasBlackGroup || hasBlackProve) {
+        if (blackEnabled) {
             return bs.isBlack(group, prove);
         }
 
