@@ -21,19 +21,33 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
+    // 定义不需要JWT验证的路径
+    private static final List<String> EXCLUDE_PATHS = Arrays.asList(
+            "/static/",
+            "/favicon"
+    );
     @Resource
     private UserDetailsService userDetailsService;
-
     @Resource
     private JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain)
             throws ServletException, IOException {
+        // 检查是否是需要排除的路径
+        String requestURI = request.getRequestURI();
+        for (String excludePath : EXCLUDE_PATHS) {
+            if (requestURI.contains(excludePath)) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
         try {
             String jwt = extractJwtToken(request);
             if (jwt != null) {

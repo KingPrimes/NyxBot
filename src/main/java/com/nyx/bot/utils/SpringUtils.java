@@ -112,7 +112,12 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @return 端口
      */
     public static String getPort() {
-        return SpringUtils.getBean(Environment.class).getProperty("local.server.port");
+        Environment env = SpringUtils.getBean(Environment.class);
+        String port = env.getProperty("local.server.port");
+        if (port == null) {
+            port = env.getProperty("server.port", "8080");
+        }
+        return port;
     }
 
     /**
