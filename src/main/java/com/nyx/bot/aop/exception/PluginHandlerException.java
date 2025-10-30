@@ -8,6 +8,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.BusinessStatus;
 import com.nyx.bot.enums.BusinessType;
 import com.nyx.bot.enums.LogTitleEnum;
+import com.nyx.bot.modules.bot.service.BotsService;
 import com.nyx.bot.modules.system.entity.LogInfo;
 import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.AsyncUtils;
@@ -15,6 +16,7 @@ import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.onebot.CqMatcher;
 import com.nyx.bot.utils.onebot.CqParse;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -32,6 +34,9 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class PluginHandlerException {
+
+    @Resource
+    BotsService bs;
 
     // 定义切入点：匹配被@Shiro注解的类中带有@AnyMessageHandler注解的方法
     @Pointcut("@annotation(anyMessageHandler) && within(@com.mikuac.shiro.annotation.common.Shiro *)")
@@ -57,6 +62,10 @@ public class PluginHandlerException {
             if (arg instanceof AnyMessageEvent e) {
                 event = e;
             }
+        }
+        // 黑白名单检查是否继续执行后续操作
+        if (event != null && !bs.isCheck(event.getGroupId(), event.getUserId())) {
+            return 0;
         }
         long startTime = System.currentTimeMillis();
         Exception ex = null;
