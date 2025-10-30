@@ -63,7 +63,7 @@ public class JgitUtil {
         List<GitHubUserProvider> all = SpringUtils.getBean(GitHubUserProviderRepository.class).findAll();
         JgitUtil jgitUtil;
         if (!all.isEmpty()) {
-            GitHubUserProvider gitHubUserProvider = all.get(0);
+            GitHubUserProvider gitHubUserProvider = all.getFirst();
             jgitUtil = new JgitUtil(urlPath, localPath, new UsernamePasswordCredentialsProvider(gitHubUserProvider.getUserName(), gitHubUserProvider.getPassWord()));
         } else {
             jgitUtil = new JgitUtil(urlPath, localPath, null);
@@ -136,16 +136,20 @@ public class JgitUtil {
      * @param fileName 文件名称
      */
     public JgitUtil add(String fileName) throws GitAPIException {
-        openRpo(localPath).add().addFilepattern(Optional.ofNullable(fileName).orElse(".").isEmpty() ? "." : fileName).call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.add().addFilepattern(Optional.ofNullable(fileName).orElse(".").isEmpty() ? "." : fileName).call();
+            return this;
+        }
     }
 
     /**
      * 添加所有更改得文件到暂存区
      */
     public JgitUtil add() throws GitAPIException {
-        openRpo(localPath).add().addFilepattern(".").call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.add().addFilepattern(".").call();
+            return this;
+        }
     }
 
     /**
@@ -154,8 +158,10 @@ public class JgitUtil {
      * @param fileName 文件名称
      */
     public JgitUtil rm(String fileName) throws GitAPIException {
-        openRpo(localPath).rm().addFilepattern(fileName).call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.rm().addFilepattern(fileName).call();
+            return this;
+        }
     }
 
     /**
@@ -164,8 +170,10 @@ public class JgitUtil {
      * @param commitInfo 提交消息
      */
     public JgitUtil commit(String commitInfo) throws GitAPIException {
-        openRpo(localPath).commit().setMessage(Optional.ofNullable(commitInfo).orElse("default commit info")).call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.commit().setMessage(Optional.ofNullable(commitInfo).orElse("default commit info")).call();
+            return this;
+        }
     }
 
     /**
@@ -206,18 +214,20 @@ public class JgitUtil {
      */
     public Map<String, String> status() throws GitAPIException {
         Map<String, String> map = new HashMap<>();
-        Status status = openRpo(localPath).status().call();
-        map.put("Added", status.getAdded().toString());
-        map.put("Changed", status.getChanged().toString());
-        map.put("Conflicting", status.getConflicting().toString());
-        map.put("ConflictingStageState", status.getConflictingStageState().toString());
-        map.put("IgnoredNotInIndex", status.getIgnoredNotInIndex().toString());
-        map.put("Missing", status.getMissing().toString());
-        map.put("Modified", status.getModified().toString());
-        map.put("Removed", status.getRemoved().toString());
-        map.put("UntrackedFiles", status.getUntracked().toString());
-        map.put("UntrackedFolders", status.getUntrackedFolders().toString());
-        return map;
+        try (Git git = openRpo(localPath)) {
+            Status status = git.status().call();
+            map.put("Added", status.getAdded().toString());
+            map.put("Changed", status.getChanged().toString());
+            map.put("Conflicting", status.getConflicting().toString());
+            map.put("ConflictingStageState", status.getConflictingStageState().toString());
+            map.put("IgnoredNotInIndex", status.getIgnoredNotInIndex().toString());
+            map.put("Missing", status.getMissing().toString());
+            map.put("Modified", status.getModified().toString());
+            map.put("Removed", status.getRemoved().toString());
+            map.put("UntrackedFiles", status.getUntracked().toString());
+            map.put("UntrackedFolders", status.getUntrackedFolders().toString());
+            return map;
+        }
     }
 
     /**
@@ -226,16 +236,17 @@ public class JgitUtil {
      * @param branchName 分支名称
      */
     public JgitUtil branch(String branchName) throws GitAPIException {
-        Git git = openRpo(localPath);
-        //检测是否存在此分支
-        List<Ref> list = git.branchList().call().stream().filter(ref -> ref.getName().equals(branchName)).toList();
-        if (!list.isEmpty()) {
+        try (Git git = openRpo(localPath)) {
+            //检测是否存在此分支
+            List<Ref> list = git.branchList().call().stream().filter(ref -> ref.getName().equals(branchName)).toList();
+            if (!list.isEmpty()) {
+                return this;
+            }
+            git.branchCreate()
+                    .setName(branchName)
+                    .call();
             return this;
         }
-        git.branchCreate()
-                .setName(branchName)
-                .call();
-        return this;
     }
 
     /**
@@ -244,10 +255,12 @@ public class JgitUtil {
      * @param branchName 分支名称
      */
     public JgitUtil delBranch(String branchName) throws GitAPIException {
-        openRpo(localPath).branchDelete()
-                .setBranchNames(branchName)
-                .call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.branchDelete()
+                    .setBranchNames(branchName)
+                    .call();
+            return this;
+        }
     }
 
     /**
@@ -256,17 +269,21 @@ public class JgitUtil {
      * @param branchName 分支名称
      */
     public JgitUtil checkoutBranch(String branchName) throws GitAPIException {
-        openRpo(localPath).checkout()
-                .setName(branchName)
-                .call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.checkout()
+                    .setName(branchName)
+                    .call();
+            return this;
+        }
     }
 
     /**
      * 所有分支(BranchList) git branch
      */
     public List<Ref> listBranch() throws GitAPIException {
-        return openRpo(localPath).branchList().call();
+        try (Git git = openRpo(localPath)) {
+            return git.branchList().call();
+        }
     }
 
     /**
@@ -276,19 +293,22 @@ public class JgitUtil {
      * @param commitMsg  合并信息
      */
     public JgitUtil mergeBranch(String branchName, String commitMsg) throws GitAPIException {
-        //切换分支获取分支信息存入Ref对象里
-        Ref refdev = openRpo(localPath).checkout().setName(branchName).call();
-        //切换回main分支
-        openRpo(localPath).checkout().setName("main").call();
-        // 合并目标分支
-        openRpo(localPath).merge().include(refdev)
-                //同时提交
-                .setCommit(true)
-                // 分支合并策略NO_FF代表普通合并, FF代表快速合并
-                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                .setMessage(Optional.ofNullable(commitMsg).orElse("master Merge"))
-                .call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            //切换分支获取分支信息存入Ref对象里
+            Ref read = git.checkout().setName(branchName).call();
+            //切换回main分支
+            git.checkout().setName("main").call();
+            // 合并目标分支
+            git.merge().include(read)
+                    //同时提交
+                    .setCommit(true)
+                    // 分支合并策略NO_FF代表普通合并, FF代表快速合并
+                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                    .setMessage(Optional.ofNullable(commitMsg).orElse("master Merge"))
+                    .call();
+            return this;
+        }
+
     }
 
     /**
@@ -298,16 +318,18 @@ public class JgitUtil {
         if (provider == null) {
             throw new RuntimeException("请设置Git账户");
         }
-        openRpo(localPath).push()
-                //设置推送的URL名称如"origin"
-                .setRemote("origin")
-                //设置需要推送的分支,如果远端没有则创建
-                .setRefSpecs(new RefSpec("main"))
-                //身份验证
-                .setCredentialsProvider(provider)
-                .setProgressMonitor(new TextProgressMonitor())
-                .call();
-        return this;
+        try (Git git = openRpo(localPath)) {
+            git.push()
+                    //设置推送的URL名称如"origin"
+                    .setRemote("origin")
+                    //设置需要推送的分支,如果远端没有则创建
+                    .setRefSpecs(new RefSpec("main"))
+                    //身份验证
+                    .setCredentialsProvider(provider)
+                    .setProgressMonitor(new TextProgressMonitor())
+                    .call();
+            return this;
+        }
     }
 
     /**
@@ -319,15 +341,16 @@ public class JgitUtil {
         if (provider == null) {
             throw new RuntimeException("请设置Git账户");
         }
-        return openRpo(localPath)
-                .push()
-                //设置推送的URL名称如"origin"
-                .setRemote("origin")
-                .setRefSpecs(new RefSpec(branch + ":refs/heads/" + branch))
-                //身份验证
-                .setCredentialsProvider(provider)
-                .setProgressMonitor(new TextProgressMonitor())
-                .call().iterator();
+        try (Git git = openRpo(localPath)) {
+            return git.push()
+                    //设置推送的URL名称如"origin"
+                    .setRemote("origin")
+                    .setRefSpecs(new RefSpec(branch + ":refs/heads/" + branch))
+                    //身份验证
+                    .setCredentialsProvider(provider)
+                    .setProgressMonitor(new TextProgressMonitor())
+                    .call().iterator();
+        }
     }
 
     /**

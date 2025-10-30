@@ -1,57 +1,104 @@
 package com.nyx.bot.controller.config;
 
 import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import com.nyx.bot.utils.I18nUtils;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 系统配置
+ */
+@SecurityScheme(
+        name = "Bearer",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer ",
+        paramName = "Authorization",
+        in = SecuritySchemeIn.HEADER
+)
+@Tag(name = "config.system", description = "重置密码")
+@SecurityRequirement(name = "Bearer")
 @RestController
 @RequestMapping("/config/loading")
 public class ConfigLoadingController extends BaseController {
 
-    @GetMapping
-    @ApiOperation("获取配置")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "成功", response = AjaxResult.class,examples = @Example(value = {
-                    @ExampleProperty(mediaType = "code", value = "200"),
-                    @ExampleProperty(mediaType = "msg", value = "获取成功"),
-                    @ExampleProperty(mediaType = "data", value = """
-                            {
-                                "serverPort": 8080,
-                                "isServerOrClient": true,
-                                "wsClientUrl": "ws://localhost:3001",
-                                "wsServerUrl": "/ws/shiro"
+
+    @Operation(
+            summary = "获取配置",
+            description = "获取当前配置",
+            method = HttpMethod.GET,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "成功",
+                            content = {
+                                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                            schema = @Schema(implementation = AjaxResult.class),
+                                            examples = {
+                                                    @ExampleObject(value = """
+                                                            {
+                                                                "code": 200,
+                                                                "msg": "获取成功",
+                                                                "data": {
+                                                                    "serverPort": 8080,
+                                                                    "isServerOrClient": true,
+                                                                    "wsClientUrl": "ws://localhost:3001",
+                                                                    "wsServerUrl": "/ws/shiro"
+                                                                }
+                                                            }
+                                                            """
+                                                    )
+                                            }
+                                    )
                             }
-                            """)
-            })),
-            @ApiResponse(code = 400, message = "请求参数错误"),
-            @ApiResponse(code = 500, message = "服务器内部错误")
-    })
+                    )
+            }
+    )
+    @GetMapping
     public AjaxResult loading() {
         return success().put("data", HandOff.getConfig());
     }
 
 
-    @ApiOperation("保存配置")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "config", value = "配置信息", required = true, dataType = "NyxConfig", paramType = "body",
-            examples = @Example(value = {
-                   @ExampleProperty(mediaType = "serverPort",value = "8080"),
-                   @ExampleProperty(mediaType = "isServerOrClient",value = "true"),
-                   @ExampleProperty(mediaType = "wsClientUrl",value = "ws://localhost:3001"),
-                   @ExampleProperty(mediaType = "wsServerUrl",value = "/ws/shiro"),
-                   @ExampleProperty(mediaType = "token",value = "123456")
-            })),
-    })
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "成功"),
-            @ApiResponse(code = 400, message = "请求参数错误"),
-            @ApiResponse(code = 500, message = "服务器内部错误")
-    })
+    @Operation(
+            summary = "保存配置",
+            description = "保存当前配置",
+            method = HttpMethod.POST,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "配置信息",
+                    required = true,
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = NyxConfig.class),
+                                    examples = {
+                                            @ExampleObject(value = """
+                                                    {
+                                                        "serverPort": 8080,
+                                                        "isServerOrClient": true,
+                                                        "wsClientUrl": "ws://localhost:3001",
+                                                        "wsServerUrl": "/ws/shiro",
+                                                        "token": "123456"
+                                                    }
+                                                    """
+                                            )
+                                    }
+                            )
+                    }
+            )
+    )
     @PostMapping
     public AjaxResult save(@Validated @RequestBody NyxConfig config) {
         if (!config.isValidateServerUrl()) {

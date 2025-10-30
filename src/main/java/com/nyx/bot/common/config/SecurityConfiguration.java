@@ -87,7 +87,8 @@ public class SecurityConfiguration {
                                 "/static/**",
                                 "/auth/login",
                                 // 机器人链接接口
-                                shiro
+                                shiro,
+                                "/v3/api-docs"
                         ).permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
@@ -114,6 +115,7 @@ public class SecurityConfiguration {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
