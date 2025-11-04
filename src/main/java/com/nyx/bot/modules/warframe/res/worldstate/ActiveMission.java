@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
 import com.nyx.bot.modules.warframe.res.enums.MissionTypeEnum;
 import com.nyx.bot.modules.warframe.res.enums.VoidEnum;
+import io.github.kingprimes.model.enums.FactionEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,6 +26,8 @@ public class ActiveMission extends BastWorldState {
     private String node;
     @JsonIgnore
     private Nodes nodes;
+
+    private FactionEnum faction;
     //
     @JsonProperty("Region")
     private Integer region;

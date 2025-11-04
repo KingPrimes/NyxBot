@@ -36,6 +36,7 @@
         <okhttp.version>4.12.0</okhttp.version>
         <jjwt.version>0.12.7</jjwt.version>
         <org.eclipse.jgit.version>7.3.0.202506031305-r</org.eclipse.jgit.version>
+        <draw-image.varsion>1.0.3</draw-image.varsion>
     </properties>
 
     <dependencies>
@@ -254,6 +255,12 @@
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
             <version>${xhtmlrenderer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.kingprimes</groupId>
+            <artifactId>draw-image-plugin</artifactId>
+            <version>${draw-image.varsion}</version>
         </dependency>
 
         <!--SpringBoot测试-->
