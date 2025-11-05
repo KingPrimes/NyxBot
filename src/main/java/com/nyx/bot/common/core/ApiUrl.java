@@ -24,7 +24,7 @@ public class ApiUrl {
     public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
     // 官方数据源
-    public static final String WARFRAME_WORLD_STATE = "https://content.warframe.com/dynamic/worldState.php";
+    public static final String WARFRAME_WORLD_STATE = "https://api.warframe.com/cdn/worldState.php";
 
     // 官方图片获取地址
     public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
