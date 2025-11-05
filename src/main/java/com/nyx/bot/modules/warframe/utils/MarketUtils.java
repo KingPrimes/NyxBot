@@ -91,29 +91,40 @@ public class MarketUtils {
                     return market;
                 }
             }
-
+            if (market.getItem() == null) {
+                market.setPossibleItems(getPossibleItems(itemsRepository, key));
+            }
             return market;
         } catch (Exception e) {
-            //查询用户可能想要查询的物品
-            List<OrdersItems> items = itemsRepository.findByItemNameLikeToList(String.valueOf(key.charAt(0)));
-            //判断集合是否为空
-            if (CollectionUtils.isEmpty(items)) {
-                //根据别名模糊查询用户 可能想要查询的物品名称
-                items = itemsRepository.findByItemNameLikeToList(StringUtils.substringBefore(key, String.valueOf(key.charAt(key.length() - 1))));
-            }
-
-            if (items.size() > 15) {
-                items = items.subList(0, 15);
-            }
-
-            List<String> item = new ArrayList<>();
-            for (OrdersItems o : items) {
-                item.add(o.getName());
-            }
-
-            market.setPossibleItems(item);
+            market.setPossibleItems(getPossibleItems(itemsRepository, key));
             return market;
         }
+    }
+
+    /**
+     * 获取可能的物品列表
+     *
+     * @param itemsRepository 物品仓库
+     * @param key             查询关键字
+     * @return 可能的物品列表
+     */
+    private static List<String> getPossibleItems(OrdersItemsRepository itemsRepository, String key) {
+        //查询用户可能想要查询的物品
+        List<OrdersItems> list = itemsRepository.findByItemNameLikeToList(String.valueOf(key.charAt(0)));
+        //判断集合是否为空
+        if (CollectionUtils.isEmpty(list)) {
+            //根据别名模糊查询用户 可能想要查询的物品名称
+            list = itemsRepository.findByItemNameLikeToList(StringUtils.substringBefore(key, String.valueOf(key.charAt(key.length() - 1))));
+        }
+        if (list.size() > 15) {
+            list = list.subList(0, 15);
+        }
+
+        List<String> item = new ArrayList<>();
+        for (OrdersItems o : list) {
+            item.add(o.getName());
+        }
+        return item;
     }
 
     public static Market toSet(String key, String form) {
