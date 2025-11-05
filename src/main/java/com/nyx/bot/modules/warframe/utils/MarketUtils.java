@@ -54,7 +54,7 @@ public class MarketUtils {
             //判断 是否使用了别名
             aliases.stream().filter(a -> finalKey.get().contains(a.getCn())).findFirst().ifPresent(a -> finalKey.set(finalKey.get().replace(a.getCn(), a.getEn())));
             key = finalKey.get();
-
+            String regex = key;
             //直接使用别名模糊查询
             items = itemsRepository.findByItemNameLike(key);
             if (items.isPresent()) {
@@ -72,20 +72,22 @@ public class MarketUtils {
                 return market;
             }
 
-            String header = key.substring(0, key.length() - 1);
+            String header = regex.substring(0, 1);
 
-            String end = key.substring(key.length() - 1);
+            String end = regex.substring(regex.length() - 1);
+            log.debug("正则查询参数 Header:{} -- End:{}", header, end);
             //正则查询
-            items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
+            items = itemsRepository.findByItemNameRegex("^" + header + ".*?" + end + ".*?");
             if (items.isPresent()) {
                 market.setItem(items.get());
                 return market;
 
             } else {
-                header = key.substring(0, key.length() - 2);
-                end = key.substring(key.length() - 2);
+                header = regex.substring(0, 2);
+                end = regex.substring(regex.length() - 2);
+                log.debug("正则查询参数 Header2:{} -- End2:{}", header, end);
                 //正则查询
-                items = itemsRepository.findByItemNameRegex("^" + header + ".*" + end);
+                items = itemsRepository.findByItemNameRegex("^" + header + ".*?" + end + ".*?");
                 if (items.isPresent()) {
                     market.setItem(items.get());
                     return market;
