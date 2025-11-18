@@ -115,7 +115,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 警告消息
      */
     public static AjaxResult warn(String msg, Object data) {
-        return new AjaxResult(HttpStatus.MOVED_PERMANENTLY, msg, data);
+        return new AjaxResult(HttpStatus.BAD_REQUEST, msg, data);
     }
 
     /**
@@ -174,7 +174,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 结果
      */
     public boolean isError() {
-        return Objects.equals(HttpStatus.INTERNAL_SERVER_ERROR, this.get(CODE_TAG));
+        return Objects.equals(HttpStatus.INTERNAL_SERVER_ERROR.value(), this.get(CODE_TAG));
     }
 
     /**

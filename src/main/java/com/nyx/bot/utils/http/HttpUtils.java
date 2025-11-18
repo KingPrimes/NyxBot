@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * @author KingPrimes
  */
 @Slf4j
-@SuppressWarnings("unused")
+@SuppressWarnings("ALL")
 public class HttpUtils {
 
     /**
@@ -109,24 +109,13 @@ public class HttpUtils {
      * @return 返回的文本
      */
     public static Body sendGet(String url, String param, HttpHeaders headers) {
-        try {
-            String urlNameString = url;
-            if (!param.isEmpty()) {
-                urlNameString = url + "?" + param;
-            }
-
-            HttpEntity<?> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(urlNameString, HttpMethod.GET, entity, String.class);
-
-            return new Body(
-                    response.getBody(),
-                    response.getStatusCode(),
-                    response.getHeaders(),
-                    url);
-        } catch (RestClientException e) {
-            log.error("sendGet", e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return doExchange(
+                appendParam(url, param),
+                HttpMethod.GET,
+                null,
+                headers,
+                String.class
+        );
     }
 
     /**
@@ -159,14 +148,13 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body marketSendGet(String url, String param, MarketFormEnums form) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, "application/json;charset=utf-8");
+        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
         headers.add("Language", "zh-hans");
         headers.add("Platform", form.getForm());
         headers.add("Pragma", "no-cache");
         headers.add("Crossplay", "true");
-        return sendGet(url, param, headers);
+        return doExchange(appendParam(url, param), HttpMethod.GET, null, headers, String.class);
     }
 
 
@@ -178,22 +166,8 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body sendPost(String url, String json) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> request = new HttpEntity<>(json, headers);
-            ResponseEntity<String> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.POST, request, String.class);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                log.warn("Response Code Is Not Successful code:{},message:{}", response.getStatusCode().value(), response.getBody());
-                return new Body(response.getStatusCode());
-            }
-
-            return getBody(response, url);
-        } catch (RestClientException e) {
-            log.warn("sendPost", e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return doExchange(url, HttpMethod.POST, json, headers, String.class);
     }
 
     /**
@@ -208,40 +182,7 @@ public class HttpUtils {
         File outputFile = new File(path);
         // 若目录不存在,创建目录
         FileUtils.createDir(outputFile);
-
-        try {
-            HttpEntity<?> entity = new HttpEntity<>(headers);
-            ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.GET, entity, Resource.class);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                try (
-                        InputStream in = response.getBody().getInputStream();
-                        FileOutputStream out = new FileOutputStream(outputFile)) {
-                    long fileSize = response.getHeaders().getContentLength();
-                    long downloaded = 0;
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, bytesRead);
-                        downloaded += bytesRead;
-                        // 输出进度
-                        printDownloadProgress(fileSize, downloaded);
-                    }
-                    future.complete(true);
-                } catch (IOException e) {
-                    log.error("文件写入失败: {}", e.getMessage());
-                    future.complete(false);
-                    future.completeExceptionally(e);
-                }
-            } else {
-                log.warn("文件下载： code：{}，headers：{}，message：{}", response.getStatusCode().value(), response.getHeaders(), response.getBody());
-                future.complete(false);
-            }
-        } catch (RestClientException e) {
-            log.warn("sendGetForFile 出现异常 请求Headers:{}", headers, e);
-            future.complete(false);
-            future.completeExceptionally(e);
-        }
-        return future.join();
+        return downloadFile(url, HttpMethod.GET, null, null, outputFile);
     }
 
     /**
@@ -257,14 +198,17 @@ public class HttpUtils {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("Accept-Encoding", "application/octet-stream");
             HttpEntity<String> request = new HttpEntity<>(json, headers);
-            ResponseEntity<?> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.POST, request, byte[].class);
+            ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.POST, request, Resource.class);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
                 log.warn("请求失败 code:{}, message:{}", response.getStatusCode().value(), response.getBody());
                 return new Body(response.getStatusCode());
             }
-            return new Body("", response.getStatusCode(), response.getHeaders(), url, (byte[]) response.getBody());
+            return new Body("", response.getStatusCode(), response.getHeaders(), url, response.getBody().getContentAsByteArray());
         } catch (RestClientException e) {
+            log.warn("请求异常", e);
+            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IOException e) {
             log.warn("请求异常", e);
             return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -302,6 +246,108 @@ public class HttpUtils {
             log.debug("文件下载进度:{}%", String.format("%.2f", progress));
             lastProgress = progress;
         }
+    }
+
+    /**
+     * 执行HTTP请求交换操作
+     *
+     * @param url          请求URL
+     * @param method       HTTP方法
+     * @param requestBody  请求体内容
+     * @param extraHeaders 额外的请求头
+     * @param responseType 响应类型
+     * @param <T>          响应泛型类型
+     * @return Body 响应结果包装对象
+     */
+    private static <T> Body doExchange(String url, HttpMethod method, Object requestBody, HttpHeaders extraHeaders, Class<T> responseType) {
+        HttpHeaders hers = new HttpHeaders(headers);
+        if (extraHeaders != null) hers.putAll(extraHeaders);
+
+        HttpEntity<?> req = (requestBody != null)
+                ? new HttpEntity<>(requestBody, hers)
+                : new HttpEntity<>(hers);
+
+        try {
+            ResponseEntity<T> resp =
+                    getRestTemplateWithoutProxyIfNeeded(url)
+                            .exchange(url, method, req, responseType);
+
+            return new Body(
+                    resp.getBody() instanceof byte[]
+                            ? ""
+                            : (String) resp.getBody(),
+                    resp.getStatusCode(),
+                    resp.getHeaders(),
+                    url,
+                    resp.getBody() instanceof byte[]
+                            ? (byte[]) resp.getBody()
+                            : null
+            );
+        } catch (RestClientException e) {
+            log.error("HTTP {} {} failed", method, url, e);
+            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 将参数追加到URL中
+     *
+     * @param url   原始URL
+     * @param param 要追加的参数
+     * @return 拼接后的URL
+     */
+    private static String appendParam(String url, String param) {
+        String urlNameString = url;
+        if (!param.isEmpty()) {
+            urlNameString = url + "?" + param;
+        }
+        return urlNameString;
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param url          请求URL
+     * @param method       HTTP方法
+     * @param extraHeaders 额外的请求头
+     * @param output       输出文件
+     * @return boolean 下载是否成功
+     */
+    private static boolean downloadFile(String url, HttpMethod method, Object requestBody, HttpHeaders extraHeaders, File output) {
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Accept-Encoding", "application/octet-stream");
+        HttpHeaders hers = new HttpHeaders(headers);
+        if (extraHeaders != null) hers.putAll(extraHeaders);
+
+        HttpEntity<?> req = (requestBody != null)
+                ? new HttpEntity<>(requestBody, hers)
+                : new HttpEntity<>(hers);
+
+        ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url)
+                .exchange(url, method,
+                        req,
+                        Resource.class);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            try (InputStream in = response.getBody().getInputStream();
+                 FileOutputStream out = new FileOutputStream(output)) {
+
+                byte[] buf = new byte[1024];
+                int n;
+                long read = 0, total = output.length();
+                while ((n = in.read(buf)) > 0) {
+                    out.write(buf, 0, n);
+                    read += n;
+                    printDownloadProgress(total, read);
+                }
+                return true;
+            } catch (Exception e) {
+                log.error("downloadFile failed for {} Handers:{}", url, response.getHeaders(), e);
+                return false;
+            }
+        }
+        log.warn("downloadFile failed for {} Handers:{}", url, response.getHeaders());
+        return false;
+
     }
 
     private static Body getBody(ResponseEntity<String> response, String url) {
