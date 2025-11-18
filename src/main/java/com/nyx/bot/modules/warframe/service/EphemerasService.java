@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.Ephemeras;
 import com.nyx.bot.modules.warframe.repo.EphemerasRepository;
 import com.nyx.bot.utils.StringUtils;
@@ -44,8 +43,8 @@ public class EphemerasService {
 
     private List<Ephemeras> getLichEphemeras() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.info("未获取到赤毒幻纹");
                 return null;
@@ -64,8 +63,8 @@ public class EphemerasService {
 
     private List<Ephemeras> getSisterEphemeras() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.info("未获取到 sisters 幻纹");
                 return null;

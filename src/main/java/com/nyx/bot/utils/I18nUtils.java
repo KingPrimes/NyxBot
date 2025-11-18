@@ -21,9 +21,9 @@ public class I18nUtils {
      */
     public static String message(String code, Object... args) {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
-        try{
+        try {
             return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
-        }catch (NoSuchMessageException e){
+        } catch (NoSuchMessageException e) {
             return code;
         }
     }
@@ -37,14 +37,6 @@ public class I18nUtils {
     public static String errorTimeOut() {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
         return messageSource.getMessage("error.timeout", new Object[]{}, LocaleContextHolder.getLocale());
-    }
-
-    public String getMessage(String msgKey, Object[] args) {
-        return messageSource.getMessage(msgKey, args, LocaleContextHolder.getLocale());
-    }
-
-    public String getMessage(String msgKey) {
-        return messageSource.getMessage(msgKey, new Object[]{}, LocaleContextHolder.getLocale());
     }
 
     /**
@@ -66,6 +58,13 @@ public class I18nUtils {
      */
     public static String RequestErrorMethod() {
         return message("request.error.method");
+    }
+
+    /**
+     * 请求参数错误
+     */
+    public static String RequestErrorParam() {
+        return message("request.error.param");
     }
 
     public static String RequestValidServerUrl() {
@@ -118,5 +117,13 @@ public class I18nUtils {
 
     public static String ControllerRestPassWordON() {
         return message("controller.rest.password.o.n");
+    }
+
+    public String getMessage(String msgKey, Object[] args) {
+        return messageSource.getMessage(msgKey, args, LocaleContextHolder.getLocale());
+    }
+
+    public String getMessage(String msgKey) {
+        return messageSource.getMessage(msgKey, new Object[]{}, LocaleContextHolder.getLocale());
     }
 }

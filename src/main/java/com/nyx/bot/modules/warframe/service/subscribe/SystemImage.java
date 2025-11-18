@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.common.core.OneBotLogInfoData;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
@@ -85,8 +84,8 @@ public class SystemImage {
                         Codes.WARFRAME_SUBSCRIBE,
                         o != null ? JSON.toJSONString(o) : "")
         );
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            builder.img(body.getFile());
+        if (body.code().is2xxSuccessful()) {
+            builder.img(body.file());
         }
     }
 }

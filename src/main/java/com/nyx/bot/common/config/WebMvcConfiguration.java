@@ -1,7 +1,7 @@
 package com.nyx.bot.common.config;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -23,7 +23,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         super.addResourceHandlers(registry);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public LocaleResolver localeResolver() {
         super.localeResolver();

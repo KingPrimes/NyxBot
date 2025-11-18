@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class ModelsTest {
 
     HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-    WorldState worldState = JSONObject.parseObject(body.getBody(), WorldState.class, JSONReader.Feature.SupportSmartMatch);
+    WorldState worldState = JSONObject.parseObject(body.body(), WorldState.class, JSONReader.Feature.SupportSmartMatch);
 
     // 夜灵平原
     @Test

@@ -1,6 +1,5 @@
 package com.nyx.bot.modules.warframe.utils;
 
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.modules.warframe.entity.RivenTrend;
@@ -30,10 +29,10 @@ public class RivenDispositionUpdates {
         HttpUtils.Body body = HttpUtils.sendGet("https://forums.warframe.com/search/?&q=Riven&type=forums_topic&quick=1&nodes=123&search_and_or=and&search_in=titles&sortby=relevancy");
         //返回变量
         List<String> newRiven = new ArrayList<>();
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+        if (!body.code().is2xxSuccessful()) {
             return newRiven;
         }
-        String html = body.getBody();
+        String html = body.body();
 
         //解析Html文档
         Document document = Jsoup.parse(html);
@@ -69,10 +68,10 @@ public class RivenDispositionUpdates {
         for (String url : urls) {
             //Get请求获取Html文档
             HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            if (!body.code().is2xxSuccessful()) {
                 continue;
             }
-            String html = body.getBody();
+            String html = body.body();
 
             //用于存放返回的结果
             Document document = Jsoup.parse(html);
