@@ -86,8 +86,13 @@ public class MarketOrdersPlugin {
         }
         log.debug("用户:{} 指令 {} 执行参数 {}", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD, JSON.toJSONString(marketOrdersData));
 
-        byte[] bytes = postMarketOrdersImage(marketOrdersData);
-        SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_ORDERS_PLUGIN, log);
+        try {
+            byte[] bytes = postMarketOrdersImage(marketOrdersData);
+            SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_ORDERS_PLUGIN, log);
+        } catch (NullPointerException e) {
+            bot.sendMsg(event, "查询失败！请检查名称是否正确。", false);
+        }
+
     }
 
     private byte[] postMarketOrdersImage(MarketOrdersData data) throws DataNotInfoException, HtmlToImageException {
