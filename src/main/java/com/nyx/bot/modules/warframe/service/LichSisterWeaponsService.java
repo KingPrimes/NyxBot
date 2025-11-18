@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.LichSisterWeapons;
 import com.nyx.bot.modules.warframe.repo.LichSisterWeaponsRepository;
 import com.nyx.bot.utils.StringUtils;
@@ -43,8 +42,8 @@ public class LichSisterWeaponsService {
 
     private List<LichSisterWeapons> getLichWeapons() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.warn("未获取到赤毒武器");
                 return null;
@@ -61,8 +60,8 @@ public class LichSisterWeaponsService {
 
     private List<LichSisterWeapons> getSisterWeapons() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.warn("未获取到信条武器");
                 return null;

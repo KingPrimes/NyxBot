@@ -3,7 +3,7 @@ package com.nyx.bot.modules.warframe.utils;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.modules.warframe.entity.*;
 import com.nyx.bot.modules.warframe.repo.*;
 import com.nyx.bot.modules.warframe.res.Ducats;
@@ -20,6 +20,7 @@ import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -46,6 +47,12 @@ public class MarketUtils {
 
         try {
             Optional<OrdersItems> items;
+            // 假设用户输入了全称
+            items = itemsRepository.findByName(key);
+            if (items.isPresent()) {
+                market.setItem(items.get());
+                return market;
+            }
             //假设用户使用了别名
             //匹配是否使用了别名 查出所有的别名列表并迭代查询
             List<Alias> aliases = aliasRepository.findAll();
@@ -129,16 +136,16 @@ public class MarketUtils {
         return item;
     }
 
-    public static Market toSet(String key, String form) {
+    public static Market toSet(String key, MarketFormEnums form) {
         Market dataBase = toDataBase(key);
         if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
             return dataBase;
         }
         log.debug("查询参数 Key:{}", dataBase.getItem().getSlug());
         HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getItem().getSlug(), form);
-        log.debug("查询结果:{}", body.getBody());
-        if (Objects.requireNonNull(body.getCode()) == HttpCodeEnum.SUCCESS) {
-            BaseOrderObjet<?> baseOrder = JSONObject.parseObject(body.getBody(), BaseOrderObjet.class, JSONReader.Feature.SupportSmartMatch);
+        log.debug("查询结果:{}", body.body());
+        if (body.code().is2xxSuccessful()) {
+            BaseOrderObjet<?> baseOrder = JSONObject.parseObject(body.body(), BaseOrderObjet.class, JSONReader.Feature.SupportSmartMatch);
             JSONObject dataJson = (JSONObject) baseOrder.getData();
             BaseOrderObjet.Data<?> data = dataJson.toJavaObject(BaseOrderObjet.Data.class, JSONReader.Feature.SupportSmartMatch);
             data.getItems().stream()
@@ -172,63 +179,59 @@ public class MarketUtils {
      * @param market 查询到的物品
      * @return 处理后的结果
      */
-    public static BaseOrder<OrderWithUser> market(String from, Boolean isBy, Boolean isMax, Market market) {
+    public static BaseOrder<OrderWithUser> market(MarketFormEnums from, Boolean isBy, Boolean isMax, Market market) {
         String key = market.getItem().getSlug();
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
         BaseOrder<OrderWithUser> owu = new BaseOrder<>();
-        switch (body.getCode()) {
-            case SUCCESS -> {
-                BaseOrder<?> ow = JSONObject.parseObject(body.getBody(), BaseOrder.class, JSONReader.Feature.SupportSmartMatch);
-                List<OrderWithUser> list = ow.getData().stream()
-                        // 转换类型
-                        .map(item -> {
-                            if (item instanceof JSONObject) {
-                                return ((JSONObject) item).toJavaObject(OrderWithUser.class);
-                            } else {
-                                return JSONObject.parseObject(item.toString(), OrderWithUser.class);
+        if (body.code().is2xxSuccessful()) {
+            BaseOrder<?> ow = JSONObject.parseObject(body.body(), BaseOrder.class, JSONReader.Feature.SupportSmartMatch);
+            List<OrderWithUser> list = ow.getData().stream()
+                    // 转换类型
+                    .map(item -> {
+                        if (item instanceof JSONObject) {
+                            return ((JSONObject) item).toJavaObject(OrderWithUser.class);
+                        } else {
+                            return JSONObject.parseObject(item.toString(), OrderWithUser.class);
+                        }
+                    })
+                    // 筛选离线用户
+                    .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
+                    // 筛选物品
+                    .filter(o -> o.getItemId().equals(market.getItem().getId()))
+                    // 筛选类型
+                    .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
+                    // 筛选等级
+                    .filter(o -> {
+                        if (isMax) {
+                            // 筛选Mod等级
+                            if (o.getRank() != null) {
+                                return o.getRank().equals(market.getItem().getMaxRank());
                             }
-                        })
-                        // 筛选离线用户
-                        .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
-                        // 筛选物品
-                        .filter(o -> o.getItemId().equals(market.getItem().getId()))
-                        // 筛选类型
-                        .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
-                        // 筛选等级
-                        .filter(o -> {
-                            if (isMax) {
-                                // 筛选Mod等级
-                                if (o.getRank() != null) {
-                                    return o.getRank().equals(market.getItem().getMaxRank());
-                                }
-                                // 筛选 阿耶檀识 星星数量
-                                if (o.getAmberStars() != null && o.getCyanStars() != null) {
-                                    return o.getAmberStars().equals(market.getItem().getMaxRank()) && o.getCyanStars().equals(market.getItem().getMaxRank());
-                                }
+                            // 筛选 阿耶檀识 星星数量
+                            if (o.getAmberStars() != null && o.getCyanStars() != null) {
+                                return o.getAmberStars().equals(market.getItem().getMaxRank()) && o.getCyanStars().equals(market.getItem().getMaxRank());
                             }
-                            return true;
-                        })
-                        // 排序物品
-                        .sorted(isBy ? Comparator.comparing(OrderWithUser::getPlatinum).reversed() : Comparator.comparing(OrderWithUser::getPlatinum))
-                        // 限制数量
-                        .limit(8)
-                        // 转换为结果
-                        .toList();
-                owu.setData(list);
-                owu.setApiVersion(ow.getApiVersion());
-                owu.setError(ow.getError());
-                return owu;
-            }
-            case TOO_MANY_REQUESTS -> {
-                owu.setError("触发速率限制，请稍后再次尝试查询。");
-                return owu;
-            }
-            default -> {
-                owu.setError("查询出现错误");
-                return owu;
-            }
+                        }
+                        return true;
+                    })
+                    // 排序物品
+                    .sorted(isBy ? Comparator.comparing(OrderWithUser::getPlatinum).reversed() : Comparator.comparing(OrderWithUser::getPlatinum))
+                    // 限制数量
+                    .limit(8)
+                    // 转换为结果
+                    .toList();
+            owu.setData(list);
+            owu.setApiVersion(ow.getApiVersion());
+            owu.setError(ow.getError());
+            return owu;
         }
+        if (body.code().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+            owu.setError("触发速率限制，请稍后再次尝试查询。");
+            return owu;
+        }
+        owu.setError("查询出现错误");
+        return owu;
     }
 
     /**
@@ -306,13 +309,13 @@ public class MarketUtils {
                     MarketRivenParameter.Policy.ANY,
                     MarketRivenParameter.SortBy.PRICE_ASC
             ).getUrl();
-            log.debug("请求的URL:{}", url);
+            log.debug("请求的MarketRiven无参 URL:{}", url);
             HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-                log.debug("获取数据失败：{}", body.getCode().getMessage());
+            if (!body.code().is2xxSuccessful()) {
+                log.debug("获取数据失败：{}", body.body());
                 return marketRiven;
             }
-            var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
+            var mr = stream(JSONObject.parseObject(body.body(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
             log.debug("获取到的数据：\n{}", mr);
             // 解析返回数据
             return mr;
@@ -368,14 +371,14 @@ public class MarketUtils {
                 MarketRivenParameter.Policy.ANY,
                 MarketRivenParameter.SortBy.PRICE_ASC
         ).getUrl();
-        log.debug("请求的URL:{}", url);
+        log.debug("请求的MarketRiven带参 URL:{}", url);
         HttpUtils.Body body = HttpUtils.marketSendGet(url, "");
 
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.debug("获取数据失败：{}", body.getCode().getMessage());
+        if (!body.code().is2xxSuccessful()) {
+            log.debug("获取数据失败：{}", body.body());
             return marketRiven;
         }
-        var mr = stream(JSONObject.parseObject(body.getBody(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
+        var mr = stream(JSONObject.parseObject(body.body(), MarketRiven.class, JSONReader.Feature.SupportSmartMatch), riveItems.getName());
         log.debug("获取到的数据：\n{}", mr);
         // 解析返回数据
         return mr;
@@ -425,11 +428,11 @@ public class MarketUtils {
 
     public static Ducats getDucats() {
         HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.debug("获取数据失败：{}", body.getCode().getMessage());
+        if (!body.code().is2xxSuccessful()) {
+            log.debug("获取Ducats数据失败：{}", body.body());
             return null;
         }
-        return JSONObject.parseObject(body.getBody(), Ducats.class, JSONReader.Feature.SupportSmartMatch);
+        return JSONObject.parseObject(body.body(), Ducats.class, JSONReader.Feature.SupportSmartMatch);
     }
 
     @Data

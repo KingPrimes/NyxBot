@@ -6,7 +6,6 @@ import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.page.TableDataInfo;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.bot.entity.white.ProveWhite;
 import com.nyx.bot.modules.bot.service.black.BlackService;
 import com.nyx.bot.modules.bot.service.white.WhiteService;
@@ -24,6 +23,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -155,7 +155,7 @@ public class ProveWhiteController extends BaseController {
         if (bs.isBlack(null, white.getProveUid())) {
             return toAjax(whiteService.save(white) != null);
         }
-        return error(HttpCodeEnum.FAIL, I18nUtils.BWBlackExist());
+        return error(HttpStatus.BAD_REQUEST, I18nUtils.BWBlackExist());
     }
 
     @Operation(

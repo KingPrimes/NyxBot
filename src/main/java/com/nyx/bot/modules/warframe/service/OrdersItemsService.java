@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
 import com.nyx.bot.utils.StringUtils;
@@ -30,8 +29,8 @@ public class OrdersItemsService {
     public Integer initOrdersItemsData() {
         log.debug("开始初始化Market物品数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_ITEMS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.error("未获取到Market物品数据");
                 return -1;

@@ -41,7 +41,7 @@ public class TestCleanseData {
         HttpUtils.Body body = HttpUtils.sendGet("https://content.warframe.com/PublicExport/Manifest/ExportManifest.json!00_QuYGmcTCltbR7qG1eNIvSQ");
         File file = new File("D:\\Demos\\NyxBot\\data\\phpData\\ExportManifest.json");
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write(body.getBody());
+            writer.write(body.body());
         }
     }
 

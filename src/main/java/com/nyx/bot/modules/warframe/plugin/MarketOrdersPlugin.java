@@ -96,13 +96,13 @@ public class MarketOrdersPlugin {
     }
 
     private byte[] postMarketOrdersImage(MarketOrdersData data) throws DataNotInfoException, HtmlToImageException {
-        MarketUtils.Market market = MarketUtils.toSet(data.getKey(), data.getForm().getForm());
+        MarketUtils.Market market = MarketUtils.toSet(data.getKey(), data.getForm());
         ModelMap modelMap = new ModelMap();
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
             modelMap.put("items", market.getPossibleItems());
             return HtmlToImage.generateImage("html/marketPossibleItems", () -> modelMap).toByteArray();
         }
-        BaseOrder<OrderWithUser> order = MarketUtils.market(data.getForm().getForm(), data.isBy(), data.isMax(), market);
+        BaseOrder<OrderWithUser> order = MarketUtils.market(data.getForm(), data.isBy(), data.isMax(), market);
         List<OrderWithUser> ows = order.getData();
         OrdersItems oi = market.getItem();
         modelMap.addAttribute("ducats", oi.getDucats());

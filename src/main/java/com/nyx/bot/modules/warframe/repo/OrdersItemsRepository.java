@@ -30,6 +30,14 @@ public interface OrdersItemsRepository extends JpaRepository<OrdersItems, String
     Optional<OrdersItems> findByItemNameLike(@Param("i") String name);
 
     /**
+     * 根据物品名称查询
+     *
+     * @param name 物品名称
+     * @return 结果
+     */
+    Optional<OrdersItems> findByName(String name);
+
+    /**
      * 根据物品名称模糊查询
      *
      * @param name 物品名称

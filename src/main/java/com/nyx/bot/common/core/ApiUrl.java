@@ -3,12 +3,11 @@ package com.nyx.bot.common.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.nyx.bot.enums.HttpCodeEnum;
+import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.modules.warframe.res.Arbitration;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Headers;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,11 +16,6 @@ import java.util.List;
 @Slf4j
 public class ApiUrl {
 
-
-    /**
-     * 中文
-     */
-    public static final Headers LANGUAGE_ZH_HANS = Headers.of("language", "zh-hans");
 
     // 官方数据源
     public static final String WARFRAME_WORLD_STATE = "https://api.warframe.com/cdn/worldState.php";
@@ -81,10 +75,10 @@ public class ApiUrl {
      * @param from 平台
      * @return 返回信息
      */
-    public static HttpUtils.Body marketOrders(String key, String from) {
+    public static HttpUtils.Body marketOrders(String key, MarketFormEnums from) {
         String url = "https://api.warframe.market/v2/orders/item/%s".formatted(key);
         log.debug("MarketOrderURL:{}", url);
-        return HttpUtils.sendGet(url, Headers.of("platform", from, "Crossplay", "true"));
+        return HttpUtils.marketSendGet(url, "", from);
     }
 
     /**
@@ -93,10 +87,10 @@ public class ApiUrl {
      * @param key 物品名称
      * @return 物品详细信息
      */
-    public static HttpUtils.Body marketOrdersSet(String key, String from) {
+    public static HttpUtils.Body marketOrdersSet(String key, MarketFormEnums from) {
         String url = "https://api.warframe.market/v2/item/%s/set".formatted(key);
         log.debug("MarketOrderSetURL:{}", url);
-        return HttpUtils.sendGet(url, Headers.of("platform", from));
+        return HttpUtils.marketSendGet(url, "", from);
     }
 
     /**
@@ -107,11 +101,11 @@ public class ApiUrl {
     public static List<Arbitration> arbitrationPreList() {
         try {
             HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            if (!body.code().is2xxSuccessful()) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }
-            return JSON.parseArray(body.getBody(), Arbitration.class, JSONReader.Feature.SupportSmartMatch);
+            return JSON.parseArray(body.body(), Arbitration.class, JSONReader.Feature.SupportSmartMatch);
         } catch (JSONException e) {
             return Collections.emptyList();
         }

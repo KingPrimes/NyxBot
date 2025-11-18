@@ -80,6 +80,7 @@ public class TestInitData {
         log.info("耗时{}ms", end - start);
         assertThat(i1).isGreaterThan(0);
     }
+
     @Test
     void testInitExprot() {
         CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(WarframeDataSource::severExportFiles)
@@ -88,6 +89,32 @@ public class TestInitData {
                 .thenRunAsync(() -> new WarframeDataSource().initWeapons())
                 .thenRun(() -> log.info("数据初始化完成！"));
         completableFuture.join();
+    }
+
+    @Test
+    void testInitDataBase() {
+        CompletableFuture.allOf(
+
+                        CompletableFuture.runAsync(WarframeDataSource::getAlias),
+                        CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
+                        CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
+                        CompletableFuture.runAsync(WarframeDataSource::initTranslation),
+                        CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
+                        CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
+
+                        CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
+                        CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
+                        CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
+                        CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
+                        CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
+
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation()),
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
+                        CompletableFuture.runAsync(WarframeDataSource::getRelics))
+                .join();
     }
 
     @Test
@@ -110,7 +137,7 @@ public class TestInitData {
     }
 
     @Test
-    void testInitWeapons(){
+    void testInitWeapons() {
         new WarframeDataSource().initWeapons();
     }
 

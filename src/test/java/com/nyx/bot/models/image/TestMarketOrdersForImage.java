@@ -3,6 +3,7 @@ package com.nyx.bot.models.image;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
+import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.res.market.BaseOrder;
 import com.nyx.bot.modules.warframe.res.market.OrderWithUser;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestMarketOrdersForImage {
 
     private static final String TEST_IMAGE_PATH = "./data/market_orders.png";
-    String form = "pc";
+    MarketFormEnums form = MarketFormEnums.PC;
     String key = "鹦鹉螺";
     Boolean isBy = false;
     Boolean isMax = false;

@@ -1,15 +1,16 @@
 package com.nyx.bot.utils;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.extra.spring.SpringCache2kCache;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.NonNull;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("unused")
 @Slf4j
 public class CacheUtils {
     public static final String SYSTEM = "system";
@@ -66,7 +67,7 @@ public class CacheUtils {
      * @return Object
      */
     public static Object get(String name, Object key) {
-        return cm.getCache(name).get(key).get();
+        return Objects.requireNonNull(Objects.requireNonNull(cm.getCache(name)).get(key)).get();
     }
 
     /**
@@ -77,12 +78,12 @@ public class CacheUtils {
      * @param type 缓存的类
      * @return type参数的类
      */
-    public static <T> T get(String name, Object key, @NotNull Class<T> type) {
-        return cm.getCache(name).get(key, type);
+    public static <T> T get(String name, Object key, @NonNull Class<T> type) {
+        return Objects.requireNonNull(cm.getCache(name)).get(key, type);
     }
 
     public static boolean exists(String name, Object key) {
-        return cm.getCache(name).get(key) != null;
+        return Objects.requireNonNull(cm.getCache(name)).get(key) != null;
     }
 
     /**
@@ -109,7 +110,9 @@ public class CacheUtils {
                 });
             } else {
                 // 非 Cache2k 缓存实现时的回退逻辑
-                springCache.put(key, value);
+                if (springCache != null) {
+                    springCache.put(key, value);
+                }
             }
         } catch (IllegalStateException e) {
             log.warn("CacheManager已关闭，无法设置带过期时间的缓存: {}", cacheName);

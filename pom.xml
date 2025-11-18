@@ -33,19 +33,12 @@
         <monstercat.os.version>1.2.2</monstercat.os.version>
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.8.3</oshi.version>
-        <okhttp.version>4.12.0</okhttp.version>
         <jjwt.version>0.12.7</jjwt.version>
         <org.eclipse.jgit.version>7.3.0.202506031305-r</org.eclipse.jgit.version>
+        <draw-image.varsion>1.0.3</draw-image.varsion>
     </properties>
 
     <dependencies>
-        <!--  统一 Kotlin 版本-->
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
-            <scope>compile</scope>
-        </dependency>
 
         <!--SpringBoot JPA操作DAO-->
         <dependency>
@@ -123,31 +116,6 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
-        </dependency>
-
-        <!--Http请求-->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp-brotli</artifactId>
-            <version>${okhttp.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- SSL/TLS 工具库 -->
@@ -254,6 +222,12 @@
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
             <version>${xhtmlrenderer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.kingprimes</groupId>
+            <artifactId>draw-image-plugin</artifactId>
+            <version>${draw-image.varsion}</version>
         </dependency>
 
         <!--SpringBoot测试-->
@@ -393,26 +367,6 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <source>src/main/java</source>
-                                <source>target/generated-sources/annotations</source>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>
         <resources>

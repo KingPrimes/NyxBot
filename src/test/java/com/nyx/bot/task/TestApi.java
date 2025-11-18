@@ -4,13 +4,13 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.nyx.bot.NyxBotApplicationTest;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.res.WorldState;
+import com.nyx.bot.modules.warframe.res.enums.MissionTypeEnum;
 import com.nyx.bot.modules.warframe.res.enums.SyndicateEnum;
 import com.nyx.bot.modules.warframe.res.worldstate.*;
 import com.nyx.bot.modules.warframe.service.MissionSubscribeService;
@@ -26,9 +26,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
+@SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
 public class TestApi {
 
@@ -43,7 +44,7 @@ public class TestApi {
     @Resource
     NightWaveRepository nightwaveRepository;
 
-    FileInputStream state = new FileInputStream("./data/state10.json");
+    FileInputStream state = new FileInputStream("./data/state-2025-10-31.json");
     WorldState worldState = JSON.parseObject(state, WorldState.class);
 
     public TestApi() throws FileNotFoundException {
@@ -78,8 +79,10 @@ public class TestApi {
     @Test
     void testGetWorldState() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            FileUtils.writeFile("./data/state10.json", body.getBody());
+        if (body.code().is2xxSuccessful() || body.code().is3xxRedirection()) {
+            FileUtils.writeFile("./data/state-2025-11-18.json", body.body());
+        } else {
+            log.error("{}", body);
         }
     }
 
@@ -93,6 +96,35 @@ public class TestApi {
         if (minutes <= 18) {
             SpringUtils.getBean(MissionSubscribeService.class).handleUpdate(SubscribeEnums.CETUS_CYCLE, worldState);
         }
+    }
+
+    /**
+     * 测试警报任务
+     * <p>
+     * 该方法用于获取并处理游戏中的警报任务信息，包括：
+     * 1. 解析警报任务奖励物品的名称
+     * 2. 将节点ID转换为可读的地点名称
+     * 3. 输出格式化后的警报任务信息
+     * </p>
+     */
+    @Test
+    void testAlerts() {
+        List<Alert> alerts = worldState.getAlerts().stream().peek(a ->
+                {
+                    // 处理警报任务奖励物品列表，将唯一标识符转换为可读名称
+                    List<String> list = a.getMissionInfo().getMissionReward().getItems().stream().map(i -> {
+                        AtomicReference<String> name = new AtomicReference<>(i);
+                        str.findByUniqueName(StringUtils.getLastThreeSegments(i)).ifPresent(s -> name.set(s.getName()));
+                        return name.get();
+                    }).toList();
+                    a.getMissionInfo().getMissionReward().setItems(list);
+
+                    // 将节点ID替换为可读的地点和星系名称
+                    nodesRepository.findById(a.getMissionInfo().getLocation()).ifPresent(nodes ->
+                            a.getMissionInfo().setLocation(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+                }
+        ).toList();
+        log.info(JSON.toJSONString(alerts));
     }
 
     /**
@@ -202,7 +234,7 @@ public class TestApi {
                     ActiveMission am = new ActiveMission();
                     nodesRepository.findById(v.getNode()).ifPresentOrElse(nodes -> {
                         am.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                        am.setMissionType(nodes.getMissionType());
+                        am.setMissionType(MissionTypeEnum.valueOf(nodes.getMissionType().name()));
                     }, () -> am.setNode(v.getNode()));
                     am.set_id(v.get_id());
                     am.setActivation(v.getActivation());
@@ -222,6 +254,15 @@ public class TestApi {
         SeasonInfo seasonInfo = worldState.getSeasonInfo();
         seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c ->
                         nightwaveRepository.findById(c.getChallenge()).ifPresent(c::setNightwave))
+//                        nightwaveRepository.findById(c.getChallenge()).ifPresent(n -> {
+//                            c.setName(n.getName());
+//                            c.setDescription(n.getDescription());
+//                            c.setStanding(n.getStanding());
+//                            c.setRequired(n.getRequired());
+//                            c.setDaily(n.getStanding() == 1000);
+//                            c.setWeekly(n.getStanding() == 4500);
+//                            c.setElite(n.getStanding() == 7000);
+//                        }))
                 .toList());
         log.info(JSON.toJSONString(seasonInfo));
     }
