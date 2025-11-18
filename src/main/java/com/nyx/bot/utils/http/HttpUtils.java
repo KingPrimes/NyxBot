@@ -29,7 +29,7 @@ public class HttpUtils {
     /**
      * 默认的请求头
      */
-    public static final HttpHeaders headers;
+    private static final HttpHeaders headers;
     /**
      * 默认的 RestTemplate
      */
@@ -86,7 +86,7 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body sendGet(String url, String param) {
-        return sendGet(url, param, headers);
+        return sendGet(url, param, null);
     }
 
     /**
@@ -148,13 +148,14 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body marketSendGet(String url, String param, MarketFormEnums form) {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
-        headers.add("Language", "zh-hans");
-        headers.add("Platform", form.getForm());
-        headers.add("Pragma", "no-cache");
-        headers.add("Crossplay", "true");
-        return doExchange(appendParam(url, param), HttpMethod.GET, null, headers, String.class);
+        HttpHeaders h = new HttpHeaders();
+        h.setContentType(MediaType.APPLICATION_JSON);
+        h.add(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
+        h.add("Language", "zh-hans");
+        h.add("Platform", form.getForm());
+        h.add("Pragma", "no-cache");
+        h.add("Crossplay", "true");
+        return doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);
     }
 
 
@@ -166,8 +167,9 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body sendPost(String url, String json) {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return doExchange(url, HttpMethod.POST, json, headers, String.class);
+        HttpHeaders h = new HttpHeaders();
+        h.setContentType(MediaType.APPLICATION_JSON);
+        return doExchange(url, HttpMethod.POST, json, h, String.class);
     }
 
     /**
@@ -194,10 +196,10 @@ public class HttpUtils {
      */
     public static Body sendPostForFile(String url, String json) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Accept-Encoding", "application/octet-stream");
-            HttpEntity<String> request = new HttpEntity<>(json, headers);
+            HttpHeaders h = new HttpHeaders(headers);
+            h.setContentType(MediaType.APPLICATION_JSON);
+            h.add("Accept-Encoding", "application/octet-stream");
+            HttpEntity<String> request = new HttpEntity<>(json, h);
             ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.POST, request, Resource.class);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
