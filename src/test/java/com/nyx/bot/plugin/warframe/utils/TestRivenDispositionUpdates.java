@@ -1,7 +1,6 @@
 package com.nyx.bot.plugin.warframe.utils;
 
 import com.nyx.bot.NyxBotApplication;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.modules.warframe.entity.RivenTrend;
@@ -31,11 +30,11 @@ public class TestRivenDispositionUpdates {
         HttpUtils.Body body = HttpUtils.sendGet("https://forums.warframe.com/search/?&q=Riven&type=forums_topic&quick=1&nodes=123&search_and_or=and&search_in=titles&sortby=relevancy");
         //返回变量
         List<String> newRiven = new ArrayList<>();
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
-            log.error("获取论坛搜索列表失败！状态码:{}", body.getCode());
+        if (!body.code().is2xxSuccessful()) {
+            log.error("获取论坛搜索列表失败！状态码:{}", body.code().value());
             return newRiven;
         }
-        String html = body.getBody();
+        String html = body.body();
 
         //解析Html文档
         Document document = Jsoup.parse(html);
@@ -77,10 +76,10 @@ public class TestRivenDispositionUpdates {
         for (String url : urls) {
             //Get请求获取Html文档
             HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+            if (!body.code().is2xxSuccessful()) {
                 continue;
             }
-            String html = body.getBody();
+            String html = body.body();
             Document document = Jsoup.parse(html);
             Elements times = document.getElementsByClass("ipsType_light ipsType_reset");
             // 获取发帖日期

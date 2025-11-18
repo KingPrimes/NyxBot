@@ -2,11 +2,11 @@ package com.nyx.bot.modules.bot.service;
 
 import com.mikuac.shiro.core.BotContainer;
 import com.nyx.bot.common.core.AjaxResult;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.bot.service.black.BlackService;
 import com.nyx.bot.modules.bot.service.white.WhiteService;
 import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -41,10 +41,10 @@ public class BotsService {
         if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
-                    ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
-                    : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+                    ? new AjaxResult(HttpStatus.OK, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
+                    : new AjaxResult(HttpStatus.NO_CONTENT, "此机器人未链接", null);
         } catch (Exception e) {
-            return new AjaxResult(HttpCodeEnum.ERROR, "获取好友列表失败,请手动输入管理员账号！");
+            return new AjaxResult(HttpStatus.NO_CONTENT, "获取好友列表失败,请手动输入管理员账号！");
         }
     }
 
@@ -57,10 +57,10 @@ public class BotsService {
         if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
-                    ? new AjaxResult(HttpCodeEnum.SUCCESS, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
-                    : new AjaxResult(HttpCodeEnum.ERROR, "此机器人未链接", null);
+                    ? new AjaxResult(HttpStatus.OK, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
+                    : new AjaxResult(HttpStatus.NO_CONTENT, "此机器人未链接", null);
         } catch (Exception e) {
-            return new AjaxResult(HttpCodeEnum.ERROR, "获取群列表失败，请手动输入群账号！");
+            return new AjaxResult(HttpStatus.NO_CONTENT, "获取群列表失败，请手动输入群账号！");
         }
     }
 

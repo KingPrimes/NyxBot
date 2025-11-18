@@ -1,14 +1,15 @@
 package com.nyx.bot.common.core;
 
 import com.alibaba.fastjson2.JSON;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.StringUtils;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class AjaxResult extends HashMap<String, Object> {
     /**
      * 状态码
@@ -37,8 +38,8 @@ public class AjaxResult extends HashMap<String, Object> {
      * @param code 状态类型
      * @param msg  返回内容
      */
-    public AjaxResult(HttpCodeEnum code, String msg) {
-        super.put(CODE_TAG, code.getCode());
+    public AjaxResult(HttpStatus code, String msg) {
+        super.put(CODE_TAG, code.value());
         super.put(MSG_TAG, msg);
     }
 
@@ -49,8 +50,8 @@ public class AjaxResult extends HashMap<String, Object> {
      * @param msg  返回内容
      * @param data 数据对象
      */
-    public AjaxResult(HttpCodeEnum code, String msg, Object data) {
-        super.put(CODE_TAG, code.getCode());
+    public AjaxResult(HttpStatus code, String msg, Object data) {
+        super.put(CODE_TAG, code.value());
         super.put(MSG_TAG, msg);
         if (StringUtils.isNotNull(data)) {
             super.put(DATA_TAG, data);
@@ -93,7 +94,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 成功消息
      */
     public static AjaxResult success(String msg, Object data) {
-        return new AjaxResult(HttpCodeEnum.SUCCESS, msg, data);
+        return new AjaxResult(HttpStatus.OK, msg, data);
     }
 
     /**
@@ -114,13 +115,13 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 警告消息
      */
     public static AjaxResult warn(String msg, Object data) {
-        return new AjaxResult(HttpCodeEnum.WARN, msg, data);
+        return new AjaxResult(HttpStatus.MOVED_PERMANENTLY, msg, data);
     }
 
     /**
      * 返回错误消息
      *
-     * @return
+     * @return 错误消息
      */
     public static AjaxResult error() {
         return AjaxResult.error(I18nUtils.message("controller.error"));
@@ -144,7 +145,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 警告消息
      */
     public static AjaxResult error(String msg, Object data) {
-        return new AjaxResult(HttpCodeEnum.ERROR, msg, data);
+        return new AjaxResult(HttpStatus.INTERNAL_SERVER_ERROR, msg, data);
     }
 
     /**
@@ -154,7 +155,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @param msg  返回内容
      * @return 警告消息
      */
-    public static AjaxResult error(HttpCodeEnum code, String msg) {
+    public static AjaxResult error(HttpStatus code, String msg) {
         return new AjaxResult(code, msg);
     }
 
@@ -173,7 +174,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 结果
      */
     public boolean isError() {
-        return Objects.equals(HttpCodeEnum.ERROR, this.get(CODE_TAG));
+        return Objects.equals(HttpStatus.INTERNAL_SERVER_ERROR, this.get(CODE_TAG));
     }
 
     /**
@@ -195,32 +196,5 @@ public class AjaxResult extends HashMap<String, Object> {
 
     public String toJsonString() {
         return JSON.toJSONString(this);
-    }
-
-    /**
-     * 状态类型
-     */
-    public enum Type {
-        /**
-         * 成功
-         */
-        SUCCESS(0),
-        /**
-         * 警告
-         */
-        WARN(301),
-        /**
-         * 错误
-         */
-        ERROR(500);
-        private final int value;
-
-        Type(int value) {
-            this.value = value;
-        }
-
-        public int value() {
-            return this.value;
-        }
     }
 }

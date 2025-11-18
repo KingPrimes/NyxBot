@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribe;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -25,16 +24,16 @@ public class TaskWarframeStatus {
     @Scheduled(cron = "0 0/2 * * * ?")
     public void executeWarframeStatus() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-        if (body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+        if (body.code().is2xxSuccessful() || body.code().is3xxRedirection()) {
             try {
-                WorldState worldState = JSON.parseObject(body.getBody(), WorldState.class);
+                WorldState worldState = JSON.parseObject(body.body(), WorldState.class);
                 WarframeCache.setWarframeStatus(worldState);
                 WarframeSubscribe.isUpdated(worldState);
             } catch (JSONException e) {
                 log.error("Warframe 状态数据解析错误: {}", e.getMessage());
             }
         } else {
-            log.error("Warframe 状态数据错误: {}", body.getBody());
+            log.error("Warframe 状态数据错误: {}", body.body());
         }
     }
 

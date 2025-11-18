@@ -1,13 +1,14 @@
 package com.nyx.bot.common.core;
 
 import com.nyx.bot.common.exception.ServiceException;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.system.entity.SysUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@SuppressWarnings("unused")
 public class SecurityUtils {
     /**
      * 用户ID
@@ -16,7 +17,7 @@ public class SecurityUtils {
         try {
             return getLoginUser().getUserId();
         } catch (Exception e) {
-            throw new ServiceException("获取用户ID异常", HttpCodeEnum.UNAUTHORIZED.getCode());
+            throw new ServiceException("获取用户ID异常", HttpStatus.UNAUTHORIZED.value());
         }
     }
 
@@ -28,7 +29,7 @@ public class SecurityUtils {
         try {
             return getLoginUser().getUserName();
         } catch (Exception e) {
-            throw new ServiceException("获取用户账户异常", HttpCodeEnum.UNAUTHORIZED.getCode());
+            throw new ServiceException("获取用户账户异常", HttpStatus.UNAUTHORIZED.value());
         }
     }
 
@@ -44,7 +45,7 @@ public class SecurityUtils {
             }
             return user;
         } catch (Exception e) {
-            throw new ServiceException("获取用户信息异常", HttpCodeEnum.UNAUTHORIZED.getCode());
+            throw new ServiceException("获取用户信息异常", HttpStatus.UNAUTHORIZED.value());
         }
     }
 

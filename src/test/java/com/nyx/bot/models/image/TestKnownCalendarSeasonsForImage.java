@@ -42,7 +42,7 @@ public class TestKnownCalendarSeasonsForImage {
     @BeforeEach
     void setUp() {
         // 初始化测试数据
-        try (FileInputStream state = new FileInputStream("./data/state10.json")) {
+        try (FileInputStream state = new FileInputStream("./data/state-2025-11-7.json")) {
             worldState = JSON.parseObject(state, WorldState.class);
         } catch (IOException e) {
             log.error("初始化测试数据失败", e);
@@ -120,6 +120,6 @@ public class TestKnownCalendarSeasonsForImage {
                                 .collect(Collectors.toList())
                 )).collect(Collectors.groupingBy(KnownCalendarSeasons.Days::getMonth))
         );
-        season.setDays(null);
+        //season.setDays(null);
     }
 }

@@ -101,12 +101,12 @@ public class TimeZoneUtil {
 
     private static String getIp() {
         HttpUtils.Body body = HttpUtils.sendGet("https://api-ipv4.ip.sb/ip");
-        return body.getBody();
+        return body.body();
     }
 
     public static String getIpTimeZone(String ip) {
         HttpUtils.Body body = HttpUtils.sendGet("https://api.ip.sb/geoip/" + ip);
-        return JSON.parseObject(body.getBody()).getString("timezone");
+        return JSON.parseObject(body.body()).getString("timezone");
     }
 
     public static String getIpTimeZone() {

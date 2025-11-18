@@ -3,7 +3,6 @@ package com.nyx.bot.utils.gitutils;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
 
@@ -21,10 +20,10 @@ public class GitHubUtil {
      */
     public static Release getReleasesLatestVersion(String repoName, String depot) {
         HttpUtils.Body latest = HttpUtils.sendGet("https://api.github.com/repos/" + repoName + "/" + depot + "/releases/latest");
-        if (!latest.getCode().equals(HttpCodeEnum.SUCCESS)) {
+        if (!latest.code().is2xxSuccessful()) {
             return null;
         }
-        return JSON.parseObject(latest.getBody(), Release.class);
+        return JSON.parseObject(latest.body(), Release.class);
     }
 
     /**
@@ -43,7 +42,7 @@ public class GitHubUtil {
      * @return String
      */
     public static String getLatestDownLoadUrl() {
-        return getReleasesLatestVersion().getAssets().get(0).getBrowserDownloadUrl();
+        return getReleasesLatestVersion().getAssets().getFirst().getBrowserDownloadUrl();
     }
 
     /**

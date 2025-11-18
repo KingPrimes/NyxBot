@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
 import com.nyx.bot.utils.StringUtils;
@@ -31,8 +30,8 @@ public class RivenItemsService {
     public Integer initRivenItemsData() {
         log.debug("开始初始化紫卡武器数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_RIVEN_WEAPONS);
-        if (body.getCode() == HttpCodeEnum.SUCCESS) {
-            JSONArray data = JSON.parseObject(body.getBody()).getJSONArray("data");
+        if (body.code().is2xxSuccessful()) {
+            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
             if (data.isEmpty()) {
                 log.error("未获取到Market紫卡武器数据");
                 return -1;

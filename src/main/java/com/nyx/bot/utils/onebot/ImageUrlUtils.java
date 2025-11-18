@@ -4,7 +4,6 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.common.core.Constants;
 import com.nyx.bot.common.core.OneBotLogInfoData;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.permissions.Permissions;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -87,7 +86,7 @@ public class ImageUrlUtils {
         oneBotLogInfoData.setTime(DateUtils.getDate());
         oneBotLogInfoData.setPermissionsEnums(Permissions.checkAdmin(bot, event));
         HttpUtils.Body body = HttpUtils.sendPostForFile(build, oneBotLogInfoData.toString());
-        if (!body.getCode().equals(HttpCodeEnum.SUCCESS)) {
+        if (!body.code().is2xxSuccessful()) {
             bot.sendMsg(event, "图片上传失败，请检查网络连接", false);
         }
         return body;

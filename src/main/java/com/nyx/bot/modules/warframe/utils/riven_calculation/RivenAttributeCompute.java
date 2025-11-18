@@ -81,7 +81,7 @@ public class RivenAttributeCompute {
             boolean nag = false;
             // 判断紫卡词条是否大于等于3条
             if (attributes.size() >= 3) {
-                String s = attributes.get(attributes.size() - 1);
+                String s = attributes.getLast();
                 if (RivenMatcherUtil.getAttributeNum(s) < 0 || RivenMatcherUtil.whetherItIsDiscrimination(s)) {
                     nag = true;
                 }

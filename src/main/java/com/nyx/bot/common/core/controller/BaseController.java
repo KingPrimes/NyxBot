@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.page.TableDataInfo;
-import com.nyx.bot.enums.HttpCodeEnum;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.ServletUtils;
@@ -16,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
@@ -72,7 +72,7 @@ public class BaseController {
         data.setCurrent(page.getNumber() + 1);
         td.setData(data);
         td.setMsg(I18nUtils.message("result.success"));
-        td.setCode(HttpCodeEnum.SUCCESS.getCode());
+        td.setCode(HttpStatus.OK.value());
         return td;
     }
 
@@ -139,7 +139,7 @@ public class BaseController {
     }
 
     public AjaxResult success(String msg, Object data) {
-        return new AjaxResult(HttpCodeEnum.SUCCESS, msg, data);
+        return new AjaxResult(HttpStatus.OK, msg, data);
     }
 
     /**
@@ -152,7 +152,7 @@ public class BaseController {
     /**
      * 返回错误码消息
      */
-    public AjaxResult error(HttpCodeEnum code, String message) {
+    public AjaxResult error(HttpStatus code, String message) {
         return new AjaxResult(code, message);
     }
 
