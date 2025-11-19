@@ -86,6 +86,7 @@ public class HandOff {
         map.put("shiro.ws.server.url", config.getWsServerUrl());
         map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
         map.put("shiro.ws.client.url", config.getWsClientUrl());
+        map.put("shiro.token", config.getToken());
         MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
         log.debug("Env AddFirst:{}", propertySource);
         env.getPropertySources().addFirst(propertySource);

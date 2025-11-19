@@ -6,11 +6,14 @@ import com.nyx.bot.common.core.Constants;
 import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.utils.CacheUtils;
 import io.jsonwebtoken.JwtException;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,18 +27,28 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
+    @Value("${shiro.ws.server.url}")
+    private String shiro;
+
     // 定义不需要JWT验证的路径
-    private static final List<String> EXCLUDE_PATHS = Arrays.asList(
-            "/static/",
-            "/favicon"
-    );
+    private List<String> EXCLUDE_PATHS;
     @Resource
     private UserDetailsService userDetailsService;
     @Resource
     private JwtUtil jwtUtil;
+
+    @PostConstruct
+    public void init() {
+        EXCLUDE_PATHS = Arrays.asList(
+                "/static/",
+                "/favicon",
+                shiro
+        );
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
@@ -43,7 +56,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // 检查是否是需要排除的路径
         String requestURI = request.getRequestURI();
         for (String excludePath : EXCLUDE_PATHS) {
-            if (requestURI.contains(excludePath)) {
+            if (excludePath != null && requestURI.contains(excludePath)) {
                 chain.doFilter(request, response);
                 return;
             }
