@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <oneSdk.version>2.4.9</oneSdk.version>
+        <oneSdk.version>2.5.0</oneSdk.version>
         <fastJson2.version>2.0.58</fastJson2.version>
         <xhtmlrenderer.version>10.0.0</xhtmlrenderer.version>
         <rhino.version>1.8.0</rhino.version>
@@ -35,7 +35,7 @@
         <oshi.version>6.8.3</oshi.version>
         <jjwt.version>0.12.7</jjwt.version>
         <org.eclipse.jgit.version>7.3.0.202506031305-r</org.eclipse.jgit.version>
-        <draw-image.varsion>1.0.3</draw-image.varsion>
+        <draw-image.varsion>1.0.5</draw-image.varsion>
     </properties>
 
     <dependencies>
@@ -96,6 +96,13 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.8.13</version>
+        </dependency>
+
+        <!--SpringBoot测试-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
@@ -185,13 +192,6 @@
             <version>${fastJson2.version}</version>
         </dependency>
 
-        <!--在Java中运行JS脚本-->
-        <dependency>
-            <groupId>org.mozilla</groupId>
-            <artifactId>rhino</artifactId>
-            <version>${rhino.version}</version>
-        </dependency>
-
         <!--Git操作-->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
@@ -210,31 +210,10 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
-        <!--Html解析-->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>${jsoup.version}</version>
-        </dependency>
-
-        <!--HTML 渲染图片-->
-        <dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-core</artifactId>
-            <version>${xhtmlrenderer.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>io.github.kingprimes</groupId>
             <artifactId>draw-image-plugin</artifactId>
             <version>${draw-image.varsion}</version>
-        </dependency>
-
-        <!--SpringBoot测试-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

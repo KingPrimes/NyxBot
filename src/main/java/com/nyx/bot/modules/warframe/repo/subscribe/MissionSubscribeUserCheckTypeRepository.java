@@ -1,8 +1,8 @@
 package com.nyx.bot.modules.warframe.repo.subscribe;
 
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.SubscribeEnums;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +25,7 @@ public interface MissionSubscribeUserCheckTypeRepository extends JpaRepository<M
             """)
     List<MissionSubscribeUserCheckType> findMatching(
             @Param("type") SubscribeEnums type,
-            @Param("missionType") WarframeMissionTypeEnum missionType,
+            @Param("missionType") MissionTypeEnum missionType,
             @Param("tier") Integer tier);
 
     @Query("""

@@ -8,18 +8,18 @@ import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
-import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
-import com.nyx.bot.modules.warframe.res.market.BaseOrder;
-import com.nyx.bot.modules.warframe.res.market.OrderWithUser;
 import com.nyx.bot.modules.warframe.utils.MarketUtils;
-import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.SendUtils;
+import io.github.kingprimes.DrawImagePlugin;
+import io.github.kingprimes.model.enums.MarketPlatformEnum;
+import io.github.kingprimes.model.market.BaseOrder;
+import io.github.kingprimes.model.market.OrderWithUser;
+import io.github.kingprimes.model.market.Orders;
+import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +36,30 @@ import java.util.List;
 @Slf4j
 public class MarketOrdersPlugin {
 
+    @Resource
+    DrawImagePlugin drawImagePlugin;
+
+    private static Orders getOrders(MarketOrdersData data, BaseOrder<OrderWithUser> order, MarketUtils.Market market) {
+        List<OrderWithUser> ows = order.getData();
+        OrdersItems oi = market.getItem();
+        return new Orders().setName(oi.getName())
+                .setForm(data.getForm())
+                .setIsBy(data.isBy)
+                .setIsMax(data.isMax)
+                .setDucats(oi.getDucats())
+                .setVaulted(oi.getVaulted())
+                .setMaxAmberStars(oi.getMaxAmberStars())
+                .setMaxCyanStars(oi.getMaxCyanStars())
+                .setBaseEndo(oi.getBaseEndo())
+                .setReqMasteryRank(oi.getReqMasteryRank())
+                .setTradingTax(oi.getTradingTax())
+                .setIcon(null)
+                .setOrders(ows);
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = {"/WM", "WM", "/市场", "市场", "/wm", "wm"}, at = AtEnum.BOTH)
-    public void marketOrders(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+    public void marketOrders(Bot bot, AnyMessageEvent event) {
         String str = event.getMessage().trim();
         str = ShiroUtils.unescape(str).toUpperCase();
         log.debug("用户:{} 输入了指令:{}", event.getUserId(), str);
@@ -70,10 +90,10 @@ public class MarketOrdersPlugin {
         }
         // 获取平台
         String finalStr = str;
-        for (MarketFormEnums form : MarketFormEnums.values()) {
-            if (finalStr.contains(form.getForm())) {
+        for (MarketPlatformEnum form : MarketPlatformEnum.values()) {
+            if (finalStr.contains(form.getPlatform())) {
                 marketOrdersData.setForm(form);
-                str = (str.replaceAll(form.getForm(), ""));
+                str = (str.replaceAll(form.getPlatform(), ""));
                 break;
             }
         }
@@ -95,32 +115,21 @@ public class MarketOrdersPlugin {
 
     }
 
-    private byte[] postMarketOrdersImage(MarketOrdersData data) throws DataNotInfoException, HtmlToImageException {
+    private byte[] postMarketOrdersImage(MarketOrdersData data) {
         MarketUtils.Market market = MarketUtils.toSet(data.getKey(), data.getForm());
         ModelMap modelMap = new ModelMap();
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
-            modelMap.put("items", market.getPossibleItems());
-            return HtmlToImage.generateImage("html/marketPossibleItems", () -> modelMap).toByteArray();
+            return drawImagePlugin.drawMarketOrdersImage(market.getPossibleItems());
         }
         BaseOrder<OrderWithUser> order = MarketUtils.market(data.getForm(), data.isBy(), data.isMax(), market);
-        List<OrderWithUser> ows = order.getData();
-        OrdersItems oi = market.getItem();
-        modelMap.addAttribute("ducats", oi.getDucats());
-        modelMap.addAttribute("level", oi.getReqMasteryRank());
-        modelMap.addAttribute("credits", oi.getTradingTax());
-        modelMap.addAttribute("itemName", market.getItem().getName());
-        modelMap.addAttribute("form", data.getForm().getForm());
-        modelMap.addAttribute("isBy", data.isBy());
-        modelMap.addAttribute("isMax", data.isMax());
-        modelMap.addAttribute("orders", ows);
-
-        return HtmlToImage.generateImage("html/market", () -> modelMap).toByteArray();
+        Orders orders = getOrders(data, order, market);
+        return drawImagePlugin.drawMarketOrdersImage(orders);
     }
 
     @Getter
     @Setter
     private static class MarketOrdersData {
-        private MarketFormEnums form = MarketFormEnums.PC;
+        private MarketPlatformEnum form = MarketPlatformEnum.PC;
         private boolean isBy;
         private boolean isMax;
         private String key;

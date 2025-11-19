@@ -1,7 +1,7 @@
 package com.nyx.bot.utils.http;
 
-import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.utils.FileUtils;
+import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -125,7 +125,7 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body marketSendGet(String url) {
-        return marketSendGet(url, "", MarketFormEnums.PC);
+        return marketSendGet(url, "", MarketPlatformEnum.PC);
     }
 
     /**
@@ -136,7 +136,7 @@ public class HttpUtils {
      * @return 响应结果
      */
     public static Body marketSendGet(String url, String param) {
-        return marketSendGet(url, param, MarketFormEnums.PC);
+        return marketSendGet(url, param, MarketPlatformEnum.PC);
     }
 
     /**
@@ -147,12 +147,12 @@ public class HttpUtils {
      * @param form  平台
      * @return 响应结果
      */
-    public static Body marketSendGet(String url, String param, MarketFormEnums form) {
+    public static Body marketSendGet(String url, String param, MarketPlatformEnum form) {
         HttpHeaders h = new HttpHeaders();
         h.setContentType(MediaType.APPLICATION_JSON);
         h.add(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
         h.add("Language", "zh-hans");
-        h.add("Platform", form.getForm());
+        h.add("Platform", form.getPlatform());
         h.add("Pragma", "no-cache");
         h.add("Crossplay", "true");
         return doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);

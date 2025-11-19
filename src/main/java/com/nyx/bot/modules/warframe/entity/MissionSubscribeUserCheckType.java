@@ -2,8 +2,8 @@ package com.nyx.bot.modules.warframe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nyx.bot.common.core.dao.BaseEntity;
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.enums.WarframeMissionTypeEnum;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +25,7 @@ public class MissionSubscribeUserCheckType extends BaseEntity {
 
     //任务类型
     @Column
-    WarframeMissionTypeEnum missionTypeEnum;
+    MissionTypeEnum missionTypeEnum;
 
     //遗物纪元
     @Column
@@ -46,7 +46,7 @@ public class MissionSubscribeUserCheckType extends BaseEntity {
     @JsonIgnore
     @Transient
     public boolean matches(SubscribeEnums type,
-                           WarframeMissionTypeEnum missionType,
+                           MissionTypeEnum missionType,
                            Integer tier) {
         return this.subscribe == type &&
                 (missionType == null || this.missionTypeEnum == missionType) &&

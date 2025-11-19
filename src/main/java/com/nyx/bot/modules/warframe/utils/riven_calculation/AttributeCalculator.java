@@ -1,9 +1,9 @@
 package com.nyx.bot.modules.warframe.utils.riven_calculation;
 
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendCompute;
-import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendModel;
 import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
+import io.github.kingprimes.model.RivenAnalyseTrendModel;
 
 import java.util.Map;
 

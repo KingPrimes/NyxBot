@@ -6,17 +6,15 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
-import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.MarketUtils;
-import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.SendUtils;
+import io.github.kingprimes.DrawImagePlugin;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 
 /**
  * 查询 Market 市场拍卖的紫卡
@@ -27,9 +25,12 @@ import org.springframework.ui.ModelMap;
 public class MarketRivenPlugin {
 
 
+    @Resource
+    DrawImagePlugin drawImagePlugin;
+
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_RIVEN_CMD,at = AtEnum.BOTH)
-    public void marketRiven(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_RIVEN_CMD, at = AtEnum.BOTH)
+    public void marketRiven(Bot bot, AnyMessageEvent event) {
         String str = event.getMessage();
         if (MatcherUtils.isSpecialSymbols(str)) {
             String item = MatcherUtils.isOrderItem(str);
@@ -50,11 +51,7 @@ public class MarketRivenPlugin {
         SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_RIVEN_PLUGIN, log);
     }
 
-    private byte[] postMarketRivenImage(String key) throws DataNotInfoException, HtmlToImageException {
-        return HtmlToImage.generateImage("html/marketRiven", () -> {
-            ModelMap modelMap = new ModelMap();
-            modelMap.put("riven", MarketUtils.marketRivenParameter(key));
-            return modelMap;
-        }).toByteArray();
+    private byte[] postMarketRivenImage(String key) {
+        return drawImagePlugin.drawMarketRivenImage(MarketUtils.marketRivenParameter(key));
     }
 }

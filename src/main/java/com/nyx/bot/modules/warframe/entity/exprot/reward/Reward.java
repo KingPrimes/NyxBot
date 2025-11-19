@@ -1,6 +1,6 @@
 package com.nyx.bot.modules.warframe.entity.exprot.reward;
 
-import com.nyx.bot.enums.RarityEnum;
+import io.github.kingprimes.model.enums.RarityEnum;
 import jakarta.persistence.*;
 import lombok.Data;
 

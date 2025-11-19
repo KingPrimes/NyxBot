@@ -1,13 +1,13 @@
 package com.nyx.bot.modules.warframe.utils;
 
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.utils.SpringUtils;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,9 +34,9 @@ public class WarframeSubscribeCheck {
      * @return Map<Integer, String>
      */
     public static Map<Integer, String> getSubscribeMissionTypeEnums() {
-        return Arrays.stream(WarframeMissionTypeEnum.values())
+        return Arrays.stream(MissionTypeEnum.values())
                 .filter(e -> e.ordinal() != 0)
-                .collect(Collectors.toMap(Enum::ordinal, WarframeMissionTypeEnum::get));
+                .collect(Collectors.toMap(Enum::ordinal, MissionTypeEnum::getName));
     }
 
     /**
@@ -83,7 +83,7 @@ public class WarframeSubscribeCheck {
                 .append("类型: ").append(params.type.getNAME());
 
         if (params.missionType != null) {
-            sb.append("\n任务: ").append(params.missionType.get());
+            sb.append("\n任务: ").append(params.missionType.getName());
         } else {
             sb.append("\n任务: 全部");
         }
@@ -110,15 +110,15 @@ public class WarframeSubscribeCheck {
         }
     }
 
-    private static WarframeMissionTypeEnum parseMissionType(String input) {
+    private static MissionTypeEnum parseMissionType(String input) {
         try {
             int code = Integer.parseInt(input);
-            if (code <= 0 || code >= WarframeMissionTypeEnum.values().length) {
-                return WarframeMissionTypeEnum.ERROR;
+            if (code <= 0 || code >= MissionTypeEnum.values().length) {
+                return MissionTypeEnum.MT_RELAY;
             }
-            return WarframeMissionTypeEnum.values()[code];
+            return MissionTypeEnum.values()[code];
         } catch (NumberFormatException e) {
-            return WarframeMissionTypeEnum.ERROR;
+            return MissionTypeEnum.MT_RELAY;
         }
     }
 
@@ -146,7 +146,7 @@ public class WarframeSubscribeCheck {
         if (!exists) {
             MissionSubscribeUserCheckType checkType = new MissionSubscribeUserCheckType();
             checkType.setSubscribe(params.type);
-            checkType.setMissionTypeEnum(params.missionType == null ? WarframeMissionTypeEnum.ERROR : params.missionType); // 允许为null
+            checkType.setMissionTypeEnum(params.missionType == null ? MissionTypeEnum.MT_RELAY : params.missionType); // 允许为null
             checkType.setTierNum(params.tier == null ? 0 : params.tier); // 允许为null
             checkType.setSubscribeUser(user);
             user.getCheckTypes().add(checkType);
@@ -237,13 +237,13 @@ public class WarframeSubscribeCheck {
         }
 
         // 解析可选参数
-        WarframeMissionTypeEnum missionTypeEnum = WarframeMissionTypeEnum.ERROR;
+        MissionTypeEnum missionTypeEnum = MissionTypeEnum.MT_RELAY;
         int tierNum = 0;
         try {
             if (split.length >= 2 && !split[1].isEmpty()) {
                 int missionCode = Integer.parseInt(split[1]);
-                if (missionCode >= 0 && missionCode < WarframeMissionTypeEnum.values().length) {
-                    missionTypeEnum = WarframeMissionTypeEnum.values()[missionCode];
+                if (missionCode >= 0 && missionCode < MissionTypeEnum.values().length) {
+                    missionTypeEnum = MissionTypeEnum.values()[missionCode];
                 }
             }
             if (split.length >= 3 && !split[2].isEmpty()) {
@@ -253,7 +253,7 @@ public class WarframeSubscribeCheck {
             return "参数包含非法数字";
         }
         Integer finalTierNum = tierNum;
-        WarframeMissionTypeEnum finalMissionTypeEnum = missionTypeEnum;
+        MissionTypeEnum finalMissionTypeEnum = missionTypeEnum;
         missionSubscribe.ifPresentOrElse(m -> {
             Set<MissionSubscribeUser> subUsers = m.getUsers();
             int removedCount = 0;
@@ -297,7 +297,7 @@ public class WarframeSubscribeCheck {
     // 参数包装类
     private static class SubscribeParams {
         SubscribeEnums type;
-        WarframeMissionTypeEnum missionType;
+        MissionTypeEnum missionType;
         Integer tier;
         String error;
 

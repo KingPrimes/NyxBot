@@ -4,7 +4,6 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.modules.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.UpdateJarUtils;
 import com.nyx.bot.utils.gitutils.GitHubUtil;
@@ -37,7 +36,7 @@ public class UpdateUtils {
                 break;
             }
             case UPDATE_WARFRAME_RIVEN_CHANGES: {
-                updateWarframeRivenChanges(bot, event);
+                //updateWarframeRivenChanges(bot, event);
                 break;
             }
             case UPDATE_WARFRAME_SISTER: {
@@ -96,17 +95,17 @@ public class UpdateUtils {
         // TODO: Implement the logic to update the Warframe Res RM
     }
 
-    private static void updateWarframeRivenChanges(Bot bot, AnyMessageEvent event) {
-        bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(() -> new RivenDispositionUpdates().upRivenTrend())
-                .thenAccept(items -> {
-                    if (items != -1) {
-                        bot.sendMsg(event, "紫卡倾向变动 已更新：" + items + " 条数据！", false);
-                    } else {
-                        bot.sendMsg(event, "紫卡倾向变动 更新失败！", false);
-                    }
-                });
-    }
+//    private static void updateWarframeRivenChanges(Bot bot, AnyMessageEvent event) {
+//        bot.sendMsg(event, "已发布任务，正在更新！", false);
+//        CompletableFuture.supplyAsync(() -> new RivenDispositionUpdates().upRivenTrend())
+//                .thenAccept(items -> {
+//                    if (items != -1) {
+//                        bot.sendMsg(event, "紫卡倾向变动 已更新：" + items + " 条数据！", false);
+//                    } else {
+//                        bot.sendMsg(event, "紫卡倾向变动 更新失败！", false);
+//                    }
+//                });
+//    }
 
     private static void updateWarframeSister(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);

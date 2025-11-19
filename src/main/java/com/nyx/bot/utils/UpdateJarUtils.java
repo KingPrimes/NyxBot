@@ -65,7 +65,7 @@ public class UpdateJarUtils {
             writer.write(update);
             log.debug("已成功创建 update.bat 文件:{}", update);
             writer.close();
-            Process exec = Runtime.getRuntime().exec("cmd /k start " + path + "/update.bat");
+            Process exec = Runtime.getRuntime().exec(new String[]{"cmd /k start ", path, "/update.bat"});
             log.debug("运行 update.bat PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);
@@ -80,7 +80,7 @@ public class UpdateJarUtils {
             runWriter.close();
             log.debug("已成功创建 run.sh 文件:{}", winRun.formatted(fileName));
             log.debug("创建和编写 update.sh");
-            Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
+            Runtime.getRuntime().exec(new String[]{"chmod +x ", run.getAbsolutePath()});
             File update = new File(path + "/update.sh");
             FileWriter writer = new FileWriter(update);
             String builder = linuxUpdate.formatted(
@@ -92,8 +92,8 @@ public class UpdateJarUtils {
             writer.write(builder);
             writer.close();
             log.debug("已成功创建 update.bat 文件:{}", builder);
-            Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
-            Process exec = Runtime.getRuntime().exec("bash " + path + "/update.sh");
+            Runtime.getRuntime().exec(new String[]{"chmod +x ", update.getAbsolutePath()});
+            Process exec = Runtime.getRuntime().exec(new String[]{"bash ", path, "/update.sh"});
             log.debug("运行 update.sh PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);
@@ -110,7 +110,7 @@ public class UpdateJarUtils {
             log.debug("已成功创建 run.sh 文件:{}", winRun.formatted(fileName));
             log.debug("创建和编写 update.sh");
 
-            Runtime.getRuntime().exec("chmod +x " + run.getAbsolutePath());
+            Runtime.getRuntime().exec(new String[]{"chmod +x ", run.getAbsolutePath()});
 
             // 创建 update.sh 脚本
             File update = new File(path + "/update.sh");
@@ -119,8 +119,8 @@ public class UpdateJarUtils {
             writer.write(builder);
             writer.close();
             log.debug("已成功创建 update.bat 文件:{}", builder);
-            Runtime.getRuntime().exec("chmod +x " + update.getAbsolutePath());
-            Process exec = Runtime.getRuntime().exec("sh " + path + "/update.sh");
+            Runtime.getRuntime().exec(new String[]{"chmod +x ", update.getAbsolutePath()});
+            Process exec = Runtime.getRuntime().exec(new String[]{"sh ", path + "/update.sh"});
             log.debug("运行 update.sh PID:{}", exec.pid());
             int exitCode = SpringApplication.exit(APP, () -> 0);
             System.exit(exitCode);

@@ -3,20 +3,20 @@ package com.nyx.bot.modules.warframe.utils;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.MarketFormEnums;
 import com.nyx.bot.modules.warframe.entity.*;
 import com.nyx.bot.modules.warframe.repo.*;
-import com.nyx.bot.modules.warframe.res.Ducats;
-import com.nyx.bot.modules.warframe.res.MarketRiven;
-import com.nyx.bot.modules.warframe.res.enums.MarketStatusEnum;
-import com.nyx.bot.modules.warframe.res.enums.TransactionEnum;
-import com.nyx.bot.modules.warframe.res.market.BaseOrder;
-import com.nyx.bot.modules.warframe.res.market.BaseOrderObjet;
-import com.nyx.bot.modules.warframe.res.market.OrderWithUser;
 import com.nyx.bot.modules.warframe.resp.MarketRivenParameter;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
+import io.github.kingprimes.model.Ducats;
+import io.github.kingprimes.model.enums.MarketPlatformEnum;
+import io.github.kingprimes.model.enums.MarketStatusEnum;
+import io.github.kingprimes.model.enums.TransactionEnum;
+import io.github.kingprimes.model.market.BaseOrder;
+import io.github.kingprimes.model.market.BaseOrderObjet;
+import io.github.kingprimes.model.market.MarketRiven;
+import io.github.kingprimes.model.market.OrderWithUser;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -136,7 +136,7 @@ public class MarketUtils {
         return item;
     }
 
-    public static Market toSet(String key, MarketFormEnums form) {
+    public static Market toSet(String key, MarketPlatformEnum form) {
         Market dataBase = toDataBase(key);
         if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
             return dataBase;
@@ -179,7 +179,7 @@ public class MarketUtils {
      * @param market 查询到的物品
      * @return 处理后的结果
      */
-    public static BaseOrder<OrderWithUser> market(MarketFormEnums from, Boolean isBy, Boolean isMax, Market market) {
+    public static BaseOrder<OrderWithUser> market(MarketPlatformEnum from, Boolean isBy, Boolean isMax, Market market) {
         String key = market.getItem().getSlug();
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
@@ -293,7 +293,7 @@ public class MarketUtils {
             riveItems = getRiveItems(key.trim());
             // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
             if (riveItems.getItems() != null) {
-                marketRiven.setPossibleItems(riveItems.getItems());
+                //marketRiven.setPossibleItems(riveItems.getItems());
                 log.debug("------未查询到匹配的物品------");
                 return marketRiven;
             }
@@ -327,7 +327,7 @@ public class MarketUtils {
         // 判断是否有查询到物品,如果没有则返回可能要查询的物品列表
         if (riveItems.getItems() != null) {
             log.debug("------未查询到匹配的物品------");
-            marketRiven.setPossibleItems(riveItems.getItems());
+            //marketRiven.setPossibleItems(riveItems.getItems());
             return marketRiven;
         }
         // 正面词条
@@ -398,7 +398,7 @@ public class MarketUtils {
                         // 过滤掉已结束的物品
                         .filter(m -> !m.getClosed())
                         // 过滤掉已下架的物品
-                        .filter(MarketRiven.Payload.Auctions::getVisible)
+                        .filter(MarketRiven.Auctions::getVisible)
                         // 过滤掉不在线玩家
                         .filter(m -> m.getOwner().getStatus().equals("online") || m.getOwner().getStatus().equals("ingame"))
                         // 排序
@@ -426,6 +426,11 @@ public class MarketUtils {
         return marketRiven;
     }
 
+    /**
+     * 获取杜卡德币数据
+     *
+     * @return 返回解析后的杜卡德币数据对象，如果获取失败则返回null
+     */
     public static Ducats getDucats() {
         HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
         if (!body.code().is2xxSuccessful()) {

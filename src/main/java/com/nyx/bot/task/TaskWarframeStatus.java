@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONException;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribe;
 import com.nyx.bot.utils.http.HttpUtils;
+import io.github.kingprimes.model.WorldState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class TaskWarframeStatus {
-     @Value("${test.isTest}")
+    @Value("${test.isTest}")
     Boolean test;
 
     @Async("taskExecutor")

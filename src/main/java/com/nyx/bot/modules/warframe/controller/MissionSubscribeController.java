@@ -4,8 +4,6 @@ import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.page.TableDataInfo;
-import com.nyx.bot.enums.SubscribeEnums;
-import com.nyx.bot.enums.WarframeMissionTypeEnum;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
@@ -13,6 +11,8 @@ import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
 import com.nyx.bot.modules.warframe.service.MissionSubscribeService;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -131,7 +131,7 @@ public class MissionSubscribeController extends BaseController {
     )
     @GetMapping("/type")
     public AjaxResult getTypeEnums() {
-        return success().put("data", Arrays.stream(WarframeMissionTypeEnum.values()).collect(Collectors.toMap(WarframeMissionTypeEnum::name, WarframeMissionTypeEnum::get)));
+        return success().put("data", Arrays.stream(MissionTypeEnum.values()).collect(Collectors.toMap(MissionTypeEnum::name, MissionTypeEnum::getName)));
     }
 
     @Operation(
