@@ -23,7 +23,7 @@ public class CachingConfig {
                 .addCaches(
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10, TimeUnit.MINUTES),
-                        b -> b.name(CacheUtils.WARFRAME),
+                        b -> b.name(CacheUtils.WARFRAME).expireAfterWrite(30, TimeUnit.MINUTES).entryCapacity(2),
                         // 配置名称为 global-states 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES).entryCapacity(1).expireAfterWrite(30, TimeUnit.MINUTES),
                         // 配置名称为 global-states-arbitration 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存

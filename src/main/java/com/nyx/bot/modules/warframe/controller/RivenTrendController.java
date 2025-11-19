@@ -8,16 +8,15 @@ import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.page.TableDataInfo;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.AsyncBeanName;
-import com.nyx.bot.enums.RivenTrendEnum;
 import com.nyx.bot.enums.RivenTrendTypeEnum;
 import com.nyx.bot.modules.warframe.entity.RivenTrend;
 import com.nyx.bot.modules.warframe.repo.RivenTrendRepository;
-import com.nyx.bot.modules.warframe.utils.RivenDispositionUpdates;
 import com.nyx.bot.utils.AsyncUtils;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.gitutils.JgitUtil;
+import io.github.kingprimes.model.enums.RivenTrendEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -217,7 +216,7 @@ public class RivenTrendController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        AsyncUtils.me().execute(() -> new RivenDispositionUpdates().upRivenTrend(), AsyncBeanName.InitData);
+        //AsyncUtils.me().execute(() -> new RivenDispositionUpdates().upRivenTrend(), AsyncBeanName.InitData);
         return success(I18nUtils.RequestTaskRun());
     }
 

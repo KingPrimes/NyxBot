@@ -3,8 +3,8 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
-import com.nyx.bot.modules.warframe.res.enums.FactionEnum;
-import com.nyx.bot.modules.warframe.res.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.FactionEnum;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -102,7 +102,7 @@ public class Nodes {
     @Transient
     @JsonIgnore
     public MissionTypeEnum getMissionType() {
-        switch (nodeType) {
+        switch (missionIndex) {
             case 0 -> {
                 return MissionTypeEnum.MT_ASSASSINATION;
             }
@@ -129,6 +129,12 @@ public class Nodes {
             }
             case 9 -> {
                 return MissionTypeEnum.MT_MOBILE_DEFENSE;
+            }
+            case 10 -> {
+                return MissionTypeEnum.MT_PVP;
+            }
+            case 11 -> {
+                return MissionTypeEnum.MT_SECTOR;
             }
             case 13 -> {
                 return MissionTypeEnum.MT_TERRITORY;
@@ -160,7 +166,7 @@ public class Nodes {
             case 28, 31 -> {
                 return MissionTypeEnum.MT_LANDSCAPE;
             }
-            case 33 -> {
+            case 32, 33 -> {
                 return MissionTypeEnum.MT_ARTIFACT;
             }
             case 34 -> {
@@ -175,6 +181,9 @@ public class Nodes {
             case 38 -> {
                 return MissionTypeEnum.MT_ALCHEMY;
             }
+            case 39 -> {
+                return MissionTypeEnum.MT_CAMBIRE;
+            }
             case 40 -> {
                 return MissionTypeEnum.MT_LEGACYTE_HARVEST;
             }
@@ -183,6 +192,21 @@ public class Nodes {
             }
             case 42 -> {
                 return MissionTypeEnum.MT_FACEOFF;
+            }
+            case 60 -> {
+                return MissionTypeEnum.MT_SKIRMISH;
+            }
+            case 61 -> {
+                return MissionTypeEnum.MT_VOLATILE;
+            }
+            case 62 -> {
+                return MissionTypeEnum.MT_ORPHEUS;
+            }
+            case 90 -> {
+                return MissionTypeEnum.MT_ASCENSION;
+            }
+            case 100 -> {
+                return MissionTypeEnum.MT_RELAY;
             }
             default -> {
                 return MissionTypeEnum.MT_DEFAULT;

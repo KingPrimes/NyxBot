@@ -10,14 +10,13 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.modules.warframe.entity.exprot.Relics;
 import com.nyx.bot.modules.warframe.service.RelicsService;
-import com.nyx.bot.utils.HtmlToImage;
 import com.nyx.bot.utils.SendUtils;
+import io.github.kingprimes.DrawImagePlugin;
+import io.github.kingprimes.model.Relics;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 
 import java.util.List;
 
@@ -28,6 +27,9 @@ import java.util.List;
 @Component
 @Slf4j
 public class RelicsPlugin {
+
+    @Resource
+    DrawImagePlugin drawImagePlugin;
 
     @Resource
     RelicsService relicsService;
@@ -43,12 +45,19 @@ public class RelicsPlugin {
         SendUtils.send(bot, event, postRelicsImage(key), Codes.WARFRAME_RELICS_PLUGIN, log);
     }
 
-    private byte[] postRelicsImage(String key) throws DataNotInfoException, HtmlToImageException {
-        List<Relics> relics = relicsService.findAllByRelicNameOrRewardsItemName(key);
-        return HtmlToImage.generateImage("html/relics", () -> {
-            ModelMap modelMap = new ModelMap();
-            modelMap.put("relics", relics);
-            return modelMap;
-        }).toByteArray();
+    private byte[] postRelicsImage(String key) {
+        List<io.github.kingprimes.model.Relics> relics = relicsService.findAllByRelicNameOrRewardsItemName(key)
+                .stream()
+                .map(sr -> new Relics()
+                        .setName(sr.getName())
+                        .setRewards(sr.getRelicRewards()
+                                .stream()
+                                .map(rs -> new Relics.Rewards()
+                                        .setName(rs.getRewardName())
+                                        .setRarity(rs.getRarity())
+                                        .setItemCount(rs.getItemCount()))
+                                .toList()))
+                .toList();
+        return drawImagePlugin.drawRelicsImage(relics);
     }
 }

@@ -3,16 +3,17 @@ package com.nyx.bot.modules.warframe.service;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
+import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.ServiceException;
-import com.nyx.bot.enums.SubscribeEnums;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
-import com.nyx.bot.modules.warframe.res.WorldState;
 import com.nyx.bot.modules.warframe.service.subscribe.*;
+import io.github.kingprimes.model.WorldState;
+import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,16 +108,15 @@ public class MissionSubscribeService {
      * 处理更新
      *
      * @param type    更新类型
-     * @param newData 新数据
      */
-    public void handleUpdate(SubscribeEnums type, WorldState newData) {
+    public void handleUpdate(SubscribeEnums type) {
         log.debug("处理更新 [type:{}]", type.getNAME());
         List<MissionSubscribe> subscriptions = subscribeRepository.findSubscriptions(type);
         log.debug("订阅列表 [subscriptions:{}]", subscriptions);
         subscriptions.parallelStream().forEach(subscribe -> subscribe.getUsers().stream()
                 .filter(user -> isUserSubscribed(user, type))
                 .forEach(user -> CompletableFuture.runAsync(() ->
-                        buildAndSendMessage(subscribe, user, type, newData)
+                        buildAndSendMessage(subscribe, user, type)
                 )));
     }
 
@@ -138,12 +138,10 @@ public class MissionSubscribeService {
      * @param subscribe 订阅组
      * @param user      用户
      * @param type      类型
-     * @param data      数据
      */
     private void buildAndSendMessage(MissionSubscribe subscribe,
                                      MissionSubscribeUser user,
-                                     SubscribeEnums type,
-                                     WorldState data) {
+                                     SubscribeEnums type) {
         try {
             log.debug("构建消息 [subscribe:{}] [user:{}] [type:{}]", subscribe.getSubGroup(), user.getUserId(), type.getNAME());
             Bot bot = botContainer.robots.get(subscribe.getSubBotUid());
@@ -151,7 +149,7 @@ public class MissionSubscribeService {
             ArrayMsgUtils msg = ArrayMsgUtils.builder()
                     .at(user.getUserId())
                     .text("您订阅的 " + type.getNAME() + " 已更新！\n");
-            appendContentByType(msg, type, data, subscribe, user);
+            appendContentByType(msg, type);
             log.debug("发送消息 [subscribe:{}] [user:{}] [type:{}] [Msg:{}]", subscribe.getSubGroup(), user.getUserId(), type.getNAME(), msg.buildCQ());
             bot.sendGroupMsg(subscribe.getSubGroup(), msg.buildCQ(), false);
         } catch (Exception e) {
@@ -163,25 +161,19 @@ public class MissionSubscribeService {
     /**
      * 构建消息内容
      *
-     * @param builder   消息构建器
-     * @param type      类型
-     * @param data      数据
-     * @param subscribe 订阅组
-     * @param user      用户
+     * @param builder 消息构建器
+     * @param type    类型
      */
     private void appendContentByType(ArrayMsgUtils builder,
-                                     SubscribeEnums type,
-                                     WorldState data,
-                                     MissionSubscribe subscribe,
-                                     MissionSubscribeUser user) {
+                                     SubscribeEnums type) throws DataNotInfoException {
         MessageAppender appender = appenderMap.get(type);
         if (appender != null) {
-            appender.appendContent(builder, type, data, subscribe, user);
+            appender.appendContent(builder, type);
         } else {
             new MessageAppender() {
                 @Override
-                public void appendContent(ArrayMsgUtils builder, SubscribeEnums enums, WorldState data, MissionSubscribe subscribe, MissionSubscribeUser user) {
-                    MessageAppender.super.appendContent(builder, enums, data, subscribe, user);
+                public void appendContent(ArrayMsgUtils builder, SubscribeEnums enums) throws DataNotInfoException {
+                    MessageAppender.super.appendContent(builder, enums);
                 }
             };
         }

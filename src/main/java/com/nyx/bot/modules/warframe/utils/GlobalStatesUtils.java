@@ -1,6 +1,6 @@
 package com.nyx.bot.modules.warframe.utils;
 
-import com.nyx.bot.modules.warframe.res.worldstate.BastWorldState;
+import io.github.kingprimes.model.worldstate.BastWorldState;
 
 import java.util.List;
 import java.util.stream.Collectors;

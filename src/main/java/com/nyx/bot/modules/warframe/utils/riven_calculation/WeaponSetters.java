@@ -1,9 +1,9 @@
 package com.nyx.bot.modules.warframe.utils.riven_calculation;
 
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendCompute;
-import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendModel;
 import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.utils.RivenMatcherUtil;
+import io.github.kingprimes.model.RivenAnalyseTrendModel;
 
 public class WeaponSetters {
 
@@ -169,32 +169,7 @@ public class WeaponSetters {
      * @param i                 武器属性索引
      */
     public static void setSpaceMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getArchwing(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getArchwing(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+        setSpaceGuns(attr, model, v, rivenAnalyseTrend, i);
     }
 
     /**
@@ -233,32 +208,7 @@ public class WeaponSetters {
      * @param i                 武器属性索引
      */
     public static void setSentinelWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getRifle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getRifle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+        setLongGuns(attr, model, v, rivenAnalyseTrend, i);
     }
 
     /**

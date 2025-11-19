@@ -3,10 +3,10 @@ package com.nyx.bot.common.core;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.nyx.bot.enums.MarketFormEnums;
-import com.nyx.bot.modules.warframe.res.Arbitration;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.http.HttpUtils;
+import io.github.kingprimes.model.Arbitration;
+import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
@@ -75,7 +75,7 @@ public class ApiUrl {
      * @param from 平台
      * @return 返回信息
      */
-    public static HttpUtils.Body marketOrders(String key, MarketFormEnums from) {
+    public static HttpUtils.Body marketOrders(String key, MarketPlatformEnum from) {
         String url = "https://api.warframe.market/v2/orders/item/%s".formatted(key);
         log.debug("MarketOrderURL:{}", url);
         return HttpUtils.marketSendGet(url, "", from);
@@ -87,7 +87,7 @@ public class ApiUrl {
      * @param key 物品名称
      * @return 物品详细信息
      */
-    public static HttpUtils.Body marketOrdersSet(String key, MarketFormEnums from) {
+    public static HttpUtils.Body marketOrdersSet(String key, MarketPlatformEnum from) {
         String url = "https://api.warframe.market/v2/item/%s/set".formatted(key);
         log.debug("MarketOrderSetURL:{}", url);
         return HttpUtils.marketSendGet(url, "", from);

@@ -2,16 +2,18 @@ package com.nyx.bot.cache;
 
 import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.modules.warframe.res.Arbitration;
 import com.nyx.bot.utils.CacheUtils;
-import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.FileUtils;
+import io.github.kingprimes.model.Arbitration;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.nyx.bot.utils.CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION;
@@ -31,7 +33,7 @@ public class ArbitrationCache {
      * @return List<ArbitrationPlugin>
      */
     public static List<Arbitration> getArbitrationList() {
-        return loadArbitrationList().stream().filter(Arbitration::isWorth).limit(10).peek(a -> a.setEtc(DateUtils.getDiff((a.getExpiry()), new Date(), true))).toList();
+        return loadArbitrationList().stream().filter(Arbitration::isWorth).limit(10).toList();
     }
 
     private static List<Arbitration> loadArbitrationList() {
@@ -67,17 +69,12 @@ public class ArbitrationCache {
         if (arbitrationList.isEmpty()) {
             return Optional.empty();
         }
-        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
+        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().getEpochSecond();
         Arbitration a = arbitrationList.stream()
                 //过滤掉过期的数据
-                .filter(ar -> ar.getExpiry().getTime() - milli > 0)
+                .filter(ar -> ar.getExpiry().getEpochSecond() - milli > 0)
                 //判断两个时间相差的毫秒数，并取最小值的元素
-                .min(Comparator.comparingLong(obj -> obj.getExpiry().getTime() - milli))
-                .stream().peek(ar -> {
-                    ar.setEtc(DateUtils.getDiff((ar.getExpiry()), new Date(), true));
-                    ar.setEnemy(ar.getEnemy().replace("Infestation", "Infested"));
-                })
-                .findFirst()
+                .min(Comparator.comparingLong(obj -> obj.getExpiry().getEpochSecond() - milli))
                 .orElse(null);
         if (a == null) {
             fetchAndCacheArbitrationList();

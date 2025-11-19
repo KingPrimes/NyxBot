@@ -12,10 +12,10 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribeCheck;
-import com.nyx.bot.utils.HtmlToImage;
+import io.github.kingprimes.DrawImagePlugin;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 
 /**
  * Warframe 任务订阅
@@ -25,6 +25,9 @@ import org.springframework.ui.ModelMap;
 @Slf4j
 public class WarframeTaskSubscribePlugin {
 
+
+    @Resource
+    DrawImagePlugin drawImagePlugin;
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD, at = AtEnum.BOTH)
@@ -54,7 +57,7 @@ public class WarframeTaskSubscribePlugin {
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_UNSUBSCRIBE_CMD)
-    public void unsubscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+    public void unsubscribe(Bot bot, AnyMessageEvent event) {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;
@@ -75,12 +78,7 @@ public class WarframeTaskSubscribePlugin {
     }
 
 
-    private byte[] postSubscribeHelp() throws DataNotInfoException, HtmlToImageException {
-        return HtmlToImage.generateImage("html/subscriberHelp", () -> {
-            ModelMap modelMap = new ModelMap();
-            modelMap.put("sub", WarframeSubscribeCheck.getSubscribeEnums());
-            modelMap.put("type", WarframeSubscribeCheck.getSubscribeMissionTypeEnums());
-            return modelMap;
-        }).toByteArray();
+    private byte[] postSubscribeHelp() {
+        return drawImagePlugin.drawWarframeSubscribeImage(WarframeSubscribeCheck.getSubscribeEnums(), WarframeSubscribeCheck.getSubscribeMissionTypeEnums());
     }
 }
