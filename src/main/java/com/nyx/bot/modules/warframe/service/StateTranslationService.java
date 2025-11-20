@@ -1,22 +1,19 @@
 package com.nyx.bot.modules.warframe.service;
 
-import com.nyx.bot.modules.warframe.entity.NotTranslation;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
-import com.nyx.bot.modules.warframe.repo.NotTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicReference;
+
 @SuppressWarnings("unused")
 @Slf4j
 @Service
 public class StateTranslationService {
     @Resource
     StateTranslationRepository str;
-    @Resource
-    NotTranslationRepository ntr;
 
 
     /**
@@ -41,13 +38,6 @@ public class StateTranslationService {
                 rest.set(st.getName());
             }
         });
-        if (rest.get().equals(uniqueName)) {
-            NotTranslation byNotTranslation = ntr.findByNotTranslation(uniqueName);
-            if (byNotTranslation == null) {
-                log.debug("未找到翻译 -- {}", uniqueName);
-                ntr.save(new NotTranslation(uniqueName));
-            }
-        }
         return rest.get();
     }
 

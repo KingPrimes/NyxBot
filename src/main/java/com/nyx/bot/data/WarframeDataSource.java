@@ -83,9 +83,7 @@ public class WarframeDataSource {
                                     CompletableFuture.runAsync(WarframeDataSource::getAlias),
                                     CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
                                     CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
-                                    CompletableFuture.runAsync(WarframeDataSource::initTranslation),
                                     CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTrend),
 
 
                                     CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
@@ -223,22 +221,6 @@ public class WarframeDataSource {
         return list.size();
     }
 
-    //翻译
-    @SneakyThrows
-    public static Integer initTranslation() {
-        log.info("开始初始化 翻译 数据！");
-        List<Translation> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "translation.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Translation.class);
-        TranslationRepository t = SpringUtils.getBean(TranslationRepository.class);
-
-        Map<String, Translation> allMap = createMap(t.findAll(), Translation::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, Translation> uniqueTranslations = createMap(translations, Translation::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<Translation> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Translation::new).toList();
-        log.info("总计更新 Warframe.Translation {} 数据！", t.saveAll(list).size());
-        return list.size();
-    }
-
     //紫卡计算器数据
     @SneakyThrows
     public static Integer getRivenAnalyseTrend() {
@@ -253,23 +235,6 @@ public class WarframeDataSource {
         List<RivenAnalyseTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenAnalyseTrend::new).toList();
 
         log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r.saveAll(list).size());
-
-        return list.size();
-    }
-
-    @SneakyThrows
-    public static Integer getRivenTrend() {
-        log.info("开始初始化 RivenTrend 数据！");
-        List<RivenTrend> rt = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTrend.class);
-        RivenTrendRepository r = SpringUtils.getBean(RivenTrendRepository.class);
-
-        Map<String, RivenTrend> allMap = createMap(r.findAll(), RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, RivenTrend> uniqueTranslations = createMap(rt, RivenTrend::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<RivenTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTrend::new).toList();
-
-        log.info("总计更新 Warframe.RivenTrend {} 数据！", r.saveAll(list).size());
 
         return list.size();
     }
@@ -477,6 +442,7 @@ public class WarframeDataSource {
     void initWeapons() {
         log.debug("开始初始化  Weapons 数据！");
         List<Weapons> weapons = parsingExportJson(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", Weapons.class);
+        weapons.forEach(w -> w.setEnglishName(w.contEnglishName()));
         int size = weaponsRepository.saveAll(weapons).size();
         log.debug("初始化 Weapons 数据完成，共{}条", size);
     }

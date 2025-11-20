@@ -2,6 +2,7 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -63,6 +64,8 @@ public class Weapons {
     // 武器的描述
     @JsonProperty("description")
     String description;
+    @JsonProperty("englishName")
+    String englishName;
     // 武器的暴击率
     @JsonProperty("criticalChance")
     Double criticalChance;
@@ -129,6 +132,18 @@ public class Weapons {
                         .setDamage(damagePerShot.get(i))
                 )
                 .collect(Collectors.toList());
+    }
+
+    public String contEnglishName() {
+        if (description == null || description.isEmpty() || description.isBlank()) {
+            return "";
+        }
+        String substring = StringUtils.getSubString(description, "（英文：", "）");
+        String name = StringUtils.convertToCamelCase(substring);
+        if (name.equalsIgnoreCase(description)) {
+            return "";
+        }
+        return name;
     }
 
     /**

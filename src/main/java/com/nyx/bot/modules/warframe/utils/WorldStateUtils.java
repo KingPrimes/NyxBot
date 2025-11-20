@@ -3,11 +3,12 @@ package com.nyx.bot.modules.warframe.utils;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
+import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.enums.FissureTypeEnum;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
-import com.nyx.bot.modules.warframe.service.TranslationService;
+import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.model.WorldState;
@@ -26,7 +27,7 @@ public class WorldStateUtils {
     StateTranslationRepository str;
 
     @Resource
-    TranslationService trans;
+    WeaponsRepository weaponsRepository;
 
     @Resource
     NodesRepository nodesRepository;
@@ -104,7 +105,9 @@ public class WorldStateUtils {
         DuvalierCycle duvalierCycle = WarframeCache.getWarframeStatus().getDuvalierCycle();
         List<EndlessXpChoices> list = duvalierCycle.getChoices().stream().peek(c -> {
             if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
-                c.setChoices(c.getChoices().stream().map(s -> trans.enToZh(s)).toList());
+                c.setChoices(c.getChoices().stream().map(s ->
+                        weaponsRepository.findByEnglishName(s).map(Weapons::getName).orElse(s)
+                ).toList());
             }
         }).toList();
         duvalierCycle.setChoices(list);
@@ -277,14 +280,12 @@ public class WorldStateUtils {
     public SeasonInfo getSeasonInfo() throws DataNotInfoException {
         SeasonInfo seasonInfo = WarframeCache.getWarframeStatus().getSeasonInfo();
         seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c ->
-                        nightwaveRepository.findById(c.getChallenge()).ifPresent(s -> {
-                            c.setChallenge(s.getName())
-                                    .setDescription(s.getDescription())
-                                    .setRequired(s.getRequired())
-                                    .setDaily(s.isDailyTasks())
-                                    .setWeekly(s.isWeeklyTasks())
-                                    .setElite(s.isEliteMissions());
-                        }))
+                        nightwaveRepository.findById(c.getChallenge()).ifPresent(s -> c.setChallenge(s.getName())
+                                .setDescription(s.getDescription())
+                                .setRequired(s.getRequired())
+                                .setDaily(s.isDailyTasks())
+                                .setWeekly(s.isWeeklyTasks())
+                                .setElite(s.isEliteMissions())))
                 .toList());
         return seasonInfo;
     }
