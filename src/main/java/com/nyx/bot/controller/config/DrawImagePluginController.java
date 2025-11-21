@@ -94,6 +94,7 @@ public class DrawImagePluginController {
      *
      * @return 重新加载结果
      */
+    @SuppressWarnings("null")
     @PostMapping("/reload")
     public AjaxResult reloadPlugins() {
         try {
