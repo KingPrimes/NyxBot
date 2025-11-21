@@ -1,4 +1,4 @@
-package com.nyx.bot.utils;
+package com.nyx.bot.modules.warframe.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

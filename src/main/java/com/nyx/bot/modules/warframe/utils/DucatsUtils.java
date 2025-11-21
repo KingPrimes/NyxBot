@@ -44,6 +44,7 @@ public class DucatsUtils {
      * @param ducats 杜卡德币列表
      * @return 返回经过筛选和排序后的杜卡德币列表，最多包含10个元素
      */
+    @SuppressWarnings("null")
     private static List<Ducats.Ducat> getSilverDump(List<Ducats.Ducat> ducats) {
         return ducats.stream().filter(ducat -> ducat.getDucats() >= 45 && ducat.getDucats() < 100)
                 .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))
@@ -58,6 +59,7 @@ public class DucatsUtils {
      * @param ducats 杜卡德币列表
      * @return 返回经过筛选和排序后的杜卡德币列表
      */
+    @SuppressWarnings("null")
     private static List<Ducats.Ducat> getGodDump(List<Ducats.Ducat> ducats) {
         return ducats.stream().filter(ducat -> ducat.getDucats() == 100)
                 .peek(d -> d.setItem(SpringUtils.getBean(OrdersItemsRepository.class).findById(d.getItem()).orElse(new OrdersItems()).getName()))

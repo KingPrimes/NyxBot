@@ -2,7 +2,7 @@ package com.nyx.bot.modules.warframe.utils.riven_calculation;
 
 import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendCompute;
 import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
-import com.nyx.bot.utils.RivenMatcherUtil;
+import com.nyx.bot.modules.warframe.utils.RivenMatcherUtil;
 import io.github.kingprimes.model.RivenAnalyseTrendModel;
 
 public class WeaponSetters {

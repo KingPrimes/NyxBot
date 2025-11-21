@@ -10,7 +10,7 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import com.nyx.bot.utils.SendUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

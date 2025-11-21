@@ -5,7 +5,7 @@ import com.nyx.bot.modules.warframe.core.RivenAnalyseTrendCompute;
 import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.utils.OCRImage;
-import com.nyx.bot.utils.RivenMatcherUtil;
+import com.nyx.bot.modules.warframe.utils.RivenMatcherUtil;
 import io.github.kingprimes.model.RivenAnalyseTrendModel;
 import io.github.kingprimes.model.enums.RivenTrendEnum;
 import lombok.extern.slf4j.Slf4j;

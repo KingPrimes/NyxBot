@@ -85,10 +85,10 @@ public class RivenAnalyseTrendCompute {
 
         private String getString(double medianValue, double abs, double i) {
             double v = DoubleUtils.formatDouble4(((Math.abs(medianValue) - Math.abs(abs)) / Math.abs(medianValue)) * 100);
-            return i > 0 ? "<span class=\"diff-high\">高：" + Math.abs(v) + "%</span>" :
+            return i > 0 ? "+" + Math.abs(v) + "%" :
                     i == 0 ?
-                            "<span class=\"diff-flat\">平：0.0%</span>" :
-                            "<span class=\"diff-low\">低：" + Math.abs(v) + "%</span>";
+                            "0.0%" :
+                            "-" + Math.abs(v) + "%";
         }
 
 

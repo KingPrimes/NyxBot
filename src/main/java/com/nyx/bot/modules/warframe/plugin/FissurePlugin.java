@@ -1,6 +1,5 @@
 package com.nyx.bot.modules.warframe.plugin;
 
-import com.alibaba.fastjson2.JSON;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
@@ -12,7 +11,7 @@ import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.enums.FissureTypeEnum;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import com.nyx.bot.utils.SendUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.worldstate.ActiveMission;
 import jakarta.annotation.Resource;
@@ -28,7 +27,6 @@ import java.util.List;
 @Component
 @Slf4j
 public class FissurePlugin {
-
     @Resource
     DrawImagePlugin drawImagePlugin;
 
@@ -68,7 +66,6 @@ public class FissurePlugin {
 
     private byte[] postFissuresImage(FissureTypeEnum type) throws DataNotInfoException {
         List<ActiveMission> fissure = worldStateUtils.getFissure(type);
-        log.info("裂隙信息:{}", JSON.toJSONString(fissure));
         return drawImagePlugin.drawActiveMissionImage(fissure);
     }
 }

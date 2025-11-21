@@ -1,6 +1,7 @@
 package com.nyx.bot.modules.warframe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.annotation.NotEmpty;
@@ -12,12 +13,15 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 @EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"NAME", "UNIQUE_NAME"}))
 @JsonView(Views.View.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateTranslation extends BaseEntity {
     // 唯一名词
     @Id
@@ -56,6 +60,25 @@ public class StateTranslation extends BaseEntity {
         this.type = stateTranslation.type;
         this.uniqueName = stateTranslation.uniqueName;
         this.parentName = stateTranslation.parentName;
+    }
+
+    public String getDescription() {
+        if (description == null) {
+            return "";
+        }
+        return description;
+    }
+
+    public void setDescription(Object description) {
+        if (description instanceof List<?> descList) {
+            if (!descList.isEmpty()) {
+                this.description = descList.getFirst().toString();
+            } else {
+                this.description = "";
+            }
+        } else {
+            this.description = description.toString();
+        }
     }
 
     @JsonIgnore

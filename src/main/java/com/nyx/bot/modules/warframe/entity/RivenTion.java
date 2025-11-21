@@ -26,14 +26,14 @@ public class RivenTion extends BaseEntity {
     @JsonProperty("effect")
     String effect;
     //分组
-    @JsonProperty("`group`")
+    @JsonProperty("group")
     @Column(name = "`group`")
     String group;
     //仅负属性
     @JsonProperty("negative_only")
     Double negativeOnly;
     //
-    @JsonProperty("negative_is_negative")
+    @JsonProperty("positive_is_negative")
     Double positiveIsNegative;
     //前缀
     @JsonProperty("prefix")
@@ -57,18 +57,6 @@ public class RivenTion extends BaseEntity {
     public RivenTion() {
     }
 
-    public RivenTion(RivenTion tr) {
-        this.effect = tr.effect;
-        this.group = tr.group;
-        this.negativeOnly = tr.negativeOnly;
-        this.positiveIsNegative = tr.positiveIsNegative;
-        this.prefix = tr.prefix;
-        this.searchOnly = tr.searchOnly;
-        this.suffix = tr.suffix;
-        this.units = tr.units;
-        this.urlName = tr.urlName;
-        this.exclusiveTo = tr.exclusiveTo;
-    }
     @JsonIgnore
     public String getEquation() {
         return this.effect + this.group + this.negativeOnly + this.positiveIsNegative + this.prefix + this.searchOnly + this.suffix + this.units + this.urlName + this.exclusiveTo;

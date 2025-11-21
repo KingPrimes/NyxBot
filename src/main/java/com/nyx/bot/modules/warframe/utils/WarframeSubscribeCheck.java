@@ -174,6 +174,7 @@ public class WarframeSubscribeCheck {
      * @param raw       源消息
      * @return 发送的信息
      */
+    @SuppressWarnings("null")
     @Transactional
     public String userSubscriptions(Long botUid, Long userUid, String userName,
                                     Long subGroup, String groupName, String raw) {

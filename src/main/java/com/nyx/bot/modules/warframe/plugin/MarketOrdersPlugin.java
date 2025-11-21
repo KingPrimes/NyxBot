@@ -1,6 +1,6 @@
 package com.nyx.bot.modules.warframe.plugin;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
@@ -13,7 +13,7 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.utils.MarketUtils;
 import com.nyx.bot.utils.MatcherUtils;
-import com.nyx.bot.utils.SendUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import io.github.kingprimes.model.market.BaseOrder;
@@ -24,7 +24,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 
 import java.util.List;
 
@@ -35,6 +34,8 @@ import java.util.List;
 @Component
 @Slf4j
 public class MarketOrdersPlugin {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Resource
     DrawImagePlugin drawImagePlugin;
@@ -104,7 +105,11 @@ public class MarketOrdersPlugin {
             bot.sendMsg(event, "请输入正确的名称！", false);
             return;
         }
-        log.debug("用户:{} 指令 {} 执行参数 {}", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD, JSON.toJSONString(marketOrdersData));
+        try {
+            log.debug("用户:{} 指令 {} 执行参数 {}", event.getUserId(), CommandConstants.WARFRAME_MARKET_ORDERS_CMD, objectMapper.writeValueAsString(marketOrdersData));
+        } catch (Exception e) {
+            log.debug("序列化参数失败: {}", e.getMessage());
+        }
 
         try {
             byte[] bytes = postMarketOrdersImage(marketOrdersData);
@@ -117,7 +122,6 @@ public class MarketOrdersPlugin {
 
     private byte[] postMarketOrdersImage(MarketOrdersData data) {
         MarketUtils.Market market = MarketUtils.toSet(data.getKey(), data.getForm());
-        ModelMap modelMap = new ModelMap();
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
             return drawImagePlugin.drawMarketOrdersImage(market.getPossibleItems());
         }

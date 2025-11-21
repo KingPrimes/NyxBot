@@ -26,6 +26,7 @@ public class SyndicateMissionsUtils {
      * @param se  集团派系
      * @return 格式化之后的集团任务
      */
+    @SuppressWarnings("null")
     public static SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
         AtomicReference<SyndicateMission> smr = new AtomicReference<>(new SyndicateMission());
         StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);

@@ -9,7 +9,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.utils.SendUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import jakarta.annotation.Resource;
