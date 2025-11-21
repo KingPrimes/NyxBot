@@ -8,6 +8,7 @@ import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
 import com.nyx.bot.service.UserService;
 import com.nyx.bot.utils.I18nUtils;
+import com.nyx.bot.utils.SpringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -23,7 +24,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,7 @@ import java.util.Optional;
 @SecurityScheme(
         name = "Bearer",
         type = SecuritySchemeType.HTTP,
-        scheme = "Bearer ",
+        scheme = "bearer",
         paramName = "Authorization",
         in = SecuritySchemeIn.HEADER,
         bearerFormat = "JWT"
@@ -95,7 +96,7 @@ public class ChangeUsernameController extends BaseController {
         UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
 
         // 验证密码
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        PasswordEncoder encoder = SpringUtils.getBean(PasswordEncoder.class);
         if (!encoder.matches(params.getPassword(), userDetails.getPassword())) {
             return error(I18nUtils.ControllerRestPassWordOldError());
         }
