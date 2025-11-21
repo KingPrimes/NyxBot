@@ -15,7 +15,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      * 静态资源匹配
      */
     @Override
-    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+    protected void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
                 .addResourceLocations("classpath:/resources/")

@@ -22,7 +22,7 @@ public class MyEndpointConfigure extends ServerEndpointConfig.Configurator imple
      * @return 端点实例
      */
     @Override
-    public <T> T getEndpointInstance(Class<T> clazz) {
+    public <T> T getEndpointInstance(@NonNull Class<T> clazz) {
         return context.getBean(clazz);
     }
 

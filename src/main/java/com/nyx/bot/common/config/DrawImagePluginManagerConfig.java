@@ -9,6 +9,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class DrawImagePluginManagerConfig {
      * 动态注册插件bean
      * @param plugin 要注册的插件
      */
-    public static void registerDrawImagePlugin(DrawImagePlugin plugin) {
+    public static void registerDrawImagePlugin(@NonNull DrawImagePlugin plugin) {
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getApplicationContext().getAutowireCapableBeanFactory();
         beanFactory.destroySingleton("drawImagePlugin");
         beanFactory.registerSingleton("drawImagePlugin", plugin);
