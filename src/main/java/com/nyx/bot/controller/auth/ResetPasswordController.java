@@ -4,7 +4,6 @@ import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
 import com.nyx.bot.service.UserService;
 import com.nyx.bot.utils.I18nUtils;
@@ -18,10 +17,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -29,15 +28,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 /**
  * 重置密码
  */
 @SecurityScheme(
         name = "Bearer",
         type = SecuritySchemeType.HTTP,
-        scheme = "Bearer ",
+        scheme = "bearer",
         paramName = "Authorization",
         in = SecuritySchemeIn.HEADER,
         bearerFormat = "JWT"
@@ -78,12 +75,12 @@ public class ResetPasswordController extends BaseController {
                     }
             ))
     @PostMapping("/auth/restorePassword")
-    public AjaxResult restPwd(HttpServletRequest request, @Validated @RequestBody ResetPassword params) {
+    public AjaxResult restPwd(Authentication authentication, @Validated @RequestBody ResetPassword params) {
         if (params.isValidOld()) return error(I18nUtils.ControllerRestPassWordON());
         if (!params.isValid()) return error(I18nUtils.ControllerRestPassWordONError());
 
 
-        UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
+        UserDetails userDetails = userService.loadUserByUsername(authentication.getName());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if (!encoder.matches(params.getOldPassword(), userDetails.getPassword())) {
             return AjaxResult.error(I18nUtils.ControllerRestPassWordOldError());
@@ -91,14 +88,12 @@ public class ResetPasswordController extends BaseController {
         if (encoder.matches(params.getNewPassword(), userDetails.getPassword())) {
             return AjaxResult.error(I18nUtils.ControllerRestPassWordON());
         }
-        Optional<SysUser> sysUser = repository.findSysUsersByUserName(userDetails.getUsername());
-        SysUser user = sysUser.map(s -> {
-            s.setPassword(encoder.encode(params.getNewPassword()));
-            return s;
-        }).orElse(null);
-        if (user == null) return AjaxResult.error(I18nUtils.ControllerRestPassWordONError());
-        repository.save(user);
-        return AjaxResult.success();
+        return repository.findSysUsersByUserName(userDetails.getUsername())
+                .map(s -> {
+                    s.setPassword(encoder.encode(params.getNewPassword()));
+                    repository.save(s);
+                    return success();
+                }).orElse(error(I18nUtils.ControllerRestPassWordONError()));
     }
 
 

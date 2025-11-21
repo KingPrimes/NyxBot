@@ -19,10 +19,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -78,7 +78,7 @@ public class ChangeUsernameController extends BaseController {
                     }
             ))
     @PostMapping("/auth/changeUsername")
-    public AjaxResult changeUsername(HttpServletRequest request, @Validated @RequestBody ChangeUsername params) {
+    public AjaxResult changeUsername(Authentication authentication, @Validated @RequestBody ChangeUsername params) {
         if (params == null) {
             return error(I18nUtils.RequestErrorParam());
         }
@@ -93,7 +93,7 @@ public class ChangeUsernameController extends BaseController {
         }
 
         // 获取当前用户信息
-        UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
+        UserDetails userDetails = userService.loadUserByUsername(authentication.getName());
 
         // 验证密码
         PasswordEncoder encoder = SpringUtils.getBean(PasswordEncoder.class);
