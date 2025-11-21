@@ -31,7 +31,7 @@ public record I18nUtils(MessageSource messageSource) {
      */
     public static String errorTimeOut() {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
-        return messageSource.getMessage("error.timeout", new Object[] {}, LocaleContextHolder.getLocale());
+        return messageSource.getMessage("error.timeout", new Object[]{}, LocaleContextHolder.getLocale());
     }
 
     /**
@@ -73,12 +73,6 @@ public record I18nUtils(MessageSource messageSource) {
         return message("request.valid.client.url");
     }
 
-    /**
-     * 请求git地址不符合规范
-     */
-    public static String RequestValidGitUrl() {
-        return message("request.valid.git.url");
-    }
 
     /**
      * 超级管理员已存在且只能有一个
@@ -94,12 +88,46 @@ public record I18nUtils(MessageSource messageSource) {
         return message("permissions.ban");
     }
 
+    /**
+     * 验证消息获取方法
+     * 根据传入的键值获取对应的验证消息
+     *
+     * @param key 验证消息键值
+     * @return 对应的国际化验证消息字符串
+     */
+    public static String Validated(String key) {
+        return message("validated.%s".formatted(key));
+    }
+
+
+    /**
+     * 认证成功消息
+     * 根据传入的键值获取对应的认证成功消息
+     *
+     * @param key 认证消息键值
+     * @return 对应的国际化认证成功消息字符串
+     */
+    public static String AuthSuccess(String key) {
+        return message("auth.success.%s".formatted(key));
+    }
+
+    /**
+     * 认证错误消息
+     * 根据传入的键值获取对应的认证错误消息
+     *
+     * @param key 认证错误消息键值
+     * @return 对应的国际化认证错误消息字符串
+     */
+    public static String AuthError(String key) {
+        return message("auth.error.%s".formatted(key));
+    }
+
     public static String BWBlackExist() {
         return message("bw.black.exist");
     }
 
     public static String RequestTaskRun() {
-        return message("request.task.run");
+        return message("request.TaskRun");
     }
 
     public static String ControllerRestPassWordOldError() {
@@ -119,6 +147,6 @@ public record I18nUtils(MessageSource messageSource) {
     }
 
     public String getMessage(@NonNull String msgKey) {
-        return messageSource.getMessage(msgKey, new Object[] {}, LocaleContextHolder.getLocale());
+        return messageSource.getMessage(msgKey, new Object[]{}, LocaleContextHolder.getLocale());
     }
 }

@@ -104,16 +104,16 @@ public class ResetPasswordController extends BaseController {
 
     @Data
     public static class ResetPassword {
-        @NotEmpty(message = "controller.rest.password.old.not.empty")
-        @Size(min = 6, max = 18, message = "controller.rest.password.length")
+        @NotEmpty(message = "validated.OldPasswordNotEmpty")
+        @Size(min = 6, max = 18, message = "validated.PasswordSize")
         private String oldPassword;
 
-        @NotEmpty(message = "controller.rest.password.new.not.empty")
-        @Size(min = 6, max = 18, message = "controller.rest.password.length")
+        @NotEmpty(message = "validated.NewPasswordNotEmpty")
+        @Size(min = 6, max = 18, message = "validated.PasswordSize")
         private String newPassword;
 
-        @NotEmpty(message = "controller.rest.password.confirm.not.empty")
-        @Size(min = 6, max = 18, message = "controller.rest.password.length")
+        @NotEmpty(message = "validated.ConfirmPasswordNotEmpty")
+        @Size(min = 6, max = 18, message = "validated.PasswordSize")
         private String confirmPassword;
 
         public boolean isValid() {

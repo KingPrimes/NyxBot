@@ -78,17 +78,30 @@ public class ChangeUsernameController extends BaseController {
             ))
     @PostMapping("/auth/changeUsername")
     public AjaxResult changeUsername(HttpServletRequest request, @Validated @RequestBody ChangeUsername params) {
+        if (params == null) {
+            return error(I18nUtils.RequestErrorParam());
+        }
+        if (params.getNewUsername() == null || params.getNewUsername().isEmpty()) {
+            return error(I18nUtils.Validated("NewNameNotEmpty"));
+        }
+        if (params.getNewUsername().length() < 4 || params.getNewUsername().length() > 20) {
+            return error(I18nUtils.Validated("UserNameSize"));
+        }
+        if (params.getPassword() == null || params.getPassword().isEmpty()) {
+            return error(I18nUtils.Validated("PasswordNotEmpty"));
+        }
+
         // 获取当前用户信息
         UserDetails userDetails = userService.loadUserByUsername(request.getRemoteUser());
 
         // 验证密码
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if (!encoder.matches(params.getPassword(), userDetails.getPassword())) {
-            return AjaxResult.error(I18nUtils.ControllerRestPassWordOldError());
+            return error(I18nUtils.ControllerRestPassWordOldError());
         }
         // 检查新用户名是否已存在
         if (userDetails.getUsername().equals(params.getNewUsername())) {
-            return AjaxResult.error("用户名已存在");
+            return error(I18nUtils.Validated("UserNameExists"));
         }
         // 更新用户名
         Optional<SysUser> sysUser = repository.findSysUsersByUserName(userDetails.getUsername());
@@ -98,22 +111,22 @@ public class ChangeUsernameController extends BaseController {
         }).orElse(null);
 
         if (user == null) {
-            return AjaxResult.error("用户不存在");
+            return error(I18nUtils.Validated("UserNotExists"));
         }
         repository.save(user);
 
-        return AjaxResult.success("用户名更改成功");
+        return success(I18nUtils.AuthSuccess("EditUserName"));
     }
 
 
     @Data
     public static class ChangeUsername {
-        @NotEmpty(message = "新用户名不能为空")
-        @Size(min = 4, max = 20, message = "用户名长度必须在4-20个字符之间")
+        @NotEmpty(message = "validated.NewNameNotEmpty")
+        @Size(min = 4, max = 20, message = "validated.UserNameSize")
         private String newUsername;
 
-        @NotEmpty(message = "密码不能为空")
-        @Size(min = 6, max = 18, message = "密码长度必须在6-18个字符之间")
+        @NotEmpty(message = "validated.PasswordNotEmpty")
+        @Size(min = 6, max = 18, message = "validated.PasswordSize")
         private String password;
     }
 

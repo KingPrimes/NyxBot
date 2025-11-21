@@ -2,6 +2,7 @@ package com.nyx.bot.service;
 
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
+import com.nyx.bot.utils.I18nUtils;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -26,12 +27,11 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<SysUser> user = sysUserRepository.findSysUsersByUserName(username);
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("用户名或密码错误");
+            throw new UsernameNotFoundException(I18nUtils.message("auth.error.NamePassword"));
         }
-        return user.map(sysUser -> User
-                .withUsername(sysUser.getUserName())
-                .password(sysUser.getPassword())
-                .build()).orElse(null);
-
+        return User
+                .withUsername(user.get().getUserName())
+                .password(user.get().getPassword())
+                .build();
     }
 }
