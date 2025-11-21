@@ -28,6 +28,10 @@
             <!--重启清理日志文件-->
             <cleanHistoryOnStart>false</cleanHistoryOnStart>
         </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <!-- 每个日志文件最大10MB -->
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
             <charset>${LOG_FILE_ENCODING}</charset>
