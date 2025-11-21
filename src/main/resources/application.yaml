@@ -14,9 +14,6 @@ async:
       name:
         prefix: async-
 
-app:
-  timezone: Asia/Shanghai
-
 springdoc:
   api-docs:
     path: /v3/api-docs
