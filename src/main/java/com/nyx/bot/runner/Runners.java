@@ -49,7 +49,7 @@ public class Runners {
             user.setPassword(new BCryptPasswordEncoder().encode(password));
             List<SysUser> all = userRepository.findAll();
             if (all.isEmpty()) {
-                log.info("\u001B[31m默认账号：{} 随机密码：{} \t 请修改随机密码，或保存好随机密码！ \u001B[0m", name, password);
+                log.info("默认账号：{} 随机密码：{} \t 请修改随机密码，或保存好随机密码！", name, password);
                 userRepository.save(user);
             }
         }, AsyncBeanName.SERVICE);

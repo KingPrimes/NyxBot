@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("unused")
 @Slf4j
 public class CacheUtils {
     public static final String SYSTEM = "system";
@@ -23,14 +22,14 @@ public class CacheUtils {
 
     private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
 
-
     /**
      * 设置缓存
      *
      * @param name 缓存名称
      * @param map  map k,v
      */
-    public static void set(String name, Map<Object, Object> map) {
+    @SuppressWarnings("null")
+    public static void set(@NonNull String name, @NonNull Map<Object, Object> map) {
         map.forEach((k, v) -> Objects.requireNonNull(cm.getCache(name)).put(k, v));
     }
 
@@ -40,14 +39,15 @@ public class CacheUtils {
      * @param name 缓存名称
      * @param kv   KeyAndValue key,value
      */
-    public static void set(String name, Object... kv) {
-        //动态参数缺少数据
+    @SuppressWarnings("null")
+    public static void set(@NonNull String name, @NonNull Object... kv) {
+        // 动态参数缺少数据
         if (kv.length % 2 != 0) {
             log.error("键值对缺少！");
             return;
         }
-        //遍历动态参数
-        for (int i = 0; i < kv.length + 1; ) {
+        // 遍历动态参数
+        for (int i = 0; i < kv.length + 1;) {
             if (i + 1 < kv.length + 1) {
                 Objects.requireNonNull(cm.getCache(name)).put(kv[i], kv[i + 1]);
             }
@@ -66,7 +66,7 @@ public class CacheUtils {
      * @param key  key
      * @return Object
      */
-    public static Object get(String name, Object key) {
+    public static Object get(@NonNull String name, @NonNull Object key) {
         return Objects.requireNonNull(Objects.requireNonNull(cm.getCache(name)).get(key)).get();
     }
 
@@ -78,11 +78,11 @@ public class CacheUtils {
      * @param type 缓存的类
      * @return type参数的类
      */
-    public static <T> T get(String name, Object key, @NonNull Class<T> type) {
+    public static <T> T get(@NonNull String name, @NonNull Object key, @NonNull Class<T> type) {
         return Objects.requireNonNull(cm.getCache(name)).get(key, type);
     }
 
-    public static boolean exists(String name, Object key) {
+    public static boolean exists(@NonNull String name, @NonNull Object key) {
         return Objects.requireNonNull(cm.getCache(name)).get(key) != null;
     }
 
@@ -95,7 +95,8 @@ public class CacheUtils {
      * @param duration  时间长度
      * @param unit      时间单位
      */
-    public static void putWithExpiry(String cacheName, Object key, Object value, long duration, TimeUnit unit) {
+    public static void putWithExpiry(@NonNull String cacheName, @NonNull Object key, Object value, long duration,
+            TimeUnit unit) {
         try {
             Cache springCache = cm.getCache(cacheName);
             if (springCache instanceof SpringCache2kCache) {

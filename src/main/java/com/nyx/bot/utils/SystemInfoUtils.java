@@ -63,16 +63,18 @@ public class SystemInfoUtils {
         cpuInfo.setModel(processor.getProcessorIdentifier().getName());
         // CPU核数
         cpuInfo.setCores(processor.getLogicalProcessorCount());
+        // CPU 线程数
+        cpuInfo.setThreads(processor.getLogicalProcessorCount());
         // CPU频率
-        cpuInfo.setFrequency(processor.getMaxFreq());
+        cpuInfo.setFrequency(Double.parseDouble(new DecimalFormat("#.##").format(processor.getMaxFreq() / 1_000_000_000.0)));
         // CPU使用率
-        cpuInfo.setUserUsage(Double.parseDouble(new DecimalFormat("#.##%").format(user * 1.0 / totalCpu)));
+        cpuInfo.setUserUsage(Double.parseDouble(new DecimalFormat("#.##").format(user * 1.0 / totalCpu)));
         // CPU当前等待率
-        cpuInfo.setWaitUsage(Double.parseDouble(new DecimalFormat("#.##%").format(wait * 1.0 / totalCpu)));
+        cpuInfo.setWaitUsage(Double.parseDouble(new DecimalFormat("#.##").format(wait * 1.0 / totalCpu)));
         // CPU系统使用率
-        cpuInfo.setSysUsage(Double.parseDouble(new DecimalFormat("#.##%").format(cSys * 1.0 / totalCpu)));
+        cpuInfo.setSysUsage(Double.parseDouble(new DecimalFormat("#.##").format(cSys * 1.0 / totalCpu)));
         // CPU当前使用率
-        cpuInfo.setIdleUsage(Double.parseDouble(new DecimalFormat("#.##%").format(idle * 1.0 / totalCpu)));
+        cpuInfo.setIdleUsage(Double.parseDouble(new DecimalFormat("#.##").format(idle * 1.0 / totalCpu)));
         return cpuInfo;
     }
 
@@ -119,9 +121,9 @@ public class SystemInfoUtils {
         // 剩余内存
         memInfo.setFreeMemory(acaliableByte);
         //使用率
-        memInfo.setUsedMemoryRatio(Double.parseDouble(new DecimalFormat("#.##%").format((totalByte - acaliableByte) * 1.0 / totalByte)));
+        memInfo.setUsedMemoryRatio(Double.parseDouble(new DecimalFormat("#.##").format((totalByte - acaliableByte) * 1.0 / totalByte)));
         // 剩余内存占比
-        memInfo.setFreeMemoryRatio(Double.parseDouble(new DecimalFormat("#.##%").format(acaliableByte * 1.0 / totalByte)));
+        memInfo.setFreeMemoryRatio(Double.parseDouble(new DecimalFormat("#.##").format(acaliableByte * 1.0 / totalByte)));
         return memInfo;
     }
 
@@ -152,7 +154,7 @@ public class SystemInfoUtils {
 
             sysFiles.add(fileInfo);
         }
-        sysFileInfos.setSysFileInfos(sysFiles);
+        sysFileInfos.setSysFileInfos(sysFiles.stream().limit(2).toList());
         return sysFileInfos;
     }
 
@@ -245,6 +247,7 @@ public class SystemInfoUtils {
     /**
      * 单位转换
      */
+    @SuppressWarnings("unused")
     private static String formatByte(long byteNumber) {
         //换算单位
         double FORMAT = 1024.0;

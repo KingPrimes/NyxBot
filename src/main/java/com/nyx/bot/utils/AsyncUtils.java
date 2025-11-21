@@ -38,6 +38,7 @@ public class AsyncUtils {
      * @param task 执行的方法
      * @param name 那个线程池
      */
+    @SuppressWarnings("null")
     public void execute(Runnable task, AsyncBeanName name) {
         Executor executor = SpringUtils.getBean(name.getStr());
         executor.execute(task);

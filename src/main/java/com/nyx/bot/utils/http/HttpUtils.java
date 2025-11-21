@@ -14,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Http请求工具类</br>
@@ -23,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
  * @author KingPrimes
  */
 @Slf4j
-@SuppressWarnings("ALL")
+@SuppressWarnings({ "ALL", "null" })
 public class HttpUtils {
 
     /**
@@ -179,8 +178,6 @@ public class HttpUtils {
      * @param path - 文件输出路径
      */
     public static Boolean sendGetForFile(String url, String path) {
-        // 用于下载完成返回标志符
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
         File outputFile = new File(path);
         // 若目录不存在,创建目录
         FileUtils.createDir(outputFile);
@@ -350,14 +347,6 @@ public class HttpUtils {
         log.warn("downloadFile failed for {} Handers:{}", url, response.getHeaders());
         return false;
 
-    }
-
-    private static Body getBody(ResponseEntity<String> response, String url) {
-        return new Body(response.getBody(),
-                response.getStatusCode(),
-                response.getHeaders(),
-                url,
-                null);
     }
 
 

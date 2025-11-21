@@ -1,6 +1,5 @@
 package com.nyx.bot.filter;
 
-import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.Constants;
 import com.nyx.bot.common.core.JwtUtil;
@@ -46,12 +45,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         EXCLUDE_PATHS = Arrays.asList(
                 "/static/",
                 "/favicon",
-                shiro
-        );
+                shiro);
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain chain)
             throws ServletException, IOException {
         // 检查是否是需要排除的路径
         String requestURI = request.getRequestURI();
@@ -116,6 +115,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(status);
-        response.getWriter().write(JSON.toJSONString(AjaxResult.error(message)));
+        response.getWriter().write(AjaxResult.error(message).toJsonString());
     }
 }

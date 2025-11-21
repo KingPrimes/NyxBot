@@ -1,9 +1,10 @@
-package com.nyx.bot.utils;
+package com.nyx.bot.utils.onebot;
 
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.utils.StringUtils;
 import org.slf4j.Logger;
 
 public class SendUtils {

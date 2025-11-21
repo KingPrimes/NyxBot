@@ -3,7 +3,6 @@ package com.nyx.bot.enums;
 public class CommandConstants {
     public static final String CHECK_VERSION_CMD = "^检查版本$|^版本$|^运行状态$|^状态$";
     public static final String HELP_CMD = "^HELP$|^帮助$|^指令$|^命令$|^菜单$|^help$";
-    public static final String UPDATE_HTML_CMD = "^更新HTML$|^更新html$";
     public static final String UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD = "^更新WM物品$";
     public static final String UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD = "^更新WM紫卡$";
     public static final String UPDATE_WARFRAME_RES_RM_CMD = "^更新RM紫卡$";
