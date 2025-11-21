@@ -1,10 +1,11 @@
 package com.nyx.bot.aop;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.annotation.LogInfo;
 import com.nyx.bot.enums.BusinessStatus;
 import com.nyx.bot.modules.system.repo.LogInfoRepository;
 import com.nyx.bot.utils.*;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,6 +22,9 @@ import java.util.Map;
 @Aspect
 @Component
 public class LogInfoAspect {
+
+    @Resource
+    ObjectMapper objectMapper;
 
     Long runTime;
 
@@ -100,7 +104,11 @@ public class LogInfoAspect {
         }
         // 是否需要保存response，参数和值
         if (log.isSaveResponseData() && StringUtils.isNotNull(jsonResult)) {
-            logInfo.setResult(JSONObject.toJSONString(jsonResult));
+            try {
+                logInfo.setResult(objectMapper.writeValueAsString(jsonResult));
+            } catch (Exception e) {
+                logInfo.setResult("{}");
+            }
         }
     }
 
@@ -114,8 +122,12 @@ public class LogInfoAspect {
         ServletUtils.getRequest().ifPresentOrElse(r -> {
             Map<String, String[]> map = r.getParameterMap();
             if (StringUtils.isNotEmpty(map)) {
-                String params = JSONObject.toJSONString(map);
-                logInfo.setParam(params);
+                try {
+                    String params = objectMapper.writeValueAsString(map);
+                    logInfo.setParam(params);
+                } catch (Exception e) {
+                    logInfo.setParam("{}");
+                }
             }
         }, () -> {
             Object args = joinPoint.getArgs();
@@ -137,8 +149,8 @@ public class LogInfoAspect {
             for (Object o : paramsArray) {
                 if (StringUtils.isNotNull(o)) {
                     try {
-                        Object jsonObj = JSONObject.toJSONString(o);
-                        if (!MatcherUtils.isNumber(jsonObj.toString())) {
+                        String jsonObj = objectMapper.writeValueAsString(o);
+                        if (!MatcherUtils.isNumber(jsonObj)) {
                             params
                                     .append(jsonObj)
                                     .append(" ");

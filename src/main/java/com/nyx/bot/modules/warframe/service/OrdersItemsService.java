@@ -1,9 +1,7 @@
 package com.nyx.bot.modules.warframe.service;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
@@ -13,12 +11,15 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
 public class OrdersItemsService {
+    
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    
     OrdersItemsRepository ordersItemsService;
 
     public OrdersItemsService(OrdersItemsRepository ordersItemsService) {
@@ -30,56 +31,62 @@ public class OrdersItemsService {
         log.debug("开始初始化Market物品数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_ITEMS);
         if (body.code().is2xxSuccessful()) {
-            JSONArray data = JSON.parseObject(body.body()).getJSONArray("data");
-            if (data.isEmpty()) {
-                log.error("未获取到Market物品数据");
+            try {
+                JsonNode rootNode = objectMapper.readTree(body.body());
+                JsonNode dataNode = rootNode.get("data");
+                if (dataNode == null || !dataNode.isArray() || dataNode.isEmpty()) {
+                    log.error("未获取到Market物品数据");
+                    return -1;
+                }
+                List<OrdersItems> items = new ArrayList<>();
+                for (JsonNode itemNode : dataNode) {
+                    OrdersItems item = buildOrdersItems(itemNode);
+                    if (item != null) {
+                        items.add(item);
+                    }
+                }
+                log.debug("成功初始化Market物品数据，数量为：{}", items.size());
+                return ordersItemsService.saveAllAndFlush(items).size();
+            } catch (Exception e) {
+                log.error("解析Market物品数据失败", e);
                 return -1;
             }
-            // 2. 使用Stream流处理集合，代码更简洁
-            List<OrdersItems> items = data.stream()
-                    .map(i -> (JSONObject) i) // 安全转换为JSONObject
-                    .filter(Objects::nonNull) // 过滤null对象
-                    .map(this::buildOrdersItems) // 提取对象构建逻辑
-                    .filter(Objects::nonNull) // 过滤构建失败的对象
-                    .toList();
-            log.debug("成功初始化Market物品数据，数量为：{}", items.size());
-            return ordersItemsService.saveAll(items).size();
         }
         return -1;
     }
 
-    private OrdersItems buildOrdersItems(JSONObject object) {
+    private OrdersItems buildOrdersItems(JsonNode object) {
         try {
-            String gameRef = object.getString("gameRef");
-            String id = object.getString("id");
-            String slug = object.getString("slug");
+            String gameRef = object.has("gameRef") ? object.get("gameRef").asText() : null;
+            String id = object.has("id") ? object.get("id").asText() : null;
+            String slug = object.has("slug") ? object.get("slug").asText() : null;
             if (StringUtils.isAnyBlank(id, slug)) {
                 log.warn("物品关键信息缺失，跳过处理: {}", object);
                 return null;
             }
 
             // 嵌套JSON安全解析
-            JSONObject i18n = object.getJSONObject("i18n");
-            JSONObject zhHansI18n = i18n != null ? i18n.getJSONObject("zh-hans") : null;
-            String name = zhHansI18n != null ? zhHansI18n.getString("name") : object.getString("slug"); // 名称缺失时用slug兜底
-            String icon = zhHansI18n != null ? zhHansI18n.getString("icon") : null;
-            String thumb = zhHansI18n != null ? zhHansI18n.getString("thumb") : null;
+            JsonNode i18nNode = object.has("i18n") ? object.get("i18n") : null;
+            JsonNode zhHansNode = (i18nNode != null && i18nNode.has("zh-hans")) ? i18nNode.get("zh-hans") : null;
+            String name = (zhHansNode != null && zhHansNode.has("name")) ? zhHansNode.get("name").asText() : slug;
+            String icon = (zhHansNode != null && zhHansNode.has("icon")) ? zhHansNode.get("icon").asText() : null;
+            String thumb = (zhHansNode != null && zhHansNode.has("thumb")) ? zhHansNode.get("thumb").asText() : null;
 
             return new OrdersItems()
                     .setGameRef(gameRef)
                     .setId(id)
                     .setSlug(slug)
-                    .setBulkTradable(object.getBooleanValue("bulkTradable")) // 布尔值默认false
-                    .setMaxRank(object.getInteger("maxRank"))
-                    .setDucats(object.getInteger("ducats"))
-                    .setVaulted(object.getBooleanValue("vaulted"))
-                    .setMaxAmberStars(object.getInteger("maxAmberStars"))
-                    .setMaxCyanStars(object.getInteger("maxCyanStars"))
-                    .setBaseEndo(object.getInteger("baseEndo"))
+                    .setBulkTradable(object.has("bulkTradable") && object.get("bulkTradable").asBoolean())
+                    .setMaxRank(object.has("maxRank") ? object.get("maxRank").asInt() : null)
+                    .setDucats(object.has("ducats") ? object.get("ducats").asInt() : null)
+                    .setVaulted(object.has("vaulted") && object.get("vaulted").asBoolean())
+                    .setMaxAmberStars(object.has("maxAmberStars") ? object.get("maxAmberStars").asInt() : null)
+                    .setMaxCyanStars(object.has("maxCyanStars") ? object.get("maxCyanStars").asInt() : null)
+                    .setBaseEndo(object.has("baseEndo") ? object.get("baseEndo").asInt() : null)
                     .setName(name)
                     .setIcon(icon)
                     .setThumb(thumb);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             log.error("解析物品数据失败: {}", object, e);
             return null; // 解析失败的物品跳过处理
         }

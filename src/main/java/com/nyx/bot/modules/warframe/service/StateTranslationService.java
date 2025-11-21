@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-@SuppressWarnings("unused")
 @Slf4j
 @Service
 public class StateTranslationService {
@@ -21,8 +20,9 @@ public class StateTranslationService {
      *
      * @param st 不带ID新增，带ID修改
      */
+    @SuppressWarnings("null")
     public StateTranslation save(StateTranslation st) {
-        return str.save(st);
+        return str.saveAndFlush(st);
     }
 
     /**

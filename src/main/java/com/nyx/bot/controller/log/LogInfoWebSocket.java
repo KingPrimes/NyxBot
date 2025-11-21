@@ -1,6 +1,6 @@
 package com.nyx.bot.controller.log;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.CacheUtils;
 import jakarta.websocket.*;
 import jakarta.websocket.server.HandshakeRequest;
@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 @ServerEndpoint(value = "/ws/log-now", configurator = LogInfoWebSocket.CustomConfigurator.class)
 public class LogInfoWebSocket {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
     private static final Map<String, Integer> lengthMap = new ConcurrentHashMap<>();
     //用于匹配日志格式的正则表达式
@@ -81,7 +82,11 @@ public class LogInfoWebSocket {
 
                     if (!logInfoWebSocketForStrList.isEmpty()) {
                         //发送 Json格式的日志到前端
-                        send(session, JSON.toJSONString(logInfoWebSocketForStrList));
+                        try {
+                            send(session, objectMapper.writeValueAsString(logInfoWebSocketForStrList));
+                        } catch (Exception e) {
+                            log.error("JSON序列化失败: {}", e.getMessage());
+                        }
                     }
                     //休眠一秒
                     Thread.sleep(1000);

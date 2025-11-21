@@ -1,9 +1,10 @@
 package com.nyx.bot.cache;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.FileUtils;
+import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.model.Arbitration;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,9 @@ import static com.nyx.bot.utils.CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION;
 
 @Slf4j
 public class ArbitrationCache {
+
+    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+
     /**
      * 重载仲裁数据
      */
@@ -89,6 +93,10 @@ public class ArbitrationCache {
      */
     public static void setArbitration(List<Arbitration> arbitrationList) {
         CacheUtils.set(WARFRAME_GLOBAL_STATES_ARBITRATION, "data", arbitrationList, 15L, TimeUnit.DAYS);
-        FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(JSON.toJSONBytes(arbitrationList)));
+        try {
+            FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(arbitrationList)));
+        } catch (Exception e) {
+            log.error("序列化Arbitration失败: {}", e.getMessage());
+        }
     }
 }

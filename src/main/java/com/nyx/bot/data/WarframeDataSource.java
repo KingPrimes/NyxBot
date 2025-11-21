@@ -1,19 +1,19 @@
 package com.nyx.bot.data;
 
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.ArbitrationCache;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.enums.StateTypeEnum;
-import com.nyx.bot.modules.warframe.entity.*;
+import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.entity.exprot.NightWave;
 import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
-import com.nyx.bot.modules.warframe.repo.*;
+import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
@@ -23,21 +23,17 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
-import com.nyx.bot.utils.gitutils.JgitUtil;
 import com.nyx.bot.utils.http.HttpUtils;
-import io.github.kingprimes.model.Arbitration;
 import io.github.kingprimes.model.WorldState;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,11 +43,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings("all")
 public class WarframeDataSource {
 
-    static final String DATA_SOURCE_PATH = JgitUtil.lockPath + "/warframe/";
     static final String EXPORT_PATH = "./data/export/%s";
     static final String LAMA_PATH = "./data/lzma/index_zh.txt.lzma";
     static final String INDEX_PATH = "./data/lzma/index_zh.txt";
-
+    static ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
     StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
     NodesRepository nodesRepository = SpringUtils.getBean(NodesRepository.class);
     WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
@@ -60,46 +55,48 @@ public class WarframeDataSource {
     public static void init() {
         log.info("开始初始化数据！");
 
-        // 1. 首先执行cloneDataSource
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-                    if (flag) {
-                        log.error("初始化数据模板，失败！请检查网络环境");
-                        throw new RuntimeException("克隆数据模板失败");
-                    }
-                })
-                // 使用thenCompose确保severExportFiles在cloneDataSource完成后执行
-                .thenCompose(ignore -> CompletableFuture.supplyAsync(WarframeDataSource::severExportFiles)).thenAccept(flag -> {
+        // 优化后的任务编排：
+        // 1. 首先执行 initStateTranslation（可能被其他任务依赖）
+        // 2. 然后并行执行所有数据库更新任务
+        // 3. 注意：虽然添加了同步锁，但仍保持单线程执行数据库批量更新任务以提高性能
+        CompletableFuture
+                .supplyAsync(WarframeDataSource::severExportFiles)
+                .thenAccept(flag -> {
                     if (!flag) {
                         log.error("获取导出数据文件失败！请检查网络环境");
                         throw new RuntimeException("获取导出数据文件失败");
                     }
                 })
-                // 3. severExportFiles完成后执行initStateTranslation
-                .thenCompose(ignore -> CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation()))
-                // 4. 剩余任务并行执行
-                .thenRunAsync(() -> {
-                    CompletableFuture.allOf(
+                // 步骤1: 初始化状态翻译数据（优先级最高，可能被其他任务依赖）
+                .thenCompose(ignore ->
+                        CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation())
+                                // 步骤2: 并行执行所有数据初始化任务
+                                .thenRunAsync(() -> {
+                                    // 数据库批量更新任务组（这些任务各自已有同步锁保护）
+                                    CompletableFuture<Void> dbUpdateTasks = CompletableFuture.allOf(
+                                            CompletableFuture.runAsync(WarframeDataSource::getAlias),
+                                            CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
+                                            CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
+                                            CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend)
+                                    );
 
-                                    CompletableFuture.runAsync(WarframeDataSource::getAlias),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend),
+                                    // 其他数据初始化任务组（读取操作为主，可以完全并行）
+                                    CompletableFuture<Void> otherTasks = CompletableFuture.allOf(
+                                            CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
+                                            CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
+                                            CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
+                                            CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
+                                            CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
+                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
+                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
+                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
+                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
+                                            CompletableFuture.runAsync(WarframeDataSource::getRelics)
+                                    );
 
-
-                                    CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
-                                    CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
-                                    CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
-                                    CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
-
-
-                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
-                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
-                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
-                                    CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
-                                    CompletableFuture.runAsync(WarframeDataSource::getRelics))
-                            .join();
-                })
+                                    // 等待所有任务完成
+                                    CompletableFuture.allOf(dbUpdateTasks, otherTasks).join();
+                                }))
                 // 所有任务完成后输出信息
                 .thenRun(() -> log.info("数据初始化完成！"))
                 // 异常处理
@@ -108,7 +105,6 @@ public class WarframeDataSource {
 
                     // 回退操作：清理已生成的文件
                     FileUtils.delAllFile(EXPORT_PATH.formatted("").replace("%s", ""));
-                    FileUtils.delAllFile(JgitUtil.lockPath);
                     FileUtils.deleteFile(LAMA_PATH);
                     FileUtils.deleteFile(INDEX_PATH);
                     FileUtils.deleteFile("./data/keys.json");
@@ -119,26 +115,19 @@ public class WarframeDataSource {
                 });
     }
 
+    @SneakyThrows
     public static void initWarframeStatus() {
         String a = FileUtils.readFileToString("./data/arbitration");
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
-            WorldState worldState = JSON.parseObject(str, WorldState.class);
+            WorldState worldState = objectMapper.readValue(str, WorldState.class);
             WarframeCache.setWarframeStatus(worldState);
         }
         if (!a.isEmpty()) {
-            List<Arbitration> arbitration = JSON.parseArray(Base64.getDecoder().decode(a), Arbitration.class);
+            List arbitration = objectMapper.readValue(Base64.getDecoder().decode(a), List.class);
             ArbitrationCache.setArbitration(arbitration);
         } else {
             ArbitrationCache.reloadArbitration();
-        }
-    }
-
-    private static void sleepSeconds() {
-        try {
-            TimeUnit.SECONDS.sleep(30);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 
@@ -169,92 +158,31 @@ public class WarframeDataSource {
     }
 
     //别名
-
-    @SneakyThrows
-    public static Integer getAlias() {
+    public static void getAlias() {
         log.info("开始初始化别名数据！");
-        List<Alias> aliasList = JSON.parseArray(new File(DATA_SOURCE_PATH + "alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(Alias.class);
-        AliasRepository aliasR = SpringUtils.getBean(AliasRepository.class);
-
-        Map<String, Alias> allMap = createMap(aliasR.findAll(), Alias::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, Alias> uniqueTranslations = createMap(aliasList, Alias::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<Alias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(Alias::new).toList();
-
-        log.info("总计更新 Warframe.Alias {} 数据！", aliasR.saveAll(list).size());
-
-        return list.size();
+        int i = SpringUtils.getBean(AliasService.class).updateAlias();
+        log.info("总计更新 Warframe.Alias {} 数据！", i);
     }
 
     // 紫卡词条
-    @SneakyThrows
-    public static Integer getRivenTion() {
+    public static void getRivenTion() {
         log.info("开始初始化 RivenTion 数据！");
-        List<RivenTion> rivenTions = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTion.class);
-        RivenTionRepository records = SpringUtils.getBean(RivenTionRepository.class);
-
-        Map<String, RivenTion> allMap = createMap(records.findAll(), RivenTion::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, RivenTion> uniqueTranslations = createMap(rivenTions, RivenTion::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<RivenTion> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTion::new).toList();
-
-        log.info("总计更新 Warframe.RivenTion {} 数据！", records.saveAll(list).size());
-        return list.size();
+        int i = SpringUtils.getBean(RivenTionService.class).updateRivenTion();
+        log.info("总计更新 Warframe.RivenTion {} 数据！", i);
     }
 
     // 紫卡词条别名
-    @SneakyThrows
-    public static Integer getRivenTionAlias() {
+    public static void getRivenTionAlias() {
         log.info("开始初始化 RivenTion 别名数据！");
-        List<RivenTionAlias> rivenTionAliases = JSON.parseArray(new File(DATA_SOURCE_PATH + "market_riven_tion_alias.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenTionAlias.class);
-        RivenTionAliasRepository repository = SpringUtils.getBean(RivenTionAliasRepository.class);
-
-        Map<String, RivenTionAlias> allMap = createMap(repository.findAll(), RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, RivenTionAlias> uniqueTranslations = createMap(rivenTionAliases, RivenTionAlias::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<RivenTionAlias> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenTionAlias::new).toList();
-
-        log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", repository.saveAll(list).size());
-        return list.size();
+        int i = SpringUtils.getBean(RivenTionAliasService.class).updateRivenTionAlias();
+        log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", i);
     }
 
     //紫卡计算器数据
-    @SneakyThrows
-    public static Integer getRivenAnalyseTrend() {
+    public static void getRivenAnalyseTrend() {
         log.info("开始初始化 RivenAnalyseTrend 数据！");
-        List<RivenAnalyseTrend> translations = JSON.parseArray(new File(DATA_SOURCE_PATH + "riven_analyse_trend.json").toURI().toURL(), JSONReader.Feature.SupportSmartMatch).toJavaList(RivenAnalyseTrend.class);
-        RivenAnalyseTrendRepository r = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
-
-        Map<String, RivenAnalyseTrend> allMap = createMap(r.findAll(), RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
-
-        Map<String, RivenAnalyseTrend> uniqueTranslations = createMap(translations, RivenAnalyseTrend::getEquation, (oldVal, newVal) -> oldVal);
-
-        List<RivenAnalyseTrend> list = uniqueTranslations.values().stream().filter(item -> !allMap.containsKey(item.getEquation())).map(RivenAnalyseTrend::new).toList();
-
-        log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r.saveAll(list).size());
-
-        return list.size();
-    }
-
-
-    public static Boolean cloneDataSource() {
-        log.info("开始初始化数据模板！");
-        boolean flag = true;
-        for (String url : ApiUrl.DATA_SOURCE_GIT) {
-            try {
-                log.debug("Clone data:{}", url);
-                JgitUtil git = JgitUtil.Build(url, JgitUtil.lockPath);
-                git.pull();
-                flag = false;
-                break;
-            } catch (Exception e) {
-                log.error("初始化数据模板不正确", e);
-            }
-        }
-        return flag;
+        int r = SpringUtils.getBean(RivenAnalyseTrendService.class).updateRivenAnalyseTrends();
+        log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r);
     }
 
     public static Boolean severExportFiles() {
@@ -309,16 +237,26 @@ public class WarframeDataSource {
      * @return List<StateTranslation>
      */
     static List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
-        JSONObject object;
+        JsonNode rootNode;
         try {
-            object = JSON.parseObject(new FileInputStream(exportPath));
-        } catch (FileNotFoundException e) {
+            rootNode = objectMapper.readTree(new FileInputStream(exportPath));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return object.getList(key, StateTranslation.class).stream().filter(s -> !s.getName().isEmpty()).peek(s -> {
-            s.setType(StateTypeEnum.RESOURCES);
-            Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
-        }).toList();
+        try {
+            JsonNode arrayNode = rootNode.get(key);
+            List<StateTranslation> list = objectMapper.convertValue(
+                    arrayNode,
+                    new TypeReference<List<StateTranslation>>() {
+                    }
+            );
+            return list.stream().filter(s -> !s.getName().isEmpty()).peek(s -> {
+                s.setType(StateTypeEnum.RESOURCES);
+                Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
+            }).toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse " + key + " from " + exportPath, e);
+        }
     }
 
     /**
@@ -347,24 +285,45 @@ public class WarframeDataSource {
         String keysHashPath = "./data/keys.json";
         Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
-            Map<String, String> map = JSON.parseObject(new FileInputStream(keysHashPath)).toJavaObject(Map.class);
-            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            Map<String, String> map = objectMapper.readValue(
+                    new FileInputStream(keysHashPath),
+                    new TypeReference<Map<String, String>>() {
+                    }
+            );
+            FileUtils.writeFile(keysHashPath, objectMapper.writeValueAsString(collect));
             return collect.entrySet().stream().filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (FileNotFoundException e) {
-            FileUtils.writeFile(keysHashPath, JSON.toJSONString(collect));
+            try {
+                FileUtils.writeFile(keysHashPath, objectMapper.writeValueAsString(collect));
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to write keys file", ex);
+            }
             return collect;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse keys file", e);
         }
     }
 
     <T> List<T> parsingExportJson(String exportPath, String key, Class<T> c) {
-        JSONObject object;
+        JsonNode rootNode;
         try {
-            object = JSON.parseObject(new FileInputStream(exportPath));
+            rootNode = objectMapper.readTree(new FileInputStream(exportPath));
         } catch (FileNotFoundException e) {
             log.error("{} 路径文件不存在", exportPath);
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("解析文件失败: {}", exportPath, e);
+            throw new RuntimeException(e);
         }
-        return object.getList(key, c);
+        try {
+            JsonNode arrayNode = rootNode.get(key);
+            return objectMapper.convertValue(
+                    arrayNode,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, c)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse " + key + " from " + exportPath, e);
+        }
     }
 
     void initStateTranslation() {
@@ -384,29 +343,53 @@ public class WarframeDataSource {
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
         int size = str.saveAll(stateTranslationList).size();
         log.debug("初始化 Lost 翻译 数据完成，共{}条", size);
-        try {
-            log.debug("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
-            List<StateTranslation> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "state_translation.json"), JSONReader.Feature.SupportSmartMatch).toJavaList(StateTranslation.class).stream().peek(s -> {
-                s.setType(StateTypeEnum.RESOURCES);
-                Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
-            }).toList();
-            size = str.saveAll(javaList).size();
-            log.debug("初始化 自定义 Lost state_translation.json 翻译 数据完成，共{}条", size);
-        } catch (FileNotFoundException e) {
-            log.error("state_translation.json文件不存在");
+        log.debug("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
+        List<StateTranslation> javaList = new ArrayList<>();
+        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_STATE_TRANSLATION) {
+            HttpUtils.Body body = HttpUtils.sendGet(url);
+            if (body.code().is2xxSuccessful()) {
+                try {
+                    List<StateTranslation> translations = objectMapper.readValue(
+                            body.body(),
+                            new TypeReference<List<StateTranslation>>() {
+                            }
+                    );
+                    javaList.addAll(translations);
+                    break;
+                } catch (Exception e) {
+                    log.error("解析 StateTranslation 数据失败: {}", url, e);
+                }
+            }
         }
+        List<StateTranslation> sts = javaList.stream().peek(s -> {
+            Arrays.stream(StateTypeEnum.values())
+                    .filter(stateTypeEnum -> s.getUniqueName()
+                            .matches(stateTypeEnum.getKEY()))
+                    .findFirst()
+                    .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
+        }).toList();
+        size = str.saveAll(sts).size();
+        log.debug("初始化 自定义 Lost state_translation.json 翻译 数据完成，共{}条", size);
         log.debug("初始化 Lost 翻译 数据完成");
     }
 
     void initNightWave() {
         log.debug("开始初始化  NightWave 数据！");
-        List<NightWave> javaList = null;
         try {
-            javaList = JSON.parseObject(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json"))).getJSONObject("ExportNightwave").getJSONArray("challenges").toJavaList(NightWave.class);
+            JsonNode rootNode = objectMapper.readTree(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json")));
+            JsonNode challengesNode = rootNode.get("ExportNightwave").get("challenges");
+            List<NightWave> javaList = objectMapper.convertValue(
+                    challengesNode,
+                    new TypeReference<List<NightWave>>() {
+                    }
+            );
             int size = SpringUtils.getBean(NightWaveRepository.class).saveAll(javaList).size();
             log.debug("初始化 NightWave 数据完成，共{}条", size);
         } catch (FileNotFoundException e) {
             log.error("ExportSortieRewards_zh.json文件不存在", e);
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("解析 NightWave 数据失败", e);
             throw new RuntimeException(e);
         }
     }
@@ -416,27 +399,49 @@ public class WarframeDataSource {
         List<Nodes> nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
         int size = nodesRepository.saveAll(nodesList).size();
         log.debug("初始化 Nodes 数据完成，共{}条", size);
-        try {
-            log.debug("开始初始化 自定义 Nodes nodes.json 数据！");
-            List<Nodes> nodes = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "nodes.json")).toJavaList(Nodes.class);
-            size = nodesRepository.saveAll(nodes).size();
-            log.debug("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
-        } catch (FileNotFoundException e) {
-            log.error("nodes.json文件不存在", e);
-            throw new RuntimeException(e);
+        List<Nodes> nodes = new ArrayList<>();
+        log.debug("开始初始化 自定义 Nodes nodes.json 数据！");
+        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_NODES) {
+            HttpUtils.Body body = HttpUtils.sendGet(url);
+            if (body.code().is2xxSuccessful()) {
+                try {
+                    List<Nodes> customNodes = objectMapper.readValue(
+                            body.body(),
+                            new TypeReference<List<Nodes>>() {
+                            }
+                    );
+                    nodes.addAll(customNodes);
+                    break;
+                } catch (Exception e) {
+                    log.error("解析 Nodes 数据失败: {}", url, e);
+                }
+            }
         }
+        size = nodesRepository.saveAll(nodes).size();
+        log.debug("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
     }
 
     void initRewardPool() {
-        try {
-            log.debug("开始初始化 自定义 RewardPool reward_pool.json 数据！");
-            List<RewardPool> javaList = JSON.parseArray(new FileInputStream(DATA_SOURCE_PATH + "reward_pool.json")).toJavaList(RewardPool.class);
-            int size = rewardPoolRepository.saveAll(javaList).size();
-            log.debug("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
-        } catch (FileNotFoundException e) {
-            log.error("reward_pool.json文件不存在", e);
-            throw new RuntimeException(e);
+        log.debug("开始初始化 自定义 RewardPool reward_pool.json 数据！");
+        List<RewardPool> javaList = new ArrayList<>();
+        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL) {
+            HttpUtils.Body body = HttpUtils.sendGet(url);
+            if (body.code().is2xxSuccessful()) {
+                try {
+                    List<RewardPool> pools = objectMapper.readValue(
+                            body.body(),
+                            new TypeReference<List<RewardPool>>() {
+                            }
+                    );
+                    javaList.addAll(pools);
+                    break;
+                } catch (Exception e) {
+                    log.error("解析 RewardPool 数据失败: {}", url, e);
+                }
+            }
         }
+        int size = rewardPoolRepository.saveAll(javaList).size();
+        log.debug("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
     }
 
     void initWeapons() {

@@ -1,7 +1,7 @@
 package com.nyx.bot.utils.gitutils;
 
-import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
@@ -10,6 +10,7 @@ import java.util.List;
 
 public class GitHubUtil {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 获取最新版本
@@ -23,7 +24,11 @@ public class GitHubUtil {
         if (!latest.code().is2xxSuccessful()) {
             return null;
         }
-        return JSON.parseObject(latest.body(), Release.class);
+        try {
+            return objectMapper.readValue(latest.body(), Release.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

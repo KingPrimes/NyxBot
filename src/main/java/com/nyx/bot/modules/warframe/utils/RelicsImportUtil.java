@@ -1,15 +1,16 @@
 package com.nyx.bot.modules.warframe.utils;
 
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.entity.exprot.RelicRewards;
 import com.nyx.bot.modules.warframe.entity.exprot.Relics;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.utils.ListUtils;
+import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.criteria.Predicate;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 public class RelicsImportUtil {
     private static final Logger log = LoggerFactory.getLogger(RelicsImportUtil.class);
     private static final int BATCH_SIZE = 500;
+    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
 
     // 用于收集未翻译的奖励名称
     private final List<Map<String, String>> untranslatedItems = new ArrayList<>();
@@ -100,14 +102,15 @@ public class RelicsImportUtil {
      */
     private List<Relics> readRelicsFromFile(String filePath) throws IOException {
         try (FileInputStream fis = new FileInputStream(filePath)) {
-            JSONArray jsonArray = JSON.parseObject(fis).getJSONArray("ExportRelicArcane");
-            return jsonArray.toJavaList(Relics.class);
+            JsonNode rootNode = objectMapper.readTree(fis);
+            JsonNode relicArcaneNode = rootNode.get("ExportRelicArcane");
+            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<List<Relics>>() {});
         } catch (FileNotFoundException e) {
             log.error("数据文件不存在: {}", filePath);
             throw e;
-        } catch (JSONException e) {
+        } catch (Exception e) {
             log.error("JSON数据解析失败", e);
-            throw e;
+            throw new IOException("JSON数据解析失败", e);
         }
     }
 
@@ -281,7 +284,7 @@ public class RelicsImportUtil {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
 
-            String json = JSON.toJSONString(untranslatedItems);
+            String json = objectMapper.writeValueAsString(untranslatedItems);
             writer.write(json);
             log.info("成功导出{}条未翻译数据到: {}", untranslatedItems.size(), "./UntranslatedItems.json");
         } catch (IOException e) {
@@ -293,6 +296,7 @@ public class RelicsImportUtil {
     /**
      * 分批次插入数据
      */
+    @SuppressWarnings("null")
     private void batchInsertRelics(List<Relics> relics) {
         if (relics.isEmpty()) {
             log.info("没有需要插入的数据");
