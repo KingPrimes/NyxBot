@@ -4,6 +4,8 @@ import com.nyx.bot.modules.system.entity.SysUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * 系统管理员
  * Jpa 操作数据源 接口
@@ -11,6 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SysUserRepository extends JpaRepository<SysUser, Long> {
 
-    SysUser findSysUsersByUserName(String userName);
+    Optional<SysUser> findSysUsersByUserName(String userName);
 
 }
