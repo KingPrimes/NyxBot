@@ -13,8 +13,6 @@ async:
       queue_capacity: 80
       name:
         prefix: async-
-app:
-  timezone: Asia/Shanghai
 
 springdoc:
   api-docs:

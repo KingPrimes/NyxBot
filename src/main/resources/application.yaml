@@ -14,9 +14,6 @@ async:
       name:
         prefix: async-
 
-app:
-  timezone: Asia/Shanghai
-
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -98,6 +95,7 @@ shiro:
       enable: false
       url: ws://localhost:3001
       reconnect-interval: 5000
+    access-token:
   debug: false
 server:
   port: 8080
