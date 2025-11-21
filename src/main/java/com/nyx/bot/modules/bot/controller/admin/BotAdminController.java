@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -218,7 +219,7 @@ public class BotAdminController extends BaseController {
             }
     )
     @DeleteMapping("/remove/{id}")
-    public AjaxResult remove(@PathVariable("id") Long id) {
+    public AjaxResult remove(@NonNull @PathVariable("id") Long id) {
         botAdminRepository.deleteById(id);
         return success();
     }

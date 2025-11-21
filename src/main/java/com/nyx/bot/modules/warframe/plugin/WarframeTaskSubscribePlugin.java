@@ -9,7 +9,6 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WarframeSubscribeCheck;
 import io.github.kingprimes.DrawImagePlugin;
@@ -31,7 +30,7 @@ public class WarframeTaskSubscribePlugin {
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD, at = AtEnum.BOTH)
-    public void subscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException, HtmlToImageException {
+    public void subscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;

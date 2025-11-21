@@ -29,7 +29,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @throws BeansException
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getBean(String name) throws BeansException {
+    public static <T> T getBean(@NonNull String name) throws BeansException {
         return (T) beanFactory.getBean(name);
     }
 
@@ -38,7 +38,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @throws BeansException
      */
-    public static <T> T getBean(Class<T> clz) throws BeansException {
+    public static <T> T getBean(@NonNull Class<T> clz) throws BeansException {
         return beanFactory.getBean(clz);
     }
 
@@ -47,7 +47,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @return boolean
      */
-    public static boolean containsBean(String name) {
+    public static boolean containsBean(@NonNull String name) {
         return beanFactory.containsBean(name);
     }
 
@@ -58,7 +58,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @return boolean
      * @throws NoSuchBeanDefinitionException
      */
-    public static boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+    public static boolean isSingleton(@NonNull String name) throws NoSuchBeanDefinitionException {
         return beanFactory.isSingleton(name);
     }
 
@@ -66,7 +66,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @return Class 注册对象的类型
      * @throws NoSuchBeanDefinitionException
      */
-    public static Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+    public static Class<?> getType(@NonNull String name) throws NoSuchBeanDefinitionException {
         return beanFactory.getType(name);
     }
 
@@ -75,7 +75,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @throws NoSuchBeanDefinitionException
      */
-    public static String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+    public static String[] getAliases(@NonNull String name) throws NoSuchBeanDefinitionException {
         return beanFactory.getAliases(name);
     }
 

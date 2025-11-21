@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -174,7 +175,7 @@ public class LogInfoController extends BaseController {
             }
     )
     @GetMapping("/detail/{logId}")
-    public AjaxResult detail(@PathVariable("logId") Long logId) {
+    public AjaxResult detail(@NonNull @PathVariable("logId") Long logId) {
         AjaxResult ar = success();
         repository.findById(logId).ifPresent(l -> ar.put("data", l));
         return ar;

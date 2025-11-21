@@ -18,16 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class UpdateAllPlugin {
-    @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_HTML_CMD, at = AtEnum.BOTH)
-    public void updateHtmlHandler(Bot bot, AnyMessageEvent event) {
-        if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
-            UpdateUtils.updatePlugin(bot, event, Codes.UPDATE_HTML);
-        } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_HTML_CMD);
-            bot.sendMsg(event, "权限不足！", false);
-        }
-    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD, at = AtEnum.BOTH)

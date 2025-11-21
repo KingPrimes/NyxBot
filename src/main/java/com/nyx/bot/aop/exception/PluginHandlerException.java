@@ -130,8 +130,10 @@ public class PluginHandlerException {
                     .logTime(new Date())
                     .build();
 
-
-            SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
+            // 空安全检查：确保 logInfo 不为 null 后再保存
+            if (logInfo != null) {
+                SpringUtils.getBean(LogInfoRepository.class).save(logInfo);
+            }
         } catch (Exception exp) {
             log.error("插件日志记录异常", exp);
         }

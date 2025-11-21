@@ -1,6 +1,7 @@
 package com.nyx.bot.common.core;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,8 @@ public class AjaxResult extends HashMap<String, Object> {
     public static final String DATA_TAG = "data";
     @Serial
     private static final long serialVersionUID = 1L;
+    
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 初始化一个新创建的 AjaxResult 对象，使其表示一个空消息。
@@ -195,6 +198,10 @@ public class AjaxResult extends HashMap<String, Object> {
     }
 
     public String toJsonString() {
-        return JSON.toJSONString(this);
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "{}";
+        }
     }
 }

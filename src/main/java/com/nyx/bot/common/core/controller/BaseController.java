@@ -1,14 +1,12 @@
 package com.nyx.bot.common.core.controller;
 
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.page.TableDataInfo;
-import com.nyx.bot.utils.DateUtils;
-import com.nyx.bot.utils.I18nUtils;
-import com.nyx.bot.utils.ServletUtils;
-import com.nyx.bot.utils.StringUtils;
+import com.nyx.bot.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BaseController {
+    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
@@ -164,12 +163,19 @@ public class BaseController {
     }
 
     public String pushJson(List<?> all) {
-        SimplePropertyPreFilter spf = new SimplePropertyPreFilter();
-        Set<String> set = new HashSet<>();
-        set.add("current");
-        set.add("size");
-        spf.getExcludes().addAll(set);
-        return JSON.toJSONString(all, spf);
+        try {
+            Set<String> excludes = new HashSet<>();
+            excludes.add("current");
+            excludes.add("size");
+            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(excludes);
+            SimpleFilterProvider filters = new SimpleFilterProvider().setDefaultFilter(filter);
+            ObjectMapper mapper = objectMapper.copy();
+            mapper.setFilterProvider(filters);
+            return mapper.writeValueAsString(all);
+        } catch (Exception e) {
+            log.error("JSON序列化失败: {}", e.getMessage());
+            return "[]";
+        }
     }
 
 }

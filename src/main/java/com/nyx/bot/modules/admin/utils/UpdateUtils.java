@@ -19,10 +19,6 @@ public class UpdateUtils {
      */
     public static void updatePlugin(Bot bot, AnyMessageEvent event, Codes codes) {
         switch (codes) {
-            case UPDATE_HTML: {
-                updateHtml(bot, event);
-                break;
-            }
             case UPDATE_WARFRAME_RES_MARKET_ITEMS: {
                 updateWarframeResMarketItems(bot, event);
                 break;
@@ -53,18 +49,6 @@ public class UpdateUtils {
             }
             default:
         }
-    }
-
-
-    private static void updateHtml(Bot bot, AnyMessageEvent event) {
-        bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-            if (flag) {
-                bot.sendMsg(event, "HTML模板，更新成功！", false);
-            } else {
-                bot.sendMsg(event, "HTML模板，更新失败！", false);
-            }
-        });
     }
 
     private static void updateWarframeResMarketItems(Bot bot, AnyMessageEvent event) {

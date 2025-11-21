@@ -3,11 +3,12 @@ package com.nyx.bot.modules.warframe.utils;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
+import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.enums.FissureTypeEnum;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
-import com.nyx.bot.modules.warframe.service.TranslationService;
+import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.model.WorldState;
@@ -26,7 +27,7 @@ public class WorldStateUtils {
     StateTranslationRepository str;
 
     @Resource
-    TranslationService trans;
+    WeaponsRepository weaponsRepository;
 
     @Resource
     NodesRepository nodesRepository;
@@ -104,7 +105,9 @@ public class WorldStateUtils {
         DuvalierCycle duvalierCycle = WarframeCache.getWarframeStatus().getDuvalierCycle();
         List<EndlessXpChoices> list = duvalierCycle.getChoices().stream().peek(c -> {
             if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
-                c.setChoices(c.getChoices().stream().map(s -> trans.enToZh(s)).toList());
+                c.setChoices(c.getChoices().stream().map(s ->
+                        weaponsRepository.findByEnglishName(s).map(Weapons::getName).orElse(s)
+                ).toList());
             }
         }).toList();
         duvalierCycle.setChoices(list);
@@ -118,6 +121,7 @@ public class WorldStateUtils {
      * @return 返回处理后的fissure信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public List<ActiveMission> getFissure(FissureTypeEnum type) throws DataNotInfoException {
         switch (type) {
             case ACTIVE_MISSION -> {
@@ -171,6 +175,7 @@ public class WorldStateUtils {
      * @return 获取处理后的入侵信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public List<Invasion> getInvasions() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getInvasions().stream()
                 .filter(i -> !i.getCompleted())
@@ -215,6 +220,7 @@ public class WorldStateUtils {
                 .map(s -> s.getSeason().name() + s.getYearIteration())
                 .collect(Collectors.joining("_"));
         // 优先从缓存获取
+        @SuppressWarnings("null")
         List<KnownCalendarSeasons> cachedSeasons = CacheUtils.get(CacheUtils.WARFRAME, cacheKey, List.class);
         if (cachedSeasons != null) {
             return cachedSeasons; // 直接使用缓存数据生成图片
@@ -261,6 +267,7 @@ public class WorldStateUtils {
      * @return 获取处理后的执刑官猎杀信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public List<LiteSorite> getLiteSorite() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getLiteSorties().stream()
                 .peek(s -> s.setMissions(s.getMissions().stream()
@@ -274,17 +281,17 @@ public class WorldStateUtils {
      * @return 获取处理后的电波信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public SeasonInfo getSeasonInfo() throws DataNotInfoException {
         SeasonInfo seasonInfo = WarframeCache.getWarframeStatus().getSeasonInfo();
         seasonInfo.setActiveChallenges(seasonInfo.getActiveChallenges().stream().peek(c ->
-                        nightwaveRepository.findById(c.getChallenge()).ifPresent(s -> {
-                            c.setChallenge(s.getName())
-                                    .setDescription(s.getDescription())
-                                    .setRequired(s.getRequired())
-                                    .setDaily(s.isDailyTasks())
-                                    .setWeekly(s.isWeeklyTasks())
-                                    .setElite(s.isEliteMissions());
-                        }))
+                        nightwaveRepository.findById(c.getChallenge()).ifPresent(s -> c.setName(s.getName())
+                                .setDescription(s.getDescription())
+                                .setStanding(s.getStanding())
+                                .setRequired(s.getRequired())
+                                .setDaily(s.isDailyTasks())
+                                .setWeekly(s.isWeeklyTasks())
+                                .setElite(s.isEliteMissions())))
                 .toList());
         return seasonInfo;
     }
@@ -295,6 +302,7 @@ public class WorldStateUtils {
      * @return 获取处理后的突击信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public List<Sortie> getSorties() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getSorties().stream()
                 .peek(s -> s.setVariants(s.getVariants().stream()
@@ -308,6 +316,7 @@ public class WorldStateUtils {
      * @return 获取处理后的虚空商人信息
      * @throws DataNotInfoException 当无法获取到世界状态数据时抛出异常
      */
+    @SuppressWarnings("null")
     public List<VoidTrader> getVoidTraders() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getVoidTraders().stream()
                 .peek(v -> {

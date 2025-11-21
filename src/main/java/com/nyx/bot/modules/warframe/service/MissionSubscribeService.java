@@ -12,7 +12,6 @@ import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
 import com.nyx.bot.modules.warframe.service.subscribe.*;
-import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +61,7 @@ public class MissionSubscribeService {
      */
     @Transactional
     public void deleteSubscribeGroup(Long id) {
+        @SuppressWarnings("null")
         Optional<MissionSubscribe> group = subscribeRepository.findById(id);
 
         group.ifPresentOrElse(g -> {
@@ -81,6 +81,7 @@ public class MissionSubscribeService {
      */
     @Transactional
     public void deleteSubscribeUser(Long userId) {
+        @SuppressWarnings("null")
         MissionSubscribeUser user = userRepo.findById(userId)
                 .orElseThrow(() -> new ServiceException("用户不存在"));
 
@@ -96,6 +97,7 @@ public class MissionSubscribeService {
      *
      * @param checkTypeId 检查类型ID
      */
+    @SuppressWarnings("null")
     @Transactional
     public void deleteCheckType(Long checkTypeId) {
         MissionSubscribeUserCheckType checkType = checkTypeRepo.findById(checkTypeId)
@@ -110,9 +112,7 @@ public class MissionSubscribeService {
      * @param type    更新类型
      */
     public void handleUpdate(SubscribeEnums type) {
-        log.debug("处理更新 [type:{}]", type.getNAME());
         List<MissionSubscribe> subscriptions = subscribeRepository.findSubscriptions(type);
-        log.debug("订阅列表 [subscriptions:{}]", subscriptions);
         subscriptions.parallelStream().forEach(subscribe -> subscribe.getUsers().stream()
                 .filter(user -> isUserSubscribed(user, type))
                 .forEach(user -> CompletableFuture.runAsync(() ->

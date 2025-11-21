@@ -2,7 +2,6 @@ package com.nyx.bot.aop.exception;
 
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.common.exception.HtmlToImageException;
 import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.utils.I18nUtils;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,15 +32,6 @@ public class HandlerException {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body("<body>" + e.getMessage() + "</body>");
-    }
-
-    @ResponseBody
-    @ExceptionHandler(value = HtmlToImageException.class)
-    public Object handlerHtmlToImageException(HtmlToImageException e) {
-        log.error("HtmlToImageException", e);
-        return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .header("Content-Type", "text/html; charset=utf-8")
-                .body(e.getMessage());
     }
 
 
@@ -99,6 +89,7 @@ public class HandlerException {
         // 获取原始消息（可能是国际化key或普通文本）
         String messageKey = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
         // 尝试进行国际化解析
+        assert messageKey != null;
         String i18nMessage = I18nUtils.message(messageKey);
         // 若解析结果与原始key相同，说明不是有效国际化key，直接使用原始消息；否则使用国际化结果
         String finalMessage = i18nMessage.equals(messageKey) ? messageKey : i18nMessage;

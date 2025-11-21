@@ -25,7 +25,6 @@
     <properties>
         <java.version>21</java.version>
         <oneSdk.version>2.5.0</oneSdk.version>
-        <fastJson2.version>2.0.58</fastJson2.version>
         <xhtmlrenderer.version>10.0.0</xhtmlrenderer.version>
         <rhino.version>1.8.0</rhino.version>
         <jsoup.version>1.21.1</jsoup.version>
@@ -34,7 +33,6 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.8.3</oshi.version>
         <jjwt.version>0.12.7</jjwt.version>
-        <org.eclipse.jgit.version>7.3.0.202506031305-r</org.eclipse.jgit.version>
         <draw-image.varsion>1.0.5</draw-image.varsion>
     </properties>
 
@@ -185,20 +183,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!--JSON解析-->
-        <dependency>
-            <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2</artifactId>
-            <version>${fastJson2.version}</version>
-        </dependency>
-
-        <!--Git操作-->
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>${org.eclipse.jgit.version}</version>
-        </dependency>
-
         <!--YAML操作-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -259,7 +243,6 @@
             <artifactId>rapidocr-onnx-linux-x86_64</artifactId>
             <version>${monstercat.os.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -1,6 +1,5 @@
 package com.nyx.bot.common.config;
 
-import com.alibaba.fastjson2.JSON;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.filter.JwtRequestFilter;
 import com.nyx.bot.handler.AuthenticationEntryPointImpl;
@@ -10,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -55,7 +55,7 @@ public class SecurityConfiguration {
      * 配置持久化Token
      */
     @Bean
-    public PersistentTokenRepository tokenRepository(DataSource dataSource) {
+    public PersistentTokenRepository tokenRepository(@NonNull DataSource dataSource) {
         JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
         repository.setDataSource(dataSource);
         repository.setCreateTableOnStartup(false);
@@ -101,7 +101,7 @@ public class SecurityConfiguration {
                         .authenticationEntryPoint(unauthorizedHandler)
                         .accessDeniedHandler((req, res, e) -> {  // 权限不足
                             res.setContentType("application/json;charset=UTF-8");
-                            res.getWriter().write(JSON.toJSONString(AjaxResult.error("权限不足")));
+                            res.getWriter().write(AjaxResult.error("权限不足").toJsonString());
                         })
                 )
                 //禁用默认的登录表单

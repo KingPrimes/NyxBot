@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+@SuppressWarnings("deprecation")
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
     public static final Long YEARS = 31536000000L;

@@ -29,6 +29,7 @@ public class SystemImage {
         switch (enums) {
             case ALERTS -> bytes = drawImagePlugin.drawAlertsImage(utils.getAlerts());
             case VOID -> bytes = drawImagePlugin.drawVoidTraderImage(utils.getVoidTraders());
+            default -> throw new IllegalArgumentException("Unexpected value: " + enums);
         }
         builder.img(bytes);
     }
