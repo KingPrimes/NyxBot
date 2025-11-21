@@ -2,13 +2,16 @@ package com.nyx.bot.service;
 
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
+import com.nyx.bot.utils.I18nUtils;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * 用户登录
@@ -17,18 +20,18 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-    @Autowired
+    @Resource
     SysUserRepository sysUserRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        SysUser user = sysUserRepository.findSysUsersByUserName(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("用户名或密码错误");
+        Optional<SysUser> user = sysUserRepository.findSysUsersByUserName(username);
+        if (user.isEmpty()) {
+            throw new UsernameNotFoundException(I18nUtils.message("auth.error.NamePassword"));
         }
         return User
-                .withUsername(user.getUserName())
-                .password(user.getPassword())
+                .withUsername(user.get().getUserName())
+                .password(user.get().getPassword())
                 .build();
     }
 }

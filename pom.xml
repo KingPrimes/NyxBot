@@ -33,7 +33,7 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.8.3</oshi.version>
         <jjwt.version>0.12.7</jjwt.version>
-        <draw-image.varsion>1.0.5</draw-image.varsion>
+        <draw-image.varsion>1.0.6</draw-image.varsion>
     </properties>
 
     <dependencies>
