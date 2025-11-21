@@ -1,12 +1,14 @@
 package com.nyx.bot.common.core.page;
 
 import com.nyx.bot.utils.StringUtils;
-import lombok.Getter;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 分页数据
  */
-@Getter
+@Data
+@Accessors(chain = true)
 public class PageDomain {
     /**
      * 当前记录起始索引
@@ -40,30 +42,10 @@ public class PageDomain {
         return StringUtils.toUnderScoreCase(orderByColumn) + " " + isAsc;
     }
 
-    public void setPageNum(Integer pageNum) {
-        this.pageNum = pageNum;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public void setOrderByColumn(String orderByColumn) {
-        this.orderByColumn = orderByColumn;
-    }
-
-    public void setIsAsc(String isAsc) {
-        this.isAsc = isAsc;
-    }
-
     public Boolean getReasonable() {
         if (StringUtils.isNull(reasonable)) {
             return Boolean.TRUE;
         }
         return reasonable;
-    }
-
-    public void setReasonable(Boolean reasonable) {
-        this.reasonable = reasonable;
     }
 }
