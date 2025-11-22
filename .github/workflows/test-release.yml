@@ -60,7 +60,8 @@ jobs:
         run: |
           echo "::add-mask::$USERNAME"
           echo "::add-mask::$PASSWORD"
-          mvn clean package -DUSERNAME="$USERNAME" -DPASSWORD="$PASSWORD"
+          JWT_SECRET=$(openssl rand -base64 32 | tr -d '\n')
+          mvn clean package -DUSERNAME="$USERNAME" -DPASSWORD="$PASSWORD" -DJWT_SECRET="$JWT_SECRET"
 
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
