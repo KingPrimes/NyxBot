@@ -1,6 +1,7 @@
 package com.nyx.bot.service.log;
 
 import com.nyx.bot.cache.LogCacheManager;
+import com.nyx.bot.common.config.LogFilterConfig;
 import com.nyx.bot.common.event.LogEvent;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +84,191 @@ public class LogSearchService {
     public List<LogEvent> searchByTimeRange(long startTime, long endTime) {
         return searchLogs(null, startTime, endTime, null, false);
     }
+
+    /**
+     * 应用完整的过滤规则
+     *
+     * @param logEvent 日志事件
+     * @param config   过滤配置
+     * @return true 如果日志应该被发送
+     */
+    public boolean matches(LogEvent logEvent, LogFilterConfig config) {
+        // 1. 级别过滤
+        if (!matchLevel(logEvent, config.getMinLevel())) {
+            return false;
+        }
+
+        // 2. 包名过滤
+        if (!matchPackages(logEvent, config)) {
+            return false;
+        }
+
+        // 3. 线程过滤
+        if (!matchThreads(logEvent, config)) {
+            return false;
+        }
+
+        // 4. 关键词过滤
+        return matchKeywords(logEvent, config);
+    }
+
+    /**
+     * 级别匹配
+     *
+     * @param logEvent 日志事件
+     * @param minLevel 最低级别
+     * @return true 如果匹配
+     */
+    private boolean matchLevel(LogEvent logEvent, String minLevel) {
+        int logValue = getLevelValue(logEvent.getLevel());
+        int minValue = getLevelValue(minLevel);
+        return logValue >= minValue;
+    }
+
+    /**
+     * 获取级别数值
+     *
+     * @param level 级别名称
+     * @return 级别数值
+     */
+    private int getLevelValue(String level) {
+        if (level == null) {
+            return 2; // 默认 INFO
+        }
+
+        return switch (level.toUpperCase()) {
+            case "TRACE" -> 0;
+            case "DEBUG" -> 1;
+            case "WARN" -> 3;
+            case "ERROR" -> 4;
+            default -> 2;
+        };
+    }
+
+    /**
+     * 包名匹配
+     *
+     * @param logEvent 日志事件
+     * @param config   过滤配置
+     * @return true 如果匹配
+     */
+    private boolean matchPackages(LogEvent logEvent, LogFilterConfig config) {
+        String pack = logEvent.getPack();
+
+        // 黑名单检查
+        if (!config.getExcludePackages().isEmpty()) {
+            for (String excluded : config.getExcludePackages()) {
+                if (pack.contains(excluded)) {
+                    return false;
+                }
+            }
+        }
+
+        // 白名单检查
+        if (!config.getIncludePackages().isEmpty()) {
+            boolean matched = false;
+            for (String included : config.getIncludePackages()) {
+                if (pack.contains(included)) {
+                    matched = true;
+                    break;
+                }
+            }
+            return matched;
+        }
+
+        return true;
+    }
+
+    /**
+     * 线程匹配
+     *
+     * @param logEvent 日志事件
+     * @param config   过滤配置
+     * @return true 如果匹配
+     */
+    private boolean matchThreads(LogEvent logEvent, LogFilterConfig config) {
+        if (config.getIncludeThreads().isEmpty()) {
+            return true;
+        }
+
+        String thread = logEvent.getThread();
+        for (String included : config.getIncludeThreads()) {
+            if (thread.contains(included)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 关键词匹配
+     *
+     * @param logEvent 日志事件
+     * @param config   过滤配置
+     * @return true 如果匹配
+     */
+    private boolean matchKeywords(LogEvent logEvent, LogFilterConfig config) {
+        String content = logEvent.getLog() + " " + logEvent.getPack();
+
+        // 排除关键词检查
+        if (!config.getExcludeKeywords().isEmpty()) {
+            for (String excluded : config.getExcludeKeywords()) {
+                if (matchText(content, excluded, config.isUseRegex())) {
+                    return false;
+                }
+            }
+        }
+
+        // 包含关键词检查
+        if (!config.getIncludeKeywords().isEmpty()) {
+            boolean matched = false;
+            for (String included : config.getIncludeKeywords()) {
+                if (matchText(content, included, config.isUseRegex())) {
+                    matched = true;
+                    break;
+                }
+            }
+            return matched;
+        }
+
+        return true;
+    }
+
+    /**
+     * 基本级别过滤判断
+     *
+     * @param logLevel 日志级别
+     * @param minLevel 最低级别
+     * @return true 如果应该发送
+     */
+    public boolean shouldSendByLevel(String logLevel, String minLevel) {
+        return getLevelValue(logLevel) >= getLevelValue(minLevel);
+    }
+
+    /**
+     * 文本匹配（支持正则）
+     *
+     * @param text     文本内容
+     * @param pattern  匹配模式
+     * @param useRegex 是否使用正则表达式
+     * @return true 如果匹配
+     */
+    private boolean matchText(String text, String pattern, boolean useRegex) {
+        if (useRegex) {
+            try {
+                return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
+                        .matcher(text)
+                        .find();
+            } catch (PatternSyntaxException e) {
+                log.warn("无效的正则表达式: {}", pattern);
+                return false;
+            }
+        } else {
+            return text.toLowerCase().contains(pattern.toLowerCase());
+        }
+    }
+
 
     /**
      * 匹配时间范围

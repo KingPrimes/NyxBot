@@ -3,9 +3,10 @@ package com.nyx.bot.controller.log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
 import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.event.LogEvent;
-import com.nyx.bot.controller.websocket.LogInfoWebSocket;
+import com.nyx.bot.service.log.LogInfoMapper;
 import com.nyx.bot.service.log.LogSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +43,9 @@ public class LogExportController extends BaseController {
 
     @Resource
     private LogCacheManager logCacheManager;
+
+    @Resource
+    private LogInfoMapper logInfoMapper;
 
     @Resource
     private ObjectMapper objectMapper;
@@ -129,8 +133,8 @@ public class LogExportController extends BaseController {
         );
 
         // 转换为 DTO
-        List<LogInfoWebSocket.LogInfoWebSocketForStr> dtoList = logs.stream()
-                .map(this::convertToDto)
+        List<LogInfoWebSocketDto> dtoList = logs.stream()
+                .map(logInfoMapper::toDto)
                 .collect(Collectors.toList());
 
         // 设置响应头
@@ -142,12 +146,7 @@ public class LogExportController extends BaseController {
         Map<String, Object> result = new HashMap<>();
         result.put("exportTime", System.currentTimeMillis());
         result.put("total", dtoList.size());
-        result.put("filter", Map.of(
-                "keyword", keyword != null ? keyword : "",
-                "startTime", startTime != null ? startTime : "",
-                "endTime", endTime != null ? endTime : "",
-                "levels", levels != null ? levels : List.of()
-        ));
+        result.put("filter", buildFilter(keyword, startTime, endTime, levels, false));
         result.put("logs", dtoList);
 
         response.getWriter().write(objectMapper.writeValueAsString(result));
@@ -212,36 +211,30 @@ public class LogExportController extends BaseController {
         );
 
         // 转换为 DTO
-        List<LogInfoWebSocket.LogInfoWebSocketForStr> dtoList = logs.stream()
-                .map(this::convertToDto)
+        List<LogInfoWebSocketDto> dtoList = logs.stream()
+                .map(logInfoMapper::toDto)
                 .collect(Collectors.toList());
 
         // 构建响应
         return success()
                 .put("total", dtoList.size())
-                .put("filter", Map.of(
-                        "keyword", keyword != null ? keyword : "",
-                        "startTime", startTime != null ? startTime : "",
-                        "endTime", endTime != null ? endTime : "",
-                        "levels", levels != null ? levels : List.of(),
-                        "useRegex", useRegex
-                ))
+                .put("filter", buildFilter(keyword, startTime, endTime, levels, useRegex))
                 .put("logs", dtoList);
     }
 
-    /**
-     * 转换 LogEvent 到 DTO
-     *
-     * @param event 日志事件
-     * @return DTO 对象
-     */
-    private LogInfoWebSocket.LogInfoWebSocketForStr convertToDto(LogEvent event) {
-        LogInfoWebSocket.LogInfoWebSocketForStr dto = new LogInfoWebSocket.LogInfoWebSocketForStr();
-        dto.setLive(event.getLevel());
-        dto.setTime(event.getTime());
-        dto.setThread(event.getThread());
-        dto.setPack(event.getPack());
-        dto.setLog(event.getLog());
-        return dto;
+    private Map<String, Object> buildFilter(
+            String keyword,
+            Long startTime,
+            Long endTime,
+            List<String> levels,
+            boolean useRegex
+    ) {
+        Map<String, Object> filter = new HashMap<>();
+        filter.put("keyword", keyword != null ? keyword : "");
+        filter.put("startTime", startTime != null ? startTime : "");
+        filter.put("endTime", endTime != null ? endTime : "");
+        filter.put("levels", levels != null ? levels : List.of());
+        filter.put("useRegex", useRegex);
+        return filter;
     }
 }

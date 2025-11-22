@@ -109,9 +109,9 @@ public class LogEventListener {
         }
 
         try {
-            // 从队列中取出日志（最多 50 条）
+            // 从队列中取出日志（最多 BATCH_SIZE 条）
             List<LogEvent> batch = new ArrayList<>();
-            logQueue.drainTo(batch, 50);
+            logQueue.drainTo(batch, BATCH_SIZE);
 
             if (!batch.isEmpty()) {
                 // 广播到所有 WebSocket 客户端

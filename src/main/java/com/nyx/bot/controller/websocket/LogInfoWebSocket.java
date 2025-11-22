@@ -1,34 +1,32 @@
 package com.nyx.bot.controller.websocket;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
 import com.nyx.bot.common.config.LogFilterConfig;
+import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
+import com.nyx.bot.common.core.helper.WebSocketMessageSender;
 import com.nyx.bot.common.event.LogEvent;
+import com.nyx.bot.service.log.LogInfoMapper;
+import com.nyx.bot.service.log.LogSearchService;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.SpringUtils;
+import jakarta.annotation.Resource;
 import jakarta.websocket.*;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.server.ServerEndpointConfig;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * WebSocket 日志推送端点
@@ -42,23 +40,51 @@ import java.util.zip.GZIPOutputStream;
 @ServerEndpoint(value = "/ws/log-now", configurator = LogInfoWebSocket.CustomConfigurator.class)
 public class LogInfoWebSocket {
 
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
-
     /**
      * 所有活动的 WebSocket 会话
      */
     private static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
-
     /**
      * 每个会话的日志级别过滤配置（用于基本级别过滤）
      */
     private static final Map<String, String> levelFilterMap = new ConcurrentHashMap<>();
-
     /**
      * 每个会话的完整过滤配置（用于高级过滤）
      */
     private static final Map<String, LogFilterConfig> filterConfigMap = new ConcurrentHashMap<>();
 
+    /**
+     * 移除会话以及相关的过滤配置，避免资源泄漏
+     */
+    private static void removeSession(Session session) {
+        if (session == null) {
+            return;
+        }
+        removeSession(session.getId());
+    }
+
+    private static void removeSession(String sessionId) {
+        if (sessionId == null) {
+            return;
+        }
+        sessionMap.remove(sessionId);
+        levelFilterMap.remove(sessionId);
+        filterConfigMap.remove(sessionId);
+    }
+
+    @Resource
+    private LogInfoMapper logInfoMapper;
+    @Resource
+    private ObjectMapper objectMapper;
+    @Resource
+    private LogSearchService logSearchService;
+    @Resource
+    private WebSocketMessageSender webSocketMessageSender;
+    private final Map<String, MessageHandler> handlers = Map.of(
+            "filter", this::handleFilterMessage,
+            "ping", this::handlePingMessage,
+            "request", this::handleRequestMessage
+    );
 
     /**
      * 连接建立成功调用的方法
@@ -103,20 +129,12 @@ public class LogInfoWebSocket {
         try {
             JsonNode messageNode = objectMapper.readTree(message);
             String type = messageNode.get("type").asText();
-
-            switch (type) {
-                case "filter":
-                    handleFilterMessage(session, messageNode);
-                    break;
-                case "ping":
-                    handlePingMessage(session);
-                    break;
-                case "request":
-                    handleRequestMessage(session, messageNode);
-                    break;
-                default:
-                    sendError(session, "未知的消息类型: " + type);
+            MessageHandler messageHandler = handlers.get(type);
+            if (messageHandler == null) {
+                sendError(session, "未知的消息类型: " + type);
+                return;
             }
+            messageHandler.handle(session, messageNode);
         } catch (Exception e) {
             log.error("处理客户端消息失败: {}", e.getMessage(), e);
             sendError(session, "消息处理失败: " + e.getMessage());
@@ -130,9 +148,7 @@ public class LogInfoWebSocket {
      */
     @OnClose
     public void onClose(Session session) {
-        sessionMap.remove(session.getId());
-        levelFilterMap.remove(session.getId());
-        filterConfigMap.remove(session.getId());
+        removeSession(session);
         log.debug("WebSocket 连接关闭: sessionId={}", session.getId());
     }
 
@@ -158,6 +174,12 @@ public class LogInfoWebSocket {
     public void broadcastLogs(List<LogEvent> logs) {
         sessionMap.forEach((sessionId, session) -> {
             try {
+                // 检查会话是否已经关闭，如果关闭则移除它
+                if (!session.isOpen()) {
+                    removeSession(sessionId);
+                    return;
+                }
+
                 // 获取该会话的过滤配置
                 final LogFilterConfig config = filterConfigMap.getOrDefault(
                         sessionId,
@@ -165,18 +187,18 @@ public class LogInfoWebSocket {
                 );
 
                 // 如果过滤未启用，使用基本的级别过滤
-                List<LogInfoWebSocketForStr> filtered;
+                List<LogInfoWebSocketDto> filtered;
                 if (!config.isEnabled()) {
                     String minLevel = levelFilterMap.getOrDefault(sessionId, "INFO");
                     filtered = logs.stream()
-                            .filter(logEvent -> shouldSendByLevel(logEvent.getLevel(), minLevel))
-                            .map(this::convertToDto)
+                            .filter(logEvent -> logSearchService.shouldSendByLevel(logEvent.getLevel(), minLevel))
+                            .map(logInfoMapper::toDto)
                             .collect(Collectors.toList());
                 } else {
                     // 应用完整的过滤配置
                     filtered = logs.stream()
-                            .filter(logEvent -> applyFilter(logEvent, config))
-                            .map(this::convertToDto)
+                            .filter(logEvent -> logSearchService.matches(logEvent, config))
+                            .map(logInfoMapper::toDto)
                             .collect(Collectors.toList());
                 }
 
@@ -203,8 +225,8 @@ public class LogInfoWebSocket {
             List<LogEvent> historyLogs = cacheManager.getRecentLogs(minLevel);
 
             if (!historyLogs.isEmpty()) {
-                List<LogInfoWebSocketForStr> dtoList = historyLogs.stream()
-                        .map(this::convertToDto)
+                List<LogInfoWebSocketDto> dtoList = historyLogs.stream()
+                        .map(logInfoMapper::toDto)
                         .collect(Collectors.toList());
 
                 String json = objectMapper.writeValueAsString(dtoList);
@@ -227,17 +249,10 @@ public class LogInfoWebSocket {
         String action = messageNode.get("action").asText();
 
         switch (action) {
-            case "update":
-                updateFilterConfig(session, messageNode.get("config"));
-                break;
-            case "reset":
-                resetFilterConfig(session);
-                break;
-            case "get":
-                sendCurrentConfig(session);
-                break;
-            default:
-                sendError(session, "未知的过滤操作: " + action);
+            case "update" -> updateFilterConfig(session, messageNode.get("config"));
+            case "reset" -> resetFilterConfig(session);
+            case "get" -> sendCurrentConfig(session);
+            default -> sendError(session, "未知的过滤操作: " + action);
         }
     }
 
@@ -265,7 +280,6 @@ public class LogInfoWebSocket {
         response.put("status", "success");
         response.put("message", "过滤配置已更新");
         response.put("config", config);
-
         send(session, objectMapper.writeValueAsString(response));
 
         log.info("会话 {} 更新过滤配置: {}", session.getId(), config);
@@ -276,7 +290,7 @@ public class LogInfoWebSocket {
      *
      * @param session WebSocket 会话
      */
-    private void resetFilterConfig(Session session) throws Exception {
+    private void resetFilterConfig(Session session) throws JsonProcessingException {
         LogFilterConfig defaultConfig = LogFilterConfig.createDefault();
         String minLevel = levelFilterMap.getOrDefault(session.getId(), "INFO");
         defaultConfig.setMinLevel(minLevel);
@@ -289,7 +303,9 @@ public class LogInfoWebSocket {
         response.put("message", "过滤配置已重置");
         response.put("config", defaultConfig);
 
+
         send(session, objectMapper.writeValueAsString(response));
+        log.info("会话 {} 重置过滤配置: {}", session.getId(), defaultConfig);
     }
 
     /**
@@ -297,7 +313,7 @@ public class LogInfoWebSocket {
      *
      * @param session WebSocket 会话
      */
-    private void sendCurrentConfig(Session session) throws Exception {
+    private void sendCurrentConfig(Session session) throws JsonProcessingException {
         LogFilterConfig config = filterConfigMap.getOrDefault(
                 session.getId(),
                 LogFilterConfig.createDefault()
@@ -307,7 +323,6 @@ public class LogInfoWebSocket {
         response.put("type", "filter_response");
         response.put("status", "success");
         response.put("config", config);
-
         send(session, objectMapper.writeValueAsString(response));
     }
 
@@ -316,7 +331,7 @@ public class LogInfoWebSocket {
      *
      * @param session WebSocket 会话
      */
-    private void handlePingMessage(Session session) throws Exception {
+    private void handlePingMessage(Session session, JsonNode messageNode) throws JsonProcessingException {
         Map<String, Object> response = new HashMap<>();
         response.put("type", "pong");
         response.put("timestamp", System.currentTimeMillis());
@@ -354,215 +369,12 @@ public class LogInfoWebSocket {
             response.put("type", "error");
             response.put("message", errorMessage);
             response.put("timestamp", System.currentTimeMillis());
-
             send(session, objectMapper.writeValueAsString(response));
         } catch (Exception e) {
             log.error("发送错误消息失败: {}", e.getMessage());
         }
     }
 
-    /**
-     * 应用完整的过滤规则
-     *
-     * @param logEvent 日志事件
-     * @param config   过滤配置
-     * @return true 如果日志应该被发送
-     */
-    private boolean applyFilter(LogEvent logEvent, LogFilterConfig config) {
-        // 1. 级别过滤
-        if (!matchLevel(logEvent, config.getMinLevel())) {
-            return false;
-        }
-
-        // 2. 包名过滤
-        if (!matchPackages(logEvent, config)) {
-            return false;
-        }
-
-        // 3. 线程过滤
-        if (!matchThreads(logEvent, config)) {
-            return false;
-        }
-
-        // 4. 关键词过滤
-        return matchKeywords(logEvent, config);
-    }
-
-    /**
-     * 级别匹配
-     *
-     * @param logEvent 日志事件
-     * @param minLevel 最低级别
-     * @return true 如果匹配
-     */
-    private boolean matchLevel(LogEvent logEvent, String minLevel) {
-        int logValue = getLevelValue(logEvent.getLevel());
-        int minValue = getLevelValue(minLevel);
-        return logValue >= minValue;
-    }
-
-    /**
-     * 包名匹配
-     *
-     * @param logEvent 日志事件
-     * @param config   过滤配置
-     * @return true 如果匹配
-     */
-    private boolean matchPackages(LogEvent logEvent, LogFilterConfig config) {
-        String pack = logEvent.getPack();
-
-        // 黑名单检查
-        if (!config.getExcludePackages().isEmpty()) {
-            for (String excluded : config.getExcludePackages()) {
-                if (pack.contains(excluded)) {
-                    return false;
-                }
-            }
-        }
-
-        // 白名单检查
-        if (!config.getIncludePackages().isEmpty()) {
-            boolean matched = false;
-            for (String included : config.getIncludePackages()) {
-                if (pack.contains(included)) {
-                    matched = true;
-                    break;
-                }
-            }
-            return matched;
-        }
-
-        return true;
-    }
-
-    /**
-     * 线程匹配
-     *
-     * @param logEvent 日志事件
-     * @param config   过滤配置
-     * @return true 如果匹配
-     */
-    private boolean matchThreads(LogEvent logEvent, LogFilterConfig config) {
-        if (config.getIncludeThreads().isEmpty()) {
-            return true;
-        }
-
-        String thread = logEvent.getThread();
-        for (String included : config.getIncludeThreads()) {
-            if (thread.contains(included)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * 关键词匹配
-     *
-     * @param logEvent 日志事件
-     * @param config   过滤配置
-     * @return true 如果匹配
-     */
-    private boolean matchKeywords(LogEvent logEvent, LogFilterConfig config) {
-        String content = logEvent.getLog() + " " + logEvent.getPack();
-
-        // 排除关键词检查
-        if (!config.getExcludeKeywords().isEmpty()) {
-            for (String excluded : config.getExcludeKeywords()) {
-                if (matchText(content, excluded, config.isUseRegex())) {
-                    return false;
-                }
-            }
-        }
-
-        // 包含关键词检查
-        if (!config.getIncludeKeywords().isEmpty()) {
-            boolean matched = false;
-            for (String included : config.getIncludeKeywords()) {
-                if (matchText(content, included, config.isUseRegex())) {
-                    matched = true;
-                    break;
-                }
-            }
-            return matched;
-        }
-
-        return true;
-    }
-
-    /**
-     * 文本匹配（支持正则）
-     *
-     * @param text     文本内容
-     * @param pattern  匹配模式
-     * @param useRegex 是否使用正则表达式
-     * @return true 如果匹配
-     */
-    private boolean matchText(String text, String pattern, boolean useRegex) {
-        if (useRegex) {
-            try {
-                return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                        .matcher(text)
-                        .find();
-            } catch (PatternSyntaxException e) {
-                log.warn("无效的正则表达式: {}", pattern);
-                return false;
-            }
-        } else {
-            return text.toLowerCase().contains(pattern.toLowerCase());
-        }
-    }
-
-    /**
-     * 基本级别过滤判断
-     *
-     * @param logLevel 日志级别
-     * @param minLevel 最低级别
-     * @return true 如果应该发送
-     */
-    private boolean shouldSendByLevel(String logLevel, String minLevel) {
-        int logValue = getLevelValue(logLevel);
-        int minValue = getLevelValue(minLevel);
-        return logValue >= minValue;
-    }
-
-    /**
-     * 获取级别数值
-     *
-     * @param level 级别名称
-     * @return 级别数值
-     */
-    private int getLevelValue(String level) {
-        if (level == null) {
-            return 2; // 默认 INFO
-        }
-
-        return switch (level.toUpperCase()) {
-            case "TRACE" -> 0;
-            case "DEBUG" -> 1;
-            case "INFO" -> 2;
-            case "WARN" -> 3;
-            case "ERROR" -> 4;
-            default -> 2;
-        };
-    }
-
-    /**
-     * 转换 LogEvent 到 DTO
-     *
-     * @param event 日志事件
-     * @return DTO 对象
-     */
-    private LogInfoWebSocketForStr convertToDto(LogEvent event) {
-        LogInfoWebSocketForStr dto = new LogInfoWebSocketForStr();
-        dto.setLive(event.getLevel());
-        dto.setTime(event.getTime());
-        dto.setThread(event.getThread());
-        dto.setPack(event.getPack());
-        dto.setLog(event.getLog());
-        return dto;
-    }
 
     /**
      * 获取查询参数
@@ -594,55 +406,20 @@ public class LogInfoWebSocket {
      * @param message 消息内容
      */
     private void send(Session session, String message) {
+        if (!session.isOpen()) {
+            removeSession(session);
+            return;
+        }
         try {
-            if (!session.isOpen()) {
-                return;
-            }
-
-            // 始终使用 GZIP 压缩
-            byte[] compressed = compressData(message);
-            session.getBasicRemote().sendBinary(ByteBuffer.wrap(compressed));
-        } catch (Exception e) {
-            log.error("WebSocket 发送消息失败: {}", e.getMessage());
+            webSocketMessageSender.sendCompressed(session, message);
+        } catch (IOException e) {
+            removeSession(session);
         }
     }
 
-    /**
-     * 压缩数据
-     *
-     * @param data 原始数据
-     * @return 压缩后的数据
-     */
-    private byte[] compressData(String data) throws Exception {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(bos)) {
-            gzipOutputStream.write(data.getBytes(StandardCharsets.UTF_8));
-        }
-        return bos.toByteArray();
-    }
 
-
-    /**
-     * 日志数据传输对象
-     */
-    @Data
-    public static class LogInfoWebSocketForStr {
-        String live;
-        String time;
-        String thread;
-        String pack;
-        String log;
-
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
-                    .append("live", live)
-                    .append("time", time)
-                    .append("thread", thread)
-                    .append("pack", pack)
-                    .append("log", log)
-                    .toString();
-        }
+    private interface MessageHandler {
+        void handle(Session session, JsonNode messageNode) throws Exception;
     }
 
     /**
