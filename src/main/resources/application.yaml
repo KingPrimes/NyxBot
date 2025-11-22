@@ -3,7 +3,7 @@ test:
   isTest: false
 jwt:
   expiration: 3600
-  secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
+  secret: @JWT_SECRET@
 #线程池
 async:
   executor:
