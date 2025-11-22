@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@SuppressWarnings("unused")
 public class LogSearchService {
 
     @Resource
@@ -255,6 +256,9 @@ public class LogSearchService {
      * @return true 如果匹配
      */
     private boolean matchText(String text, String pattern, boolean useRegex) {
+        if (pattern == null || pattern.isEmpty()) {
+            return true;
+        }
         if (useRegex) {
             try {
                 return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
@@ -317,22 +321,8 @@ public class LogSearchService {
             return true;
         }
 
-        // 搜索范围：日志内容 + 包名
         String searchText = log.getLog() + " " + log.getPack();
-
-        if (useRegex) {
-            try {
-                Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
-                return pattern.matcher(searchText).find();
-            } catch (PatternSyntaxException e) {
-                // 使用完整的日志记录器名称避免与参数冲突
-                LogSearchService.log.warn("无效的正则表达式: {}", keyword);
-                return false;
-            }
-        } else {
-            // 普通字符串匹配（大小写不敏感）
-            return searchText.toLowerCase().contains(keyword.toLowerCase());
-        }
+        return matchText(searchText, keyword, useRegex);
     }
 
     /**

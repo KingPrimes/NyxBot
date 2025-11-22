@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,30 @@ public class LogInfoWebSocket {
      * 每个会话的完整过滤配置（用于高级过滤）
      */
     private static final Map<String, LogFilterConfig> filterConfigMap = new ConcurrentHashMap<>();
+    private static LogInfoMapper logInfoMapper;
+    private static ObjectMapper objectMapper;
+    private static LogSearchService logSearchService;
+    private static WebSocketMessageSender webSocketMessageSender;
+
+    @Resource
+    public void setLogInfoMapper(LogInfoMapper logInfoMapper) {
+        LogInfoWebSocket.logInfoMapper = logInfoMapper;
+    }
+
+    @Resource
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        LogInfoWebSocket.objectMapper = objectMapper;
+    }
+
+    @Resource
+    public void setLogSearchService(LogSearchService logSearchService) {
+        LogInfoWebSocket.logSearchService = logSearchService;
+    }
+
+    @Resource
+    public void setWebSocketMessageSender(WebSocketMessageSender webSocketMessageSender) {
+        LogInfoWebSocket.webSocketMessageSender = webSocketMessageSender;
+    }
 
     /**
      * 移除会话以及相关的过滤配置，避免资源泄漏
@@ -72,20 +98,6 @@ public class LogInfoWebSocket {
         filterConfigMap.remove(sessionId);
     }
 
-    @Resource
-    private LogInfoMapper logInfoMapper;
-    @Resource
-    private ObjectMapper objectMapper;
-    @Resource
-    private LogSearchService logSearchService;
-    @Resource
-    private WebSocketMessageSender webSocketMessageSender;
-    private final Map<String, MessageHandler> handlers = Map.of(
-            "filter", this::handleFilterMessage,
-            "ping", this::handlePingMessage,
-            "request", this::handleRequestMessage
-    );
-
     /**
      * 连接建立成功调用的方法
      *
@@ -95,7 +107,7 @@ public class LogInfoWebSocket {
     public void onOpen(Session session) {
         try {
             // 1. 解析连接参数（日志级别）
-            String level = getQueryParam(session, "level");
+            String level = getQueryParam(session);
             String logLevel = (level != null && !level.isEmpty()) ? level.toUpperCase() : "INFO";
 
             // 2. 保存会话和配置
@@ -129,12 +141,17 @@ public class LogInfoWebSocket {
         try {
             JsonNode messageNode = objectMapper.readTree(message);
             String type = messageNode.get("type").asText();
-            MessageHandler messageHandler = handlers.get(type);
-            if (messageHandler == null) {
-                sendError(session, "未知的消息类型: " + type);
+            if (type == null) {
+                sendError(session, "缺少消息类型字段: type");
                 return;
             }
-            messageHandler.handle(session, messageNode);
+
+            switch (type) {
+                case "filter" -> handleFilterMessage(session, messageNode);
+                case "ping" -> handlePingMessage(session);
+                case "request" -> handleRequestMessage(session, messageNode);
+                default -> sendError(session, "未知的消息类型: " + type);
+            }
         } catch (Exception e) {
             log.error("处理客户端消息失败: {}", e.getMessage(), e);
             sendError(session, "消息处理失败: " + e.getMessage());
@@ -180,27 +197,7 @@ public class LogInfoWebSocket {
                     return;
                 }
 
-                // 获取该会话的过滤配置
-                final LogFilterConfig config = filterConfigMap.getOrDefault(
-                        sessionId,
-                        LogFilterConfig.createDefault()
-                );
-
-                // 如果过滤未启用，使用基本的级别过滤
-                List<LogInfoWebSocketDto> filtered;
-                if (!config.isEnabled()) {
-                    String minLevel = levelFilterMap.getOrDefault(sessionId, "INFO");
-                    filtered = logs.stream()
-                            .filter(logEvent -> logSearchService.shouldSendByLevel(logEvent.getLevel(), minLevel))
-                            .map(logInfoMapper::toDto)
-                            .collect(Collectors.toList());
-                } else {
-                    // 应用完整的过滤配置
-                    filtered = logs.stream()
-                            .filter(logEvent -> logSearchService.matches(logEvent, config))
-                            .map(logInfoMapper::toDto)
-                            .collect(Collectors.toList());
-                }
+                List<LogInfoWebSocketDto> filtered = filterLogsForSession(sessionId, logs);
 
                 if (!filtered.isEmpty()) {
                     String json = objectMapper.writeValueAsString(filtered);
@@ -210,6 +207,33 @@ public class LogInfoWebSocket {
                 log.error("广播日志到会话 {} 失败: {}", sessionId, e.getMessage());
             }
         });
+    }
+
+    /**
+     * 根据会话的过滤配置筛选日志
+     *
+     * @param sessionId 会话ID
+     * @param logs      待筛选的日志列表
+     * @return 筛选后的日志DTO列表
+     */
+    private List<LogInfoWebSocketDto> filterLogsForSession(String sessionId, List<LogEvent> logs) {
+        LogFilterConfig config = filterConfigMap.getOrDefault(
+                sessionId,
+                LogFilterConfig.createDefault()
+        );
+
+        if (!config.isEnabled()) {
+            String minLevel = levelFilterMap.getOrDefault(sessionId, "INFO");
+            return logs.stream()
+                    .filter(logEvent -> logSearchService.shouldSendByLevel(logEvent.getLevel(), minLevel))
+                    .map(logInfoMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+
+        return logs.stream()
+                .filter(logEvent -> logSearchService.matches(logEvent, config))
+                .map(logInfoMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -331,7 +355,7 @@ public class LogInfoWebSocket {
      *
      * @param session WebSocket 会话
      */
-    private void handlePingMessage(Session session, JsonNode messageNode) throws JsonProcessingException {
+    private void handlePingMessage(Session session) throws JsonProcessingException {
         Map<String, Object> response = new HashMap<>();
         response.put("type", "pong");
         response.put("timestamp", System.currentTimeMillis());
@@ -380,10 +404,9 @@ public class LogInfoWebSocket {
      * 获取查询参数
      *
      * @param session WebSocket 会话
-     * @param name    参数名
      * @return 参数值
      */
-    private String getQueryParam(Session session, String name) {
+    private String getQueryParam(Session session) {
         String queryString = session.getQueryString();
         if (queryString == null || queryString.isEmpty()) {
             return null;
@@ -391,8 +414,13 @@ public class LogInfoWebSocket {
 
         for (String param : queryString.split("&")) {
             String[] pair = param.split("=");
-            if (pair.length == 2 && pair[0].equals(name)) {
-                return pair[1];
+            if (pair.length == 2 && pair[0].equalsIgnoreCase("level")) {
+                String raw = pair[1];
+                try {
+                    return URLDecoder.decode(raw, StandardCharsets.UTF_8);
+                } catch (IllegalArgumentException | NullPointerException e) {
+                    return raw;
+                }
             }
         }
 
@@ -414,12 +442,8 @@ public class LogInfoWebSocket {
             webSocketMessageSender.sendCompressed(session, message);
         } catch (IOException e) {
             removeSession(session);
+            log.error("发送消息失败: {}", e.getMessage(), e);
         }
-    }
-
-
-    private interface MessageHandler {
-        void handle(Session session, JsonNode messageNode) throws Exception;
     }
 
     /**

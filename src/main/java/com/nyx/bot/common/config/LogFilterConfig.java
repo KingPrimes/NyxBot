@@ -89,7 +89,7 @@ public class LogFilterConfig {
      * @return true 如果有效
      */
     private boolean isValidLevel(String level) {
-        return switch (level) {
+        return switch (level.toUpperCase()) {
             case "TRACE", "DEBUG", "INFO", "WARN", "ERROR" -> true;
             default -> false;
         };
