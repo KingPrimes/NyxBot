@@ -46,10 +46,19 @@
         </filter>
     </appender>
 
+    <!-- WebSocket 日志推送 Appender -->
+    <appender name="websocket" class="com.nyx.bot.common.core.WebSocketLogAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>${LOG_FILE_ENCODING}</charset>
+        </encoder>
+    </appender>
+
     <!--  指定日志输出级别，以及启用的Appender，这里就使用了我们上面的ConsoleAppender  -->
     <root level="INFO" additivity="true">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
+        <appender-ref ref="websocket"/>
     </root>
 
 </configuration>

@@ -52,10 +52,19 @@
         </filter>
     </appender>
 
+    <!-- WebSocket 日志推送 Appender -->
+    <appender name="websocket" class="com.nyx.bot.common.core.WebSocketLogAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>${LOG_FILE_ENCODING}</charset>
+        </encoder>
+    </appender>
+
 
     <logger name="com.nyx.bot" level="${nyxBotLogLevel}" additivity="false">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
+        <appender-ref ref="websocket"/>
     </logger>
 
 
