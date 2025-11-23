@@ -36,11 +36,11 @@ public class HttpUtils {
     /**
      * 请求超时时间
      */
-    private static final int CONNECT_TIMEOUT = 60000;
+    private static final int CONNECT_TIMEOUT = 5000;
     /**
      * 读取超时
      */
-    private static final int READ_TIMEOUT = 240000;
+    private static final int READ_TIMEOUT = 15000;
     /**
      * 上传进度
      */

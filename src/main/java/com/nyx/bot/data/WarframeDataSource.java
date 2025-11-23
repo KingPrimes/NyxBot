@@ -104,10 +104,7 @@ public class WarframeDataSource {
                     log.error("初始化过程中发生异常，正在回退操作...", ex);
 
                     // 回退操作：清理已生成的文件
-                    FileUtils.delAllFile(EXPORT_PATH.formatted("").replace("%s", ""));
-                    FileUtils.deleteFile(LAMA_PATH);
-                    FileUtils.deleteFile(INDEX_PATH);
-                    FileUtils.deleteFile("./data/keys.json");
+                    FileUtils.delAllFile("./data");
 
                     log.error("回退操作完成，程序即将退出。");
                     System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));

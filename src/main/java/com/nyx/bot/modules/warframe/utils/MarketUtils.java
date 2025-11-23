@@ -230,7 +230,7 @@ public class MarketUtils {
                 }
                 return owu;
             } catch (Exception e) {
-                log.error("解析Market订单数据失败: {}", e.getMessage());
+                log.error("解析Market订单数据失败, platform: {}, Slug: {}, ItemId: {}", from.getPlatform(), market.getItem().getSlug(), market.getItem().getId(), e);
                 owu.setError("解析数据失败");
                 return owu;
             }
