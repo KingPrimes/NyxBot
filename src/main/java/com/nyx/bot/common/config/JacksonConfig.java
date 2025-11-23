@@ -35,6 +35,8 @@ public class JacksonConfig {
                 .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
                 // 禁用反序列化时的纳秒级时间戳（避免将输入当作纳秒处理）
                 .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+                // 忽略枚举值大小写
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS,true)
                 // 设置时区为UTC
                 .defaultTimeZone(TimeZone.getTimeZone("UTC"))
                 // 添加Java 8日期时间模块支持
