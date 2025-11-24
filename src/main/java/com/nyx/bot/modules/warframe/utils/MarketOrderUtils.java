@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
 
 @Slf4j
 public class MarketOrderUtils {
@@ -40,21 +41,23 @@ public class MarketOrderUtils {
             String normalizedKey = normalizeInput(key);
 
             // 获取仓库实例
-            OrdersItemsRepository itemsRepository = getItemsRepository();
-            AliasRepository aliasRepository = getAliasRepository();
+            OrdersItemsRepository itemsRepository = SpringUtils.getBean(OrdersItemsRepository.class);
+            AliasRepository aliasRepository = SpringUtils.getBean(AliasRepository.class);
 
-            // 尝试不同的查询策略
-            if (tryDirectMatch(market, itemsRepository, normalizedKey)) {
+            // 尝试直接匹配物品名称
+            if (tryMatch(market, normalizedKey, itemsRepository::findByName)) {
                 return market;
             }
 
             String aliasProcessedKey = processAliases(normalizedKey, aliasRepository);
-            if (tryAliasMatch(market, itemsRepository, aliasProcessedKey)) {
+            // 尝试通过别名匹配
+            if (tryMatch(market, aliasProcessedKey, itemsRepository::findByItemNameLike)) {
                 return market;
             }
 
             String primeProcessedKey = processPrimeKeyword(aliasProcessedKey);
-            if (tryPrimeMatch(market, itemsRepository, primeProcessedKey)) {
+            // 尝试Prime关键词匹配
+            if (tryMatch(market, primeProcessedKey, itemsRepository::findByItemNameLike)) {
                 return market;
             }
 
@@ -68,7 +71,7 @@ public class MarketOrderUtils {
             return market;
         } catch (Exception e) {
             log.error("查询物品时发生异常: {}", e.getMessage(), e);
-            market.setPossibleItems(getPossibleItems(getItemsRepository(), normalizeInput(key)));
+            market.setPossibleItems(getPossibleItems(SpringUtils.getBean(OrdersItemsRepository.class), normalizeInput(key)));
             return market;
         }
     }
@@ -78,29 +81,6 @@ public class MarketOrderUtils {
      */
     private static String normalizeInput(String key) {
         return key.toLowerCase(Locale.ROOT).replace("总图", "蓝图");
-    }
-
-    /**
-     * 获取物品仓库实例
-     */
-    private static OrdersItemsRepository getItemsRepository() {
-        return SpringUtils.getBean(OrdersItemsRepository.class);
-    }
-
-    /**
-     * 获取别名仓库实例
-     */
-    private static AliasRepository getAliasRepository() {
-        return SpringUtils.getBean(AliasRepository.class);
-    }
-
-    /**
-     * 尝试直接匹配物品名称
-     */
-    private static boolean tryDirectMatch(Market market, OrdersItemsRepository itemsRepository, String key) {
-        Optional<OrdersItems> items = itemsRepository.findByName(key);
-        items.ifPresent(market::setItem);
-        return items.isPresent();
     }
 
     /**
@@ -118,15 +98,6 @@ public class MarketOrderUtils {
     }
 
     /**
-     * 尝试通过别名匹配
-     */
-    private static boolean tryAliasMatch(Market market, OrdersItemsRepository itemsRepository, String key) {
-        Optional<OrdersItems> items = itemsRepository.findByItemNameLike(key);
-        items.ifPresent(market::setItem);
-        return items.isPresent();
-    }
-
-    /**
      * 处理Prime关键词
      */
     private static String processPrimeKeyword(String key) {
@@ -134,15 +105,6 @@ public class MarketOrderUtils {
             return key.replace("p", "Prime");
         }
         return key;
-    }
-
-    /**
-     * 尝试Prime关键词匹配
-     */
-    private static boolean tryPrimeMatch(Market market, OrdersItemsRepository itemsRepository, String key) {
-        Optional<OrdersItems> items = itemsRepository.findByItemNameLike(key);
-        items.ifPresent(market::setItem);
-        return items.isPresent();
     }
 
     /**
@@ -175,6 +137,25 @@ public class MarketOrderUtils {
     }
 
     /**
+     * 尝试匹配物品信息
+     * <p>通过指定的查找函数来查找物品信息，如果找到则设置到market对象中</p>
+     *
+     * @param market Market对象，用于存储匹配到的物品信息
+     * @param key    查找关键字
+     * @param lookup 查找函数，接收一个字符串参数，返回Optional<OrdersItems>结果
+     * @return 如果匹配成功返回true，否则返回false
+     */
+    private static boolean tryMatch(
+            Market market,
+            String key,
+            Function<String, Optional<OrdersItems>> lookup
+    ) {
+        Optional<OrdersItems> items = lookup.apply(key);
+        items.ifPresent(market::setItem);
+        return items.isPresent();
+    }
+
+    /**
      * 获取可能的物品列表
      *
      * @param itemsRepository 物品仓库
@@ -200,6 +181,38 @@ public class MarketOrderUtils {
         return item;
     }
 
+    /**
+     * 检查订单是否匹配最大等级条件
+     * <p>根据是否需要最大等级的条件，验证订单是否符合条件。
+     * 对于Mod物品检查等级，对于阿耶檀识之星物品检查星级。</p>
+     *
+     * @param isMax 是否需要最大等级/星级
+     * @param market 市场信息，包含物品的最大等级信息
+     * @param o 订单信息，包含物品等级或星级
+     * @return 如果订单满足最大等级条件返回true，否则返回false
+     */
+    private static boolean matchesMaxRank(boolean isMax, Market market, OrderWithUser o) {
+        if (!isMax) {
+            return true;
+        }
+        Integer maxRank = market.getItem().getMaxRank();
+        if (o.getRank() != null) {
+            return o.getRank().equals(maxRank);
+        }
+        if (o.getAmberStars() != null && o.getCyanStars() != null) {
+            return o.getAmberStars().equals(maxRank) && o.getCyanStars().equals(maxRank);
+        }
+        return true;
+    }
+
+    /**
+     * 根据关键字和平台获取市场物品信息
+     * <p>首先从本地数据库查询物品信息，如果未找到确切匹配项，则通过API查询网络数据补充信息</p>
+     *
+     * @param key  物品关键字
+     * @param form 平台枚举
+     * @return Market对象，包含物品信息或可能的物品列表
+     */
     public static Market toSet(String key, MarketPlatformEnum form) {
         Market dataBase = toDataBase(key);
         if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
@@ -225,11 +238,12 @@ public class MarketOrderUtils {
                     }
                 }
             } catch (Exception e) {
-                log.error("解析Market数据失败: {}", e.getMessage());
                 throw new RuntimeException("解析Market数据失败", e);
             }
-        } else {
+        } else if (body.code().equals(HttpStatus.TOO_MANY_REQUESTS)) {
             throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
+        } else {
+            throw new RuntimeException("查询Market数据失败, Code:%d Headers:%s".formatted(body.code().value(), body.headers().toSingleValueMap().toString()));
         }
         return dataBase;
     }
@@ -268,21 +282,11 @@ public class MarketOrderUtils {
                         // 筛选类型
                         .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
                         // 筛选等级
-                        .filter(o -> {
-                            if (isMax) {
-                                // 筛选Mod等级
-                                if (o.getRank() != null) {
-                                    return o.getRank().equals(market.getItem().getMaxRank());
-                                }
-                                // 筛选 阿耶檀识 星星数量
-                                if (o.getAmberStars() != null && o.getCyanStars() != null) {
-                                    return o.getAmberStars().equals(market.getItem().getMaxRank()) && o.getCyanStars().equals(market.getItem().getMaxRank());
-                                }
-                            }
-                            return true;
-                        })
+                        .filter(o -> matchesMaxRank(isMax, market, o))
                         // 排序物品
-                        .sorted(isBy ? Comparator.comparing(OrderWithUser::getPlatinum).reversed() : Comparator.comparing(OrderWithUser::getPlatinum))
+                        .sorted(isBy
+                                ? Comparator.comparing(OrderWithUser::getPlatinum).reversed()
+                                : Comparator.comparing(OrderWithUser::getPlatinum))
                         // 限制数量
                         .limit(8)
                         // 转换为结果
@@ -306,7 +310,6 @@ public class MarketOrderUtils {
         owu.setError("查询出现错误");
         return owu;
     }
-
 
 
     @Data
