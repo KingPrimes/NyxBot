@@ -139,11 +139,16 @@ public class Weapons {
             return "";
         }
         String substring = StringUtils.getSubString(description, "（英文：", "）");
-        String name = StringUtils.convertToCamelCase(substring);
-        if (name.equalsIgnoreCase(description)) {
+        String eName = StringUtils.convertToCamelCase(substring);
+        if (name.equalsIgnoreCase("MK1-")) {
+            if (!eName.equalsIgnoreCase(description) && !eName.equalsIgnoreCase("MK1-")) {
+                return "Mk1-" + eName;
+            }
+        }
+        if (eName.equalsIgnoreCase(description)) {
             return "";
         }
-        return name;
+        return eName;
     }
 
     /**
