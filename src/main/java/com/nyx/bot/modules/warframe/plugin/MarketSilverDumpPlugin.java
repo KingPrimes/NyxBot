@@ -8,8 +8,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.modules.warframe.utils.DucatsUtils;
-import com.nyx.bot.modules.warframe.utils.MarketUtils;
+import com.nyx.bot.modules.warframe.utils.MarketDucatsUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.Ducats;
@@ -33,14 +32,14 @@ public class MarketSilverDumpPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_SILVER_DUMP_CMD, at = AtEnum.BOTH)
     public void marketSilverDumpHandler(Bot bot, AnyMessageEvent event) {
-        Ducats ducats = MarketUtils.getDucats();
+        Ducats ducats = MarketDucatsUtils.getDucats();
         if (Objects.isNull(ducats)) {
             log.debug("获取ducat失败");
             bot.sendMsg(event, "获取ducat失败", false);
             return;
         }
 
-        byte[] bytes = drawImagePlugin.drawMarketGodDumpImage(DucatsUtils.getDuats(DucatsUtils.DucatsType.SILVER, ducats));
+        byte[] bytes = drawImagePlugin.drawMarketGodDumpImage(MarketDucatsUtils.getDuats(MarketDucatsUtils.DucatsType.SILVER, ducats));
         SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_SILVER_DUMP, log);
     }
 }

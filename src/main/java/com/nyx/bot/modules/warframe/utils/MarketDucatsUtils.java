@@ -1,9 +1,12 @@
 package com.nyx.bot.modules.warframe.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
 import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.Ducats;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -11,8 +14,30 @@ import java.util.Map;
 import static io.github.kingprimes.model.Ducats.DumpType.DAY;
 import static io.github.kingprimes.model.Ducats.DumpType.HOUR;
 
+@Slf4j
+public class MarketDucatsUtils {
 
-public class DucatsUtils {
+
+    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+
+    /**
+     * 获取杜卡德币数据
+     *
+     * @return 返回解析后的杜卡德币数据对象，如果获取失败则返回null
+     */
+    public static Ducats getDucats() {
+        HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
+        if (!body.code().is2xxSuccessful()) {
+            log.debug("获取Ducats数据失败：{}", body.body());
+            return null;
+        }
+        try {
+            return objectMapper.readValue(body.body(), Ducats.class);
+        } catch (Exception e) {
+            log.error("解析Ducats数据失败: {}", e.getMessage());
+            return null;
+        }
+    }
 
     /**
      * 根据指定类型获取杜卡德金币数据
