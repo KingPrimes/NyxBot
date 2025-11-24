@@ -8,7 +8,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.modules.warframe.utils.MarketUtils;
+import com.nyx.bot.modules.warframe.utils.MarketRivenUtils;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
@@ -52,6 +52,6 @@ public class MarketRivenPlugin {
     }
 
     private byte[] postMarketRivenImage(String key) {
-        return drawImagePlugin.drawMarketRivenImage(MarketUtils.marketRivenParameter(key));
+        return drawImagePlugin.drawMarketRivenImage(MarketRivenUtils.marketRivenParameter(key));
     }
 }
