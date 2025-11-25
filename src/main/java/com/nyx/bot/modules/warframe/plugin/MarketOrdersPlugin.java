@@ -47,15 +47,19 @@ public class MarketOrdersPlugin {
                 .setForm(data.getForm())
                 .setIsBy(data.isBy)
                 .setIsMax(data.isMax)
-                .setDucats(oi.getDucats())
+                .setDucats(defaultIfNull(oi.getDucats()))
                 .setVaulted(oi.getVaulted())
-                .setMaxAmberStars(oi.getMaxAmberStars())
-                .setMaxCyanStars(oi.getMaxCyanStars())
-                .setBaseEndo(oi.getBaseEndo())
-                .setReqMasteryRank(oi.getReqMasteryRank())
-                .setTradingTax(oi.getTradingTax())
+                .setMaxAmberStars(defaultIfNull(oi.getMaxAmberStars()))
+                .setMaxCyanStars(defaultIfNull(oi.getMaxCyanStars()))
+                .setBaseEndo(defaultIfNull(oi.getBaseEndo()))
+                .setReqMasteryRank(defaultIfNull(oi.getReqMasteryRank()))
+                .setTradingTax(defaultIfNull(oi.getTradingTax()))
                 .setIcon(null)
                 .setOrders(ows);
+    }
+
+    private static Integer defaultIfNull(Integer value) {
+        return value == null ? 0 : value;
     }
 
     @AnyMessageHandler
@@ -128,7 +132,7 @@ public class MarketOrdersPlugin {
             String result = input.replaceAll("满级", "").replaceAll("MAX", "");
             data.setMax(true);
             return result;
-        }else {
+        } else {
             data.setMax(false);
         }
         return input;
