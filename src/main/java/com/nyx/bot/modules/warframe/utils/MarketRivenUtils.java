@@ -5,6 +5,8 @@ import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.entity.RivenTion;
 import com.nyx.bot.modules.warframe.entity.RivenTionAlias;
+import com.nyx.bot.modules.warframe.enums.MarketSearchPolicy;
+import com.nyx.bot.modules.warframe.enums.MarketSortBy;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
 import com.nyx.bot.modules.warframe.repo.RivenTionAliasRepository;
@@ -247,8 +249,8 @@ public class MarketRivenUtils {
                     MarketRivenParameter.Polarity.ANY,
                     7,
                     16,
-                    MarketRivenParameter.Policy.ANY,
-                    MarketRivenParameter.SortBy.PRICE_ASC
+                    MarketSearchPolicy.ANY,
+                    MarketSortBy.PRICE_ASC
             ).getUrl();
             log.debug("请求的MarketRiven无参 URL:{}", url);
             return fetchAndProcess(url, riveItems.getName());
@@ -282,8 +284,8 @@ public class MarketRivenUtils {
                 MarketRivenParameter.Polarity.ANY,
                 7,
                 16,
-                MarketRivenParameter.Policy.ANY,
-                MarketRivenParameter.SortBy.PRICE_ASC
+                MarketSearchPolicy.ANY,
+                MarketSortBy.PRICE_ASC
         ).getUrl();
         log.debug("有词条参数 请求的MarketRiven带参 URL:{}", url);
         return fetchAndProcess(url, riveItems.getName());

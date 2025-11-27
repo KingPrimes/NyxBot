@@ -109,6 +109,12 @@ public class ApiUrl {
      * 信条武器
      */
     public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v2/sister/weapons";
+
+    /**
+     * Market 拍卖
+     */
+    public static final String WARFRAME_MARKET_SEARCH = "https://api.warframe.market/v1/auctions/search";
+
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
     private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
 

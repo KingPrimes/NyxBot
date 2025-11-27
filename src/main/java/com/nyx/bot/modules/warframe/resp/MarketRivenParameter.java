@@ -1,5 +1,7 @@
 package com.nyx.bot.modules.warframe.resp;
 
+import com.nyx.bot.modules.warframe.enums.MarketSearchPolicy;
+import com.nyx.bot.modules.warframe.enums.MarketSortBy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -26,9 +28,9 @@ public class MarketRivenParameter {
     //最高段位
     Integer masteryRankMax;
     //类别 direct 售卖  auction 拍卖 默认全部
-    Policy buyoutPolicy;
+    MarketSearchPolicy buyoutPolicy;
     //排序方式  price_asc 价格正序, price_desc 价格倒序, damage_asc 伤害正序, damage_desc 伤害倒序
-    SortBy sortBy;
+    MarketSortBy sortBy;
 
     public String getUrl() {
         StringBuilder url = new StringBuilder();
@@ -37,7 +39,7 @@ public class MarketRivenParameter {
         if (!getPositiveStats().trim().isEmpty()) {
             url.append("&positive_stats=").append(getPositiveStats());
         }
-        if (!getBuyoutPolicy().equals(Policy.ANY)) {
+        if (!getBuyoutPolicy().equals(MarketSearchPolicy.ANY)) {
             url.append("&buyout_policy=").append(getBuyoutPolicy().name());
         }
         if (!getNegativeStats().trim().isEmpty()) {
@@ -55,7 +57,7 @@ public class MarketRivenParameter {
         }
         url
                 .append("&polarity=").append(getPolarity().name())
-                .append("&sort_by=").append(getSortBy().name());
+                .append("&sort_by=").append(getSortBy().getValue());
         return url.toString().toLowerCase(Locale.ROOT);
     }
 
@@ -67,31 +69,6 @@ public class MarketRivenParameter {
         MADURAI,
         VAZARIN,
         NARAMON
-    }
-
-    /**
-     * 类别： direct 售卖  auction 拍卖 any 全部
-     */
-    public enum Policy {
-        ANY,
-        // 售卖
-        DIRECT,
-        // 拍卖
-        AUCTION
-    }
-
-    /**
-     * 排序方式： price_asc 价格正序, price_desc 价格倒序, damage_asc 伤害正序, damage_desc 伤害倒序
-     */
-    public enum SortBy {
-        //价格正序
-        PRICE_ASC,
-        //价格倒序
-        PRICE_DESC,
-        //伤害正序
-        DAMAGE_ASC,
-        //伤害倒序
-        DAMAGE_DESC
     }
 
 
