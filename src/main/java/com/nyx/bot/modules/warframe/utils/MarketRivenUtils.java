@@ -316,12 +316,12 @@ public class MarketRivenUtils {
         MarketSortBy sortBy = MarketSortBy.PRICE_ASC;
 
         public Integer getMasteryRankMin() {
-            if (masteryRankMin < 7) return 7;
+            if (masteryRankMin == null || masteryRankMin < 7) return 7;
             return masteryRankMin;
         }
 
         public Integer getMasteryRankMax() {
-            if (masteryRankMax > 16) return 16;
+            if (masteryRankMax == null || masteryRankMax > 16) return 16;
             return masteryRankMax;
         }
 
