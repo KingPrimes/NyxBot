@@ -244,7 +244,10 @@ public class MarketRivenUtils {
                 return marketRiven;
             }
             // 构建无参数请求url
-            result.setUrlName(riveItems.getSlug());
+            result
+                    .setUrlName(riveItems.getSlug())
+                    .setPositiveStats("")
+                    .setNegativeStats("");
             return fetchAndProcess(result, riveItems.getName());
         }
         // 有词条参数查询模式
@@ -269,6 +272,7 @@ public class MarketRivenUtils {
         log.debug("正面词条：{} ---- 负面词条:{}", positiveStats, not);
         // 构建带参数请求url
         result
+                .setUrlName(riveItems.getSlug())
                 .setPositiveStats(positiveStats)
                 .setNegativeStats(not)
                 .setPolarity(Polarity.ANY)
