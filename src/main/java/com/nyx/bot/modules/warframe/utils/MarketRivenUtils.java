@@ -1,6 +1,7 @@
 package com.nyx.bot.modules.warframe.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.entity.RivenTion;
@@ -11,10 +12,11 @@ import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
 import com.nyx.bot.modules.warframe.repo.RivenTionAliasRepository;
 import com.nyx.bot.modules.warframe.repo.RivenTionRepository;
-import com.nyx.bot.modules.warframe.resp.MarketRivenParameter;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.market.MarketRiven;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -78,14 +80,14 @@ public class MarketRivenUtils {
      * 从指定URL获取紫卡市场数据并进行处理
      * <p>发送HTTP请求获取市场数据，解析JSON响应，并对数据进行过滤和排序处理</p>
      *
-     * @param url      请求的URL地址
+     * @param params   请求的URL地址
      * @param itemName 物品名称
      * @return MarketRiven对象，包含处理后的市场数据，失败时返回空对象
      */
-    private static MarketRiven fetchAndProcess(String url, String itemName) {
+    private static MarketRiven fetchAndProcess(MarketSearchResult params, String itemName) {
         MarketRiven empty = new MarketRiven();
         // 发送HTTP GET请求获取市场数据
-        HttpUtils.Body body = HttpUtils.marketSendGet(url);
+        HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SEARCH, params.getUrl());
 
         // 检查HTTP响应状态码
         if (!body.code().is2xxSuccessful()) {
@@ -95,9 +97,9 @@ public class MarketRivenUtils {
 
         try {
             // 解析JSON数据并进行流式处理
-            var mr = stream(objectMapper.readValue(body.body(), MarketRiven.class), itemName);
-            log.debug("获取到的数据：\n{}", mr);
-            return mr;
+            empty = stream(objectMapper.readValue(body.body(), MarketRiven.class), itemName);
+            log.debug("获取到的数据：\n{}", empty);
+            return empty;
         } catch (Exception e) {
             log.error("解析紫卡数据失败: {}", e.getMessage());
             return empty;
@@ -231,6 +233,7 @@ public class MarketRivenUtils {
         MarketRiven marketRiven = new MarketRiven();
         RivenItems riveItems;
         // 无词条参数查询模式
+        MarketSearchResult result = new MarketSearchResult();
         if (!key.contains("-")) {
             log.debug("------无词条参数状态------");
             riveItems = getRiveItems(key.trim());
@@ -241,19 +244,11 @@ public class MarketRivenUtils {
                 return marketRiven;
             }
             // 构建无参数请求url
-            String url = new MarketRivenParameter(
-                    riveItems.getSlug(),
-                    riveItems.getName(),
-                    "",
-                    "",
-                    MarketRivenParameter.Polarity.ANY,
-                    7,
-                    16,
-                    MarketSearchPolicy.ANY,
-                    MarketSortBy.PRICE_ASC
-            ).getUrl();
-            log.debug("请求的MarketRiven无参 URL:{}", url);
-            return fetchAndProcess(url, riveItems.getName());
+            result
+                    .setUrlName(riveItems.getSlug())
+                    .setPositiveStats("")
+                    .setNegativeStats("");
+            return fetchAndProcess(result, riveItems.getName());
         }
         // 有词条参数查询模式
         log.debug("------有词条参数状态------");
@@ -276,19 +271,81 @@ public class MarketRivenUtils {
 
         log.debug("正面词条：{} ---- 负面词条:{}", positiveStats, not);
         // 构建带参数请求url
-        String url = new MarketRivenParameter(
-                riveItems.getSlug(),
-                riveItems.getName(),
-                positiveStats,
-                not,
-                MarketRivenParameter.Polarity.ANY,
-                7,
-                16,
-                MarketSearchPolicy.ANY,
-                MarketSortBy.PRICE_ASC
-        ).getUrl();
-        log.debug("有词条参数 请求的MarketRiven带参 URL:{}", url);
-        return fetchAndProcess(url, riveItems.getName());
+        result
+                .setUrlName(riveItems.getSlug())
+                .setPositiveStats(positiveStats)
+                .setNegativeStats(not)
+                .setPolarity(Polarity.ANY)
+                .setMasteryRankMin(7)
+                .setMasteryRankMax(16)
+                .setBuyoutPolicy(MarketSearchPolicy.ANY)
+                .setSortBy(MarketSortBy.PRICE_ASC);
+        return fetchAndProcess(result, riveItems.getName());
+    }
+
+    /**
+     * 极性
+     */
+    private enum Polarity {
+        ANY,
+        MADURAI,
+        VAZARIN,
+        NARAMON
+    }
+
+    @Data
+    @Accessors(chain = true)
+    private static class MarketSearchResult {
+        /**
+         * url名称
+         */
+        String urlName;
+        //正向词条以,分割
+        String positiveStats;
+        //负面词条 none 无  has 有
+        String negativeStats;
+        //极性
+        Polarity polarity = Polarity.ANY;
+        //最低段位
+        Integer masteryRankMin = 7;
+        //最高段位
+        Integer masteryRankMax = 16;
+        //类别 direct 售卖  auction 拍卖 默认全部
+        MarketSearchPolicy buyoutPolicy = MarketSearchPolicy.ANY;
+        //排序方式  price_asc 价格正序, price_desc 价格倒序, damage_asc 伤害正序, damage_desc 伤害倒序
+        MarketSortBy sortBy = MarketSortBy.PRICE_ASC;
+
+        public Integer getMasteryRankMin() {
+            if (masteryRankMin == null || masteryRankMin < 7) return 7;
+            return masteryRankMin;
+        }
+
+        public Integer getMasteryRankMax() {
+            if (masteryRankMax == null || masteryRankMax > 16) return 16;
+            return masteryRankMax;
+        }
+
+        public String getUrl() {
+            StringBuilder url = new StringBuilder();
+            url.append("type=riven&weapon_url_name=")
+                    .append(getUrlName());
+            if (!getPositiveStats().trim().isEmpty()) {
+                url.append("&positive_stats=").append(getPositiveStats());
+            }
+            if (!getBuyoutPolicy().equals(MarketSearchPolicy.ANY)) {
+                url.append("&buyout_policy=").append(getBuyoutPolicy().name());
+            }
+            if (!getNegativeStats().trim().isEmpty()) {
+                url.append("&negative_stats=").append(getNegativeStats());
+            }
+            url.append("&mastery_rank_min=")
+                    .append(getMasteryRankMin())
+                    .append("&mastery_rank_max=")
+                    .append(getMasteryRankMax())
+                    .append("&polarity=").append(getPolarity().name())
+                    .append("&sort_by=").append(getSortBy().getValue());
+            return url.toString().toLowerCase(Locale.ROOT);
+        }
     }
 
 }
