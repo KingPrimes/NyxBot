@@ -4,13 +4,13 @@ import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
-import com.nyx.bot.modules.warframe.service.MissionSubscribeService;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +56,7 @@ public class MissionSubscribeController extends BaseController {
     @Resource
     MissionSubscribeRepository repository;
     @Resource
-    MissionSubscribeService mss;
+    SubscriptionApplicationService subscriptionService;
 
     @Resource
     MissionSubscribeUserRepository msu;
@@ -251,7 +251,7 @@ public class MissionSubscribeController extends BaseController {
     )
     @DeleteMapping("/{id}")
     public AjaxResult delete(@PathVariable Long id) {
-        mss.deleteSubscribeGroup(id);
+        subscriptionService.deleteSubscribeGroup(id);
         return success();
     }
 
@@ -281,7 +281,7 @@ public class MissionSubscribeController extends BaseController {
     )
     @DeleteMapping("/user/{id}")
     public AjaxResult deleteUser(@PathVariable Long id) {
-        mss.deleteSubscribeUser(id);
+        subscriptionService.deleteSubscribeUser(id);
         return success();
     }
 
@@ -311,7 +311,7 @@ public class MissionSubscribeController extends BaseController {
     )
     @DeleteMapping("/type/{id}")
     public AjaxResult deleteCheckType(@PathVariable Long id) {
-        mss.deleteCheckType(id);
+        subscriptionService.deleteCheckType(id);
         return success();
     }
 

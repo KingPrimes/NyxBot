@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.modules.warframe.utils.WarframeSubscribe;
+import com.nyx.bot.modules.warframe.application.NotificationApplicationService;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.WorldState;
 import jakarta.annotation.Resource;
@@ -21,6 +21,9 @@ public class TaskWarframeStatus {
     @Resource
     ObjectMapper objectMapper;
 
+    @Resource
+    NotificationApplicationService notificationService;
+
     @Value("${test.isTest}")
     Boolean test;
 
@@ -30,9 +33,15 @@ public class TaskWarframeStatus {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.code().is2xxSuccessful() || body.code().is3xxRedirection()) {
             try {
-                WorldState worldState = objectMapper.readValue(body.body(), WorldState.class);
-                WarframeCache.setWarframeStatus(worldState);
-                WarframeSubscribe.isUpdated(worldState);
+                WorldState oldState = WarframeCache.getWarframeStatus();
+                WorldState newState = objectMapper.readValue(body.body(), WorldState.class);
+                
+                // 使用新的通知服务处理状态更新
+                notificationService.handleStateUpdate(oldState, newState);
+                
+                // 更新缓存
+                WarframeCache.setWarframeStatus(newState);
+                
                 log.info("Warframe 状态数据更新成功");
             } catch (Exception e) {
                 log.error("Warframe 状态数据解析错误: {}", e.getMessage());

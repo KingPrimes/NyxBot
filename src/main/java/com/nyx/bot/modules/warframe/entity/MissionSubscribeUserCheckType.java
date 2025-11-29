@@ -15,20 +15,30 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table
+@Table(
+    name = "mission_subscribe_user_check_type",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_user_subscribe_rule",
+            columnNames = {"subu_id", "subscribe", "mission_type_enum", "tier_num"}
+        )
+    }
+)
 public class MissionSubscribeUserCheckType extends BaseEntity {
 
     //订阅类型
     //订阅类型枚举
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscribe", nullable = false, length = 50)
     SubscribeEnums subscribe;
 
     //任务类型
-    @Column
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mission_type_enum", length = 50)
     MissionTypeEnum missionTypeEnum;
 
     //遗物纪元
-    @Column
+    @Column(name = "tier_num")
     Integer tierNum;
 
     @Transient
