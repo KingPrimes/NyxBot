@@ -3,7 +3,7 @@ package com.nyx.bot.modules.warframe.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.modules.warframe.entity.Alias;
+import com.nyx.bot.modules.warframe.entity.MarketResult;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
@@ -15,14 +15,13 @@ import io.github.kingprimes.model.enums.MarketStatusEnum;
 import io.github.kingprimes.model.enums.TransactionEnum;
 import io.github.kingprimes.model.market.BaseOrder;
 import io.github.kingprimes.model.market.OrderWithUser;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 public class MarketOrderUtils {
@@ -34,35 +33,35 @@ public class MarketOrderUtils {
      * @param key 物品名称
      * @return 处理后的结果
      */
-    private static Market toDataBase(String key) {
-        Market market = new Market();
+    private static MarketResult<OrdersItems, ?> toDataBase(String key) {
+        MarketResult<OrdersItems, ?> market = new MarketResult<>();
         try {
             // 标准化输入
-            String normalizedKey = normalizeInput(key);
+            String normalizedKey = MarketCommonUtils.normalizeInput(key);
 
             // 获取仓库实例
             OrdersItemsRepository itemsRepository = SpringUtils.getBean(OrdersItemsRepository.class);
             AliasRepository aliasRepository = SpringUtils.getBean(AliasRepository.class);
 
             // 尝试直接匹配物品名称
-            if (tryMatch(market, normalizedKey, itemsRepository::findByName)) {
+            if (MarketCommonUtils.tryMatch(market, normalizedKey, itemsRepository::findByName)) {
                 return market;
             }
 
-            String aliasProcessedKey = processAliases(normalizedKey, aliasRepository);
+            String aliasProcessedKey = MarketCommonUtils.processAliases(normalizedKey, aliasRepository);
             // 尝试通过别名匹配
-            if (tryMatch(market, aliasProcessedKey, itemsRepository::findByItemNameLike)) {
+            if (MarketCommonUtils.tryMatch(market, aliasProcessedKey, itemsRepository::findByItemNameLike)) {
                 return market;
             }
 
-            String primeProcessedKey = processPrimeKeyword(aliasProcessedKey);
+            String primeProcessedKey = MarketCommonUtils.processPrimeKeyword(aliasProcessedKey);
             // 尝试Prime关键词匹配
-            if (tryMatch(market, primeProcessedKey, itemsRepository::findByItemNameLike)) {
+            if (MarketCommonUtils.tryMatch(market, primeProcessedKey, itemsRepository::findByItemNameLike)) {
                 return market;
             }
 
             // 尝试正则表达式匹配
-            if (tryRegexMatch(market, itemsRepository, primeProcessedKey)) {
+            if (MarketCommonUtils.tryRegexNameMatch(market, primeProcessedKey, itemsRepository)) {
                 return market;
             }
 
@@ -71,88 +70,9 @@ public class MarketOrderUtils {
             return market;
         } catch (Exception e) {
             log.error("查询物品时发生异常: {}", e.getMessage(), e);
-            market.setPossibleItems(getPossibleItems(SpringUtils.getBean(OrdersItemsRepository.class), normalizeInput(key)));
+            market.setPossibleItems(getPossibleItems(SpringUtils.getBean(OrdersItemsRepository.class), MarketCommonUtils.normalizeInput(key)));
             return market;
         }
-    }
-
-    /**
-     * 标准化输入字符串
-     */
-    private static String normalizeInput(String key) {
-        return key.toLowerCase(Locale.ROOT).replace("总图", "蓝图");
-    }
-
-    /**
-     * 处理别名替换
-     */
-    private static String processAliases(String result, AliasRepository aliasRepository) {
-        List<Alias> aliases = aliasRepository.findAll();
-
-        for (Alias alias : aliases) {
-            if (result.contains(alias.getCn())) {
-                return result.replace(alias.getCn(), alias.getEn());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 处理Prime关键词
-     */
-    private static String processPrimeKeyword(String key) {
-        if (!key.contains("prime") && key.contains("p")) {
-            return key.replace("p", "Prime");
-        }
-        return key;
-    }
-
-    /**
-     * 尝试正则表达式匹配 - 优先使用最长前缀
-     */
-    private static boolean tryRegexMatch(Market market, OrdersItemsRepository itemsRepository, String key) {
-        if (key.length() < 2) {
-            return false;
-        }
-
-        // 获取最后一个字符
-        String end = key.substring(key.length() - 1);
-
-        // 确定最大前缀长度 - 最多4个字符，但不能超过字符串总长度-1
-        int maxPrefixLength = Math.min(4, key.length() - 1);
-
-        // 从最长前缀开始尝试，逐步减少到1个字符
-        for (int prefixLength = maxPrefixLength; prefixLength >= 1; prefixLength--) {
-            String header = key.substring(0, prefixLength);
-            log.debug("正则查询参数 - 前缀长度{}: '{}' -- 结尾: '{}'", prefixLength, header, end);
-
-            Optional<OrdersItems> items = itemsRepository.findByItemNameRegex("^" + header + ".*?" + end + ".*?");
-            if (items.isPresent()) {
-                market.setItem(items.get());
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * 尝试匹配物品信息
-     * <p>通过指定的查找函数来查找物品信息，如果找到则设置到market对象中</p>
-     *
-     * @param market Market对象，用于存储匹配到的物品信息
-     * @param key    查找关键字
-     * @param lookup 查找函数，接收一个字符串参数，返回Optional<OrdersItems>结果
-     * @return 如果匹配成功返回true，否则返回false
-     */
-    private static boolean tryMatch(
-            Market market,
-            String key,
-            Function<String, Optional<OrdersItems>> lookup
-    ) {
-        Optional<OrdersItems> items = lookup.apply(key);
-        items.ifPresent(market::setItem);
-        return items.isPresent();
     }
 
     /**
@@ -186,11 +106,11 @@ public class MarketOrderUtils {
      * @param o      订单信息，包含物品等级或星级
      * @return 如果订单满足最大等级条件返回true，否则返回false
      */
-    private static boolean matchesMaxRank(boolean isMax, Market market, OrderWithUser o) {
+    private static boolean matchesMaxRank(boolean isMax, MarketResult<OrdersItems, ?> market, OrderWithUser o) {
         if (!isMax) {
             return true;
         }
-        Integer maxRank = market.getItem().getMaxRank();
+        Integer maxRank = market.getEntity().getMaxRank();
         if (o.getRank() != null) {
             return o.getRank().equals(maxRank);
         }
@@ -208,13 +128,13 @@ public class MarketOrderUtils {
      * @param form 平台枚举
      * @return Market对象，包含物品信息或可能的物品列表
      */
-    public static Market toSet(String key, MarketPlatformEnum form) {
-        Market dataBase = toDataBase(key);
+    public static MarketResult<OrdersItems, ?> toSet(String key, MarketPlatformEnum form) {
+        MarketResult<OrdersItems, ?> dataBase = toDataBase(key);
         if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
             return dataBase;
         }
-        log.debug("查询参数 Key:{}", dataBase.getItem().getSlug());
-        HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getItem().getSlug(), form);
+        log.debug("查询参数 Key:{}", dataBase.getEntity().getSlug());
+        HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getEntity().getSlug(), form);
         log.debug("查询结果:{}", body.body());
         if (body.code().is2xxSuccessful()) {
             try {
@@ -224,11 +144,11 @@ public class MarketOrderUtils {
 
                 for (JsonNode itemNode : itemsNode) {
                     OrdersItems item = objectMapper.treeToValue(itemNode, OrdersItems.class);
-                    if (dataBase.getItem().getId().equals(item.getId())) {
-                        OrdersItems dbItem = dataBase.getItem();
+                    if (dataBase.getEntity().getId().equals(item.getId())) {
+                        OrdersItems dbItem = dataBase.getEntity();
                         dbItem.setReqMasteryRank(item.getReqMasteryRank());
                         dbItem.setTradingTax(item.getTradingTax());
-                        dataBase.setItem(dbItem);
+                        dataBase.setEntity(dbItem);
                         break;
                     }
                 }
@@ -253,8 +173,8 @@ public class MarketOrderUtils {
      * @param market 查询到的物品
      * @return 处理后的结果
      */
-    public static BaseOrder<OrderWithUser> market(MarketPlatformEnum from, Boolean isBy, Boolean isMax, Market market) {
-        String key = market.getItem().getSlug();
+    public static BaseOrder<OrderWithUser> market(MarketPlatformEnum from, Boolean isBy, Boolean isMax, MarketResult<OrdersItems, ?> market) {
+        String key = market.getEntity().getSlug();
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
         BaseOrder<OrderWithUser> owu = new BaseOrder<>();
@@ -273,7 +193,7 @@ public class MarketOrderUtils {
                         // 筛选离线用户
                         .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
                         // 筛选物品
-                        .filter(o -> o.getItemId().equals(market.getItem().getId()))
+                        .filter(o -> o.getItemId().equals(market.getEntity().getId()))
                         // 筛选类型
                         .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
                         // 筛选等级
@@ -293,7 +213,7 @@ public class MarketOrderUtils {
                 }
                 return owu;
             } catch (Exception e) {
-                log.error("解析Market订单数据失败, platform: {}, Slug: {}, ItemId: {}", from.getPlatform(), market.getItem().getSlug(), market.getItem().getId(), e);
+                log.error("解析Market订单数据失败, platform: {}, Slug: {}, ItemId: {}", from.getPlatform(), market.getEntity().getSlug(), market.getEntity().getId(), e);
                 owu.setError("解析数据失败");
                 return owu;
             }
@@ -304,13 +224,5 @@ public class MarketOrderUtils {
         }
         owu.setError("查询出现错误");
         return owu;
-    }
-
-
-    @Data
-    @Accessors(chain = true)
-    public static class Market {
-        OrdersItems item;
-        List<String> possibleItems;
     }
 }

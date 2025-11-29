@@ -10,6 +10,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
+import com.nyx.bot.modules.warframe.entity.MarketResult;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.utils.MarketOrderUtils;
 import com.nyx.bot.utils.MatcherUtils;
@@ -40,9 +41,9 @@ public class MarketOrdersPlugin {
     @Resource
     DrawImagePlugin drawImagePlugin;
 
-    private static Orders getOrders(MarketOrdersData data, BaseOrder<OrderWithUser> order, MarketOrderUtils.Market market) {
+    private static Orders getOrders(MarketOrdersData data, BaseOrder<OrderWithUser> order, MarketResult<OrdersItems, ?> market) {
         List<OrderWithUser> ows = order.getData();
-        OrdersItems oi = market.getItem();
+        OrdersItems oi = market.getEntity();
         return new Orders().setName(oi.getName())
                 .setForm(data.getForm())
                 .setIsBy(data.isBy)
@@ -232,7 +233,7 @@ public class MarketOrdersPlugin {
      * @return 生成的市场订单图像字节数组
      */
     private byte[] postMarketOrdersImage(MarketOrdersData data) {
-        MarketOrderUtils.Market market = MarketOrderUtils.toSet(data.getKey(), data.getForm());
+        MarketResult<OrdersItems, ?> market = MarketOrderUtils.toSet(data.getKey(), data.getForm());
         // 如果存在可能的物品列表，则直接绘制这些物品的图像
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
             return drawImagePlugin.drawMarketOrdersImage(market.getPossibleItems());
