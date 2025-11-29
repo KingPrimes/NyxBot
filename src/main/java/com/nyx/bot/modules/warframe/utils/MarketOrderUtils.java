@@ -170,15 +170,10 @@ public class MarketOrderUtils {
             //根据别名模糊查询用户 可能想要查询的物品名称
             list = itemsRepository.findByItemNameLikeToList(StringUtils.substringBefore(key, String.valueOf(key.charAt(key.length() - 1))));
         }
-        if (list.size() > 15) {
-            list = list.subList(0, 15);
-        }
-
-        List<String> item = new ArrayList<>();
-        for (OrdersItems o : list) {
-            item.add(o.getName());
-        }
-        return item;
+        return list.stream()
+                .limit(15)
+                .map(OrdersItems::getName)
+                .toList();
     }
 
     /**
@@ -186,9 +181,9 @@ public class MarketOrderUtils {
      * <p>根据是否需要最大等级的条件，验证订单是否符合条件。
      * 对于Mod物品检查等级，对于阿耶檀识之星物品检查星级。</p>
      *
-     * @param isMax 是否需要最大等级/星级
+     * @param isMax  是否需要最大等级/星级
      * @param market 市场信息，包含物品的最大等级信息
-     * @param o 订单信息，包含物品等级或星级
+     * @param o      订单信息，包含物品等级或星级
      * @return 如果订单满足最大等级条件返回true，否则返回false
      */
     private static boolean matchesMaxRank(boolean isMax, Market market, OrderWithUser o) {
