@@ -36,7 +36,7 @@ public interface LichSisterWeaponsRepository extends NameRegexJpaRepository<Lich
      * @param regex 武器名称正则
      * @return 匹配的武器实体
      */
-    @Query(value = "select l from LICH_SISTER_WEAPONS l WHERE UPPER(REPLACE(l.NAME,' ','')) REGEXP UPPER(replace(:#{#regex},' ',''))", nativeQuery = true)
+    @Query(value = "select * from LICH_SISTER_WEAPONS l WHERE UPPER(REPLACE(l.NAME,' ','')) REGEXP UPPER(replace(:#{#regex},' ',''))", nativeQuery = true)
     Optional<LichSisterWeapons> findByNameRegex(String regex);
 
     List<LichSisterWeapons> findByNameContaining(String name);

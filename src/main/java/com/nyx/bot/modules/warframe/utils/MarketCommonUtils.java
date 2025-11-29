@@ -110,7 +110,7 @@ public class MarketCommonUtils {
         // 从最长前缀开始尝试，逐步减少到1个字符
         for (int prefixLength = maxPrefixLength; prefixLength >= 1; prefixLength--) {
             String header = key.substring(0, prefixLength);
-            log.debug("正则查询参数 - 前缀长度{}: '{}' -- 后缀: '{}'", prefixLength, header, end);
+            log.info("tryRegexNameMatch - Prefix : '{}' -- Suffix: '{}'", header, end);
             Optional<E> items = re.findByNameRegex("^" + header + ".*?" + end + ".*?");
             if (items.isPresent()) {
                 market.setEntity(items.get());

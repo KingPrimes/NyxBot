@@ -31,7 +31,7 @@ class MarketLichsSisterUtilsTest {
         log.info("=================================================");
 
         // 测试武器关键字
-        String weaponKey = "典客";
+        String weaponKey = "信客";
         MarketLichsSisterUtils.SearchType searchType = MarketLichsSisterUtils.SearchType.SISTER;
 
         log.info("测试参数：");
