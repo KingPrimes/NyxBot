@@ -2,8 +2,8 @@ package com.nyx.bot.modules.warframe.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.entity.LichSisterWeapons;
+import com.nyx.bot.modules.warframe.entity.MarketResult;
 import com.nyx.bot.modules.warframe.enums.MarketSortBy;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.LichSisterWeaponsRepository;
@@ -14,125 +14,239 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 @Slf4j
 public class MarketLichsSisterUtils {
 
     private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
 
-    public static MarketLichSisterResult getAuctions(String key, SearchType searchType) {
-        log.info("Select Market Lich/Sister Strat.");
-        MarketLichSisterResult result = queryLichSisterWeapons(key);
-        if (!result.getPossibleItems().isEmpty()) {
+    /**
+     * 获取Lich/Sister武器拍卖信息
+     *
+     * @param key        武器名称关键字
+     * @param searchType 搜索类型（LICH或SISTER）
+     * @return MarketLichSisterResult包含武器信息和拍卖数据
+     */
+    public static MarketResult<LichSisterWeapons, MarketLichSister> getAuctions(String key, SearchType searchType) {
+        log.debug("开始查询 Market Lich/Sister 拍卖，关键字: {}, 类型: {}", key, searchType.getType());
+
+        // 第一步：查询武器信息
+        MarketResult<LichSisterWeapons, MarketLichSister> result = queryLichSisterWeapons(key);
+
+        // 如果未找到武器，返回可能的物品列表
+        if (result.getEntity() == null) {
+            log.warn("未找到匹配的武器: {}", key);
             return result;
         }
 
+        log.debug("找到武器: {}, 开始查询拍卖数据", result.getEntity().getName());
+
+        // 第二步：构建搜索参数
+        MarketSearchResult searchParams = new MarketSearchResult()
+                .setType(searchType)
+                .setUrlName(result.getEntity().getSlug())
+                .setHasEphemera(false)
+                .setSortBy(MarketSortBy.PRICE_ASC)
+                .setElement(MarketSearchElementEnum.ANY)
+                .setDamageMin(25)
+                .setDamageMax(60);
+
+        // 第三步：执行API查询
+        try {
+            MarketLichSister auctionData = fetchAuctions(searchParams);
+            result.setResult(auctionData);
+            log.debug("成功获取拍卖数据，武器: {}, 拍卖数量: {}",
+                    result.getEntity().getName(),
+                    auctionData.getPayload() != null ? auctionData.getPayload().getAuctions().size() : 0);
+        } catch (Exception e) {
+            log.error("查询拍卖数据失败，武器: {}, 错误: {}", result.getEntity().getName(), e.getMessage(), e);
+            throw new RuntimeException("查询Market拍卖数据失败: " + e.getMessage(), e);
+        }
 
         return result;
     }
 
     /**
-     * 执行市场搜索请求
-     * 根据提供的MarketSearchResult对象构建URL参数并发送GET请求到Warframe市场API
+     * 从Warframe Market获取Lich/Sister拍卖数据
+     * <p>发送HTTP请求到Market API，获取拍卖信息并进行数据处理</p>
      *
-     * @param msr MarketSearchResult对象，包含搜索参数
-     * @return HttpUtils.Body 响应体
+     * @param searchParams 搜索参数对象
+     * @return MarketLichSister对象，包含拍卖数据
+     * @throws RuntimeException 当API调用失败或解析失败时
      */
-    private static HttpUtils.Body marketSearch(MarketSearchResult msr) {
-        return HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SEARCH, msr.getUrl());
+    private static MarketLichSister fetchAuctions(MarketSearchResult searchParams) {
+        String url = ApiUrl.WARFRAME_MARKET_SEARCH;
+        String params = searchParams.getUrl();
+
+        log.debug("查询拍卖 URL: {}{}", url, params);
+
+        // 发送HTTP请求
+        HttpUtils.Body body = HttpUtils.marketSendGet(url, params);
+
+        // 检查HTTP状态码
+        if (!body.code().is2xxSuccessful()) {
+            if (body.code().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+                throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
+            }
+            throw new RuntimeException(
+                    "查询Market数据失败, Code: %d Headers: %s".formatted(
+                            body.code().value(),
+                            body.headers().toSingleValueMap().toString()
+                    )
+            );
+        }
+
+        try {
+            // 解析JSON响应
+            MarketLichSister marketData = objectMapper.readValue(
+                    body.body(),
+                    MarketLichSister.class
+            );
+
+            // 数据过滤和处理
+            return processAuctionData(marketData);
+
+        } catch (Exception e) {
+            log.error("解析Market拍卖数据失败: {}", e.getMessage(), e);
+            throw new RuntimeException("解析数据失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理拍卖数据：过滤离线用户、已关闭拍卖，按价格排序
+     *
+     * @param marketData 原始市场数据
+     * @return 处理后的数据
+     */
+    private static MarketLichSister processAuctionData(MarketLichSister marketData) {
+        if (marketData.getPayload() == null ||
+                marketData.getPayload().getAuctions() == null) {
+            log.warn("拍卖数据为空");
+            return marketData;
+        }
+
+        int originalSize = marketData.getPayload().getAuctions().size();
+
+        var filteredAuctions = marketData.getPayload()
+                .getAuctions()
+                .stream()
+                // 过滤已关闭的拍卖
+                .filter(auction -> !auction.getClosed())
+                // 过滤不可见的拍卖
+                .filter(MarketLichSister.Auctions::getVisible)
+                // 过滤离线用户
+                .filter(auction -> {
+                    String status = auction.getOwner().getStatus();
+                    return "ingame".equals(status) || "online".equals(status);
+                })
+                // 按价格排序（优先买断价，其次起始价，最后最高出价）
+                .sorted((a1, a2) -> {
+                    // 优先使用买断价
+                    if (a1.getBuyoutPrice() != null && a2.getBuyoutPrice() != null) {
+                        return Integer.compare(a1.getBuyoutPrice(), a2.getBuyoutPrice());
+                    }
+                    // 其次使用起始价
+                    if (a1.getStartingPrice() != null && a2.getStartingPrice() != null) {
+                        return Integer.compare(a1.getStartingPrice(), a2.getStartingPrice());
+                    }
+                    // 最后使用最高出价
+                    if (a1.getTopBid() != null && a2.getTopBid() != null) {
+                        return Integer.compare(a1.getTopBid(), a2.getTopBid());
+                    }
+                    return 0;
+                })
+                // 限制返回数量
+                .limit(10)
+                .toList();
+
+        marketData.getPayload().setAuctions(filteredAuctions);
+
+        log.debug("拍卖数据处理完成：原始数量: {}, 过滤后数量: {}", originalSize, filteredAuctions.size());
+        return marketData;
     }
 
 
     /**
-     * 根据关键字获取Lich/Sister武器信息 </br>
-     * 该方法会尝试多种匹配方式来查找武器信息: </br>
-     * 1. 精确匹配原始关键字</br>
-     * 2. 模糊匹配原始关键字</br>
-     * 3. 精确匹配别名转换后的关键字</br>
-     * 4. 模糊匹配别名转换后的关键字</br>
-     * 5. 正则表达式匹配匹配原始关键字</br>
-     * 6. 尝试正则表达式转换后的关键字</br>
-     * 如果以上都失败，则设置可能的候选项目列表
+     * 根据关键字获取Lich/Sister武器信息
+     * <p>该方法会尝试多种匹配方式来查找武器信息:</p>
+     * <ol>
+     * <li>精确匹配原始关键字</li>
+     * <li>模糊匹配原始关键字</li>
+     * <li>精确匹配别名转换后的关键字</li>
+     * <li>模糊匹配别名转换后的关键字</li>
+     * <li>正则表达式匹配原始关键字</li>
+     * <li>正则表达式匹配别名转换后的关键字</li>
+     * </ol>
+     * <p>如果以上都失败，则设置可能的候选项目列表</p>
      *
      * @param key 查询关键字
-     * @return MarketLichSister对象，包含匹配的武器信息或候选列表
+     * @return MarketLichSisterResult对象，包含匹配的武器信息或候选列表
      */
-    private static MarketLichSisterResult queryLichSisterWeapons(String key) {
-        log.info("Market Lich/Sister Select ServerDB Key:{}", key);
-        var lswRepository = SpringUtils.getBean(LichSisterWeaponsRepository.class);
-        var aliasRepository = SpringUtils.getBean(AliasRepository.class);
-        MarketLichSisterResult lsw = new MarketLichSisterResult();
-        if (tryMatch(lsw, key, lswRepository::findByName)) {
-            log.info("Market Lich/Sister Select ServerDB FindByName OK");
-            return lsw;
-        }
-        if (tryMatch(lsw, key, lswRepository::findFirstByNameContaining)) {
-            log.info("Market Lich/Sister Select ServerDB FindFirstByNameContaining OK");
-            return lsw;
-        }
-        String alias = processAliases(key, aliasRepository);
-        if (tryMatch(lsw, alias, lswRepository::findByName)) {
-            log.info("Market Lich/Sister Select ServerDB FindByNameForAlias OK");
-            return lsw;
-        }
-        if (tryMatch(lsw, alias, lswRepository::findFirstByNameContaining)) {
-            log.info("Market Lich/Sister Select ServerDB FindFirstByNameContainingForAlias OK");
-            return lsw;
-        }
+    private static MarketResult<LichSisterWeapons, MarketLichSister> queryLichSisterWeapons(String key) {
+        log.info("Market Lich/Sister Query DataBase Key: {}", key);
 
-        if (tryRegexMatch(lsw, key, lswRepository)) {
-            log.info("Market Lich/Sister Select ServerDB Regex OK");
-            return lsw;
-        }
-        if (tryRegexMatch(lsw, alias, lswRepository)) {
-            log.info("Market Lich/Sister Select ServerDB RegexForAlias OK");
-            return lsw;
-        }
-        lsw.setPossibleItems(getPossibleItems(key, lswRepository));
-        log.warn("Market Lich/Sister Select ServerDB Failed");
-        return lsw;
-    }
-
-    /**
-     * 处理别名替换
-     */
-    private static String processAliases(String result, AliasRepository aliasRepository) {
-        List<Alias> aliases = aliasRepository.findAll();
-
-        for (Alias alias : aliases) {
-            if (result.contains(alias.getCn())) {
-                return result.replace(alias.getCn(), alias.getEn());
+        try {
+            var lswRepository = SpringUtils.getBean(LichSisterWeaponsRepository.class);
+            var aliasRepository = SpringUtils.getBean(AliasRepository.class);
+            MarketResult<LichSisterWeapons, MarketLichSister> mr = new MarketResult<>();
+            // 1. 精确匹配原始关键字
+            if (MarketCommonUtils.tryMatch(mr, key, lswRepository::findByName)) {
+                log.info("Market Lich/Sister FindByName OK");
+                return mr;
             }
+
+            // 2. 模糊匹配原始关键字
+            if (MarketCommonUtils.tryMatch(mr, key, lswRepository::findFirstByNameContaining)) {
+                log.info("Market Lich/Sister FindFirstByNameContaining OK");
+                return mr;
+            }
+
+            // 3. 别名转换
+            String alias = MarketCommonUtils.processAliases(key, aliasRepository);
+            if (!alias.equals(key)) {
+                log.info("Alias Conversion: {} -> {}", key, alias);
+            }
+
+            // 4. 精确匹配别名
+            if (MarketCommonUtils.tryMatch(mr, alias, lswRepository::findByName)) {
+                log.info("Market Lich/Sister FindByNameForAlias OK");
+                return mr;
+            }
+
+            // 5. 模糊匹配别名
+            if (MarketCommonUtils.tryMatch(mr, alias, lswRepository::findFirstByNameContaining)) {
+                log.info("Market Lich/Sister FindFirstByNameContainingForAlias OK");
+                return mr;
+            }
+
+            // 6. 正则匹配原始关键字
+            if (MarketCommonUtils.tryRegexNameMatch(mr, key, lswRepository)) {
+                log.info("Market Lich/Sister Regex OK");
+                return mr;
+            }
+
+            // 7. 正则匹配别名
+            if (MarketCommonUtils.tryRegexNameMatch(mr, alias, lswRepository)) {
+                log.info("Market Lich/Sister RegexForAlias OK");
+                return mr;
+            }
+
+            // 8. 返回可能的候选项
+            mr.setPossibleItems(getPossibleItems(key, lswRepository));
+            log.warn("Market Lich/Sister No matching weapon found, return the number of candidates: {}", mr.getPossibleItems().size());
+            return mr;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Market Lich/Sister Query DataBase Error: " + e.getMessage(), e);
         }
-        return result;
     }
 
     /**
-     * 尝试匹配武器信息</br>
-     * 通过指定的查找函数来查找武器信息，如果找到则将其设置到MarketLichSister对象中
-     *
-     * @param ml     用于存储匹配结果的MarketLichSister对象
-     * @param key    查找关键字
-     * @param lookup 查找函数，接收关键字返回Optional<LichSisterWeapons>
-     * @return 如果找到匹配项返回true，否则返回false
-     */
-    private static boolean tryMatch(
-            MarketLichSisterResult ml,
-            String key,
-            Function<String, Optional<LichSisterWeapons>> lookup
-    ) {
-        Optional<LichSisterWeapons> apply = lookup.apply(key);
-        apply.ifPresent(ml::setLsw);
-        return apply.isPresent();
-    }
-
-    /**
-     * 获取可能的武器项目列表 </br>
-     * 通过关键字的第一个字符进行模糊查询，获取所有匹配的武器名称列表
+     * 获取可能的武器项目列表
+     * <p>通过关键字的第一个字符进行模糊查询，获取所有匹配的武器名称列表</p>
      *
      * @param key        查询关键字
      * @param repository LichSisterWeapons仓库实例
@@ -143,39 +257,6 @@ public class MarketLichsSisterUtils {
         return list.stream()
                 .map(LichSisterWeapons::getName)
                 .toList();
-    }
-
-    /**
-     * 尝试使用正则表达式匹配武器信息 </br>
-     * 通过提取关键字的前缀和后缀构造正则表达式进行匹配 </br>
-     * 匹配模式为: ^{前缀}.*?{后缀}.*?
-     *
-     * @param ml         用于存储匹配结果的MarketLichSister对象
-     * @param key        查询关键字
-     * @param repository LichSisterWeapons仓库实例
-     * @return 如果找到匹配项返回true，否则返回false
-     */
-    private static boolean tryRegexMatch(MarketLichSisterResult ml, String key, LichSisterWeaponsRepository repository) {
-        if (key.length() < 2) {
-            return false;
-        }
-        // 获取最后一个字符
-        String end = key.substring(key.length() - 1);
-
-        // 确定最大前缀长度 - 最多4个字符，但不能超过字符串总长度-1
-        int maxPrefixLength = Math.min(4, key.length() - 1);
-        // 从最长前缀开始尝试，逐步减少到1个字符
-        for (int prefixLength = maxPrefixLength; prefixLength >= 1; prefixLength--) {
-            String header = key.substring(0, prefixLength);
-            log.info("Select Regex Parameter - {} : Prefix: '{}' -- Suffix: '{}'", prefixLength, header, end);
-            Optional<LichSisterWeapons> items = repository.findByNameRegex("^" + header + ".*?" + end + ".*?");
-            if (items.isPresent()) {
-                ml.setLsw(items.get());
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Getter
@@ -281,29 +362,18 @@ public class MarketLichsSisterUtils {
         }
 
         public String getUrl() {
-            return "?type=" +
-                    getType().getType() +
-                    "&has_ephemera=" +
-                    hasEphemera +
-                    "&sort_by=" +
-                    getSortBy().getValue() +
-                    "&weapon_url_name=" +
-                    getUrlName() +
-                    "&element=" +
-                    getElement().getElement() +
-                    "&damage_min=" +
-                    getDamageMin() +
-                    "&damage_max=" +
-                    getDamageMax();
+            StringBuilder url = new StringBuilder();
+            url.append("type=").append(getType().getType());
+            url.append("&has_ephemera=").append(hasEphemera);
+            url.append("&sort_by=").append(getSortBy().getValue())
+                    .append("&weapon_url_name=").append(getUrlName());
+            if (!getElement().equals(MarketSearchElementEnum.ANY)) {
+                url.append("&element=").append(getElement().getElement());
+            }
+            url.append("&damage_min=").append(getDamageMin())
+                    .append("&damage_max=").append(getDamageMax());
+            return url.toString();
         }
-    }
-
-    @Data
-    @Accessors(chain = true)
-    public static class MarketLichSisterResult {
-        LichSisterWeapons lsw;
-        MarketLichSister mls;
-        List<String> possibleItems;
     }
 
 }

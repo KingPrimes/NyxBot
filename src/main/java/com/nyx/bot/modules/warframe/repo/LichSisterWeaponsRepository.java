@@ -1,7 +1,6 @@
 package com.nyx.bot.modules.warframe.repo;
 
 import com.nyx.bot.modules.warframe.entity.LichSisterWeapons;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface LichSisterWeaponsRepository extends JpaRepository<LichSisterWeapons, String>, JpaSpecificationExecutor<LichSisterWeapons> {
+public interface LichSisterWeaponsRepository extends NameRegexJpaRepository<LichSisterWeapons, String>, JpaSpecificationExecutor<LichSisterWeapons> {
 
     /**
      * 根据武器名称精确查询
