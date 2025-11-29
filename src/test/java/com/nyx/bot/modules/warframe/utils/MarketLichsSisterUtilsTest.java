@@ -43,7 +43,7 @@ class MarketLichsSisterUtilsTest {
             log.info("\n--- 第1步：开始查询武器信息 ---");
             MarketResult<LichSisterWeapons, MarketLichSister> result =
                     MarketLichsSisterUtils.getAuctions(weaponKey, searchType);
-
+            log.info("ItemName: {}",result.getResult().getPayload().getItemName());
             // === 验证第1步：武器查询结果 ===
             assertNotNull(result, "查询结果不应为空");
             log.info("✓ 查询结果对象创建成功");

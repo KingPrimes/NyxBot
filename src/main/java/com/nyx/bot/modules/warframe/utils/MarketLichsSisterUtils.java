@@ -31,7 +31,7 @@ public class MarketLichsSisterUtils {
      * @return MarketLichSisterResult包含武器信息和拍卖数据
      */
     public static MarketResult<LichSisterWeapons, MarketLichSister> getAuctions(String key, SearchType searchType) {
-        log.debug("开始查询 Market Lich/Sister 拍卖，关键字: {}, 类型: {}", key, searchType.getType());
+        log.info("开始查询 Market Lich/Sister 拍卖，关键字: {}, 类型: {}", key, searchType.getType());
 
         // 第一步：查询武器信息
         MarketResult<LichSisterWeapons, MarketLichSister> result = queryLichSisterWeapons(key);
@@ -42,7 +42,7 @@ public class MarketLichsSisterUtils {
             return result;
         }
 
-        log.debug("找到武器: {}, 开始查询拍卖数据", result.getEntity().getName());
+        log.info("找到武器: {}, 开始查询拍卖数据", result.getEntity().getName());
 
         // 第二步：构建搜索参数
         MarketSearchResult searchParams = new MarketSearchResult()
@@ -57,8 +57,9 @@ public class MarketLichsSisterUtils {
         // 第三步：执行API查询
         try {
             MarketLichSister auctionData = fetchAuctions(searchParams);
+            auctionData.getPayload().setItemName(result.getEntity().getName());
             result.setResult(auctionData);
-            log.debug("成功获取拍卖数据，武器: {}, 拍卖数量: {}",
+            log.info("成功获取拍卖数据，武器: {}, 拍卖数量: {}",
                     result.getEntity().getName(),
                     auctionData.getPayload() != null ? auctionData.getPayload().getAuctions().size() : 0);
         } catch (Exception e) {
