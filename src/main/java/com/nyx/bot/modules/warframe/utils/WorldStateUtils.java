@@ -45,25 +45,35 @@ public class WorldStateUtils {
         return WarframeCache.getWarframeStatus().getAlerts().stream()
                 .filter(Objects::nonNull)
                 .filter(a -> a.getMissionInfo() != null)
-                .peek(a -> {
-                    List<String> items = a.getMissionInfo().getMissionReward().getItems();
-                    if (items != null && !items.isEmpty()) {
-                        items = items.stream().map(i -> {
-                            Optional<StateTranslation> name = str.findByUniqueName(i);
-                            if (name.isPresent()) {
-                                return name.get().getName();
-                            }
-                            return i;
-                        }).toList();
-                        a.getMissionInfo().getMissionReward().setItems(items);
-                    }
-                    String location = a.getMissionInfo().getLocation();
-                    if (location != null && !location.isEmpty()) {
-                        nodesRepository.findById(location).ifPresent(nodes ->
-                                a.getMissionInfo().setLocation(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-                    }
-                })
+                .map(this::translateAlerts)
                 .toList();
+    }
+
+    /**
+     * 翻译警报信息
+     * <p>将警报中的物品ID和地点ID转换为对应的名称</p>
+     *
+     * @param alert 需要翻译的警报对象
+     * @return 翻译后的警报对象
+     */
+    public Alert translateAlerts(Alert alert) {
+        List<String> items = alert.getMissionInfo().getMissionReward().getItems();
+        if (items != null && !items.isEmpty()) {
+            items = items.stream().map(i -> {
+                Optional<StateTranslation> name = str.findByUniqueName(i);
+                if (name.isPresent()) {
+                    return name.get().getName();
+                }
+                return i;
+            }).toList();
+            alert.getMissionInfo().getMissionReward().setItems(items);
+        }
+        String location = alert.getMissionInfo().getLocation();
+        if (location != null && !location.isEmpty()) {
+            nodesRepository.findById(location).ifPresent(nodes ->
+                    alert.getMissionInfo().setLocation(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+        }
+        return alert;
     }
 
     /**
@@ -91,8 +101,20 @@ public class WorldStateUtils {
     public List<DailyDeals> getDailyDeals() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getDailyDeals()
                 .stream()
-                .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName())))
+                .map(this::translateDailyDeals)
                 .toList();
+    }
+
+    /**
+     * 翻译每日特惠信息
+     * <p>将每日特惠中的物品ID转换为对应的名称</p>
+     *
+     * @param dailyDeals 需要翻译的每日特惠对象
+     * @return 翻译后的每日特惠对象
+     */
+    public DailyDeals translateDailyDeals(DailyDeals dailyDeals) {
+        str.findByUniqueName(StringUtils.getLastThreeSegments(dailyDeals.getItem())).ifPresent(s -> dailyDeals.setItem(s.getName()));
+        return dailyDeals;
     }
 
     /**
@@ -103,6 +125,17 @@ public class WorldStateUtils {
      */
     public DuvalierCycle getDuvalierCycle() throws DataNotInfoException {
         DuvalierCycle duvalierCycle = WarframeCache.getWarframeStatus().getDuvalierCycle();
+        return translateDuvalierCycle(duvalierCycle);
+    }
+
+    /**
+     * 翻译双衍王境 轮换信息
+     * <p>将双衍王境 轮换中的物品ID转换为对应的名称</p>
+     *
+     * @param duvalierCycle 需要翻译的双衍王境 轮换对象
+     * @return 翻译后的双衍王境 轮换对象
+     */
+    public DuvalierCycle translateDuvalierCycle(DuvalierCycle duvalierCycle) {
         List<EndlessXpChoices> list = duvalierCycle.getChoices().stream().peek(c -> {
             if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
                 c.setChoices(c.getChoices().stream().map(s ->
@@ -127,20 +160,14 @@ public class WorldStateUtils {
             case ACTIVE_MISSION -> {
                 return WarframeCache.getWarframeStatus().getActiveMissions().stream()
                         .filter(m -> !m.getHard())
-                        .peek(m -> nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
-                            m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                            m.setFaction(nodes.getFactionName());
-                        }))
+                        .map(this::translateActiveMission)
                         .sorted(Comparator.comparing(ActiveMission::getModifier))
                         .toList();
             }
             case STEEL_PATH -> {
                 return WarframeCache.getWarframeStatus().getActiveMissions().stream()
                         .filter(ActiveMission::getHard)
-                        .peek(m -> nodesRepository.findById(m.getNode()).ifPresent(nodes -> {
-                            m.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
-                            m.setFaction(nodes.getFactionName());
-                        }))
+                        .map(this::translateActiveMission)
                         .sorted(Comparator.comparing(ActiveMission::getModifier))
                         .toList();
             }
@@ -170,6 +197,21 @@ public class WorldStateUtils {
     }
 
     /**
+     * 翻译fissure信息
+     * <p>将fissure中的物品ID转换为对应的名称</p>
+     *
+     * @param activeMission 需要翻译的fissure对象
+     * @return 翻译后的fissure对象
+     */
+    public ActiveMission translateActiveMission(ActiveMission activeMission) {
+        nodesRepository.findById(activeMission.getNode()).ifPresent(nodes -> {
+            activeMission.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")");
+            activeMission.setFaction(nodes.getFactionName());
+        });
+        return activeMission;
+    }
+
+    /**
      * 获取入侵信息
      *
      * @return 获取处理后的入侵信息
@@ -179,27 +221,36 @@ public class WorldStateUtils {
     public List<Invasion> getInvasions() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getInvasions().stream()
                 .filter(i -> !i.getCompleted())
-                .peek(d -> {
-                            nodesRepository.findById(d.getNode())
-                                    .ifPresent(nodes -> d.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-                            List<Reward.Item> items = d.getDefenderReward().getCountedItems()
-                                    .stream()
-                                    .filter(Objects::nonNull)
-                                    .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
-                                    .toList();
-                            d.getDefenderReward().setCountedItems(items);
+                .map(this::translateInvasion).toList();
+    }
 
-                            d.setAttackerReward(d.getAttackerReward().stream()
-                                    .filter(Objects::nonNull)
-                                    .peek(r -> r.setCountedItems(
-                                            r.getCountedItems()
-                                                    .stream()
-                                                    .filter(Objects::nonNull)
-                                                    .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
-                                                    .toList()
-                                    )).toList());
-                        }
-                ).toList();
+    /**
+     * 翻译入侵信息
+     * <p>将入侵中的物品ID转换为对应的名称</p>
+     *
+     * @param invasion 需要翻译的入侵对象
+     * @return 翻译后的入侵对象
+     */
+    public Invasion translateInvasion(Invasion invasion) {
+        nodesRepository.findById(invasion.getNode())
+                .ifPresent(nodes -> invasion.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+        List<Reward.Item> items = invasion.getDefenderReward().getCountedItems()
+                .stream()
+                .filter(Objects::nonNull)
+                .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
+                .toList();
+        invasion.getDefenderReward().setCountedItems(items);
+
+        invasion.setAttackerReward(invasion.getAttackerReward().stream()
+                .filter(Objects::nonNull)
+                .peek(r -> r.setCountedItems(
+                        r.getCountedItems()
+                                .stream()
+                                .filter(Objects::nonNull)
+                                .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getName())).ifPresent(s -> i.setName(s.getName())))
+                                .toList()
+                )).toList());
+        return invasion;
     }
 
     /**
@@ -319,16 +370,28 @@ public class WorldStateUtils {
     @SuppressWarnings("null")
     public List<VoidTrader> getVoidTraders() throws DataNotInfoException {
         return WarframeCache.getWarframeStatus().getVoidTraders().stream()
-                .peek(v -> {
-                    nodesRepository.findById(v.getNode())
-                            .ifPresent(nodes -> v.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
-                    if (v.getManifest() != null && !v.getManifest().isEmpty()) {
-                        v.setManifest(v.getManifest()
-                                .stream()
-                                .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName())))
-                                .toList()
-                        );
-                    }
-                }).toList();
+                .map(this::translateVoidTraders).toList();
+    }
+
+    /**
+     * 翻译虚空商人信息
+     * <p>将虚空商人中的地点ID和商品名称ID转换为对应的实际名称</p>
+     *
+     * @param voidTrader 需要翻译的虚空商人对象
+     * @return 翻译后的虚空商人对象
+     */
+    public VoidTrader translateVoidTraders(VoidTrader voidTrader) {
+        // 翻译虚空商人出现地点名称
+        nodesRepository.findById(voidTrader.getNode())
+                .ifPresent(nodes -> voidTrader.setNode(nodes.getName() + "(" + nodes.getSystemName() + ")"));
+        // 翻译商品清单中的物品名称
+        if (voidTrader.getManifest() != null && !voidTrader.getManifest().isEmpty()) {
+            voidTrader.setManifest(voidTrader.getManifest()
+                    .stream()
+                    .peek(i -> str.findByUniqueName(StringUtils.getLastThreeSegments(i.getItem())).ifPresent(s -> i.setItem(s.getName())))
+                    .toList()
+            );
+        }
+        return voidTrader;
     }
 }

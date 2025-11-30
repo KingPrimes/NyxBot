@@ -30,7 +30,7 @@ public class AlertsMessageBuilder implements MessageBuilder<Alert> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<Alert> event, MissionSubscribeUserCheckType rule) {
-        Alert alert = event.getData();
+        Alert alert = worldStateUtils.translateAlerts(event.getData());
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 
