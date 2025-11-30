@@ -118,6 +118,9 @@ public class NotificationApplicationService {
         return detectors.values().stream()
                 .flatMap(detector -> {
                     try {
+                        // 在检测变化前先清理过期历史记录
+                        detector.cleanExpiredHistory();
+                        
                         List<ChangeEvent> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
                             log.debug("Detector {} 检测到 {} 个变化",

@@ -8,9 +8,12 @@ import com.nyx.bot.utils.TimeUtils;
 import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.CetusCycle;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +34,30 @@ public class CetusCycleChangeDetector implements ChangeDetector {
 
     private final NotificationHistoryRepository historyRepository;
 
+    /**
+     * 历史记录保留时长（小时）
+     * 默认 12 小时，从配置文件读取
+     */
+    @Value("${warframe.notification.history.retention-hours:12}")
+    private int retentionHours;
+
+    /**
+     * 缓存的保留时长
+     * 避免每次调用都创建 Duration 对象
+     */
+    private Duration retentionDuration;
+
     public CetusCycleChangeDetector(NotificationHistoryRepository historyRepository) {
         this.historyRepository = historyRepository;
+    }
+
+    /**
+     * 初始化方法，在依赖注入完成后执行
+     */
+    @PostConstruct
+    private void init() {
+        this.retentionDuration = Duration.ofHours(retentionHours);
+        log.info("夜灵平原周期检测器初始化完成 [历史记录保留时长:{}小时]", retentionHours);
     }
 
     @Override
@@ -91,6 +116,36 @@ public class CetusCycleChangeDetector implements ChangeDetector {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * 清理当前订阅类型的过期历史记录
+     * <p>
+     * 清理规则：删除 notifiedAt 早于 (当前时间 - 保留时长) 的记录
+     * </p>
+     */
+    @Override
+    public void cleanExpiredHistory() {
+        try {
+            // 计算过期时间点：当前时间 - 保留时长
+            Instant expiredBefore = Instant.now().minus(retentionDuration);
+
+            // 删除过期记录（Repository 方法自带事务）
+            long deletedCount = historyRepository.deleteBySubscribeTypeAndNotifiedAtBefore(
+                    SubscribeEnums.CETUS_CYCLE,
+                    expiredBefore
+            );
+
+            if (deletedCount >= 0) {
+                log.info("清理夜灵平原周期过期通知记录 [数量:{}] [过期时间:{}]",
+                        deletedCount, expiredBefore);
+            } else {
+                log.debug("无需清理夜灵平原周期过期通知记录 [过期时间:{}]", expiredBefore);
+            }
+        } catch (Exception e) {
+            log.error("清理夜灵平原周期历史记录失败", e);
+            // 清理失败不应中断检测流程，仅记录日志
+        }
     }
 
     @Override

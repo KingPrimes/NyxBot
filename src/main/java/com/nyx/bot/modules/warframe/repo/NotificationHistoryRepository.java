@@ -42,4 +42,14 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
      * @return 删除的记录数
      */
     long deleteByNotifiedAtBefore(Instant before);
+
+    /**
+     * 删除指定订阅类型在指定时间之前的历史记录
+     * 用于按订阅类型精确清理过期数据
+     *
+     * @param subscribeType 订阅类型
+     * @param before 指定时间之前
+     * @return 删除的记录数
+     */
+    long deleteBySubscribeTypeAndNotifiedAtBefore(SubscribeEnums subscribeType, Instant before);
 }
