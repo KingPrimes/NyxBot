@@ -4,8 +4,8 @@ import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
-import io.github.kingprimes.model.worldstate.VoidTrader;
 import io.github.kingprimes.model.worldstate.BastWorldState;
+import io.github.kingprimes.model.worldstate.VoidTrader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +20,11 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class VoidChangeDetector implements ChangeDetector {
+public class VoidChangeDetector implements ChangeDetector<VoidTrader> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
-        List<ChangeEvent> events = new ArrayList<>();
+    public List<ChangeEvent<VoidTrader>> detectChanges(WorldState oldState, WorldState newState) {
+        List<ChangeEvent<VoidTrader>> events = new ArrayList<>();
 
         // 边界检查
         if (newState == null || newState.getVoidTraders() == null || newState.getVoidTraders().isEmpty()) {
@@ -49,7 +49,7 @@ public class VoidChangeDetector implements ChangeDetector {
         // 检测新增的商人
         for (VoidTrader newTrader : newState.getVoidTraders()) {
             BastWorldState.Id newTraderId = newTrader.get_id();
-            
+
             if (!oldTraderIds.contains(newTraderId)) {
                 log.info("检测到虚空商人变化 [位置:{}]", newTrader.getNode());
                 events.add(createChangeEvent(newTrader));
@@ -62,8 +62,8 @@ public class VoidChangeDetector implements ChangeDetector {
     /**
      * 创建变化事件
      */
-    private ChangeEvent createChangeEvent(VoidTrader trader) {
-        return new ChangeEvent(
+    private ChangeEvent<VoidTrader> createChangeEvent(VoidTrader trader) {
+        return new ChangeEvent<>(
                 SubscribeEnums.VOID,
                 null,  // 无任务类型
                 null,  // 无等级

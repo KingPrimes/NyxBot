@@ -11,7 +11,7 @@ import io.github.kingprimes.model.enums.SubscribeEnums;
  * <p>
  * 实现类应使用 @Component 注解，Spring会自动注入到应用服务中
  */
-public interface MessageBuilder {
+public interface MessageBuilder<T> {
 
     /**
      * 构建消息内容
@@ -20,7 +20,7 @@ public interface MessageBuilder {
      * @param rule  用户订阅规则（用于个性化消息）
      * @return 消息构建器
      */
-    ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule);
+    ArrayMsgUtils buildMessage(ChangeEvent<T> event, MissionSubscribeUserCheckType rule);
 
     /**
      * 获取支持的订阅类型

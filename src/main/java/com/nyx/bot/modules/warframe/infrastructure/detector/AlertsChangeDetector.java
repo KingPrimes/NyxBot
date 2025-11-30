@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class AlertsChangeDetector implements ChangeDetector {
+public class AlertsChangeDetector implements ChangeDetector<Alert> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
+    public List<ChangeEvent<Alert>> detectChanges(WorldState oldState, WorldState newState) {
         // 1. 边界检查
         if (newState == null || newState.getAlerts() == null) {
             log.debug("新状态或警报数据为空");
@@ -41,7 +41,7 @@ public class AlertsChangeDetector implements ChangeDetector {
                 .collect(Collectors.toSet());
 
         // 3. 过滤出新增的警报（且有任务信息的）
-        List<ChangeEvent> changes = newState.getAlerts().stream()
+        List<ChangeEvent<Alert>> changes = newState.getAlerts().stream()
                 .filter(alert -> alert.getMissionInfo() != null)  // 必须有任务信息
                 .filter(alert -> !oldAlertIds.contains(alert.get_id()))
                 .map(this::createChangeEvent)
@@ -58,10 +58,10 @@ public class AlertsChangeDetector implements ChangeDetector {
      * 创建警报变化事件
      * 警报有任务类型，但没有遗物等级
      */
-    private ChangeEvent createChangeEvent(Alert alert) {
+    private ChangeEvent<Alert> createChangeEvent(Alert alert) {
         return ChangeEvent.of(
                 SubscribeEnums.ALERTS,
-                alert.getMissionInfo() != null ? alert.getMissionInfo().getMissionType() : null,
+                null,
                 null,  // 警报没有等级
                 alert
         );

@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class CetusCycleChangeDetector implements ChangeDetector {
+public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
 
     private final NotificationHistoryRepository historyRepository;
 
@@ -59,7 +59,7 @@ public class CetusCycleChangeDetector implements ChangeDetector {
     }
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
+    public List<ChangeEvent<CetusCycle>> detectChanges(WorldState oldState, WorldState newState) {
         // 边界检查
         if (newState == null || newState.getCetusCycle() == null) {
             log.debug("新状态或夜灵平原数据为空");
@@ -103,7 +103,7 @@ public class CetusCycleChangeDetector implements ChangeDetector {
 
             log.info("已记录夜灵平原周期通知历史 [expiry:{}]", expiryTimestamp);
 
-            ChangeEvent event = ChangeEvent.of(
+            ChangeEvent<CetusCycle> event = ChangeEvent.of(
                     SubscribeEnums.CETUS_CYCLE,
                     null,  // 无任务类型
                     null,  // 无等级

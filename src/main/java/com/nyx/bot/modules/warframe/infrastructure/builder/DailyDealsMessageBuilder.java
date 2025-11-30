@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class DailyDealsMessageBuilder implements MessageBuilder {
+public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        DailyDeals deal = (DailyDeals) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<DailyDeals> event, MissionSubscribeUserCheckType rule) {
+        DailyDeals deal = event.getData();
         
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         

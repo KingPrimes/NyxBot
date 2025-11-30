@@ -12,7 +12,7 @@ import java.util.List;
  * <p>
  * 实现类应使用 @Component 注解，Spring会自动注入到应用服务中
  */
-public interface ChangeDetector {
+public interface ChangeDetector<T> {
 
     /**
      * 检测游戏状态变化
@@ -21,7 +21,7 @@ public interface ChangeDetector {
      * @param newState 新状态
      * @return 变化事件列表，无变化返回空列表
      */
-    List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState);
+    List<ChangeEvent<T>> detectChanges(WorldState oldState, WorldState newState);
 
     /**
      * 获取支持的订阅类型

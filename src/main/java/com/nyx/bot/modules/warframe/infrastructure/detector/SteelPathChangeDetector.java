@@ -17,10 +17,10 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class SteelPathChangeDetector implements ChangeDetector {
+public class SteelPathChangeDetector implements ChangeDetector<SteelPathOffering> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
+    public List<ChangeEvent<SteelPathOffering>> detectChanges(WorldState oldState, WorldState newState) {
         // 边界检查
         if (newState == null || newState.getSteelPath() == null) {
             log.debug("新状态或钢铁之路数据为空");
@@ -44,7 +44,7 @@ public class SteelPathChangeDetector implements ChangeDetector {
                     oldSteelPath.getNextReward().name(),
                     newSteelPath.getNextReward().name());
 
-            ChangeEvent event = ChangeEvent.of(
+            ChangeEvent<SteelPathOffering> event = ChangeEvent.of(
                     SubscribeEnums.STEEL_PATH,
                     null,  // 无任务类型
                     null,  // 无等级

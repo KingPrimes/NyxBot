@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class FissuresChangeDetector implements ChangeDetector {
+public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
+    public List<ChangeEvent<ActiveMission>> detectChanges(WorldState oldState, WorldState newState) {
         // 1. 边界检查
         if (newState == null || newState.getActiveMissions() == null) {
             log.debug("新状态或裂隙数据为空");
@@ -42,7 +42,7 @@ public class FissuresChangeDetector implements ChangeDetector {
                 .collect(Collectors.toSet());
 
         // 3. 过滤出新增的裂隙
-        List<ChangeEvent> changes = newState.getActiveMissions().stream()
+        List<ChangeEvent<ActiveMission>> changes = newState.getActiveMissions().stream()
                 .filter(mission -> !oldMissionIds.contains(mission.get_id()))
                 .map(this::createChangeEvent)
                 .collect(Collectors.toList());
@@ -57,7 +57,7 @@ public class FissuresChangeDetector implements ChangeDetector {
     /**
      * 创建裂隙变化事件
      */
-    private ChangeEvent createChangeEvent(ActiveMission mission) {
+    private ChangeEvent<ActiveMission> createChangeEvent(ActiveMission mission) {
         return ChangeEvent.of(
                 SubscribeEnums.FISSURES,
                 mission.getMissionType(),  // 任务类型（捕获、生存等）

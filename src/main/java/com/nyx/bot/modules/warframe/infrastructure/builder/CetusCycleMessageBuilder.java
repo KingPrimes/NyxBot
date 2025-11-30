@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class CetusCycleMessageBuilder implements MessageBuilder {
+public class CetusCycleMessageBuilder implements MessageBuilder<CetusCycle> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        CetusCycle cycle = (CetusCycle) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<CetusCycle> event, MissionSubscribeUserCheckType rule) {
+        CetusCycle cycle = event.getData();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 

@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class SteelPathMessageBuilder implements MessageBuilder {
+public class SteelPathMessageBuilder implements MessageBuilder<SteelPathOffering> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        SteelPathOffering steelPath = (SteelPathOffering) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<SteelPathOffering> event, MissionSubscribeUserCheckType rule) {
+        SteelPathOffering steelPath = event.getData();
         
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         

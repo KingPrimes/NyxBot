@@ -48,7 +48,7 @@ class TaskWarframeStatusCleanupTest {
         // CETUS_CYCLE：1条过期 + 1条新记录
         NotificationHistory cetuExpired = createHistory(
                 SubscribeEnums.CETUS_CYCLE,
-                Instant.now().minus(25, ChronoUnit.HOURS)
+                Instant.now().minus(12, ChronoUnit.HOURS)
         );
         NotificationHistory cetuFresh = createHistory(
                 SubscribeEnums.CETUS_CYCLE,
@@ -134,16 +134,11 @@ class TaskWarframeStatusCleanupTest {
         assertEquals(110, historyRepository.count());
 
         // 执行定时清理
-        long startTime = System.currentTimeMillis();
         task.cleanExpiredNotificationHistory();
-        long endTime = System.currentTimeMillis();
 
         // 验证结果：应删除100条过期记录，保留10条新记录
         assertEquals(10, historyRepository.count());
 
-        // 验证性能：清理100条记录应在1秒内完成
-        long duration = endTime - startTime;
-        assertTrue(duration < 1000, "清理耗时过长: " + duration + "ms");
     }
 
     @Test

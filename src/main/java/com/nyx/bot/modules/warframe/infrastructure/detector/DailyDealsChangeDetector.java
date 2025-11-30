@@ -20,11 +20,11 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class DailyDealsChangeDetector implements ChangeDetector {
+public class DailyDealsChangeDetector implements ChangeDetector<DailyDeals> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
-        List<ChangeEvent> events = new ArrayList<>();
+    public List<ChangeEvent<DailyDeals>> detectChanges(WorldState oldState, WorldState newState) {
+        List<ChangeEvent<DailyDeals>> events = new ArrayList<>();
 
         // 边界检查
         if (newState == null || newState.getDailyDeals() == null || newState.getDailyDeals().isEmpty()) {
@@ -65,8 +65,8 @@ public class DailyDealsChangeDetector implements ChangeDetector {
     /**
      * 创建变化事件
      */
-    private ChangeEvent createChangeEvent(DailyDeals deal) {
-        return new ChangeEvent(
+    private ChangeEvent<DailyDeals> createChangeEvent(DailyDeals deal) {
+        return new ChangeEvent<>(
                 SubscribeEnums.DAILY_DEALS,
                 null,  // 无任务类型
                 null,  // 无等级

@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class InvasionsChangeDetector implements ChangeDetector {
+public class InvasionsChangeDetector implements ChangeDetector<Invasion> {
 
     @Override
-    public List<ChangeEvent> detectChanges(WorldState oldState, WorldState newState) {
+    public List<ChangeEvent<Invasion>> detectChanges(WorldState oldState, WorldState newState) {
         // 1. 边界检查
         if (newState == null || newState.getInvasions() == null) {
             log.debug("新状态或入侵数据为空");
@@ -41,7 +41,7 @@ public class InvasionsChangeDetector implements ChangeDetector {
                 .collect(Collectors.toSet());
 
         // 3. 过滤出新增的入侵（且未完成的）
-        List<ChangeEvent> changes = newState.getInvasions().stream()
+        List<ChangeEvent<Invasion>> changes = newState.getInvasions().stream()
                 .filter(invasion -> !invasion.getCompleted())  // 只关注未完成的
                 .filter(invasion -> !oldInvasionIds.contains(invasion.get_id()))
                 .map(this::createChangeEvent)
@@ -58,7 +58,7 @@ public class InvasionsChangeDetector implements ChangeDetector {
      * 创建入侵变化事件
      * 入侵没有任务类型和等级的概念
      */
-    private ChangeEvent createChangeEvent(Invasion invasion) {
+    private ChangeEvent<Invasion> createChangeEvent(Invasion invasion) {
         return ChangeEvent.of(
                 SubscribeEnums.INVASIONS,
                 null,  // 入侵没有任务类型

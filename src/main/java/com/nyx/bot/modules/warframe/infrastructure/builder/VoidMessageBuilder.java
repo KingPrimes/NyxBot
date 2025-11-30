@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class VoidMessageBuilder implements MessageBuilder {
+public class VoidMessageBuilder implements MessageBuilder<VoidTrader> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        VoidTrader trader = (VoidTrader) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<VoidTrader> event, MissionSubscribeUserCheckType rule) {
+        VoidTrader trader = event.getData();
         
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         

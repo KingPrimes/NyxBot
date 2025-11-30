@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class InvasionsMessageBuilder implements MessageBuilder {
+public class InvasionsMessageBuilder implements MessageBuilder<Invasion> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        Invasion invasion = (Invasion) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<Invasion> event, MissionSubscribeUserCheckType rule) {
+        Invasion invasion = event.getData();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         

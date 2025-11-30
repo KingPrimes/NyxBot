@@ -41,20 +41,20 @@ class CetusCycleChangeDetectorTest {
     }
 
     @Test
-    @DisplayName("测试清理超过24小时的过期记录")
+    @DisplayName("测试清理超过12小时的过期记录")
     void testCleanExpiredHistory_OldRecords() {
         // 准备测试数据：3条记录
-        // 1. 过期超过24小时的记录
+        // 1. 过期超过12小时的记录
         NotificationHistory expired = createHistory(
                 SubscribeEnums.CETUS_CYCLE,
                 Instant.now().minus(25, ChronoUnit.HOURS),
                 "day"
         );
 
-        // 2. 过期12小时的记录（应保留）
+        // 2. 过期8小时的记录（应保留）
         NotificationHistory halfExpired = createHistory(
                 SubscribeEnums.CETUS_CYCLE,
-                Instant.now().minus(12, ChronoUnit.HOURS),
+                Instant.now().minus(8, ChronoUnit.HOURS),
                 "day"
         );
 

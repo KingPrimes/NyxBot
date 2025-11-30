@@ -9,7 +9,7 @@ import lombok.Value;
  * 用于封装检测到的游戏状态变化
  */
 @Value
-public class ChangeEvent {
+public class ChangeEvent<T> {
     /**
      * 订阅类型
      */
@@ -28,7 +28,14 @@ public class ChangeEvent {
     /**
      * 变化的具体数据
      */
-    Object data;
+    T data;
+
+    public ChangeEvent(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
+        this.type = type;
+        this.missionType = missionType;
+        this.tier = tier;
+        this.data = data;
+    }
 
     /**
      * 创建变化事件
@@ -39,8 +46,8 @@ public class ChangeEvent {
      * @param data        具体数据
      * @return 变化事件
      */
-    public static ChangeEvent of(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, Object data) {
-        return new ChangeEvent(type, missionType, tier, data);
+    public static <T> ChangeEvent<T> of(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
+        return new ChangeEvent<>(type, missionType, tier, data);
     }
 
     /**
@@ -50,7 +57,7 @@ public class ChangeEvent {
      * @param data 具体数据
      * @return 变化事件
      */
-    public static ChangeEvent of(SubscribeEnums type, Object data) {
-        return new ChangeEvent(type, null, null, data);
+    public static <T> ChangeEvent<T> of(SubscribeEnums type, T data) {
+        return new ChangeEvent<>(type, null, null, data);
     }
 }

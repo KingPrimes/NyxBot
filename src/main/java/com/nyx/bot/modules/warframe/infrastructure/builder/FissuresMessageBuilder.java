@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class FissuresMessageBuilder implements MessageBuilder {
+public class FissuresMessageBuilder implements MessageBuilder<ActiveMission> {
 
     @Override
-    public ArrayMsgUtils buildMessage(ChangeEvent event, MissionSubscribeUserCheckType rule) {
-        ActiveMission mission = (ActiveMission) event.getData();
+    public ArrayMsgUtils buildMessage(ChangeEvent<ActiveMission> event, MissionSubscribeUserCheckType rule) {
+        ActiveMission mission = event.getData();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         

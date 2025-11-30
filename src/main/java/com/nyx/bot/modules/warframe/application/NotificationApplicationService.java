@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 @Service
 public class NotificationApplicationService {
 
-    private final Map<SubscribeEnums, ChangeDetector> detectors;
-    private final Map<SubscribeEnums, MessageBuilder> builders;
+    private final Map<SubscribeEnums, ChangeDetector<?>> detectors;
+    private final Map<SubscribeEnums, MessageBuilder<?>> builders;
     private final MissionSubscribeRepository subscribeRepo;
     private final BotContainer botContainer;
 
@@ -52,8 +52,8 @@ public class NotificationApplicationService {
      */
     @Autowired
     public NotificationApplicationService(
-            List<ChangeDetector> detectorList,
-            List<MessageBuilder> builderList,
+            List<ChangeDetector<?>> detectorList,
+            List<MessageBuilder<?>> builderList,
             MissionSubscribeRepository subscribeRepo,
             BotContainer botContainer
     ) {
@@ -92,7 +92,7 @@ public class NotificationApplicationService {
         }
 
         // 1. 使用所有 Detector 检测变化
-        List<ChangeEvent> allChanges = detectAllChanges(oldState, newState);
+        List<ChangeEvent<?>> allChanges = detectAllChanges(oldState, newState);
 
         if (allChanges.isEmpty()) {
             log.debug("未检测到任何变化");
@@ -102,7 +102,7 @@ public class NotificationApplicationService {
         log.info("检测到 {} 个变化事件", allChanges.size());
 
         // 2. 按订阅类型分组
-        Map<SubscribeEnums, List<ChangeEvent>> changesByType = allChanges.stream()
+        Map<SubscribeEnums, List<ChangeEvent<?>>> changesByType = allChanges.stream()
                 .collect(Collectors.groupingBy(ChangeEvent::getType));
 
         // 3. 异步处理每种类型的通知
@@ -114,14 +114,14 @@ public class NotificationApplicationService {
     /**
      * 检测所有类型的变化
      */
-    private List<ChangeEvent> detectAllChanges(WorldState oldState, WorldState newState) {
+    private List<ChangeEvent<?>> detectAllChanges(WorldState oldState, WorldState newState) {
         return detectors.values().stream()
                 .flatMap(detector -> {
                     try {
                         // 在检测变化前先清理过期历史记录
                         detector.cleanExpiredHistory();
-                        
-                        List<ChangeEvent> changes = detector.detectChanges(oldState, newState);
+
+                        List<? extends ChangeEvent<?>> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
                             log.debug("Detector {} 检测到 {} 个变化",
                                     detector.getClass().getSimpleName(), changes.size());
@@ -143,7 +143,7 @@ public class NotificationApplicationService {
      * @param type    订阅类型
      * @param changes 变化列表
      */
-    private void notifySubscribers(SubscribeEnums type, List<ChangeEvent> changes) {
+    private void notifySubscribers(SubscribeEnums type, List<ChangeEvent<?>> changes) {
         // 查询订阅该类型的所有订阅组
         List<MissionSubscribe> subscriptions = subscribeRepo.findSubscriptions(type);
 
@@ -159,7 +159,7 @@ public class NotificationApplicationService {
             // 遍历订阅组中的用户
             subscription.getUsers().forEach(user -> {
                 // ⭐ 核心：精确匹配用户的订阅规则
-                List<ChangeEvent> matchedChanges = filterMatchingChanges(user, changes);
+                List<ChangeEvent<?>> matchedChanges = filterMatchingChanges(user, changes);
 
                 if (!matchedChanges.isEmpty()) {
                     sendNotification(subscription, user, matchedChanges);
@@ -176,9 +176,9 @@ public class NotificationApplicationService {
      * @param changes 所有变化
      * @return 匹配的变化列表
      */
-    private List<ChangeEvent> filterMatchingChanges(
+    private List<ChangeEvent<?>> filterMatchingChanges(
             MissionSubscribeUser user,
-            List<ChangeEvent> changes
+            List<ChangeEvent<?>> changes
     ) {
         return changes.stream()
                 .filter(event -> user.getCheckTypes().stream()
@@ -190,24 +190,22 @@ public class NotificationApplicationService {
      * 判断事件是否匹配规则
      * 三维精确匹配：类型 + 任务类型 + 等级
      */
-    private boolean matchesRule(ChangeEvent event, MissionSubscribeUserCheckType rule) {
+    private boolean matchesRule(ChangeEvent<?> event, MissionSubscribeUserCheckType rule) {
         // 1. 订阅类型必须匹配
         if (rule.getSubscribe() != event.getType()) {
             return false;
         }
 
         // 2. 任务类型匹配（null 表示全部）
-        if (rule.getMissionTypeEnum() != null &&
-                event.getMissionType() != null &&
-                rule.getMissionTypeEnum() != event.getMissionType()) {
-            return false;
+        if (rule.getMissionTypeEnum() != null) {
+            if (event.getMissionType() == null || !rule.getMissionTypeEnum().equals(event.getMissionType())) {
+                return false;
+            }
         }
 
         // 3. 遗物等级匹配（null 表示全部）
-        if (rule.getTierNum() != null &&
-                event.getTier() != null &&
-                !rule.getTierNum().equals(event.getTier())) {
-            return false;
+        if (rule.getTierNum() != null) {
+            return event.getTier() != null && rule.getTierNum().equals(event.getTier());
         }
 
         return true;
@@ -224,7 +222,7 @@ public class NotificationApplicationService {
     private void sendNotification(
             MissionSubscribe subscription,
             MissionSubscribeUser user,
-            List<ChangeEvent> changes
+            List<ChangeEvent<?>> changes
     ) {
         try {
             // 获取 Bot 实例
@@ -236,7 +234,7 @@ public class NotificationApplicationService {
 
             // 获取 MessageBuilder
             SubscribeEnums type = changes.getFirst().getType();
-            MessageBuilder builder = builders.get(type);
+            MessageBuilder<?> builder = builders.get(type);
             if (builder == null) {
                 log.warn("类型 {} 没有对应的 MessageBuilder", type.getNAME());
                 return;
