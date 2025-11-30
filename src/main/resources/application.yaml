@@ -85,6 +85,15 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 10s
 
+# Warframe 模块配置
+warframe:
+  notification:
+    history:
+      # 通知历史记录保留时长（小时）
+      # 默认 12 小时，超过此时间的记录将被自动清理
+      # 建议不少于 12 小时，以确保周期性任务的防重复机制有效
+      retention-hours: 12
+
 # OneBot
 shiro:
   ws:
