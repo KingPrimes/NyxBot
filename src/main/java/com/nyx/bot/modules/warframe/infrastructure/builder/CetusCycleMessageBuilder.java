@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 /**
  * 夜灵平原周期消息构建器
  * 构建地球平原昼夜循环的通知消息
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

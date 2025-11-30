@@ -14,8 +14,6 @@ import java.util.List;
 /**
  * 钢铁之路变化检测器
  * 检测钢铁之路奖励轮换
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

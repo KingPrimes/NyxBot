@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 /**
  * 入侵变化检测器
  * 检测新出现的派系入侵事件
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

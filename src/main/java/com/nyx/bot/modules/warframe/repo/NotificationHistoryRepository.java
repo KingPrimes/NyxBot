@@ -11,8 +11,6 @@ import java.util.Optional;
 /**
  * 通知历史记录仓储
  * 用于查询和保存通知历史，防止重复通知
- * 
- * @author Nyx Bot
  */
 @Repository
 public interface NotificationHistoryRepository extends JpaRepository<NotificationHistory, Long> {

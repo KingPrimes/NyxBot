@@ -25,8 +25,6 @@ import java.util.List;
  * 触发条件：剩余时间 <= 18 分钟时通知一次
  * <p>
  * 防重复机制：使用数据库记录已通知的周期，通过过期时间戳唯一标识每个周期
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

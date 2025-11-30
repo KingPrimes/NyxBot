@@ -14,9 +14,6 @@ import org.springframework.stereotype.Component;
  * <p>
  * 负责构建Darvo每日特惠的通知消息
  * </p>
- *
- * @author Nyx
- * @since 2024-01-01
  */
 @Slf4j
 @Component

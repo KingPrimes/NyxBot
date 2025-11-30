@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * 夜灵平原周期检测器测试
  * 主要测试清理过期通知历史记录的功能
- *
- * @author Nyx Bot
  */
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Transactional

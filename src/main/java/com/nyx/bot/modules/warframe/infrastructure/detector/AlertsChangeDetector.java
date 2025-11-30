@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 /**
  * 警报变化检测器
  * 检测新出现的警报任务
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

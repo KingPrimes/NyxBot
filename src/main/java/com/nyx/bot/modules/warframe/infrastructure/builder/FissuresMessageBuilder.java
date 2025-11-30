@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 /**
  * 裂隙消息构建器
  * 构建裂隙任务的通知消息
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

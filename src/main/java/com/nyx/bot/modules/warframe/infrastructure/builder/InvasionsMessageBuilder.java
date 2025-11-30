@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 /**
  * 入侵消息构建器
  * 构建派系入侵的通知消息
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

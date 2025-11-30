@@ -11,16 +11,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 虚空商人变化检测器
  * <p>
  * 检测虚空商人Baro Ki'Teer的到来和离开，当商人状态变化时触发通知
  * </p>
- *
- * @author Nyx
- * @since 2024-01-01
  */
 @Slf4j
 @Component

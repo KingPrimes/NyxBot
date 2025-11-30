@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Warframe 状态定时任务清理功能测试
  * 测试定时清理所有订阅类型的过期历史记录
- *
- * @author Nyx Bot
  */
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Transactional

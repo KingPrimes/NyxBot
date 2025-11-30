@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 /**
  * 警报消息构建器
  * 构建警报任务的通知消息（使用图片）
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component

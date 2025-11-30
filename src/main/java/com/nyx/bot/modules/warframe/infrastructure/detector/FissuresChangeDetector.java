@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 /**
  * 裂隙变化检测器
  * 检测新出现的虚空裂隙任务
- *
- * @author Nyx Bot
  */
 @Slf4j
 @Component
