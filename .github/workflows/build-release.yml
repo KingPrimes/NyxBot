@@ -80,6 +80,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF: ${{ github.ref }}
 
+      # 删除 release-drafter 创建的重复草稿（如果存在）
+      - name: Clean up duplicate draft releases
+        run: |
+          # 提取 tag 名称
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "Looking for duplicate draft releases with tag: $TAG_NAME"
+          
+          # 查找并删除由 release-drafter 创建的草稿
+          gh release list --limit 20 | grep "Draft" | while read -r line; do
+            RELEASE_TAG=$(echo "$line" | awk '{print $1}')
+            RELEASE_TITLE=$(echo "$line" | awk '{for(i=2;i<=NF;i++) printf "%s ", $i; print ""}')
+            
+            # 如果找到与当前 tag 匹配的草稿，则删除
+            if [ "$RELEASE_TAG" = "$TAG_NAME" ]; then
+              echo "Found duplicate draft release: $RELEASE_TAG - $RELEASE_TITLE"
+              echo "Deleting duplicate draft..."
+              gh release delete "$RELEASE_TAG" --yes --cleanup-tag || true
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -98,6 +121,8 @@ jobs:
           release_name: ${{ steps.generate_release_notes.outputs.name }}
           # 设置正文为 release-drafter/release-drafter@v6 步骤中生成的 release notes
           body: ${{ steps.generate_release_notes.outputs.body }}
+          # 如果存在同名 Release，则覆盖（防止重复）
+          overwrite: true
 
   build-docker:
     needs: build-release
