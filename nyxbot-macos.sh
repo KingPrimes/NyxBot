@@ -12,7 +12,6 @@ set -euo pipefail  # 严格模式：遇到错误立即退出
 # 设置变量
 readonly SCRIPT_VERSION="2.0.0"
 readonly API_URL="https://api.github.com/repos/KingPrimes/depot/releases/latest"
-readonly MIRROR_PREFIX="https://ghproxy.com/"
 readonly DOWNLOAD_DIR="$(cd "$(dirname "$0")" && pwd)/nyxbot_data"
 readonly NYXBOT_JAR="$DOWNLOAD_DIR/NyxBot.jar"
 readonly VERSION_FILE="$DOWNLOAD_DIR/.version"
@@ -28,7 +27,8 @@ readonly NC='\033[0m' # No Color
 # 命令行参数
 FORCE_UPDATE=false
 SKIP_JAVA_INSTALL=false
-CUSTOM_MIRROR=""
+PROXY_NUM=""
+GITHUB_PROXY=""
 
 # 错误处理
 trap 'error_handler $? $LINENO' ERR
@@ -76,8 +76,8 @@ parse_arguments() {
                 SKIP_JAVA_INSTALL=true
                 shift
                 ;;
-            --mirror)
-                CUSTOM_MIRROR="$2"
+            --proxy)
+                PROXY_NUM="$2"
                 shift 2
                 ;;
             --version)
@@ -112,7 +112,8 @@ show_help() {
   $0                          # 正常安装
   $0 --force-update           # 强制更新到最新版本
   $0 --skip-java              # 跳过Java安装（假设已安装JDK 21）
-  $0 --mirror https://mirror.ghproxy.com/  # 使用自定义镜像
+  $0 --proxy 0                # 不使用代理（直连）
+  $0 --proxy 1                # 使用第1个代理服务器
 EOF
 }
 
@@ -420,6 +421,84 @@ wait_for_installation_complete() {
     fi
 }
 
+# 网络测试和代理选择函数
+test_github_proxy() {
+    local proxy_arr=("https://ghfast.top" "https://git.yylx.win/" "https://gh-proxy.com" "https://ghfile.geekertao.top" "https://gh-proxy.net" "https://j.1win.ggff.net" "https://ghm.078465.xyz" "https://gitproxy.127731.xyz" "https://jiashu.1win.eu.org" "https://github.tbedu.top")
+    local check_url="https://raw.githubusercontent.com/KingPrimes/depot/main/README.md"
+    local timeout=10
+    
+    log_info "开始 GitHub 代理网络测试..."
+    
+    # 如果指定了代理序号
+    if [[ -n "$PROXY_NUM" ]]; then
+        if [ "$PROXY_NUM" = "0" ]; then
+            log_info "已指定不使用代理（直连）"
+            GITHUB_PROXY=""
+            return 0
+        elif [[ "$PROXY_NUM" =~ ^[0-9]+$ ]] && [ "$PROXY_NUM" -ge 1 ] && [ "$PROXY_NUM" -le ${#proxy_arr[@]} ]; then
+            GITHUB_PROXY="${proxy_arr[$((PROXY_NUM - 1))]}"
+            log_info "已指定使用代理: $GITHUB_PROXY"
+            return 0
+        else
+            log_warning "无效的代理序号: $PROXY_NUM，将自动选择"
+        fi
+    fi
+    
+    # 自动测速选择最快代理
+    local best_proxy=""
+    local best_speed=0
+    
+    # 测试直连
+    log_info "测速: 直连..."
+    local curl_output
+    curl_output=$(curl -k -L --connect-timeout ${timeout} --max-time $((timeout * 3)) -o /dev/null -s -w "%{http_code}:%{exitcode}:%{speed_download}" "${check_url}" 2>/dev/null)
+    local status=$(echo "${curl_output}" | cut -d: -f1)
+    local curl_exit_code=$(echo "${curl_output}" | cut -d: -f2)
+    local download_speed=$(echo "${curl_output}" | cut -d: -f3 | cut -d. -f1)
+    
+    if [ "${curl_exit_code}" -eq 0 ] && [ "${status}" -eq 200 ]; then
+        local speed_mb=$((download_speed / 1048576))
+        log_info "测速: 直连 - ${speed_mb} MB/s"
+        best_speed=${download_speed}
+    else
+        log_info "直连测试失败"
+    fi
+    
+    # 测试所有代理
+    for proxy_candidate in "${proxy_arr[@]}"; do
+        local test_url="${proxy_candidate}/${check_url}"
+        
+        curl_output=$(curl -k -L --connect-timeout ${timeout} --max-time $((timeout * 3)) -o /dev/null -s -w "%{http_code}:%{exitcode}:%{speed_download}" "${test_url}" 2>/dev/null)
+        status=$(echo "${curl_output}" | cut -d: -f1)
+        curl_exit_code=$(echo "${curl_output}" | cut -d: -f2)
+        download_speed=$(echo "${curl_output}" | cut -d: -f3 | cut -d. -f1)
+        
+        if [ "${curl_exit_code}" -eq 0 ] && [ "${status}" -eq 200 ]; then
+            local speed_mb=$((download_speed / 1048576))
+            log_info "测速: ${proxy_candidate} - ${speed_mb} MB/s"
+            
+            if [[ ${download_speed} -gt ${best_speed} ]]; then
+                best_speed=${download_speed}
+                best_proxy=${proxy_candidate}
+            fi
+        fi
+    done
+    
+    if [[ ${best_speed} -gt 0 ]]; then
+        GITHUB_PROXY="${best_proxy}"
+        if [ -n "${best_proxy}" ]; then
+            log_success "将使用最快的代理: $GITHUB_PROXY"
+        else
+            log_success "直连速度最快，不使用代理"
+        fi
+        return 0
+    else
+        log_warning "所有代理和直连均失败，将尝试直连"
+        GITHUB_PROXY=""
+        return 1
+    fi
+}
+
 # 下载文件函数（带重试和校验）
 download_file() {
     local url=$1
@@ -429,11 +508,15 @@ download_file() {
 
     log_info "下载 $description..."
     
-    # 使用自定义镜像（如果提供）
-    local mirror_prefix="${CUSTOM_MIRROR:-$MIRROR_PREFIX}"
+    # 构建下载URL
+    local download_url="$url"
+    if [ -n "$GITHUB_PROXY" ]; then
+        download_url="${GITHUB_PROXY}/${url#https://}"
+        log_info "使用代理: $GITHUB_PROXY"
+    fi
     
-    # 首次尝试直接下载
-    if curl -L -o "$destination" "$url" --connect-timeout 10 --max-time 300 --retry 3 -H "User-Agent: Mozilla/5.0" 2>> "$LOG_FILE"; then
+    # 尝试下载
+    if curl -L -o "$destination" "$download_url" --connect-timeout 10 --max-time 300 --retry 3 -H "User-Agent: Mozilla/5.0" 2>> "$LOG_FILE"; then
         log_success "$description 下载完成"
         
         # 验证SHA256（如果提供）
@@ -442,21 +525,8 @@ download_file() {
         fi
         return 0
     else
-        log_warning "直接下载失败，尝试使用镜像..."
-        local mirror_url="${mirror_prefix}${url#https://}"
-        
-        if curl -L -o "$destination" "$mirror_url" --connect-timeout 10 --max-time 300 --retry 3 -H "User-Agent: Mozilla/5.0" 2>> "$LOG_FILE"; then
-            log_success "$description (镜像) 下载完成"
-            
-            # 验证SHA256（如果提供）
-            if [ -n "$expected_sha256" ]; then
-                verify_sha256 "$destination" "$expected_sha256" "$description"
-            fi
-            return 0
-        else
-            log_error "无法下载 $description"
-            return 1
-        fi
+        log_error "无法下载 $description"
+        return 1
     fi
 }
 
@@ -493,15 +563,14 @@ verify_sha256() {
 get_latest_release() {
     log_info "获取最新release信息..."
     
-    local api_response
-    api_response=$(curl -s -H "User-Agent: Mozilla/5.0" -H "Accept: application/vnd.github.v3+json" "$API_URL" --connect-timeout 10 --retry 3 2>> "$LOG_FILE")
-
-    if [ $? -ne 0 ] || [ -z "$api_response" ] || [[ "$api_response" == *"Not Found"* ]]; then
-        log_warning "API请求失败，尝试使用镜像..."
-        local mirror_prefix="${CUSTOM_MIRROR:-$MIRROR_PREFIX}"
-        local api_url_mirror="${mirror_prefix}${API_URL#https://}"
-        api_response=$(curl -s -H "User-Agent: Mozilla/5.0" -H "Accept: application/vnd.github.v3+json" "$api_url_mirror" --connect-timeout 10 --retry 3 2>> "$LOG_FILE")
+    # 构建API URL
+    local api_url="$API_URL"
+    if [ -n "$GITHUB_PROXY" ]; then
+        api_url="${GITHUB_PROXY}/${API_URL#https://}"
     fi
+    
+    local api_response
+    api_response=$(curl -s -H "User-Agent: Mozilla/5.0" -H "Accept: application/vnd.github.v3+json" "$api_url" --connect-timeout 10 --retry 3 2>> "$LOG_FILE")
 
     if [ -z "$api_response" ] || [[ "$api_response" == *"Not Found"* ]]; then
         log_error "无法获取最新release信息"
@@ -588,6 +657,9 @@ main() {
     
     # 检查 OneBot 实现
     check_onebot_implementation
+    
+    # 测试网络和选择代理
+    test_github_proxy
     
     get_latest_release
     

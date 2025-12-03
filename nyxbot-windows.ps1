@@ -11,7 +11,7 @@
 param(
     [switch]$ForceUpdate,
     [switch]$SkipJava,
-    [string]$Mirror = "",
+    [string]$Proxy = "",
     [switch]$Version,
     [switch]$Help
 )
@@ -23,7 +23,6 @@ $ProgressPreference = "SilentlyContinue"
 # 设置变量
 $SCRIPT_VERSION = "2.0.0"
 $API_URL = "https://api.github.com/repos/KingPrimes/depot/releases/latest"
-$MIRROR_PREFIX = "https://ghproxy.com/"
 $DOWNLOAD_DIR = Join-Path $PSScriptRoot "nyxbot_data"
 $NYXBOT_JAR = "$DOWNLOAD_DIR\NyxBot.jar"
 $VERSION_FILE = "$DOWNLOAD_DIR\.version"
@@ -35,6 +34,7 @@ $ASSET_NAME = ""
 $RELEASE_TAG = ""
 $SHA256_URL = ""
 $EXPECTED_SHA256 = ""
+$GITHUB_PROXY = ""
 
 # 错误处理
 trap {
@@ -70,15 +70,16 @@ function Show-Help {
 选项:
   -ForceUpdate    强制更新，即使本地已是最新版本
   -SkipJava       跳过Java环境检查和安装
-  -Mirror <url>   使用自定义镜像前缀
+  -Proxy <num>    指定代理序号（0=不使用代理，1-N=使用第N个代理）
   -Version        显示脚本版本
   -Help           显示此帮助信息
 
 示例:
-  .\nyxbot-windows.ps1                      # 正常安装
+  .\nyxbot-windows.ps1                      # 正常安装（自动选择最快代理）
   .\nyxbot-windows.ps1 -ForceUpdate         # 强制更新到最新版本
   .\nyxbot-windows.ps1 -SkipJava            # 跳过Java安装
-  .\nyxbot-windows.ps1 -Mirror "https://mirror.ghproxy.com/"
+  .\nyxbot-windows.ps1 -Proxy 0             # 不使用代理（直连）
+  .\nyxbot-windows.ps1 -Proxy 1             # 使用第1个代理服务器
 "@
 }
 
@@ -395,6 +396,100 @@ function Wait-ForInstallationComplete {
     }
 }
 
+# 网络测试和代理选择函数
+function Test-GitHubProxy {
+    $proxyArr = @(
+        "https://ghfast.top",
+        "https://git.yylx.win/",
+        "https://gh-proxy.com",
+        "https://ghfile.geekertao.top",
+        "https://gh-proxy.net",
+        "https://j.1win.ggff.net",
+        "https://ghm.078465.xyz",
+        "https://gitproxy.127731.xyz",
+        "https://jiashu.1win.eu.org",
+        "https://github.tbedu.top"
+    )
+    $checkUrl = "https://raw.githubusercontent.com/KingPrimes/depot/main/README.md"
+    $timeout = 10
+    
+    Write-Log "开始 GitHub 代理网络测试..." "INFO"
+    
+    # 如果指定了代理序号
+    if ($Proxy -ne "") {
+        if ($Proxy -eq "0") {
+            Write-Log "已指定不使用代理（直连）" "INFO"
+            $script:GITHUB_PROXY = ""
+            return $true
+        } elseif ($Proxy -match '^\d+$' -and [int]$Proxy -ge 1 -and [int]$Proxy -le $proxyArr.Count) {
+            $script:GITHUB_PROXY = $proxyArr[[int]$Proxy - 1]
+            Write-Log "已指定使用代理: $GITHUB_PROXY" "INFO"
+            return $true
+        } else {
+            Write-Log "无效的代理序号: $Proxy，将自动选择" "WARNING"
+        }
+    }
+    
+    # 自动测速选择最快代理
+    $bestProxy = ""
+    $bestSpeed = 0
+    
+    # 测试直连
+    Write-Log "测速: 直连..." "INFO"
+    try {
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        $response = Invoke-WebRequest -Uri $checkUrl -TimeoutSec $timeout -UseBasicParsing -ErrorAction Stop
+        $stopwatch.Stop()
+        
+        if ($response.StatusCode -eq 200) {
+            $speed = $response.Content.Length / $stopwatch.Elapsed.TotalSeconds
+            $speedMB = [math]::Round($speed / 1MB, 2)
+            Write-Log "测速: 直连 - $speedMB MB/s" "INFO"
+            $bestSpeed = $speed
+        }
+    } catch {
+        Write-Log "直连测试失败" "INFO"
+    }
+    
+    # 测试所有代理
+    foreach ($proxyCandidate in $proxyArr) {
+        $testUrl = "$proxyCandidate/$checkUrl"
+        
+        try {
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            $response = Invoke-WebRequest -Uri $testUrl -TimeoutSec $timeout -UseBasicParsing -ErrorAction Stop
+            $stopwatch.Stop()
+            
+            if ($response.StatusCode -eq 200) {
+                $speed = $response.Content.Length / $stopwatch.Elapsed.TotalSeconds
+                $speedMB = [math]::Round($speed / 1MB, 2)
+                Write-Log "测速: $proxyCandidate - $speedMB MB/s" "INFO"
+                
+                if ($speed -gt $bestSpeed) {
+                    $bestSpeed = $speed
+                    $bestProxy = $proxyCandidate
+                }
+            }
+        } catch {
+            # 忽略失败的代理
+        }
+    }
+    
+    if ($bestSpeed -gt 0) {
+        $script:GITHUB_PROXY = $bestProxy
+        if ($bestProxy -ne "") {
+            Write-Log "将使用最快的代理: $GITHUB_PROXY" "SUCCESS"
+        } else {
+            Write-Log "直连速度最快，不使用代理" "SUCCESS"
+        }
+        return $true
+    } else {
+        Write-Log "所有代理和直连均失败，将尝试直连" "WARNING"
+        $script:GITHUB_PROXY = ""
+        return $false
+    }
+}
+
 # 下载文件函数（带重试和校验）
 function Download-File {
     param(
@@ -406,14 +501,17 @@ function Download-File {
 
     Write-Log "下载 $Description..." "INFO"
     
-    # 使用自定义镜像（如果提供）
-    $mirrorPrefix = if ($Mirror) { $Mirror } else { $MIRROR_PREFIX }
+    # 构建下载URL
+    $downloadUrl = $Url
+    if ($GITHUB_PROXY -ne "") {
+        $downloadUrl = "$GITHUB_PROXY/" + $Url.Substring("https://".Length)
+        Write-Log "使用代理: $GITHUB_PROXY" "INFO"
+    }
     
     try {
-        # 首次尝试直接下载
         $webClient = New-Object System.Net.WebClient
         $webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-        $webClient.DownloadFile($Url, $Destination)
+        $webClient.DownloadFile($downloadUrl, $Destination)
         Write-Log "$Description 下载完成" "SUCCESS"
         
         # 验证SHA256（如果提供）
@@ -424,27 +522,8 @@ function Download-File {
         }
         return $true
     } catch {
-        Write-Log "下载失败: $($_.Exception.Message)" "WARNING"
-        Write-Log "尝试使用镜像..." "INFO"
-
-        try {
-            $mirrorUrl = $mirrorPrefix + $Url.Substring("https://".Length)
-            $webClient = New-Object System.Net.WebClient
-            $webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            $webClient.DownloadFile($mirrorUrl, $Destination)
-            Write-Log "$Description (镜像) 下载完成" "SUCCESS"
-            
-            # 验证SHA256（如果提供）
-            if ($ExpectedSHA256) {
-                if (-not (Verify-SHA256 -File $Destination -ExpectedSHA256 $ExpectedSHA256 -Description $Description)) {
-                    return $false
-                }
-            }
-            return $true
-        } catch {
-            Write-Log "无法下载 $Description`: $($_.Exception.Message)" "ERROR"
-            return $false
-        }
+        Write-Log "无法下载 $Description`: $($_.Exception.Message)" "ERROR"
+        return $false
     }
 }
 
@@ -483,13 +562,19 @@ function Verify-SHA256 {
 function Get-LatestRelease {
     Write-Log "获取最新release信息..." "INFO"
     
+    # 构建API URL
+    $apiUrl = $API_URL
+    if ($GITHUB_PROXY -ne "") {
+        $apiUrl = "$GITHUB_PROXY/" + $API_URL.Substring("https://".Length)
+    }
+    
     try {
         $headers = @{
             "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             "Accept" = "application/vnd.github.v3+json"
         }
 
-        $apiResponse = Invoke-RestMethod -Uri $API_URL -Headers $headers -TimeoutSec 10
+        $apiResponse = Invoke-RestMethod -Uri $apiUrl -Headers $headers -TimeoutSec 10
         $jarAsset = $apiResponse.assets | Where-Object { $_.name -like "*.jar" } | Select-Object -First 1
 
         if (-not $jarAsset) {
@@ -509,34 +594,8 @@ function Get-LatestRelease {
         Write-Log "找到最新构建: $ASSET_NAME (版本: $RELEASE_TAG)" "SUCCESS"
         Add-Content -Path $LOG_FILE -Value "下载URL: $DOWNLOAD_URL"
     } catch {
-        Write-Log "API请求失败: $($_.Exception.Message)" "WARNING"
-        Write-Log "尝试使用镜像..." "INFO"
-
-        try {
-            $mirrorPrefix = if ($Mirror) { $Mirror } else { $MIRROR_PREFIX }
-            $mirrorApiUrl = $mirrorPrefix + $API_URL.Substring("https://".Length)
-            $apiResponse = Invoke-RestMethod -Uri $mirrorApiUrl -Headers $headers -TimeoutSec 10
-            $jarAsset = $apiResponse.assets | Where-Object { $_.name -like "*.jar" } | Select-Object -First 1
-
-            if (-not $jarAsset) {
-                throw "未找到JAR文件"
-            }
-
-            $script:DOWNLOAD_URL = $jarAsset.browser_download_url
-            $script:ASSET_NAME = $jarAsset.name
-            $script:RELEASE_TAG = $apiResponse.tag_name
-            
-            # 尝试获取SHA256
-            $sha256Asset = $apiResponse.assets | Where-Object { $_.name -like "*.jar.sha256" } | Select-Object -First 1
-            if ($sha256Asset) {
-                $script:SHA256_URL = $sha256Asset.browser_download_url
-            }
-
-            Write-Log "找到最新构建: $ASSET_NAME (版本: $RELEASE_TAG)" "SUCCESS"
-        } catch {
-            Write-Log "镜像API请求失败: $($_.Exception.Message)" "ERROR"
-            exit 1
-        }
+        Write-Log "API请求失败: $($_.Exception.Message)" "ERROR"
+        exit 1
     }
 }
 
@@ -591,6 +650,9 @@ function Main {
     # 检查 OneBot 实现
     Test-OneBotImplementation
     
+    # 测试网络和选择代理
+    Test-GitHubProxy
+    
     Get-LatestRelease
     
     # 检查是否需要更新
@@ -612,8 +674,7 @@ function Main {
         if (-not (Download-File -Url $DOWNLOAD_URL -Destination $NYXBOT_JAR -Description "NyxBot.jar" -ExpectedSHA256 $EXPECTED_SHA256)) {
             Write-Log "下载失败" "ERROR"
             
-            # 
-如果有备份，恢复备份
+            # 如果有备份，恢复备份
             if (Test-Path "$NYXBOT_JAR.bak") {
                 Write-Log "恢复备份版本..." "INFO"
                 Move-Item -Path "$NYXBOT_JAR.bak" -Destination $NYXBOT_JAR -Force
