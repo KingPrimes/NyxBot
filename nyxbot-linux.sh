@@ -651,20 +651,6 @@ main() {
         # 备份旧版本（如果存在）
         if [ -f "$NYXBOT_JAR" ]; then
             local backup_file="${NYXBOT_JAR}.bak"
-            log_info 
-    get_latest_release
-    
-    # 检查是否需要更新
-    if [ -f "$NYXBOT_JAR" ] && check_version; then
-        log_info "使用现有版本，直接启动..."
-    else
-        # 下载SHA256（如果存在）
-        EXPECTED_SHA256=""
-        download_sha256 && true  # 即使失败也继续
-        
-        # 备份旧版本（如果存在）
-        if [ -f "$NYXBOT_JAR" ]; then
-            local backup_file="${NYXBOT_JAR}.bak"
             log_info "备份旧版本到 $backup_file"
             mv "$NYXBOT_JAR" "$backup_file"
         fi

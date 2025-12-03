@@ -679,8 +679,7 @@ main() {
         fi
         
         # 下载NyxBot.jar
-        if ! download_file "$DOWNLOAD_URL" 
-"$NYXBOT_JAR" "NyxBot.jar" "$EXPECTED_SHA256"; then
+        if ! download_file "$DOWNLOAD_URL" "$NYXBOT_JAR" "NyxBot.jar" "$EXPECTED_SHA256"; then
             log_error "下载失败"
             
             # 如果有备份，恢复备份
