@@ -87,16 +87,16 @@ public class HandOff {
     /**
      * 解析环境变量，优先级：命令行 > 系统环境变量 > 默认配置
      * -debug 开启debug模式
-     * -server.port=8080 设置端口号
-     * -shiro.ws.server.enable=true 设置为服务端
-     * -shiro.ws.server.url=/ws/shiro 设置服务端地址
-     * -shiro.ws.client.enable=false 设置为客户端
-     * -shiro.ws.client.url=ws://localhost:3001 设置客户端地址
-     * -shiro.token= 添加token
-     * -http.proxy = http://127.0.0.1:7890
-     * -socks.proxy = socks5://127.0.0.1:7890
-     * -proxy.user = user
-     * -proxy.password = password
+     * -serverPort=8080 设置端口号
+     * -wsServerEnable=true 设置为服务端
+     * -wsServerUrl=/ws/shiro 设置服务端地址
+     * -wsClientEnable=false 设置为客户端
+     * -wsClientUrl=ws://localhost:3001 设置客户端地址
+     * -shiroToken=token 设置OneBot协议链接的Token
+     * -httpProxy=http://127.0.0.1:7890  Http代理地址:端口
+     * -socksProxy=socks5://127.0.0.1:7890  Sock5代理地址:端口
+     * -proxyUser=user 代理认证用户
+     * -proxyPassword=password 代理认证密码
      *
      * @param args 命令行参数
      * @return 环境变量配置
