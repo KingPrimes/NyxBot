@@ -49,7 +49,7 @@ public class ProxyUtils {
 
     private static Proxy parseStandardProxy(String proxyUrl, String username, String password) {
         if (proxyUrl == null || proxyUrl.isEmpty())
-            return null;
+            return Proxy.NO_PROXY;
 
         try {
             URI uri = new URI(proxyUrl);
