@@ -1,17 +1,14 @@
 package com.nyx.bot.utils.http;
 
-
+import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.SpringValues;
+import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public class ProxyUtils {
@@ -23,51 +20,36 @@ public class ProxyUtils {
     public static Proxy getEffectiveProxyForUrl() {
         // 1. 尝试从 JVM 参数获取
         Proxy proxy = fromJvmArgs();
-        //log.debug("获取JVM代理：{}", proxy);
-        if (proxy != null) return proxy;
+        // log.debug("获取JVM代理：{}", proxy);
+        if (!proxy.equals(Proxy.NO_PROXY))
+            return proxy;
 
         // 2. 尝试从环境变量获取 HTTP_PROXY / ALL_PROXY
         proxy = fromEnvVariables();
-        //log.debug("获取环境代理：{}", proxy);
-        if (proxy != null) return proxy;
+        // log.debug("获取环境代理：{}", proxy);
+        if (!proxy.equals(Proxy.NO_PROXY))
+            return proxy;
 
         // 3. 尝试读取系统代理（Windows / Linux / macOS）
         proxy = fromSystemProxy();
-        //log.debug("获取系统代理：{}", proxy);
-        if (proxy != null) return proxy;
+        // log.debug("获取系统代理：{}", proxy);
+        if (!proxy.equals(Proxy.NO_PROXY))
+            return proxy;
 
         // 4. 回退到 Spring 配置文件
         proxy = fromSpringConfig();
-        //log.debug("获取Spring代理：{}", proxy);
-        if (proxy != null) return proxy;
+        // log.debug("获取Spring代理：{}", proxy);
+        if (!proxy.equals(Proxy.NO_PROXY))
+            return proxy;
 
-        //log.debug("无代理可用，返回默认无代理");
+        // log.debug("无代理可用，返回默认无代理");
         // 默认无代理
         return Proxy.NO_PROXY;
     }
 
-    public static ProxySelector getProxySelector() {
-        return new ProxySelector() {
-            @Override
-            public List<Proxy> select(URI uri) {
-                Proxy effectiveProxy = ProxyUtils.getEffectiveProxyForUrl();
-                if (uri == null) return List.of(Proxy.NO_PROXY);
-
-                String host = uri.getHost();
-                if (ProxyUtils.shouldBypassProxy(host)) return List.of(Proxy.NO_PROXY);
-
-                return List.of(effectiveProxy != null ? effectiveProxy : Proxy.NO_PROXY);
-            }
-
-            @Override
-            public void connectFailed(URI uri, SocketAddress address, IOException ex) {
-                log.error("Proxy connection failed: {}", uri, ex);
-            }
-        };
-    }
-
-    private static Proxy parseStandardProxy(String proxyUrl) {
-        if (proxyUrl == null || proxyUrl.isEmpty()) return null;
+    private static Proxy parseStandardProxy(String proxyUrl, String username, String password) {
+        if (proxyUrl == null || proxyUrl.isEmpty())
+            return null;
 
         try {
             URI uri = new URI(proxyUrl);
@@ -75,42 +57,47 @@ public class ProxyUtils {
             String host = uri.getHost();
             int port = uri.getPort();
 
-            if (host == null || port == -1) return null;
+            if (host == null || port == -1)
+                return Proxy.NO_PROXY;
 
             Proxy.Type type;
-            if ("http".equals(scheme) || "https".equals(scheme)) {
-                type = Proxy.Type.HTTP;
-            } else if ("socks".equals(scheme) || "socks5".equals(scheme)) {
-                type = Proxy.Type.SOCKS;
-            } else {
-                return null;
+            switch (scheme) {
+                case "http", "https" -> type = Proxy.Type.HTTP;
+                case "socks", "socks5" -> type = Proxy.Type.SOCKS;
+                default -> {
+                    return Proxy.NO_PROXY;
+                }
             }
+
+            // 解析用户名和密码
+            setupProxyAuthentication(username, password, host, port, type);
 
             return new Proxy(type, new InetSocketAddress(host, port));
         } catch (Exception e) {
             log.warn("解析代理失败: {}", proxyUrl, e);
-            return null;
+            return Proxy.NO_PROXY;
         }
     }
 
-
     // region 来源 1：JVM 参数
     private static Proxy fromJvmArgs() {
-        String proxyUrl = System.getProperty("http.proxy");
-        if (proxyUrl == null || proxyUrl.isEmpty()) {
-            proxyUrl = System.getProperty("socks.proxy");
-        }
-        return parseStandardProxy(proxyUrl);
+        NyxConfig config = HandOff.getConfig();
+        String proxyUrl = config.getHttpProxy() == null || config.getHttpProxy().isEmpty() ? config.getSocksProxy() : config.getHttpProxy();
+        String username = config.getProxyUser();
+        String password = config.getProxyPassword();
+        return parseStandardProxy(proxyUrl, username, password);
     }
     // endregion
 
     // region 来源 2：环境变量
     private static Proxy fromEnvVariables() {
         String raw = System.getenv("HTTP_PROXY");
+        String username = System.getenv("PROXY_USER");
+        String password = System.getenv("PROXY_PASSWORD");
         if (raw == null || raw.isEmpty()) {
             raw = System.getenv("ALL_PROXY");
         }
-        return parseStandardProxy(raw);
+        return parseStandardProxy(raw, username, password);
     }
     // endregion
 
@@ -124,7 +111,7 @@ public class ProxyUtils {
         } else if (isMacOS()) {
             return getMacOSSystemProxy();
         }
-        return null;
+        return Proxy.NO_PROXY;
     }
 
     private static boolean isWindows() {
@@ -145,7 +132,8 @@ public class ProxyUtils {
 
     private static Proxy getWindowsSystemProxy() {
         try {
-            ProcessBuilder pb = new ProcessBuilder("reg", "query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+            ProcessBuilder pb = new ProcessBuilder("reg", "query",
+                    "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -173,9 +161,8 @@ public class ProxyUtils {
             }
         } catch (Exception ignored) {
         }
-        return null; // 否则继续向下查找
+        return Proxy.NO_PROXY; // 否则继续向下查找
     }
-
 
     // endregion
 
@@ -204,13 +191,12 @@ public class ProxyUtils {
                 return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
             } else {
                 // mode 不是 manual，说明未启用代理
-                return null;
+                return Proxy.NO_PROXY;
             }
         } catch (Exception ignored) {
-            return null;
+            return Proxy.NO_PROXY;
         }
     }
-
 
     // endregion
 
@@ -241,50 +227,54 @@ public class ProxyUtils {
             }
         } catch (Exception ignored) {
         }
-        return null;
+        return Proxy.NO_PROXY;
     }
 
     // endregion
+
+    /**
+     * 设置代理认证
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @param host     代理主机
+     * @param port     代理端口
+     * @param type     代理类型
+     */
+    private static void setupProxyAuthentication(String username, String password, String host, int port,
+                                                 Proxy.Type type) {
+        // 对于 HTTP 代理，使用 Authenticator
+        if (Proxy.Type.HTTP == type) {
+            Authenticator.setDefault(new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    if (getRequestingHost() != null && getRequestingHost().equals(host)
+                            && getRequestingPort() == port) {
+                        return new PasswordAuthentication(username, password.toCharArray());
+                    }
+                    return null;
+                }
+            });
+        }
+        // SOCKS 代理通常由 Java 自动处理认证信息
+    }
 
     private static Proxy fromSpringConfig() {
         try {
             var utils = SpringUtils.getBean(SpringValues.class);
             String proxyUrl = utils.url;
+            String username = utils.username;
+            String password = utils.password;
+            if (username == null || username.isEmpty())
+                username = null;
+            if (password == null || password.isEmpty())
+                password = null;
             if (proxyUrl != null && !proxyUrl.isEmpty()) {
-                return parseStandardProxy(proxyUrl);
+                return parseStandardProxy(proxyUrl, username, password);
             }
-            return null;
+            return Proxy.NO_PROXY;
         } catch (Exception ignored) {
-            return null;
+            return Proxy.NO_PROXY;
         }
-    }
-
-
-    public static boolean shouldBypassProxy(String host) {
-        if (host == null) return true;
-        // 添加对本地地址（如 localhost、127.0.0.1）的判断
-        if (host.equalsIgnoreCase("localhost") || host.equalsIgnoreCase("127.0.0.1")) {
-            return true;
-        }
-        Set<String> noProxyHosts = getNoProxyHosts();
-        for (String pattern : noProxyHosts) {
-            if (pattern.startsWith(".") && host.endsWith(pattern)) {
-                return true;
-            } else if (host.equals(pattern)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Set<String> getNoProxyHosts() {
-        Set<String> hosts = new HashSet<>();
-        String noProxy = System.getenv("NO_PROXY");
-        if (noProxy != null && !noProxy.isEmpty()) {
-            for (String h : noProxy.split(",")) {
-                hosts.add(h.trim());
-            }
-        }
-        return hosts;
     }
 }

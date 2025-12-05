@@ -29,6 +29,14 @@ public class NyxConfig {
 
     String token;
 
+    String httpProxy;
+
+    String socksProxy;
+
+    String proxyUser;
+
+    String proxyPassword;
+
     // 不进行序列化
     @JsonIgnore
     public boolean isValidateClientUrl() {
