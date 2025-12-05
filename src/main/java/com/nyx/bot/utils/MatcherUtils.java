@@ -181,7 +181,7 @@ public class MatcherUtils {
     }
 
     /**
-     * 从字符串中提取所有数字字符并转换为Long类型
+     * 从字符串中提取所有数字字符并转换为Integer类型
      *
      * @param str 输入的字符串
      * @return 提取出的数字，如果字符串中没有数字则返回0

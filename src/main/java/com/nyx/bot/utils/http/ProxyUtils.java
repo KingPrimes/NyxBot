@@ -250,6 +250,7 @@ public class ProxyUtils {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     if (getRequestingHost() != null && getRequestingHost().equals(host)
                             && getRequestingPort() == port) {
+                        if (username == null || username.isEmpty() || password == null || password.isEmpty()) return null;
                         return new PasswordAuthentication(username, password.toCharArray());
                     }
                     return null;
