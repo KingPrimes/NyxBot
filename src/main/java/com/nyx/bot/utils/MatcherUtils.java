@@ -179,4 +179,22 @@ public class MatcherUtils {
     public static boolean isIPV6(String str) {
         return IS_IPV6.matcher(str).matches();
     }
+
+    /**
+     * 从字符串中提取所有数字字符并转换为Integer类型
+     *
+     * @param str 输入的字符串
+     * @return 提取出的数字，如果字符串中没有数字则返回0
+     */
+    public static Integer getNumber(String str) {
+        String numStr = str.replaceAll("[^0-9]", "");
+        if (numStr.isEmpty()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(numStr);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }
