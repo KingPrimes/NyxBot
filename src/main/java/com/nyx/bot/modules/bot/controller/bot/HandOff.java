@@ -88,9 +88,9 @@ public class HandOff {
      * 解析环境变量，优先级：命令行 > 系统环境变量 > 默认配置
      * -debug 开启debug模式
      * -serverPort=8080 设置端口号
-     * -wsServerEnable=true 设置为服务端
+     * -wsServerEnable 设置为服务端
      * -wsServerUrl=/ws/shiro 设置服务端地址
-     * -wsClientEnable=false 设置为客户端
+     * -wsClientEnable 设置为客户端
      * -wsClientUrl=ws://localhost:3001 设置客户端地址
      * -shiroToken=token 设置OneBot协议链接的Token
      * -httpProxy=http://127.0.0.1:7890  Http代理地址:端口
@@ -186,10 +186,8 @@ public class HandOff {
      */
     private static void configureWsSettings(String[] args, NyxConfig config, Map<String, Object> map) {
         // 配置WebSocket服务端启用状态
-        withArg(args, "-wsserverenable=", arg ->
-                config.setIsServerOrClient(arg.toLowerCase().contains("true"))
-        );
-        map.put("shiro.ws.server.enable", config.getIsServerOrClient());
+        boolean wsserverenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsserverenable"));
+        config.setIsServerOrClient(wsserverenable);
 
         // 配置WebSocket服务端URL
         withArg(args, "-wsserverurl=", arg ->
@@ -198,10 +196,15 @@ public class HandOff {
         map.put("shiro.ws.server.url", config.getWsServerUrl());
 
         // 配置WebSocket客户端启用状态
-        withArg(args, "-wsclientenable", arg ->
-                config.setIsServerOrClient(!arg.toLowerCase().contains("true"))
-        );
-        map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
+        if(wsserverenable){
+            map.put("shiro.ws.client.enable", false);
+        }else{
+            boolean wsclientenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsclientenable"));
+            config.setIsServerOrClient(!wsclientenable);
+            map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
+        }
+
+        map.put("shiro.ws.server.enable", config.getIsServerOrClient());
 
         // 配置WebSocket客户端URL
         withArg(args, "-wsclienturl=", arg ->
