@@ -11,4 +11,11 @@ public class TestStringUtils {
         String name = StringUtils.convertToCamelCase(substring);
         System.out.println(name);
     }
+
+    @Test
+    void testSubstring(){
+        String str = "-wsServerUrl=/ws/shiro";
+        String substring = StringUtils.getSubString(str, "=", "");
+        System.out.println(substring);
+    }
 }

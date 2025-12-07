@@ -3,7 +3,6 @@ package com.nyx.bot.modules.warframe.service;
 import com.nyx.bot.common.core.page.TableDataInfo;
 import com.nyx.bot.modules.warframe.entity.exprot.Relics;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
-import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.modules.warframe.utils.RelicsImportUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,24 +18,21 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class RelicsService {
 
+    private final RelicsRepository repository;
 
-    RelicsRepository repository;
+    private final AliasRepository ar;
 
+    private final RelicsImportUtil relicsImportUtil;
 
-    AliasRepository ar;
-
-
-    StateTranslationRepository str;
-
-    public RelicsService(RelicsRepository repository, AliasRepository ar, StateTranslationRepository str) {
+    public RelicsService(RelicsRepository repository, AliasRepository ar, RelicsImportUtil relicsImportUtil) {
         this.repository = repository;
         this.ar = ar;
-        this.str = str;
+        this.relicsImportUtil = relicsImportUtil;
     }
 
     public Integer initRelicsData(String filePath) {
         log.info("开始初始化遗物数据");
-        return new RelicsImportUtil(str, repository).importRelicsData(filePath);
+        return relicsImportUtil.importRelicsData(filePath);
     }
 
 

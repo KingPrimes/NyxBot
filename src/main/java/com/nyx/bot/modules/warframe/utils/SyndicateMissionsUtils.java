@@ -4,7 +4,6 @@ import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
-import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.RewardPool;
@@ -23,8 +22,14 @@ public class SyndicateMissionsUtils {
 
     private final DrawImagePlugin drawImagePlugin;
 
-    public SyndicateMissionsUtils(DrawImagePlugin drawImagePlugin) {
+    private final RewardPoolRepository rewardPoolRepository;
+
+    private final StateTranslationRepository stateTranslationRepository;
+
+    public SyndicateMissionsUtils(DrawImagePlugin drawImagePlugin, RewardPoolRepository rewardPoolRepository, StateTranslationRepository stateTranslationRepository) {
         this.drawImagePlugin = drawImagePlugin;
+        this.rewardPoolRepository = rewardPoolRepository;
+        this.stateTranslationRepository = stateTranslationRepository;
     }
 
     /**
@@ -37,7 +42,6 @@ public class SyndicateMissionsUtils {
     @SuppressWarnings("null")
     private SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
         AtomicReference<SyndicateMission> smr = new AtomicReference<>(new SyndicateMission());
-        StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
         sms.stream()
                 .filter(sm -> Objects.equals(sm.getTag(), se))
                 .filter(sm -> sm.getJobs() != null && !sm.getJobs().isEmpty())
@@ -45,12 +49,12 @@ public class SyndicateMissionsUtils {
                 .ifPresent(sm -> {
                     sm.setJobs(sm.getJobs().stream()
                             .peek(j ->
-                                    str.findByUniqueName(StringUtils.getLastThreeSegments(j.getType() != null ? j.getType() : j.getLocationTag()))
+                                    stateTranslationRepository.findByUniqueName(StringUtils.getLastThreeSegments(j.getType() != null ? j.getType() : j.getLocationTag()))
                                             .ifPresent(s -> {
                                                 j.setType(s.getName());
                                                 j.setDesc(s.getDescription());
                                             })
-                            ).peek(j -> SpringUtils.getBean(RewardPoolRepository.class).findById(j.getRewards()).ifPresent(r -> j.setRewardPool(new RewardPool()
+                            ).peek(j -> rewardPoolRepository.findById(j.getRewards()).ifPresent(r -> j.setRewardPool(new RewardPool()
                                     .setRewards(
                                             r.getRewards()
                                                     .stream()

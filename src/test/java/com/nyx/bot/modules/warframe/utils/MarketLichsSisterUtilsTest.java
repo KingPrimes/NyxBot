@@ -23,6 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("MarketLichsSisterUtils 集成测试")
 class MarketLichsSisterUtilsTest {
 
+    private final MarketLichsSisterUtils marketLichsSisterUtils;
+
+    public MarketLichsSisterUtilsTest(MarketLichsSisterUtils marketLichsSisterUtils) {
+        this.marketLichsSisterUtils = marketLichsSisterUtils;
+    }
+
     @Test
     @DisplayName("集成测试 - 完整查询流程（真实运行）")
     void testCompleteQueryFlow() {
@@ -42,8 +48,8 @@ class MarketLichsSisterUtilsTest {
             // === 执行完整的查询流程 ===
             log.info("\n--- 第1步：开始查询武器信息 ---");
             MarketResult<LichSisterWeapons, MarketLichSister> result =
-                    MarketLichsSisterUtils.getAuctions(weaponKey, searchType);
-            log.info("ItemName: {}",result.getResult().getPayload().getItemName());
+                    marketLichsSisterUtils.getAuctions(weaponKey, searchType);
+            log.info("ItemName: {}", result.getResult().getPayload().getItemName());
             // === 验证第1步：武器查询结果 ===
             assertNotNull(result, "查询结果不应为空");
             log.info("✓ 查询结果对象创建成功");
