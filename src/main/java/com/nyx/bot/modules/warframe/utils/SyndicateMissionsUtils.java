@@ -11,13 +11,21 @@ import io.github.kingprimes.model.RewardPool;
 import io.github.kingprimes.model.enums.SyndicateEnum;
 import io.github.kingprimes.model.worldstate.SyndicateMission;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
+@Component
 public class SyndicateMissionsUtils {
+
+    private final DrawImagePlugin drawImagePlugin;
+
+    public SyndicateMissionsUtils(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     /**
      * 获取集团任务列表
@@ -27,7 +35,7 @@ public class SyndicateMissionsUtils {
      * @return 格式化之后的集团任务
      */
     @SuppressWarnings("null")
-    public static SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
+    private SyndicateMission getSyndicateMissions(List<SyndicateMission> sms, SyndicateEnum se) {
         AtomicReference<SyndicateMission> smr = new AtomicReference<>(new SyndicateMission());
         StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
         sms.stream()
@@ -42,27 +50,25 @@ public class SyndicateMissionsUtils {
                                                 j.setType(s.getName());
                                                 j.setDesc(s.getDescription());
                                             })
-                            ).peek(j -> SpringUtils.getBean(RewardPoolRepository.class).findById(j.getRewards()).ifPresent(r -> {
-                                j.setRewardPool(new RewardPool()
-                                        .setRewards(
-                                                r.getRewards()
-                                                        .stream()
-                                                        .map(rd ->
-                                                                new RewardPool.Reward()
-                                                                        .setItem(rd.getItem())
-                                                                        .setItemCount(rd.getItemCount())
-                                                                        .setRarity(rd.getRarity())).toList()
-                                        )
-                                );
-                            }))
+                            ).peek(j -> SpringUtils.getBean(RewardPoolRepository.class).findById(j.getRewards()).ifPresent(r -> j.setRewardPool(new RewardPool()
+                                    .setRewards(
+                                            r.getRewards()
+                                                    .stream()
+                                                    .map(rd ->
+                                                            new RewardPool.Reward()
+                                                                    .setItem(rd.getItem())
+                                                                    .setItemCount(rd.getItemCount())
+                                                                    .setRarity(rd.getRarity())).toList()
+                                    )
+                            )))
                             .toList());
                     smr.set(sm);
                 });
         return smr.get();
     }
 
-    public static byte[] postSyndicateEntratiImage(SyndicateEnum syndicateEnum) throws DataNotInfoException {
+    public byte[] postSyndicateEntratiImage(SyndicateEnum syndicateEnum) throws DataNotInfoException {
         SyndicateMission syndicateMissions = getSyndicateMissions(WarframeCache.getWarframeStatus().getSyndicateMissions(), syndicateEnum);
-        return SpringUtils.getBean(DrawImagePlugin.class).drawSyndicateImage(syndicateMissions);
+        return drawImagePlugin.drawSyndicateImage(syndicateMissions);
     }
 }

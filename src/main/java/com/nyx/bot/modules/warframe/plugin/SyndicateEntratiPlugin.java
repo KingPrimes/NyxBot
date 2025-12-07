@@ -23,11 +23,16 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SyndicateEntratiPlugin {
 
+    private final SyndicateMissionsUtils syndicateMissionsUtils;
+
+    public SyndicateEntratiPlugin(SyndicateMissionsUtils syndicateMissionsUtils) {
+        this.syndicateMissionsUtils = syndicateMissionsUtils;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_ENTRATI_CMD,at = AtEnum.BOTH)
     public void syndicateEntranceHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, SyndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.EntratiSyndicate), Codes.WARFRAME_SYNDICATE_ENTRATI, log);
+        SendUtils.send(bot, event, syndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.EntratiSyndicate), Codes.WARFRAME_SYNDICATE_ENTRATI, log);
     }
 
 

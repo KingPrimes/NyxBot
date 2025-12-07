@@ -13,7 +13,6 @@ import com.nyx.bot.modules.warframe.service.RelicsService;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.Relics;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -27,11 +26,14 @@ import java.util.List;
 @Slf4j
 public class RelicsPlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    RelicsService relicsService;
+    private final RelicsService relicsService;
+
+    public RelicsPlugin(DrawImagePlugin drawImagePlugin, RelicsService relicsService) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.relicsService = relicsService;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RELICS_CMD, at = AtEnum.BOTH)

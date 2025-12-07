@@ -12,7 +12,6 @@ import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -36,7 +35,6 @@ public class SubscriptionApplicationService {
     private final MissionSubscribeUserCheckTypeRepository checkTypeRepo;
     private final MissionSubscribeUserRepository userRepo;
 
-    @Autowired
     public SubscriptionApplicationService(
             MissionSubscribeRepository subscribeRepo,
             MissionSubscribeUserCheckTypeRepository checkTypeRepo,

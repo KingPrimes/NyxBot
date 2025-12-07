@@ -8,11 +8,10 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.utils.onebot.SendUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.AllInfo;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +22,11 @@ import java.net.UnknownHostException;
 @Slf4j
 public class SystemInfoPlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    public SystemInfoPlugin(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.CHECK_VERSION_CMD, at = AtEnum.BOTH)

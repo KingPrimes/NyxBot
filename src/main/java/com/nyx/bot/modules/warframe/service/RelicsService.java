@@ -6,7 +6,6 @@ import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
 import com.nyx.bot.modules.warframe.utils.RelicsImportUtil;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -20,14 +19,20 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class RelicsService {
 
-    @Resource
+
     RelicsRepository repository;
 
-    @Resource
+
     AliasRepository ar;
 
-    @Resource
+
     StateTranslationRepository str;
+
+    public RelicsService(RelicsRepository repository, AliasRepository ar, StateTranslationRepository str) {
+        this.repository = repository;
+        this.ar = ar;
+        this.str = str;
+    }
 
     public Integer initRelicsData(String filePath) {
         log.info("开始初始化遗物数据");

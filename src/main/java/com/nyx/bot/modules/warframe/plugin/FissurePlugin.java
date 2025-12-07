@@ -14,7 +14,6 @@ import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.worldstate.ActiveMission;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +26,15 @@ import java.util.List;
 @Component
 @Slf4j
 public class FissurePlugin {
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
 
+
+    public FissurePlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.worldStateUtils = worldStateUtils;
+    }
 
     /**
      * 裂隙

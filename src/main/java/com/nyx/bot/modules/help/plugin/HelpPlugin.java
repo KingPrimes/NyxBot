@@ -9,10 +9,9 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.utils.onebot.SendUtils;
 import com.nyx.bot.utils.StringUtils;
+import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HelpPlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    public HelpPlugin(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.HELP_CMD, at = AtEnum.BOTH)

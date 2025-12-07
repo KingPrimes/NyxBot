@@ -12,7 +12,6 @@ import com.nyx.bot.modules.warframe.utils.MarketDucatsUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.Ducats;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,20 +24,27 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class MarketGodDumpPlugin {
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+
+    private final DrawImagePlugin drawImagePlugin;
+
+    private final MarketDucatsUtils marketDucatsUtils;
+
+    public MarketGodDumpPlugin(DrawImagePlugin drawImagePlugin, MarketDucatsUtils marketDucatsUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.marketDucatsUtils = marketDucatsUtils;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD, at = AtEnum.BOTH)
     public void marketGodDump(Bot bot, AnyMessageEvent event) {
-        Ducats ducats = MarketDucatsUtils.getDucats();
+        Ducats ducats = marketDucatsUtils.getDucats();
         if (Objects.isNull(ducats)) {
             log.debug("获取ducat失败");
             bot.sendMsg(event, "获取ducat失败", false);
             return;
         }
 
-        byte[] bytes = drawImagePlugin.drawMarketGodDumpImage(MarketDucatsUtils.getDuats(MarketDucatsUtils.DucatsType.GOD, ducats));
+        byte[] bytes = drawImagePlugin.drawMarketGodDumpImage(marketDucatsUtils.getDuats(MarketDucatsUtils.DucatsType.GOD, ducats));
         SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_GOD_DUMP, log);
     }
 

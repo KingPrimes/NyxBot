@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -51,9 +50,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/config/bot/admin")
 public class BotAdminController extends BaseController {
 
-    @Resource
-    BotAdminRepository botAdminRepository;
+    private final BotAdminRepository botAdminRepository;
 
+    public BotAdminController(BotAdminRepository botAdminRepository) {
+        this.botAdminRepository = botAdminRepository;
+    }
 
     @Operation(
             summary = "获取机器人管理员列表",

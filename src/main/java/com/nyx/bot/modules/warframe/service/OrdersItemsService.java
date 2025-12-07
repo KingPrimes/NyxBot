@@ -18,11 +18,12 @@ import java.util.List;
 @Service
 public class OrdersItemsService {
     
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
     
     OrdersItemsRepository ordersItemsService;
 
-    public OrdersItemsService(OrdersItemsRepository ordersItemsService) {
+    public OrdersItemsService(ObjectMapper objectMapper,OrdersItemsRepository ordersItemsService) {
+        this.objectMapper = objectMapper;
         this.ordersItemsService = ordersItemsService;
     }
 

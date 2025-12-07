@@ -5,7 +5,6 @@ import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.modules.bot.service.black.BlackService;
 import com.nyx.bot.modules.bot.service.white.WhiteService;
 import com.nyx.bot.utils.I18nUtils;
-import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +13,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class BotsService {
-    @Resource
-    BotContainer container;
+    private final BotContainer container;
 
-    @Resource
-    WhiteService ws;
+    private final WhiteService ws;
 
-    @Resource
-    BlackService bs;
+    private final BlackService bs;
+
+    public BotsService(BotContainer container, WhiteService ws, BlackService bs) {
+        this.container = container;
+        this.ws = ws;
+        this.bs = bs;
+    }
 
     /***
      * 获取机器人列表

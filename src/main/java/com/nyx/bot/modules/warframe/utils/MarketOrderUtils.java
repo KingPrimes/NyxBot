@@ -7,7 +7,6 @@ import com.nyx.bot.modules.warframe.entity.MarketResult;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
-import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
@@ -17,6 +16,7 @@ import io.github.kingprimes.model.market.BaseOrder;
 import io.github.kingprimes.model.market.OrderWithUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -24,65 +24,25 @@ import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
+@Component
 public class MarketOrderUtils {
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+    private final ObjectMapper objectMapper;
+    private final OrdersItemsRepository itemsRepository;
+    private final AliasRepository aliasRepository;
 
-    /**
-     * 从数据库中查询可能的值
-     *
-     * @param key 物品名称
-     * @return 处理后的结果
-     */
-    private static MarketResult<OrdersItems, ?> toDataBase(String key) {
-        MarketResult<OrdersItems, ?> market = new MarketResult<>();
-        try {
-            // 标准化输入
-            String normalizedKey = MarketCommonUtils.normalizeInput(key);
-
-            // 获取仓库实例
-            OrdersItemsRepository itemsRepository = SpringUtils.getBean(OrdersItemsRepository.class);
-            AliasRepository aliasRepository = SpringUtils.getBean(AliasRepository.class);
-
-            // 尝试直接匹配物品名称
-            if (MarketCommonUtils.tryMatch(market, normalizedKey, itemsRepository::findByName)) {
-                return market;
-            }
-
-            String aliasProcessedKey = MarketCommonUtils.processAliases(normalizedKey, aliasRepository);
-            // 尝试通过别名匹配
-            if (MarketCommonUtils.tryMatch(market, aliasProcessedKey, itemsRepository::findByItemNameLike)) {
-                return market;
-            }
-
-            String primeProcessedKey = MarketCommonUtils.processPrimeKeyword(aliasProcessedKey);
-            // 尝试Prime关键词匹配
-            if (MarketCommonUtils.tryMatch(market, primeProcessedKey, itemsRepository::findByItemNameLike)) {
-                return market;
-            }
-
-            // 尝试正则表达式匹配
-            if (MarketCommonUtils.tryRegexNameMatch(market, primeProcessedKey, itemsRepository)) {
-                return market;
-            }
-
-            // 所有匹配都失败，获取可能的物品列表
-            market.setPossibleItems(getPossibleItems(itemsRepository, primeProcessedKey));
-            return market;
-        } catch (Exception e) {
-            log.error("查询物品时发生异常: {}", e.getMessage(), e);
-            market.setPossibleItems(getPossibleItems(SpringUtils.getBean(OrdersItemsRepository.class), MarketCommonUtils.normalizeInput(key)));
-            return market;
-        }
+    public MarketOrderUtils(ObjectMapper objectMapper, OrdersItemsRepository itemsRepository, AliasRepository aliasRepository) {
+        this.objectMapper = objectMapper;
+        this.itemsRepository = itemsRepository;
+        this.aliasRepository = aliasRepository;
     }
 
     /**
      * 获取可能的物品列表
      *
-     * @param itemsRepository 物品仓库
-     * @param key             查询关键字
+     * @param key 查询关键字
      * @return 可能的物品列表
      */
-    private static List<String> getPossibleItems(OrdersItemsRepository itemsRepository, String key) {
+    private List<String> getPossibleItems(String key) {
         //查询用户可能想要查询的物品
         List<OrdersItems> list = itemsRepository.findByItemNameLikeToList(String.valueOf(key.charAt(0)));
         //判断集合是否为空
@@ -106,7 +66,7 @@ public class MarketOrderUtils {
      * @param o      订单信息，包含物品等级或星级
      * @return 如果订单满足最大等级条件返回true，否则返回false
      */
-    private static boolean matchesMaxRank(boolean isMax, MarketResult<OrdersItems, ?> market, OrderWithUser o) {
+    private boolean matchesMaxRank(boolean isMax, MarketResult<OrdersItems, ?> market, OrderWithUser o) {
         if (!isMax) {
             return true;
         }
@@ -128,7 +88,7 @@ public class MarketOrderUtils {
      * @param form 平台枚举
      * @return Market对象，包含物品信息或可能的物品列表
      */
-    public static MarketResult<OrdersItems, ?> toSet(String key, MarketPlatformEnum form) {
+    public MarketResult<OrdersItems, ?> toSet(String key, MarketPlatformEnum form) {
         MarketResult<OrdersItems, ?> dataBase = toDataBase(key);
         if (dataBase.getPossibleItems() != null && !dataBase.getPossibleItems().isEmpty()) {
             return dataBase;
@@ -163,7 +123,6 @@ public class MarketOrderUtils {
         return dataBase;
     }
 
-
     /**
      * 查询Warframe.Market物品 并处理结果
      *
@@ -173,7 +132,7 @@ public class MarketOrderUtils {
      * @param market 查询到的物品
      * @return 处理后的结果
      */
-    public static BaseOrder<OrderWithUser> market(MarketPlatformEnum from, Boolean isBy, Boolean isMax, MarketResult<OrdersItems, ?> market) {
+    public BaseOrder<OrderWithUser> market(MarketPlatformEnum from, Boolean isBy, Boolean isMax, MarketResult<OrdersItems, ?> market) {
         String key = market.getEntity().getSlug();
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
@@ -224,5 +183,49 @@ public class MarketOrderUtils {
         }
         owu.setError("查询出现错误");
         return owu;
+    }
+
+    /**
+     * 从数据库中查询可能的值
+     *
+     * @param key 物品名称
+     * @return 处理后的结果
+     */
+    private MarketResult<OrdersItems, ?> toDataBase(String key) {
+        MarketResult<OrdersItems, ?> market = new MarketResult<>();
+        try {
+            // 标准化输入
+            String normalizedKey = MarketCommonUtils.normalizeInput(key);
+
+            // 尝试直接匹配物品名称
+            if (MarketCommonUtils.tryMatch(market, normalizedKey, itemsRepository::findByName)) {
+                return market;
+            }
+
+            String aliasProcessedKey = MarketCommonUtils.processAliases(normalizedKey, aliasRepository);
+            // 尝试通过别名匹配
+            if (MarketCommonUtils.tryMatch(market, aliasProcessedKey, itemsRepository::findByItemNameLike)) {
+                return market;
+            }
+
+            String primeProcessedKey = MarketCommonUtils.processPrimeKeyword(aliasProcessedKey);
+            // 尝试Prime关键词匹配
+            if (MarketCommonUtils.tryMatch(market, primeProcessedKey, itemsRepository::findByItemNameLike)) {
+                return market;
+            }
+
+            // 尝试正则表达式匹配
+            if (MarketCommonUtils.tryRegexNameMatch(market, primeProcessedKey, itemsRepository)) {
+                return market;
+            }
+
+            // 所有匹配都失败，获取可能的物品列表
+            market.setPossibleItems(getPossibleItems(primeProcessedKey));
+            return market;
+        } catch (Exception e) {
+            log.error("查询物品时发生异常: {}", e.getMessage(), e);
+            market.setPossibleItems(getPossibleItems(MarketCommonUtils.normalizeInput(key)));
+            return market;
+        }
     }
 }

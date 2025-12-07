@@ -13,7 +13,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.Arbitration;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ArbitrationPlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+
+    public ArbitrationPlugin(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ARBITRATION_CMD, at = AtEnum.BOTH)

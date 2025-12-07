@@ -15,7 +15,6 @@ import com.nyx.bot.modules.warframe.domain.valueobject.SubscriptionCommand;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -31,16 +30,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WarframeTaskSubscribePlugin {
 
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final SubscriptionApplicationService subscriptionService;
 
-    @Resource
-    SubscriptionApplicationService subscriptionService;
+    public WarframeTaskSubscribePlugin(DrawImagePlugin drawImagePlugin, SubscriptionApplicationService subscriptionService) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.subscriptionService = subscriptionService;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SUBSCRIBE_CMD, at = AtEnum.BOTH)
-    public void subscribe(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
+    public void subscribe(Bot bot, AnyMessageEvent event) {
         if (!ActionParams.GROUP.equals(event.getMessageType())) {
             bot.sendMsg(event, "此指令只能在群组中使用！", false);
             return;

@@ -7,7 +7,6 @@ import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.RivenTionAlias;
 import com.nyx.bot.modules.warframe.repo.RivenTionAliasRepository;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +21,19 @@ import java.util.stream.Collectors;
 @Service
 public class RivenTionAliasService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
     
     /**
      * 同步锁，用于防止并发更新紫卡词条别名数据时的乐观锁冲突
      */
     private static final Object RIVEN_TION_ALIAS_UPDATE_LOCK = new Object();
-    
-    @Resource
+
     RivenTionAliasRepository rivenTionAliasRepository;
+
+    public RivenTionAliasService(ObjectMapper objectMapper, RivenTionAliasRepository rivenTionAliasRepository) {
+        this.objectMapper = objectMapper;
+        this.rivenTionAliasRepository = rivenTionAliasRepository;
+    }
 
     private List<RivenTionAlias> getRivenTionAlias() {
         List<RivenTionAlias> rats = new ArrayList<>();

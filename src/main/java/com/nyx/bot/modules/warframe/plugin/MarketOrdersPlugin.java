@@ -20,7 +20,6 @@ import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import io.github.kingprimes.model.market.BaseOrder;
 import io.github.kingprimes.model.market.OrderWithUser;
 import io.github.kingprimes.model.market.Orders;
-import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +35,17 @@ import java.util.List;
 @Slf4j
 public class MarketOrdersPlugin {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    private final MarketOrderUtils marketOrderUtils;
+
+    public MarketOrdersPlugin(ObjectMapper objectMapper, DrawImagePlugin drawImagePlugin, MarketOrderUtils marketOrderUtils) {
+        this.objectMapper = objectMapper;
+        this.drawImagePlugin = drawImagePlugin;
+        this.marketOrderUtils = marketOrderUtils;
+    }
 
     private static Orders getOrders(MarketOrdersData data, BaseOrder<OrderWithUser> order, MarketResult<OrdersItems, ?> market) {
         List<OrderWithUser> ows = order.getData();
@@ -233,12 +239,12 @@ public class MarketOrdersPlugin {
      * @return 生成的市场订单图像字节数组
      */
     private byte[] postMarketOrdersImage(MarketOrdersData data) {
-        MarketResult<OrdersItems, ?> market = MarketOrderUtils.toSet(data.getKey(), data.getForm());
+        MarketResult<OrdersItems, ?> market = marketOrderUtils.toSet(data.getKey(), data.getForm());
         // 如果存在可能的物品列表，则直接绘制这些物品的图像
         if (market.getPossibleItems() != null && !market.getPossibleItems().isEmpty()) {
             return drawImagePlugin.drawMarketOrdersImage(market.getPossibleItems());
         }
-        BaseOrder<OrderWithUser> order = MarketOrderUtils.market(data.getForm(), data.isBy(), data.isMax(), market);
+        BaseOrder<OrderWithUser> order = marketOrderUtils.market(data.getForm(), data.isBy(), data.isMax(), market);
         Orders orders = getOrders(data, order, market);
         // 绘制订单图像
         return drawImagePlugin.drawMarketOrdersImage(orders);

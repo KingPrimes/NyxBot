@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -49,8 +48,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class AliasController extends BaseController {
 
-    @Resource
     AliasRepository repository;
+
+    public AliasController(AliasRepository repository) {
+        this.repository = repository;
+    }
 
     @Operation(
             summary = "查询别名列表",

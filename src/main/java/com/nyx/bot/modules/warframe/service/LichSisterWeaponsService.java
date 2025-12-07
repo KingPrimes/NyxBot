@@ -17,13 +17,14 @@ import java.util.List;
 @Slf4j
 @Service
 public class LichSisterWeaponsService {
-    
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
+    ObjectMapper objectMapper;
+
     LichSisterWeaponsRepository repository;
 
-    public LichSisterWeaponsService(LichSisterWeaponsRepository repository) {
+    public LichSisterWeaponsService( ObjectMapper objectMapper,LichSisterWeaponsRepository repository) {
         this.repository = repository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional

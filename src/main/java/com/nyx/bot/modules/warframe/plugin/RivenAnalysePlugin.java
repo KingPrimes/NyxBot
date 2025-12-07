@@ -14,7 +14,6 @@ import com.nyx.bot.modules.warframe.utils.riven_calculation.RivenAttributeComput
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.RivenAnalyseTrendModel;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +27,16 @@ import java.util.List;
 @Slf4j
 public class RivenAnalysePlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+
+    private final DrawImagePlugin drawImagePlugin;
+
+    public RivenAnalysePlugin(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_ANALYSE_CMD, at = AtEnum.BOTH)
-    public void rivenAnalyse(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
+    public void rivenAnalyse(Bot bot, AnyMessageEvent event) {
         List<String> msgImgUrlList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
         if (msgImgUrlList.isEmpty()) {
             bot.sendMsg(event, "请在指令后方添加上您要查询的紫卡图片!", false);

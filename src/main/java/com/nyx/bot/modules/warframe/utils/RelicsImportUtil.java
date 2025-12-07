@@ -16,6 +16,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
  * Relics数据导入工具类
  * 封装数据读取、翻译处理和批量插入功能
  */
+@Component
 public class RelicsImportUtil {
     private static final Logger log = LoggerFactory.getLogger(RelicsImportUtil.class);
     private static final int BATCH_SIZE = 500;
@@ -104,7 +106,8 @@ public class RelicsImportUtil {
         try (FileInputStream fis = new FileInputStream(filePath)) {
             JsonNode rootNode = objectMapper.readTree(fis);
             JsonNode relicArcaneNode = rootNode.get("ExportRelicArcane");
-            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<List<Relics>>() {});
+            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<>() {
+            });
         } catch (FileNotFoundException e) {
             log.error("数据文件不存在: {}", filePath);
             throw e;

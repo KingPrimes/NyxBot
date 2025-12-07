@@ -1,19 +1,52 @@
 package com.nyx.bot.modules.warframe.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.modules.warframe.entity.StateTranslation;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
-import jakarta.annotation.Resource;
+import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
 public class StateTranslationService {
-    @Resource
+
+    ObjectMapper objectMapper;
+
     StateTranslationRepository str;
 
+    public StateTranslationService(ObjectMapper objectMapper, StateTranslationRepository str) {
+        this.objectMapper = objectMapper;
+        this.str = str;
+    }
+
+    public List<StateTranslation> getStateTranslationsForCnd() {
+        List<StateTranslation> list = new ArrayList<>();
+        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_STATE_TRANSLATION) {
+            HttpUtils.Body body = HttpUtils.sendGet(url);
+            if (body.code().is2xxSuccessful()) {
+                try {
+                    list.addAll(objectMapper.readValue(
+                            body.body(),
+                            new TypeReference<>() {
+                            }
+                    ));
+                    break;
+                } catch (Exception e) {
+                    log.warn("解析 StateTranslation 数据失败，尝试下一个数据源: {}", e.getMessage());
+                }
+            } else {
+                log.warn("获取 StateTranslation 数据失败,，尝试下一个数据源: HttpCode {} - Url:{}", body.code(), url);
+            }
+        }
+        return list;
+    }
 
     /**
      * 新增 | 修改

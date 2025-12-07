@@ -18,11 +18,12 @@ import java.util.List;
 @Service
 public class RivenItemsService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
     
     RivenItemsRepository repository;
 
-    public RivenItemsService(RivenItemsRepository repository) {
+    public RivenItemsService(ObjectMapper objectMapper,RivenItemsRepository repository) {
+        this.objectMapper = objectMapper;
         this.repository = repository;
     }
 

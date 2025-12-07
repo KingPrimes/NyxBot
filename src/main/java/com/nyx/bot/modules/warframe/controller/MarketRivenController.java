@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,8 +43,11 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/data/warframe/market/riven")
 
 public class MarketRivenController extends BaseController {
-    @Resource
     RivenItemsRepository repository;
+
+    public MarketRivenController(RivenItemsRepository repository) {
+        this.repository = repository;
+    }
 
     @Operation(
             summary = "获取紫卡武器列表",

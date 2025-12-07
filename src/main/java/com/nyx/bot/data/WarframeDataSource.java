@@ -341,23 +341,7 @@ public class WarframeDataSource {
         int size = str.saveAll(stateTranslationList).size();
         log.debug("初始化 Lost 翻译 数据完成，共{}条", size);
         log.debug("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
-        List<StateTranslation> javaList = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_STATE_TRANSLATION) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    List<StateTranslation> translations = objectMapper.readValue(
-                            body.body(),
-                            new TypeReference<List<StateTranslation>>() {
-                            }
-                    );
-                    javaList.addAll(translations);
-                    break;
-                } catch (Exception e) {
-                    log.error("解析 StateTranslation 数据失败: {}", url, e);
-                }
-            }
-        }
+        List<StateTranslation> javaList = SpringUtils.getBean(StateTranslationService.class).getStateTranslationsForCnd();
         List<StateTranslation> sts = javaList.stream().peek(s -> {
             Arrays.stream(StateTypeEnum.values())
                     .filter(stateTypeEnum -> s.getUniqueName()

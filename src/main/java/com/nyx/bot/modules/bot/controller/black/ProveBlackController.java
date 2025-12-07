@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +40,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/config/bot/black/prove")
 public class ProveBlackController extends BaseController {
 
-    @Resource
-    BlackService bs;
+    private final BlackService bs;
+
+    public ProveBlackController(BlackService bs) {
+        this.bs = bs;
+    }
 
     @Operation(
             summary = "获取个人黑名单列表",

@@ -7,7 +7,6 @@ import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.ActiveMission;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +18,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class FissuresMessageBuilder implements MessageBuilder<ActiveMission> {
 
-    @Resource
-    private WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
+
+    public FissuresMessageBuilder(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<ActiveMission> event, MissionSubscribeUserCheckType rule) {

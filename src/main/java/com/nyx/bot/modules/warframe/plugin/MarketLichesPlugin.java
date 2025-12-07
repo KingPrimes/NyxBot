@@ -14,7 +14,6 @@ import com.nyx.bot.modules.warframe.utils.MarketLichsSisterUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.market.MarketLichSister;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +25,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MarketLichesPlugin {
 
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final MarketLichsSisterUtils marketLichsSisterUtils;
+
+    public MarketLichesPlugin(DrawImagePlugin drawImagePlugin, MarketLichsSisterUtils marketLichsSisterUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.marketLichsSisterUtils = marketLichsSisterUtils;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LICHES_CMD, at = AtEnum.BOTH)
@@ -39,7 +43,7 @@ public class MarketLichesPlugin {
             bot.sendMsg(event, "请输入正确的指令！", false);
             return;
         }
-        MarketResult<LichSisterWeapons, MarketLichSister> auctions = MarketLichsSisterUtils.getAuctions(key, MarketLichsSisterUtils.SearchType.LICH);
+        MarketResult<LichSisterWeapons, MarketLichSister> auctions = marketLichsSisterUtils.getAuctions(key, MarketLichsSisterUtils.SearchType.LICH);
         if (auctions.getPossibleItems() != null) {
             byte[] bytes = drawImagePlugin.drawMarketOrdersImage(auctions.getPossibleItems());
             SendUtils.send(bot, event, bytes, Codes.WARFRAME_LICHES_PLUGIN, log);
