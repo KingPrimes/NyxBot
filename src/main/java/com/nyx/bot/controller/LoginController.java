@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,14 +33,18 @@ import java.util.Map;
 @RestController
 @CrossOrigin
 public class LoginController extends BaseController {
-    @Resource
-    private AuthenticationManager authenticationManager;
 
-    @Resource
-    private JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
-    @Resource
-    private UserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+
+    private final UserDetailsService userDetailsService;
+
+    public LoginController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Operation(
             summary = "登录",

@@ -10,7 +10,6 @@ import com.nyx.bot.modules.bot.repo.BotAdminRepository;
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
 import com.nyx.bot.utils.*;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
@@ -28,12 +27,15 @@ import java.util.Optional;
 @Component
 public class Runners {
 
+    private final SysUserRepository userRepository;
+    private final WarframeDataSource dataSource;
     @Value("${test.isTest}")
     Boolean test;
 
-    @Resource
-    SysUserRepository userRepository;
-
+    public Runners(SysUserRepository userRepository, WarframeDataSource dataSource) {
+        this.userRepository = userRepository;
+        this.dataSource = dataSource;
+    }
 
     //程序启动完成后初始化Web系统用户
     @Bean
@@ -64,7 +66,7 @@ public class Runners {
         return args -> {
             if (!test) {
                 //程序启动之后获取WarframeDataSource
-                WarframeDataSource.init();
+                dataSource.init();
             }
         };
     }

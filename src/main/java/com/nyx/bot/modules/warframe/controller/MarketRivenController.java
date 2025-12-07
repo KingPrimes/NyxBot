@@ -43,10 +43,13 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/data/warframe/market/riven")
 
 public class MarketRivenController extends BaseController {
-    RivenItemsRepository repository;
+    private final RivenItemsRepository repository;
 
-    public MarketRivenController(RivenItemsRepository repository) {
+    private final WarframeDataSource dataSource;
+
+    public MarketRivenController(RivenItemsRepository repository,WarframeDataSource dataSource) {
         this.repository = repository;
+        this.dataSource = dataSource;
     }
 
     @Operation(
@@ -83,7 +86,7 @@ public class MarketRivenController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons);
+        CompletableFuture.runAsync(dataSource::getRivenWeapons);
         return success(I18nUtils.RequestTaskRun());
     }
 

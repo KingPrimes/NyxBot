@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/data/warframe/relics")
 public class RelicsController extends BaseController {
 
-    RelicsService rs;
+    private final RelicsService rs;
 
     public RelicsController(RelicsService rs) {
         this.rs = rs;

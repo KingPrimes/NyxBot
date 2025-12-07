@@ -45,10 +45,12 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/data/warframe/market")
 public class OrdersItemsController extends BaseController {
 
-    OrdersItemsRepository repository;
+    private final OrdersItemsRepository repository;
+    private final WarframeDataSource dataSource;
 
-    public OrdersItemsController(OrdersItemsRepository repository) {
+    public OrdersItemsController(OrdersItemsRepository repository, WarframeDataSource dataSource) {
         this.repository = repository;
+        this.dataSource = dataSource;
     }
 
     @Operation(
@@ -109,7 +111,7 @@ public class OrdersItemsController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData);
+        CompletableFuture.runAsync(dataSource::initOrdersItemsData);
         return success(I18nUtils.RequestTaskRun());
     }
 }

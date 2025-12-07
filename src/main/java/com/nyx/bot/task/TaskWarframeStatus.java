@@ -9,7 +9,6 @@ import com.nyx.bot.modules.warframe.application.NotificationApplicationService;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.WorldState;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -24,20 +23,26 @@ import java.time.Instant;
 @Slf4j
 public class TaskWarframeStatus {
 
-    @Resource
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    @Resource
-    NotificationApplicationService notificationService;
+    private final NotificationApplicationService notificationService;
 
-    @Resource
-    NotificationHistoryRepository historyRepository;
+    private final NotificationHistoryRepository historyRepository;
 
-    @Resource
-    Environment environment;
+    private final Environment environment;
+
+    private final WarframeDataSource dataSource;
 
     @Value("${test.isTest}")
     Boolean test;
+
+    public TaskWarframeStatus(ObjectMapper objectMapper, NotificationApplicationService notificationService, NotificationHistoryRepository historyRepository, Environment environment, WarframeDataSource dataSource) {
+        this.objectMapper = objectMapper;
+        this.notificationService = notificationService;
+        this.historyRepository = historyRepository;
+        this.environment = environment;
+        this.dataSource = dataSource;
+    }
 
     @Async("taskExecutor")
     @Scheduled(cron = "0 0/2 * * * ?")
@@ -108,7 +113,7 @@ public class TaskWarframeStatus {
     @Scheduled(cron = "0 0 0 1/3 * ? ")
     public void executeDataSourcePullRandom() {
         if (Math.random() < 0.5 && !test) {
-            WarframeDataSource.init();
+            dataSource.init();
         }
     }
 

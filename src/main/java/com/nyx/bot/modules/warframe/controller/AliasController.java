@@ -48,10 +48,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class AliasController extends BaseController {
 
-    AliasRepository repository;
+    private final AliasRepository repository;
 
-    public AliasController(AliasRepository repository) {
+    private final WarframeDataSource dataSource;
+
+    public AliasController(AliasRepository repository, WarframeDataSource dataSource) {
         this.repository = repository;
+        this.dataSource = dataSource;
     }
 
     @Operation(
@@ -122,7 +125,7 @@ public class AliasController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getAlias);
+        CompletableFuture.runAsync(dataSource::getAlias);
         return success(I18nUtils.RequestTaskRun());
     }
 

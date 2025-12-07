@@ -7,7 +7,6 @@ import com.nyx.bot.repo.PluginConfigRepository;
 import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,11 +22,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/config/plugin/image")
 public class DrawImagePluginController {
 
-    @Resource
-    DrawImagePluginManager drawImagePluginManager;
+    private final DrawImagePluginManager drawImagePluginManager;
 
-    @Resource
-    PluginConfigRepository repository;
+    private final PluginConfigRepository repository;
+
+    public DrawImagePluginController(DrawImagePluginManager drawImagePluginManager, PluginConfigRepository repository) {
+        this.drawImagePluginManager = drawImagePluginManager;
+        this.repository = repository;
+    }
 
     /**
      * 保存插件选择到数据库

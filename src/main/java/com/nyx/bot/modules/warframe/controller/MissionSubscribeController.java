@@ -53,15 +53,13 @@ import java.util.stream.Collectors;
 public class MissionSubscribeController extends BaseController {
 
 
-    MissionSubscribeRepository repository;
+    private final MissionSubscribeRepository repository;
 
-    SubscriptionApplicationService subscriptionService;
+    private final SubscriptionApplicationService subscriptionService;
 
+    private final MissionSubscribeUserRepository msu;
 
-    MissionSubscribeUserRepository msu;
-
-
-    MissionSubscribeUserCheckTypeRepository msuct;
+    private final MissionSubscribeUserCheckTypeRepository msuct;
 
     public MissionSubscribeController(MissionSubscribeRepository repository, SubscriptionApplicationService subscriptionService, MissionSubscribeUserRepository msu, MissionSubscribeUserCheckTypeRepository msuct) {
         this.repository = repository;

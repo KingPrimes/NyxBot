@@ -44,10 +44,13 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/data/warframe/ephemeras")
 public class EphemerasController extends BaseController {
-    EphemerasRepository ephemerasRepository;
+    private final EphemerasRepository ephemerasRepository;
 
-    public EphemerasController(EphemerasRepository ephemerasRepository) {
+    private final WarframeDataSource dataSource;
+
+    public EphemerasController(EphemerasRepository ephemerasRepository, WarframeDataSource dataSource) {
         this.ephemerasRepository = ephemerasRepository;
+        this.dataSource = dataSource;
     }
 
     @Operation(
@@ -141,7 +144,7 @@ public class EphemerasController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getEphemeras);
+        CompletableFuture.runAsync(dataSource::getEphemeras);
         return success(I18nUtils.RequestTaskRun());
     }
 }

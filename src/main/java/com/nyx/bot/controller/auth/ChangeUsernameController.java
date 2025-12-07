@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
@@ -29,6 +28,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import java.util.Optional;
 
@@ -48,11 +48,14 @@ import java.util.Optional;
 @RestController
 public class ChangeUsernameController extends BaseController {
 
-    @Resource
-    UserService userService;
+    private final UserService userService;
 
-    @Resource
-    SysUserRepository repository;
+    private final SysUserRepository repository;
+
+    public ChangeUsernameController(UserService userService, SysUserRepository repository) {
+        this.userService = userService;
+        this.repository = repository;
+    }
 
     @Operation(
             summary = "更改用户名",

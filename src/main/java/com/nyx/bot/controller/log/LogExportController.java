@@ -3,15 +3,14 @@ package com.nyx.bot.controller.log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
 import com.nyx.bot.common.core.AjaxResult;
-import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.core.controller.BaseController;
+import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.event.LogEvent;
 import com.nyx.bot.service.log.LogInfoMapper;
 import com.nyx.bot.service.log.LogSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,17 +37,20 @@ import java.util.stream.Collectors;
 @Tag(name = "日志管理", description = "日志查询、导出和统计接口")
 public class LogExportController extends BaseController {
 
-    @Resource
-    private LogSearchService logSearchService;
+    private final LogSearchService logSearchService;
 
-    @Resource
-    private LogCacheManager logCacheManager;
+    private final LogCacheManager logCacheManager;
 
-    @Resource
-    private LogInfoMapper logInfoMapper;
+    private final LogInfoMapper logInfoMapper;
 
-    @Resource
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    public LogExportController(LogSearchService logSearchService, LogCacheManager logCacheManager, LogInfoMapper logInfoMapper, ObjectMapper objectMapper) {
+        this.logSearchService = logSearchService;
+        this.logCacheManager = logCacheManager;
+        this.logInfoMapper = logInfoMapper;
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * 导出日志为 TXT 文件
