@@ -7,7 +7,6 @@ import com.nyx.bot.modules.warframe.entity.MarketResult;
 import com.nyx.bot.modules.warframe.enums.MarketSortBy;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.LichSisterWeaponsRepository;
-import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.market.MarketLichSister;
 import lombok.Data;
@@ -15,13 +14,23 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
+@Component
 public class MarketLichsSisterUtils {
 
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+    private final ObjectMapper objectMapper;
+    private final LichSisterWeaponsRepository lswRepository;
+    private final AliasRepository aliasRepository;
+
+    public MarketLichsSisterUtils(ObjectMapper objectMapper, LichSisterWeaponsRepository lswRepository, AliasRepository aliasRepository) {
+        this.objectMapper = objectMapper;
+        this.lswRepository = lswRepository;
+        this.aliasRepository = aliasRepository;
+    }
 
     /**
      * 获取Lich/Sister武器拍卖信息
@@ -30,7 +39,7 @@ public class MarketLichsSisterUtils {
      * @param searchType 搜索类型（LICH或SISTER）
      * @return MarketLichSisterResult包含武器信息和拍卖数据
      */
-    public static MarketResult<LichSisterWeapons, MarketLichSister> getAuctions(String key, SearchType searchType) {
+    public MarketResult<LichSisterWeapons, MarketLichSister> getAuctions(String key, SearchType searchType) {
         log.info("开始查询 Market Lich/Sister 拍卖，关键字: {}, 类型: {}", key, searchType.getType());
 
         // 第一步：查询武器信息
@@ -78,7 +87,7 @@ public class MarketLichsSisterUtils {
      * @return MarketLichSister对象，包含拍卖数据
      * @throws RuntimeException 当API调用失败或解析失败时
      */
-    private static MarketLichSister fetchAuctions(MarketSearchResult searchParams) {
+    private MarketLichSister fetchAuctions(MarketSearchResult searchParams) {
         String url = ApiUrl.WARFRAME_MARKET_SEARCH;
         String params = searchParams.getUrl();
 
@@ -122,7 +131,7 @@ public class MarketLichsSisterUtils {
      * @param marketData 原始市场数据
      * @return 处理后的数据
      */
-    private static MarketLichSister processAuctionData(MarketLichSister marketData) {
+    private MarketLichSister processAuctionData(MarketLichSister marketData) {
         if (marketData.getPayload() == null ||
                 marketData.getPayload().getAuctions() == null) {
             log.warn("拍卖数据为空");
@@ -186,12 +195,10 @@ public class MarketLichsSisterUtils {
      * @param key 查询关键字
      * @return MarketLichSisterResult对象，包含匹配的武器信息或候选列表
      */
-    private static MarketResult<LichSisterWeapons, MarketLichSister> queryLichSisterWeapons(String key) {
+    private MarketResult<LichSisterWeapons, MarketLichSister> queryLichSisterWeapons(String key) {
         log.info("Market Lich/Sister Query DataBase Key: {}", key);
 
         try {
-            var lswRepository = SpringUtils.getBean(LichSisterWeaponsRepository.class);
-            var aliasRepository = SpringUtils.getBean(AliasRepository.class);
             MarketResult<LichSisterWeapons, MarketLichSister> mr = new MarketResult<>();
             // 1. 精确匹配原始关键字
             if (MarketCommonUtils.tryMatch(mr, key, lswRepository::findByName)) {
@@ -253,7 +260,7 @@ public class MarketLichsSisterUtils {
      * @param repository LichSisterWeapons仓库实例
      * @return 包含武器名称的字符串列表
      */
-    private static List<String> getPossibleItems(String key, LichSisterWeaponsRepository repository) {
+    private List<String> getPossibleItems(String key, LichSisterWeaponsRepository repository) {
         List<LichSisterWeapons> list = repository.findByNameContaining(String.valueOf(key.charAt(0)));
         return list.stream()
                 .map(LichSisterWeapons::getName)

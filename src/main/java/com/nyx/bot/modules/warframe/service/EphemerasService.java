@@ -17,11 +17,13 @@ import java.util.List;
 @Service
 public class EphemerasService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    ObjectMapper objectMapper;
 
     EphemerasRepository repository;
 
-    public EphemerasService(EphemerasRepository repository) {
+    public EphemerasService(ObjectMapper objectMapper,EphemerasRepository repository) {
+        this.objectMapper = objectMapper;
         this.repository = repository;
     }
 

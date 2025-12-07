@@ -13,7 +13,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.worldstate.SteelPathOffering;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +23,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SteelPathPlugin {
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    public SteelPathPlugin(DrawImagePlugin drawImagePlugin) {
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_STEEL_PATH_CMD, at = AtEnum.BOTH)

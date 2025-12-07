@@ -4,7 +4,6 @@ import com.nyx.bot.modules.bot.entity.black.GroupBlack;
 import com.nyx.bot.modules.bot.entity.black.ProveBlack;
 import com.nyx.bot.modules.bot.repo.black.GroupBlackRepository;
 import com.nyx.bot.modules.bot.repo.black.ProveBlackRepository;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,12 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class BlackService {
 
-    @Resource
-    GroupBlackRepository repository;
+    private final GroupBlackRepository repository;
 
-    @Resource
-    ProveBlackRepository proveBlackRepository;
+    private final ProveBlackRepository proveBlackRepository;
 
+    public BlackService(GroupBlackRepository repository, ProveBlackRepository proveBlackRepository) {
+        this.repository = repository;
+        this.proveBlackRepository = proveBlackRepository;
+    }
 
     public Page<GroupBlack> list(GroupBlack gb) {
         return repository.findAllPageable(

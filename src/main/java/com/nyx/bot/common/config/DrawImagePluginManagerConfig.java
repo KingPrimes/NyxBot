@@ -5,7 +5,6 @@ import com.nyx.bot.repo.PluginConfigRepository;
 import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +18,11 @@ import java.util.List;
 @Configuration
 public class DrawImagePluginManagerConfig {
 
-    @Resource
-    PluginConfigRepository repository;
+    private final PluginConfigRepository repository;
+
+    public DrawImagePluginManagerConfig(PluginConfigRepository repository) {
+        this.repository = repository;
+    }
 
     /**
      * 创建图片插件管理器

@@ -8,7 +8,6 @@ import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.Invasion;
 import io.github.kingprimes.model.worldstate.Reward;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +19,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class InvasionsMessageBuilder implements MessageBuilder<Invasion> {
 
-    @Resource
-    private WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
+
+    public InvasionsMessageBuilder(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<Invasion> event, MissionSubscribeUserCheckType rule) {

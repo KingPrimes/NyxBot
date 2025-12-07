@@ -7,7 +7,6 @@ import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +21,19 @@ import java.util.stream.Collectors;
 @Service
 public class AliasService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+    ObjectMapper objectMapper;
+
     /**
      * 同步锁，用于防止并发更新别名数据时的乐观锁冲突
      */
     private static final Object ALIAS_UPDATE_LOCK = new Object();
 
-    @Resource
     AliasRepository aliasRepository;
+
+    public AliasService(ObjectMapper objectMapper, AliasRepository aliasRepository) {
+        this.objectMapper = objectMapper;
+        this.aliasRepository = aliasRepository;
+    }
 
     private List<Alias> getAlias() {
         List<Alias> aliasList = new ArrayList<>();

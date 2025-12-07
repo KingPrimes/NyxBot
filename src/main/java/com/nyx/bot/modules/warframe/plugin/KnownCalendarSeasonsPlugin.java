@@ -12,7 +12,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +20,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KnownCalendarSeasonsPlugin {
 
-    @Resource
-    WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    public KnownCalendarSeasonsPlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
+        this.worldStateUtils = worldStateUtils;
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_KNOWN_CALENDAR_SEASONS_CMD, at = AtEnum.BOTH)

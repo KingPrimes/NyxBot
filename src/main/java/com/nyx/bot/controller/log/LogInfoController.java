@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -46,9 +45,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/log")
 public class LogInfoController extends BaseController {
 
-    @Resource
-    LogInfoRepository repository;
+    private final LogInfoRepository repository;
 
+    public LogInfoController(LogInfoRepository repository) {
+        this.repository = repository;
+    }
 
     @Operation(summary = "获取代码列表",
             description = "获取系统支持的所有代码列表",

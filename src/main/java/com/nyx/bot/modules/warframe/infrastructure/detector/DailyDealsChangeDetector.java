@@ -4,8 +4,8 @@ import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
-import io.github.kingprimes.model.worldstate.DailyDeals;
 import io.github.kingprimes.model.worldstate.BastWorldState;
+import io.github.kingprimes.model.worldstate.DailyDeals;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

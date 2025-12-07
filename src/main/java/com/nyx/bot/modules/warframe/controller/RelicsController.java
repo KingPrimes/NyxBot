@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/data/warframe/relics")
 public class RelicsController extends BaseController {
 
-    @Resource
-    RelicsService rs;
+    private final RelicsService rs;
+
+    public RelicsController(RelicsService rs) {
+        this.rs = rs;
+    }
 
     @Operation(
             summary = "获取遗物列表",

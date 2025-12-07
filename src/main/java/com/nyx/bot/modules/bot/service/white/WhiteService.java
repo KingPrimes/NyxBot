@@ -4,7 +4,6 @@ import com.nyx.bot.modules.bot.entity.white.GroupWhite;
 import com.nyx.bot.modules.bot.entity.white.ProveWhite;
 import com.nyx.bot.modules.bot.repo.white.GroupWhiteRepository;
 import com.nyx.bot.modules.bot.repo.white.ProveWhiteRepository;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +14,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Service
 public class WhiteService {
+    private final GroupWhiteRepository groupWhiteRepository;
 
-    @Resource
-    GroupWhiteRepository groupWhiteRepository;
+    private final ProveWhiteRepository proveWhiteRepository;
 
-    @Resource
-    ProveWhiteRepository proveWhiteRepository;
+    public WhiteService(GroupWhiteRepository groupWhiteRepository, ProveWhiteRepository proveWhiteRepository) {
+        this.groupWhiteRepository = groupWhiteRepository;
+        this.proveWhiteRepository = proveWhiteRepository;
+    }
 
     public Page<GroupWhite> list(GroupWhite gw) {
         return groupWhiteRepository.findAllPageable(

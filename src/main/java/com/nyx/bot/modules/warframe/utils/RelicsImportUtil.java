@@ -13,9 +13,9 @@ import com.nyx.bot.utils.ListUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.criteria.Predicate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
@@ -29,8 +29,9 @@ import java.util.stream.Stream;
  * Relics数据导入工具类
  * 封装数据读取、翻译处理和批量插入功能
  */
+@Slf4j
+@Component
 public class RelicsImportUtil {
-    private static final Logger log = LoggerFactory.getLogger(RelicsImportUtil.class);
     private static final int BATCH_SIZE = 500;
     private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
 
@@ -104,7 +105,8 @@ public class RelicsImportUtil {
         try (FileInputStream fis = new FileInputStream(filePath)) {
             JsonNode rootNode = objectMapper.readTree(fis);
             JsonNode relicArcaneNode = rootNode.get("ExportRelicArcane");
-            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<List<Relics>>() {});
+            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<>() {
+            });
         } catch (FileNotFoundException e) {
             log.error("数据文件不存在: {}", filePath);
             throw e;
@@ -277,7 +279,9 @@ public class RelicsImportUtil {
         File file = new File("./data/UntranslatedRelicsRewardsName.json");
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
+            if (!parentDir.mkdirs() && !parentDir.exists()) {
+                throw new IOException("创建父目录失败");
+            }
         }
 
         // 写入JSON数据

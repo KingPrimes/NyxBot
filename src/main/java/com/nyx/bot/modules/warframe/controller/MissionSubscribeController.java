@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,16 +52,21 @@ import java.util.stream.Collectors;
 @Validated
 public class MissionSubscribeController extends BaseController {
 
-    @Resource
-    MissionSubscribeRepository repository;
-    @Resource
-    SubscriptionApplicationService subscriptionService;
 
-    @Resource
-    MissionSubscribeUserRepository msu;
+    private final MissionSubscribeRepository repository;
 
-    @Resource
-    MissionSubscribeUserCheckTypeRepository msuct;
+    private final SubscriptionApplicationService subscriptionService;
+
+    private final MissionSubscribeUserRepository msu;
+
+    private final MissionSubscribeUserCheckTypeRepository msuct;
+
+    public MissionSubscribeController(MissionSubscribeRepository repository, SubscriptionApplicationService subscriptionService, MissionSubscribeUserRepository msu, MissionSubscribeUserCheckTypeRepository msuct) {
+        this.repository = repository;
+        this.subscriptionService = subscriptionService;
+        this.msu = msu;
+        this.msuct = msuct;
+    }
 
     @Operation(
             summary = "获取订阅类型列表",

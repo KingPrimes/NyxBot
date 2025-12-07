@@ -12,7 +12,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,11 +23,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AlertsPlugin {
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
+
+    public AlertsPlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_ALERTS_CMD, at = AtEnum.BOTH)

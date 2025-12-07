@@ -1,17 +1,15 @@
 package com.nyx.bot.common.core.controller;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.nyx.bot.common.core.AjaxResult;
 import com.nyx.bot.common.core.page.TableDataInfo;
-import com.nyx.bot.utils.*;
+import com.nyx.bot.utils.DateUtils;
+import com.nyx.bot.utils.I18nUtils;
+import com.nyx.bot.utils.ServletUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.WebDataBinder;
@@ -19,13 +17,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+@Slf4j
 public class BaseController {
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
-    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 返回成功数据
@@ -153,29 +148,6 @@ public class BaseController {
      */
     public AjaxResult error(HttpStatus code, String message) {
         return new AjaxResult(code, message);
-    }
-
-    /**
-     * 页面跳转
-     */
-    public String redirect(String url) {
-        return StringUtils.format("redirect:{}", url);
-    }
-
-    public String pushJson(List<?> all) {
-        try {
-            Set<String> excludes = new HashSet<>();
-            excludes.add("current");
-            excludes.add("size");
-            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(excludes);
-            SimpleFilterProvider filters = new SimpleFilterProvider().setDefaultFilter(filter);
-            ObjectMapper mapper = objectMapper.copy();
-            mapper.setFilterProvider(filters);
-            return mapper.writeValueAsString(all);
-        } catch (Exception e) {
-            log.error("JSON序列化失败: {}", e.getMessage());
-            return "[]";
-        }
     }
 
 }

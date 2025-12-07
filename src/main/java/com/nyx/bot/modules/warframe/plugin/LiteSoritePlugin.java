@@ -12,7 +12,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,11 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class LiteSoritePlugin {
-    @Resource
-    WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
+
+    public LiteSoritePlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
+        this.worldStateUtils = worldStateUtils;
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LITE_SORITE_CMD, at = AtEnum.BOTH)

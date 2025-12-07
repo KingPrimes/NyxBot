@@ -8,7 +8,6 @@ import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.Alert;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +21,14 @@ import java.util.Collections;
 @Component
 public class AlertsMessageBuilder implements MessageBuilder<Alert> {
 
-    @Resource
-    private DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    private WorldStateUtils worldStateUtils;
+    private final WorldStateUtils worldStateUtils;
+
+    public AlertsMessageBuilder(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<Alert> event, MissionSubscribeUserCheckType rule) {

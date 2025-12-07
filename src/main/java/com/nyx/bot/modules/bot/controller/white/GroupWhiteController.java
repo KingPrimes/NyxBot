@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -44,12 +43,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/config/bot/white/group")
 public class GroupWhiteController extends BaseController {
 
-    @Resource
-    WhiteService ws;
+    private final WhiteService ws;
 
-    @Resource
-    BlackService bs;
+    private final BlackService bs;
 
+    public GroupWhiteController(WhiteService ws, BlackService bs) {
+        this.ws = ws;
+        this.bs = bs;
+    }
 
     @Operation(
             summary = "查询群聊白名单列表",

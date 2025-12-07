@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,8 +44,14 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/data/warframe/ephemeras")
 public class EphemerasController extends BaseController {
-    @Resource
-    EphemerasRepository ephemerasRepository;
+    private final EphemerasRepository ephemerasRepository;
+
+    private final WarframeDataSource dataSource;
+
+    public EphemerasController(EphemerasRepository ephemerasRepository, WarframeDataSource dataSource) {
+        this.ephemerasRepository = ephemerasRepository;
+        this.dataSource = dataSource;
+    }
 
     @Operation(
             summary = "查询幻纹列表",
@@ -139,7 +144,7 @@ public class EphemerasController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getEphemeras);
+        CompletableFuture.runAsync(dataSource::getEphemeras);
         return success(I18nUtils.RequestTaskRun());
     }
 }

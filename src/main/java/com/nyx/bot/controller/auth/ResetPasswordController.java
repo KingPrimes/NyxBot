@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
@@ -44,11 +43,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ResetPasswordController extends BaseController {
 
-    @Resource
-    UserService userService;
+    private final UserService userService;
 
-    @Resource
-    SysUserRepository repository;
+    private final SysUserRepository repository;
+
+    public ResetPasswordController(UserService userService, SysUserRepository repository) {
+        this.userService = userService;
+        this.repository = repository;
+    }
 
     @Operation(
             summary = "重置密码",

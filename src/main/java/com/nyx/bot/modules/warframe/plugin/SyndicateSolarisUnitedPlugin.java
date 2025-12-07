@@ -23,10 +23,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SyndicateSolarisUnitedPlugin {
 
+    private final SyndicateMissionsUtils syndicateMissionsUtils;
+
+    public SyndicateSolarisUnitedPlugin(SyndicateMissionsUtils syndicateMissionsUtils) {
+        this.syndicateMissionsUtils = syndicateMissionsUtils;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_SOLARIS_UNITED_CMD, at = AtEnum.BOTH)
     public void syndicateSolarisUnitedHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, SyndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.SolarisSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
+        SendUtils.send(bot, event, syndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.SolarisSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
     }
 }

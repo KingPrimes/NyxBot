@@ -13,7 +13,6 @@ import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.worldstate.*;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,17 +22,21 @@ import java.util.stream.Collectors;
 @Component
 public class WorldStateUtils {
 
-    @Resource
-    StateTranslationRepository str;
 
-    @Resource
-    WeaponsRepository weaponsRepository;
+    private final StateTranslationRepository str;
 
-    @Resource
-    NodesRepository nodesRepository;
+    private final WeaponsRepository weaponsRepository;
 
-    @Resource
-    NightWaveRepository nightwaveRepository;
+    private final NodesRepository nodesRepository;
+
+    private final NightWaveRepository nightwaveRepository;
+
+    public WorldStateUtils(StateTranslationRepository str, WeaponsRepository weaponsRepository, NodesRepository nodesRepository, NightWaveRepository nightwaveRepository) {
+        this.str = str;
+        this.weaponsRepository = weaponsRepository;
+        this.nodesRepository = nodesRepository;
+        this.nightwaveRepository = nightwaveRepository;
+    }
 
     /**
      * 获取警报信息列表

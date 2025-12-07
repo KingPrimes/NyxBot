@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -49,8 +48,14 @@ import java.util.concurrent.CompletableFuture;
 
 public class AliasController extends BaseController {
 
-    @Resource
-    AliasRepository repository;
+    private final AliasRepository repository;
+
+    private final WarframeDataSource dataSource;
+
+    public AliasController(AliasRepository repository, WarframeDataSource dataSource) {
+        this.repository = repository;
+        this.dataSource = dataSource;
+    }
 
     @Operation(
             summary = "查询别名列表",
@@ -120,7 +125,7 @@ public class AliasController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::getAlias);
+        CompletableFuture.runAsync(dataSource::getAlias);
         return success(I18nUtils.RequestTaskRun());
     }
 

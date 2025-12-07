@@ -12,68 +12,32 @@ import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
 import com.nyx.bot.modules.warframe.repo.RivenTionAliasRepository;
 import com.nyx.bot.modules.warframe.repo.RivenTionRepository;
-import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.market.MarketRiven;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 
 @Slf4j
+@Component
 public class MarketRivenUtils {
 
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+    private final ObjectMapper objectMapper;
+    private final RivenItemsRepository rivenItemsRepository;
+    private final AliasRepository aliasRepository;
+    private final RivenTionRepository rivenTionRepository;
+    private final RivenTionAliasRepository rivenTionAliasRepository;
 
-
-    /**
-     * 获取紫卡武器信息 如果遇到为查询到的物品则返回可能要查询的物品列表
-     * RivenItems.items 可能要查询的物品列表
-     */
-    private static RivenItems getRiveItems(String key) {
-        log.debug("------紫卡查询--查询数据库------");
-        log.debug("原始数据：{}", key);
-        // 假设用户输入的是正确值，直接查询数据库
-        var repository = SpringUtils.getBean(RivenItemsRepository.class);
-        Optional<RivenItems> items = repository.findByName(key);
-        log.debug("假设正确:{}", items.orElse(new RivenItems()));
-        if (items.isPresent()) {
-            return items.get();
-        }
-
-        // 假设用户输入的是别名，查询数据库
-        var alias = SpringUtils.getBean(AliasRepository.class);
-        key = key.toLowerCase(Locale.ROOT);
-        if (!key.contains("prime") && key.contains("p")) {
-            key = key.replace("p", "Prime");
-        }
-        Optional<Alias> a = alias.findByCn(key);
-        if (a.isPresent()) {
-            items = repository.findByName(a.get().getEn());
-            log.debug("别名:{}", items);
-            if (items.isPresent()) {
-                return items.get();
-            }
-        }
-
-        // 正则查询
-        String start = String.valueOf(key.charAt(0));
-        String end = String.valueOf(key.charAt(key.length() - 1));
-        items = repository.findByNameRegex("^" + start + ".*?" + end + ".*?");
-        log.debug("正则查询:{}", items);
-        if (items.isPresent()) {
-            return items.get();
-        }
-
-        //最后查询所有以该字符开头的物品，并返回
-        List<RivenItems> itemsList = repository.nameLikes(start);
-        RivenItems finalItems = new RivenItems();
-        finalItems.setItems(itemsList);
-        log.debug("可能存在的值：{}", finalItems);
-        log.debug("------数据库查询结束------");
-        return finalItems;
+    public MarketRivenUtils(ObjectMapper objectMapper, RivenItemsRepository rivenItemsRepository, AliasRepository aliasRepository, RivenTionRepository rivenTionRepository, RivenTionAliasRepository rivenTionAliasRepository) {
+        this.objectMapper = objectMapper;
+        this.rivenItemsRepository = rivenItemsRepository;
+        this.aliasRepository = aliasRepository;
+        this.rivenTionRepository = rivenTionRepository;
+        this.rivenTionAliasRepository = rivenTionAliasRepository;
     }
 
     /**
@@ -84,7 +48,7 @@ public class MarketRivenUtils {
      * @param itemName 物品名称
      * @return MarketRiven对象，包含处理后的市场数据，失败时返回空对象
      */
-    private static MarketRiven fetchAndProcess(MarketSearchResult params, String itemName) {
+    private MarketRiven fetchAndProcess(MarketSearchResult params, String itemName) {
         MarketRiven empty = new MarketRiven();
         // 发送HTTP GET请求获取市场数据
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SEARCH, params.getUrl());
@@ -113,7 +77,7 @@ public class MarketRivenUtils {
      * @param list 参数列表，通常包含武器名称、正面词条和负面词条
      * @return 转换后的负面词条字符串，"has"表示有负面词条，"none"表示无负面词条，列表长度不足时返回空字符串
      */
-    private static String parseNegativeStat(List<String> list) {
+    private String parseNegativeStat(List<String> list) {
         // 检查列表长度是否足够包含负面词条参数
         if (list.size() <= 2) {
             return "";
@@ -131,17 +95,15 @@ public class MarketRivenUtils {
      * @param stats 词条效果数组
      * @return 逗号分隔的URL名称字符串
      */
-    private static String resolveStatUrlNames(String[] stats) {
-        RivenTionRepository tionRepo = SpringUtils.getBean(RivenTionRepository.class);
-        RivenTionAliasRepository aliasRepo = SpringUtils.getBean(RivenTionAliasRepository.class);
+    private String resolveStatUrlNames(String[] stats) {
 
         return Arrays.stream(stats)
                 .map(String::trim)
                 // 将每个词条效果映射为URL名称
-                .map(effect -> tionRepo.findByEffect(effect)
+                .map(effect -> rivenTionRepository.findByEffect(effect)
                         .map(RivenTion::getUrlName)
                         // 如果找不到直接匹配，则尝试通过别名查找
-                        .orElseGet(() -> aliasRepo.findByCn(effect)
+                        .orElseGet(() -> rivenTionAliasRepository.findByCn(effect)
                                 .map(RivenTionAlias::getEn)
                                 .orElse(null)))
                 // 过滤掉无法识别的词条
@@ -157,7 +119,7 @@ public class MarketRivenUtils {
      * @param marketRiven 数据
      * @param itemName    物品名称
      */
-    private static MarketRiven stream(MarketRiven marketRiven, String itemName) {
+    private MarketRiven stream(MarketRiven marketRiven, String itemName) {
         marketRiven.setItemName(itemName);
         marketRiven.getPayload().setAuctions(
                 marketRiven.getPayload()
@@ -169,10 +131,10 @@ public class MarketRivenUtils {
                         // 过滤掉不在线玩家
                         .filter(m -> m.getOwner().getStatus().equals("online") || m.getOwner().getStatus().equals("ingame"))
                         // 排序
-                        .sorted(MarketRivenUtils::compareByPrice)
+                        .sorted(this::compareByPrice)
                         // 取前10个
                         .limit(10)
-                        .peek(MarketRivenUtils::mapAttributeEffects)
+                        .peek(this::mapAttributeEffects)
                         .toList());
         // 解析返回数据
         return marketRiven;
@@ -186,7 +148,7 @@ public class MarketRivenUtils {
      * @param o2 第二个拍卖物品
      * @return 比较结果：负数表示o1价格更低，0表示价格相等，正数表示o1价格更高
      */
-    private static int compareByPrice(MarketRiven.Auctions o1, MarketRiven.Auctions o2) {
+    private int compareByPrice(MarketRiven.Auctions o1, MarketRiven.Auctions o2) {
         // 优先比较买断价格
         if (o1.getBuyoutPrice() != null && o2.getBuyoutPrice() != null) {
             return o1.getBuyoutPrice() - o2.getBuyoutPrice();
@@ -208,12 +170,11 @@ public class MarketRivenUtils {
      *
      * @param auction 拍卖物品对象，包含待转换的属性信息
      */
-    private static void mapAttributeEffects(MarketRiven.Auctions auction) {
-        RivenTionRepository repo = SpringUtils.getBean(RivenTionRepository.class);
+    private void mapAttributeEffects(MarketRiven.Auctions auction) {
         auction.getItem().setAttributes(
                 auction.getItem().getAttributes().stream()
                         .peek(a -> a.setUrlName(
-                                repo.findByUrlName(a.getUrlName())
+                                rivenTionRepository.findByUrlName(a.getUrlName())
                                         .orElse(new RivenTion())
                                         .getEffect()
                         ))
@@ -228,7 +189,7 @@ public class MarketRivenUtils {
      * @param key 查询关键字，格式可以是"武器名称"或"武器名称-正面词条1,正面词条2-负面词条"
      * @return MarketRiven对象，包含查询结果或可能的物品列表
      */
-    public static MarketRiven marketRivenParameter(String key) {
+    public MarketRiven marketRivenParameter(String key) {
         log.debug("------紫卡查询--构建请求地址------");
         MarketRiven marketRiven = new MarketRiven();
         RivenItems riveItems;
@@ -281,6 +242,53 @@ public class MarketRivenUtils {
                 .setBuyoutPolicy(MarketSearchPolicy.ANY)
                 .setSortBy(MarketSortBy.PRICE_ASC);
         return fetchAndProcess(result, riveItems.getName());
+    }
+
+    /**
+     * 获取紫卡武器信息 如果遇到为查询到的物品则返回可能要查询的物品列表
+     * RivenItems.items 可能要查询的物品列表
+     */
+    private RivenItems getRiveItems(String key) {
+        log.debug("------紫卡查询--查询数据库------");
+        log.debug("原始数据：{}", key);
+        // 假设用户输入的是正确值，直接查询数据库
+        var repository = rivenItemsRepository;
+        Optional<RivenItems> items = repository.findByName(key);
+        log.debug("假设正确:{}", items.orElse(new RivenItems()));
+        if (items.isPresent()) {
+            return items.get();
+        }
+
+        // 假设用户输入的是别名，查询数据库
+        key = key.toLowerCase(Locale.ROOT);
+        if (!key.contains("prime") && key.contains("p")) {
+            key = key.replace("p", "Prime");
+        }
+        Optional<Alias> a = aliasRepository.findByCn(key);
+        if (a.isPresent()) {
+            items = repository.findByName(a.get().getEn());
+            log.debug("别名:{}", items);
+            if (items.isPresent()) {
+                return items.get();
+            }
+        }
+
+        // 正则查询
+        String start = String.valueOf(key.charAt(0));
+        String end = String.valueOf(key.charAt(key.length() - 1));
+        items = repository.findByNameRegex("^" + start + ".*?" + end + ".*?");
+        log.debug("正则查询:{}", items);
+        if (items.isPresent()) {
+            return items.get();
+        }
+
+        //最后查询所有以该字符开头的物品，并返回
+        List<RivenItems> itemsList = repository.nameLikes(start);
+        RivenItems finalItems = new RivenItems();
+        finalItems.setItems(itemsList);
+        log.debug("可能存在的值：{}", finalItems);
+        log.debug("------数据库查询结束------");
+        return finalItems;
     }
 
     /**

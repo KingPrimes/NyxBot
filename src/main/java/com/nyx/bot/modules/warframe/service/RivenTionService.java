@@ -7,7 +7,6 @@ import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.RivenTion;
 import com.nyx.bot.modules.warframe.repo.RivenTionRepository;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +21,18 @@ import java.util.stream.Collectors;
 @Service
 public class RivenTionService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
     /**
      * 同步锁，用于防止并发更新紫卡词条数据时的乐观锁冲突
      */
     private static final Object RIVEN_TION_UPDATE_LOCK = new Object();
-
-    @Resource
+    ObjectMapper objectMapper;
     RivenTionRepository rivenTionRepository;
+
+    public RivenTionService(ObjectMapper objectMapper, RivenTionRepository rivenTionRepository) {
+        this.objectMapper = objectMapper;
+        this.rivenTionRepository = rivenTionRepository;
+    }
 
     private List<RivenTion> getRivenTions() {
         List<RivenTion> rivenTionList = new ArrayList<>();
@@ -71,16 +73,16 @@ public class RivenTionService {
                 throw new ServiceException("RivenTion数据获取失败！", 500);
             }
             log.debug("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
-            
+
             try {
                 // 策略：查询现有数据，使用唯一约束字段 url_name 进行映射
                 List<RivenTion> existingList = rivenTionRepository.findAll();
                 Map<String, RivenTion> existingMap = existingList.stream()
                         .filter(rt -> rt.getUrlName() != null)
                         .collect(Collectors.toMap(RivenTion::getUrlName, Function.identity(), (a1, a2) -> a1));
-                
+
                 log.debug("数据库中现有 {} 条紫卡词条数据", existingMap.size());
-                
+
                 // 处理新数据：为已存在的记录复用ID
                 List<RivenTion> toSave = new ArrayList<>();
                 for (RivenTion newRivenTion : rivenTionList) {
@@ -94,11 +96,11 @@ public class RivenTionService {
                     }
                     toSave.add(newRivenTion);
                 }
-                
+
                 // 批量保存
                 List<RivenTion> saved = rivenTionRepository.saveAll(toSave);
                 rivenTionRepository.flush();
-                
+
                 log.debug("紫卡词条数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {

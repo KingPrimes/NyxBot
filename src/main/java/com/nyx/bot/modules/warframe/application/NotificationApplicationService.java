@@ -13,7 +13,6 @@ import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,7 +49,6 @@ public class NotificationApplicationService {
      * @param subscribeRepo 订阅仓储
      * @param botContainer  Bot 容器
      */
-    @Autowired
     public NotificationApplicationService(
             List<ChangeDetector<?>> detectorList,
             List<MessageBuilder<?>> builderList,
@@ -123,7 +121,7 @@ public class NotificationApplicationService {
 
                         List<? extends ChangeEvent<?>> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
-                            log.debug("Detector {} 检测到 {} 个变化",
+                            log.info("Detector {} 检测到 {} 个变化",
                                     detector.getClass().getSimpleName(), changes.size());
                         }
                         return changes.stream();
@@ -148,7 +146,7 @@ public class NotificationApplicationService {
         List<MissionSubscribe> subscriptions = subscribeRepo.findSubscriptions(type);
 
         if (subscriptions.isEmpty()) {
-            log.debug("类型 {} 没有订阅者", type.getNAME());
+            log.info("类型 {} 没有订阅者", type.getNAME());
             return;
         }
 

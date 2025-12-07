@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -44,11 +43,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/config/bot/white/prove")
 public class ProveWhiteController extends BaseController {
 
-    @Resource
-    WhiteService whiteService;
+    private final WhiteService whiteService;
 
-    @Resource
-    BlackService bs;
+    private final BlackService bs;
+
+    public ProveWhiteController(WhiteService whiteService, BlackService bs) {
+        this.whiteService = whiteService;
+        this.bs = bs;
+    }
 
     @Operation(
             summary = "查询个人白名单列表",

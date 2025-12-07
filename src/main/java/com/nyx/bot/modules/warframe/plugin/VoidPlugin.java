@@ -12,7 +12,6 @@ import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +23,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class VoidPlugin {
 
+    private final WorldStateUtils worldStateUtils;
 
-    @Resource
-    WorldStateUtils worldStateUtils;
+    private final DrawImagePlugin drawImagePlugin;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    public VoidPlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
+        this.worldStateUtils = worldStateUtils;
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_CMD, at = AtEnum.BOTH)

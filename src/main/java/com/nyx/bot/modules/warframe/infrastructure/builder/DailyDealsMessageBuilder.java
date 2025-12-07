@@ -8,7 +8,6 @@ import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.DailyDeals;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
 
-    @Resource
-    private DrawImagePlugin drawImagePlugin;
+    private final DrawImagePlugin drawImagePlugin;
 
+    private final WorldStateUtils worldStateUtils;
 
-    @Resource
-    private WorldStateUtils worldStateUtils;
+    public DailyDealsMessageBuilder(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+        this.drawImagePlugin = drawImagePlugin;
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<DailyDeals> event, MissionSubscribeUserCheckType rule) {
@@ -76,8 +77,6 @@ public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
             builder.text("\n━━━━━━━━━━━━━━━━");
 
         }
-
-        log.debug("构建每日特惠消息完成 [商品:{}]", deal.getItem());
         return builder;
     }
 

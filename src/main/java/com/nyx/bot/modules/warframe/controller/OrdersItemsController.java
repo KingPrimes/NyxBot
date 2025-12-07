@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,8 +45,13 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/data/warframe/market")
 public class OrdersItemsController extends BaseController {
 
-    @Resource
-    OrdersItemsRepository repository;
+    private final OrdersItemsRepository repository;
+    private final WarframeDataSource dataSource;
+
+    public OrdersItemsController(OrdersItemsRepository repository, WarframeDataSource dataSource) {
+        this.repository = repository;
+        this.dataSource = dataSource;
+    }
 
     @Operation(
             summary = "获取可交易物品列表",
@@ -107,7 +111,7 @@ public class OrdersItemsController extends BaseController {
     )
     @PostMapping("/update")
     public AjaxResult update() {
-        CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData);
+        CompletableFuture.runAsync(dataSource::initOrdersItemsData);
         return success(I18nUtils.RequestTaskRun());
     }
 }

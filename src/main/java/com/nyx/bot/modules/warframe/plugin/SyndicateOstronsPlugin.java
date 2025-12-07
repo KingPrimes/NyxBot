@@ -22,14 +22,19 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SyndicateOstronsPlugin {
+
+    private final SyndicateMissionsUtils syndicateMissionsUtils;
+
+    public SyndicateOstronsPlugin(SyndicateMissionsUtils syndicateMissionsUtils) {
+        this.syndicateMissionsUtils = syndicateMissionsUtils;
+    }
+
     /**
      * 希图斯 赏金
      */
-
-
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_OSTRONS_CMD, at = AtEnum.BOTH)
     public void cetusSyndicateHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, SyndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.CetusSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
+        SendUtils.send(bot, event, syndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.CetusSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
     }
 }

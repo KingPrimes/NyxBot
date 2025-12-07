@@ -46,13 +46,21 @@ public class WarframeDataSource {
     static final String EXPORT_PATH = "./data/export/%s";
     static final String LAMA_PATH = "./data/lzma/index_zh.txt.lzma";
     static final String INDEX_PATH = "./data/lzma/index_zh.txt";
-    static ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
-    StateTranslationRepository str = SpringUtils.getBean(StateTranslationRepository.class);
-    NodesRepository nodesRepository = SpringUtils.getBean(NodesRepository.class);
-    WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
-    RewardPoolRepository rewardPoolRepository = SpringUtils.getBean(RewardPoolRepository.class);
+    private final ObjectMapper objectMapper;
+    private final StateTranslationRepository str;
+    private final NodesRepository nodesRepository;
+    private final WeaponsRepository weaponsRepository;
+    private final RewardPoolRepository rewardPoolRepository;
 
-    public static void init() {
+    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository) {
+        this.objectMapper = objectMapper;
+        this.str = str;
+        this.nodesRepository = nodesRepository;
+        this.weaponsRepository = weaponsRepository;
+        this.rewardPoolRepository = rewardPoolRepository;
+    }
+
+    public void init() {
         log.info("开始初始化数据！");
 
         // 优化后的任务编排：
@@ -60,7 +68,7 @@ public class WarframeDataSource {
         // 2. 然后并行执行所有数据库更新任务
         // 3. 注意：虽然添加了同步锁，但仍保持单线程执行数据库批量更新任务以提高性能
         CompletableFuture
-                .supplyAsync(WarframeDataSource::severExportFiles)
+                .supplyAsync(this::severExportFiles)
                 .thenAccept(flag -> {
                     if (!flag) {
                         log.error("获取导出数据文件失败！请检查网络环境");
@@ -69,29 +77,29 @@ public class WarframeDataSource {
                 })
                 // 步骤1: 初始化状态翻译数据（优先级最高，可能被其他任务依赖）
                 .thenCompose(ignore ->
-                        CompletableFuture.runAsync(() -> new WarframeDataSource().initStateTranslation())
+                        CompletableFuture.runAsync(() -> this.initStateTranslation())
                                 // 步骤2: 并行执行所有数据初始化任务
                                 .thenRunAsync(() -> {
                                     // 数据库批量更新任务组（这些任务各自已有同步锁保护）
                                     CompletableFuture<Void> dbUpdateTasks = CompletableFuture.allOf(
-                                            CompletableFuture.runAsync(WarframeDataSource::getAlias),
-                                            CompletableFuture.runAsync(WarframeDataSource::getRivenTion),
-                                            CompletableFuture.runAsync(WarframeDataSource::getRivenTionAlias),
-                                            CompletableFuture.runAsync(WarframeDataSource::getRivenAnalyseTrend)
+                                            CompletableFuture.runAsync(this::getAlias),
+                                            CompletableFuture.runAsync(this::getRivenTion),
+                                            CompletableFuture.runAsync(this::getRivenTionAlias),
+                                            CompletableFuture.runAsync(this::getRivenAnalyseTrend)
                                     );
 
                                     // 其他数据初始化任务组（读取操作为主，可以完全并行）
                                     CompletableFuture<Void> otherTasks = CompletableFuture.allOf(
-                                            CompletableFuture.runAsync(WarframeDataSource::initWarframeStatus),
-                                            CompletableFuture.runAsync(WarframeDataSource::getEphemeras),
-                                            CompletableFuture.runAsync(WarframeDataSource::initOrdersItemsData),
-                                            CompletableFuture.runAsync(WarframeDataSource::getLichSisterWeapons),
-                                            CompletableFuture.runAsync(WarframeDataSource::getRivenWeapons),
-                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNodes()),
-                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initWeapons()),
-                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initRewardPool()),
-                                            CompletableFuture.runAsync(() -> new WarframeDataSource().initNightWave()),
-                                            CompletableFuture.runAsync(WarframeDataSource::getRelics)
+                                            CompletableFuture.runAsync(this::initWarframeStatus),
+                                            CompletableFuture.runAsync(this::getEphemeras),
+                                            CompletableFuture.runAsync(this::initOrdersItemsData),
+                                            CompletableFuture.runAsync(this::getLichSisterWeapons),
+                                            CompletableFuture.runAsync(this::getRivenWeapons),
+                                            CompletableFuture.runAsync(() -> this.initNodes()),
+                                            CompletableFuture.runAsync(() -> this.initWeapons()),
+                                            CompletableFuture.runAsync(() -> this.initRewardPool()),
+                                            CompletableFuture.runAsync(() -> this.initNightWave()),
+                                            CompletableFuture.runAsync(this::getRelics)
                                     );
 
                                     // 等待所有任务完成
@@ -113,7 +121,7 @@ public class WarframeDataSource {
     }
 
     @SneakyThrows
-    public static void initWarframeStatus() {
+    public void initWarframeStatus() {
         String a = FileUtils.readFileToString("./data/arbitration");
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
@@ -129,60 +137,60 @@ public class WarframeDataSource {
     }
 
     //幻纹
-    public static Integer getEphemeras() {
+    public Integer getEphemeras() {
         return SpringUtils.getBean(EphemerasService.class).initEphemerasData();
     }
 
 
     //Market
-    public static Integer initOrdersItemsData() {
+    public Integer initOrdersItemsData() {
         return SpringUtils.getBean(OrdersItemsService.class).initOrdersItemsData();
     }
 
     //赤毒武器/信条武器
-    public static Integer getLichSisterWeapons() {
+    public Integer getLichSisterWeapons() {
         return SpringUtils.getBean(LichSisterWeaponsService.class).initLichSisterWeaponsData();
     }
 
     //紫卡武器
-    public static Integer getRivenWeapons() {
+    public Integer getRivenWeapons() {
         return SpringUtils.getBean(RivenItemsService.class).initRivenItemsData();
     }
 
     // 遗物
-    public static Integer getRelics() {
+    public Integer getRelics() {
         return SpringUtils.getBean(RelicsService.class).initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
     }
 
     //别名
-    public static void getAlias() {
+    public void getAlias() {
         log.info("开始初始化别名数据！");
         int i = SpringUtils.getBean(AliasService.class).updateAlias();
         log.info("总计更新 Warframe.Alias {} 数据！", i);
     }
 
     // 紫卡词条
-    public static void getRivenTion() {
+    public void getRivenTion() {
         log.info("开始初始化 RivenTion 数据！");
         int i = SpringUtils.getBean(RivenTionService.class).updateRivenTion();
         log.info("总计更新 Warframe.RivenTion {} 数据！", i);
     }
 
     // 紫卡词条别名
-    public static void getRivenTionAlias() {
+    public void getRivenTionAlias() {
         log.info("开始初始化 RivenTion 别名数据！");
         int i = SpringUtils.getBean(RivenTionAliasService.class).updateRivenTionAlias();
         log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", i);
     }
 
     //紫卡计算器数据
-    public static void getRivenAnalyseTrend() {
+    public void getRivenAnalyseTrend() {
         log.info("开始初始化 RivenAnalyseTrend 数据！");
         int r = SpringUtils.getBean(RivenAnalyseTrendService.class).updateRivenAnalyseTrends();
         log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r);
     }
 
-    public static Boolean severExportFiles() {
+    public Boolean severExportFiles() {
         return severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
     }
 
@@ -194,7 +202,7 @@ public class WarframeDataSource {
      * @param outPath      解压文件保存路径
      * @param exportPath   索引数据保存路径 ./data/export/%s
      */
-    private static Boolean severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
+    Boolean severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
         Boolean files = getExportLZMAFiles(languagesKey, path);
         if (!files) {
             return false;
@@ -223,7 +231,7 @@ public class WarframeDataSource {
      * @param path - 文件保存路径
      * @param key  语言
      */
-    static Boolean getExportLZMAFiles(String key, String path) {
+    Boolean getExportLZMAFiles(String key, String path) {
         return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted(key), path);
     }
 
@@ -233,7 +241,7 @@ public class WarframeDataSource {
      * @param exportPath 文件路径
      * @return List<StateTranslation>
      */
-    static List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
+    List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
         JsonNode rootNode;
         try {
             rootNode = objectMapper.readTree(new FileInputStream(exportPath));
@@ -262,12 +270,12 @@ public class WarframeDataSource {
      * @param key  索引
      * @param path 文件保存路径
      */
-    static Boolean getExportFiles(String key, String path) {
+    Boolean getExportFiles(String key, String path) {
         log.debug("ExportFiles URL:{} Path:{}", key, path);
         return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
     }
 
-    static <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
+    <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
         return items.stream().collect(Collectors.toMap(keyMapper, Function.identity(), mergeFunction));
     }
 
@@ -277,7 +285,7 @@ public class WarframeDataSource {
      * @param keys Lzma读取的列表
      * @return 不同的Hash值
      */
-    static Map<String, String> compareTheHashAndSave(List<String> keys) {
+    Map<String, String> compareTheHashAndSave(List<String> keys) {
         log.debug("开始对比 Lzma 数据的 Hash 值并保存！");
         String keysHashPath = "./data/keys.json";
         Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
@@ -341,23 +349,7 @@ public class WarframeDataSource {
         int size = str.saveAll(stateTranslationList).size();
         log.debug("初始化 Lost 翻译 数据完成，共{}条", size);
         log.debug("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
-        List<StateTranslation> javaList = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_STATE_TRANSLATION) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    List<StateTranslation> translations = objectMapper.readValue(
-                            body.body(),
-                            new TypeReference<List<StateTranslation>>() {
-                            }
-                    );
-                    javaList.addAll(translations);
-                    break;
-                } catch (Exception e) {
-                    log.error("解析 StateTranslation 数据失败: {}", url, e);
-                }
-            }
-        }
+        List<StateTranslation> javaList = SpringUtils.getBean(StateTranslationService.class).getStateTranslationsForCnd();
         List<StateTranslation> sts = javaList.stream().peek(s -> {
             Arrays.stream(StateTypeEnum.values())
                     .filter(stateTypeEnum -> s.getUniqueName()

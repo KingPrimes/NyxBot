@@ -9,6 +9,7 @@ import io.github.kingprimes.model.WorldState;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.CetusCycle;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -123,6 +124,7 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
      * </p>
      */
     @Override
+    @Transactional
     public void cleanExpiredHistory() {
         try {
             // 计算过期时间点：当前时间 - 保留时长
@@ -142,7 +144,6 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
             }
         } catch (Exception e) {
             log.error("清理夜灵平原周期历史记录失败", e);
-            // 清理失败不应中断检测流程，仅记录日志
         }
     }
 

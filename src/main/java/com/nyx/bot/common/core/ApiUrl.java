@@ -22,68 +22,69 @@ public class ApiUrl {
     public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
     public static final String WARFRAME_PUBLIC_EXPORT_MANIFESTS = "http://content.warframe.com/PublicExport/Manifest/%s";
     public static final String WARFRAME_PUBLIC_EXPORT_INDEX = "https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
+
     /**
-     * Warframe 别名数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * Warframe 别名数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_ALIAS = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/alias.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/alias.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/alias.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/alias.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/alias.json",
+            "https://kingprimes.top/warframe/alias.json"
     );
     /**
-     * RivenTion 数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * RivenTion 数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
+            "https://kingprimes.top/warframe/market_riven_tion.json"
     );
     /**
-     * RivenTion 别名数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * RivenTion 别名数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
+            "https://kingprimes.top/warframe/market_riven_tion_alias.json"
     );
     /**
-     * 节点数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * 节点数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_NODES = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/nodes.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/nodes.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/nodes.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/nodes.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/nodes.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/nodes.json",
+            "https://kingprimes.top/warframe/nodes.json"
     );
     /**
-     * 奖励池数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * 奖励池数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_REWARD_POOL = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/reward_pool.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/reward_pool.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/reward_pool.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/reward_pool.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/reward_pool.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/reward_pool.json",
+            "https://kingprimes.top/warframe/reward_pool.json"
     );
     /**
-     * 紫卡计算器数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * 紫卡计算器数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_RIVEN_ANALYSE_TREND = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
+            "https://kingprimes.top/warframe/riven_analyse_trend.json"
     );
     /**
-     * 状态翻译数据源</br>
-     * 使用<a href="https://www.jsdelivr.com/">www.jsdelivr.com</a>与<a href="https://cdn.jsdmirror.com/">cdn.jsdmirror.com</a>进行cnd加速获取数据</br>
+     * 状态翻译数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_STATE_TRANSLATION = List.of(
-            "https://cdn.jsdmirror.com/gh/KingPrimes/DataSource/warframe/state_translation.json",
-            "https://cdn.jsdmirror.cn/gh/KingPrimes/DataSource/warframe/state_translation.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/state_translation.json"
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/state_translation.json",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/state_translation.json",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/state_translation.json",
+            "https://kingprimes.top/warframe/state_translation.json"
     );
     /**
      * 赤毒幻纹
@@ -155,7 +156,7 @@ public class ApiUrl {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }
-            return objectMapper.readValue(body.body(), new TypeReference<List<Arbitration>>() {
+            return objectMapper.readValue(body.body(), new TypeReference<>() {
             });
         } catch (Exception e) {
             log.error("解析仲裁数据失败: {}", e.getMessage());

@@ -12,7 +12,6 @@ import com.nyx.bot.modules.warframe.utils.MarketRivenUtils;
 import com.nyx.bot.utils.MatcherUtils;
 import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class MarketRivenPlugin {
+    private final DrawImagePlugin drawImagePlugin;
 
+    private final MarketRivenUtils marketRivenUtils;
 
-    @Resource
-    DrawImagePlugin drawImagePlugin;
+    public MarketRivenPlugin(MarketRivenUtils marketRivenUtils, DrawImagePlugin drawImagePlugin) {
+        this.marketRivenUtils = marketRivenUtils;
+        this.drawImagePlugin = drawImagePlugin;
+    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_RIVEN_CMD, at = AtEnum.BOTH)
@@ -52,6 +55,6 @@ public class MarketRivenPlugin {
     }
 
     private byte[] postMarketRivenImage(String key) {
-        return drawImagePlugin.drawMarketRivenImage(MarketRivenUtils.marketRivenParameter(key));
+        return drawImagePlugin.drawMarketRivenImage(marketRivenUtils.marketRivenParameter(key));
     }
 }
