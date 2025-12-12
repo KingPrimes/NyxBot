@@ -4,13 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.WarframeCache;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.modules.warframe.application.NotificationApplicationService;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.WorldState;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,21 +29,16 @@ public class TaskWarframeStatus {
 
     private final Environment environment;
 
-    private final WarframeDataSource dataSource;
 
-    @Value("${test.isTest}")
-    Boolean test;
-
-    public TaskWarframeStatus(ObjectMapper objectMapper, NotificationApplicationService notificationService, NotificationHistoryRepository historyRepository, Environment environment, WarframeDataSource dataSource) {
+    public TaskWarframeStatus(ObjectMapper objectMapper, NotificationApplicationService notificationService, NotificationHistoryRepository historyRepository, Environment environment) {
         this.objectMapper = objectMapper;
         this.notificationService = notificationService;
         this.historyRepository = historyRepository;
         this.environment = environment;
-        this.dataSource = dataSource;
     }
 
     @Async("taskExecutor")
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void executeWarframeStatus() {
         HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
         if (body.code().is2xxSuccessful() || body.code().is3xxRedirection()) {
@@ -106,15 +99,5 @@ public class TaskWarframeStatus {
         }
     }
 
-    /**
-     * 定时更新数据
-     */
-    @Async("taskExecutor")
-    @Scheduled(cron = "0 0 0 1/3 * ? ")
-    public void executeDataSourcePullRandom() {
-        if (Math.random() < 0.5 && !test) {
-            dataSource.init();
-        }
-    }
 
 }

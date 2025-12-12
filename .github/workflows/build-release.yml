@@ -7,23 +7,6 @@ on:
   push:
     tags:
       - v*
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: '要构建的分支'
-        required: true
-        default: 'dev'
-        type: string
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'info'
-        type: choice
-        options:
-          - debug
-          - info
-          - warning
-          - error
 jobs:
   build-release:
     name: Release
@@ -122,6 +105,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
+        env:
+          GITHUB_TAG: ${{ github.ref_name }}
         run: |
-          docker build -t kingprimes/nyxbot:latest .
+          docker build -t kingprimes/nyxbot:${GITHUB_TAG} .
+          docker push kingprimes/nyxbot:${GITHUB_TAG}
+          echo "✅ 版本标签已推送: kingprimes/nyxbot:${GITHUB_TAG}"
+
+          # 重新标记为 latest 并推送
+          docker tag kingprimes/nyxbot:${GITHUB_TAG} kingprimes/nyxbot:latest
           docker push kingprimes/nyxbot:latest
+          echo "✅ latest 标签已更新: kingprimes/nyxbot:latest"

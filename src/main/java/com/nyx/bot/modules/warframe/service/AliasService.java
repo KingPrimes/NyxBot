@@ -21,13 +21,11 @@ import java.util.stream.Collectors;
 @Service
 public class AliasService {
 
-    ObjectMapper objectMapper;
-
     /**
      * 同步锁，用于防止并发更新别名数据时的乐观锁冲突
      */
     private static final Object ALIAS_UPDATE_LOCK = new Object();
-
+    ObjectMapper objectMapper;
     AliasRepository aliasRepository;
 
     public AliasService(ObjectMapper objectMapper, AliasRepository aliasRepository) {
@@ -75,16 +73,16 @@ public class AliasService {
                 throw new ServiceException("别名数据获取失败！", 500);
             }
             log.debug("获取到 {} 条别名数据，准备更新数据库", aliasList.size());
-            
+
             try {
                 // 策略：查询现有数据，智能更新
                 // 1. 获取现有数据建立映射 (cn -> Alias)
                 List<Alias> existingAliases = aliasRepository.findAll();
                 Map<String, Alias> existingMap = existingAliases.stream()
                         .collect(Collectors.toMap(Alias::getCn, Function.identity(), (a1, a2) -> a1));
-                
+
                 log.debug("数据库中现有 {} 条别名数据", existingMap.size());
-                
+
                 // 2. 处理新数据：更新ID以避免冲突
                 List<Alias> toSave = new ArrayList<>();
                 for (Alias newAlias : aliasList) {
@@ -98,11 +96,11 @@ public class AliasService {
                     }
                     toSave.add(newAlias);
                 }
-                
+
                 // 3. 批量保存（save会根据ID判断是insert还是update）
                 List<Alias> saved = aliasRepository.saveAll(toSave);
                 aliasRepository.flush();
-                
+
                 log.debug("别名数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
@@ -111,5 +109,4 @@ public class AliasService {
             }
         }
     }
-
 }

@@ -19,6 +19,7 @@ import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.service.*;
+import com.nyx.bot.service.DataCleanupService;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -51,13 +52,33 @@ public class WarframeDataSource {
     private final NodesRepository nodesRepository;
     private final WeaponsRepository weaponsRepository;
     private final RewardPoolRepository rewardPoolRepository;
+    private final AliasService aliasService;
+    private final EphemerasService ephemerasService;
+    private final OrdersItemsService ordersItemsService;
+    private final LichSisterWeaponsService lichSisterWeaponsService;
+    private final RivenItemsService rivenItemsService;
+    private final RelicsService relicsService;
+    private final RivenTionService rivenTionService;
+    private final RivenTionAliasService rivenTionAliasService;
+    private final RivenAnalyseTrendService rivenAnalyseTrendService;
+    private final DataCleanupService dataCleanupService;
 
-    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository) {
+    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService) {
         this.objectMapper = objectMapper;
         this.str = str;
         this.nodesRepository = nodesRepository;
         this.weaponsRepository = weaponsRepository;
         this.rewardPoolRepository = rewardPoolRepository;
+        this.aliasService = aliasService;
+        this.ephemerasService = ephemerasService;
+        this.ordersItemsService = ordersItemsService;
+        this.lichSisterWeaponsService = lichSisterWeaponsService;
+        this.rivenItemsService = rivenItemsService;
+        this.relicsService = relicsService;
+        this.rivenTionService = rivenTionService;
+        this.rivenTionAliasService = rivenTionAliasService;
+        this.rivenAnalyseTrendService = rivenAnalyseTrendService;
+        this.dataCleanupService = dataCleanupService;
     }
 
     public void init() {
@@ -112,7 +133,11 @@ public class WarframeDataSource {
                     log.error("初始化过程中发生异常，正在回退操作...", ex);
 
                     // 回退操作：清理已生成的文件
-                    FileUtils.delAllFile("./data");
+                    FileUtils.delAllFile("./data/export");
+                    FileUtils.delAllFile("./data/lzma");
+                    FileUtils.deleteFile("./data/keys.json");
+                    // 清理数据库
+                    dataCleanupService.performAtomicCleanup();
 
                     log.error("回退操作完成，程序即将退出。");
                     System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
@@ -138,55 +163,55 @@ public class WarframeDataSource {
 
     //幻纹
     public Integer getEphemeras() {
-        return SpringUtils.getBean(EphemerasService.class).initEphemerasData();
+        return ephemerasService.initEphemerasData();
     }
 
 
     //Market
     public Integer initOrdersItemsData() {
-        return SpringUtils.getBean(OrdersItemsService.class).initOrdersItemsData();
+        return ordersItemsService.initOrdersItemsData();
     }
 
     //赤毒武器/信条武器
     public Integer getLichSisterWeapons() {
-        return SpringUtils.getBean(LichSisterWeaponsService.class).initLichSisterWeaponsData();
+        return lichSisterWeaponsService.initLichSisterWeaponsData();
     }
 
     //紫卡武器
     public Integer getRivenWeapons() {
-        return SpringUtils.getBean(RivenItemsService.class).initRivenItemsData();
+        return rivenItemsService.initRivenItemsData();
     }
 
     // 遗物
     public Integer getRelics() {
-        return SpringUtils.getBean(RelicsService.class).initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
+        return relicsService.initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
     }
 
     //别名
     public void getAlias() {
         log.info("开始初始化别名数据！");
-        int i = SpringUtils.getBean(AliasService.class).updateAlias();
+        int i = aliasService.updateAlias();
         log.info("总计更新 Warframe.Alias {} 数据！", i);
     }
 
     // 紫卡词条
     public void getRivenTion() {
         log.info("开始初始化 RivenTion 数据！");
-        int i = SpringUtils.getBean(RivenTionService.class).updateRivenTion();
+        int i = rivenTionService.updateRivenTion();
         log.info("总计更新 Warframe.RivenTion {} 数据！", i);
     }
 
     // 紫卡词条别名
     public void getRivenTionAlias() {
         log.info("开始初始化 RivenTion 别名数据！");
-        int i = SpringUtils.getBean(RivenTionAliasService.class).updateRivenTionAlias();
+        int i = rivenTionAliasService.updateRivenTionAlias();
         log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", i);
     }
 
     //紫卡计算器数据
     public void getRivenAnalyseTrend() {
         log.info("开始初始化 RivenAnalyseTrend 数据！");
-        int r = SpringUtils.getBean(RivenAnalyseTrendService.class).updateRivenAnalyseTrends();
+        int r = rivenAnalyseTrendService.updateRivenAnalyseTrends();
         log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r);
     }
 
