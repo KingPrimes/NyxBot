@@ -53,7 +53,7 @@ public class DataCleanupService {
         this.nightWaveRepository = nightWaveRepository;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void performAtomicCleanup() {
         log.info("开始原子清理数据库...");
 
