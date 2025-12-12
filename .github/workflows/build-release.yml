@@ -108,7 +108,7 @@ jobs:
         env:
           GITHUB_TAG: ${{ github.ref_name }}
         run: |
-          docker build -t kingprimes/nyxbot:${GITHUB_TAG} .
+          docker build --no-cache -t kingprimes/nyxbot:${GITHUB_TAG} .
           docker push kingprimes/nyxbot:${GITHUB_TAG}
           echo "✅ 版本标签已推送: kingprimes/nyxbot:${GITHUB_TAG}"
 
