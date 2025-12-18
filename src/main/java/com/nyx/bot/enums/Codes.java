@@ -15,11 +15,8 @@ public enum Codes {
 
     UPDATE_WARFRAME_RES_MARKET_ITEMS(UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD, PermissionsEnums.SUPER_ADMIN),
     UPDATE_WARFRAME_RES_MARKET_RIVEN(UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD, PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RES_RM(UPDATE_WARFRAME_RES_RM_CMD, PermissionsEnums.SUPER_ADMIN),
-    UPDATE_WARFRAME_RIVEN_CHANGES(UPDATE_WARFRAME_RIVEN_CHANGES_CMD, PermissionsEnums.SUPER_ADMIN),
     UPDATE_WARFRAME_SISTER(UPDATE_WARFRAME_SISTER_CMD, PermissionsEnums.SUPER_ADMIN),
     UPDATE_WARFRAME_TAR(UPDATE_WARFRAME_TAR_CMD, PermissionsEnums.SUPER_ADMIN),
-    UPDATE_JAR(UPDATE_JAR_CMD, PermissionsEnums.SUPER_ADMIN),
 
     WARFRAME_ALERTS_PLUGIN(WARFRAME_ALERTS_CMD, PermissionsEnums.USER),
     WARFRAME_SORTIES_PLUGIN(WARFRAME_SORTIES_CMD, PermissionsEnums.USER),
@@ -58,16 +55,11 @@ public enum Codes {
 
 
     private final PermissionsEnums permissions;
-    private String comm;
+    private final String comm;
 
     Codes(String comm, PermissionsEnums permissions) {
         this.comm = comm;
         this.permissions = permissions;
-    }
-
-    public Codes setComm(String comm) {
-        this.comm = comm;
-        return this;
     }
 
 }

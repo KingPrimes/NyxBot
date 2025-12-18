@@ -1,12 +1,11 @@
 package com.nyx.bot.modules.warframe.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.RivenTion;
 import com.nyx.bot.modules.warframe.repo.RivenTionRepository;
-import com.nyx.bot.utils.http.HttpUtils;
+import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,32 +25,17 @@ public class RivenTionService {
      * 同步锁，用于防止并发更新紫卡词条数据时的乐观锁冲突
      */
     private static final Object RIVEN_TION_UPDATE_LOCK = new Object();
-    ObjectMapper objectMapper;
-    RivenTionRepository rivenTionRepository;
+    private final ApiDataSourceUtils apiDataSourceUtils;
+    private final RivenTionRepository rivenTionRepository;
 
-    public RivenTionService(ObjectMapper objectMapper, RivenTionRepository rivenTionRepository) {
-        this.objectMapper = objectMapper;
+    public RivenTionService(ApiDataSourceUtils apiDataSourceUtils, RivenTionRepository rivenTionRepository) {
+        this.apiDataSourceUtils = apiDataSourceUtils;
         this.rivenTionRepository = rivenTionRepository;
     }
 
     private List<RivenTion> getRivenTions() {
-        List<RivenTion> rivenTionList = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    rivenTionList.addAll(objectMapper.readValue(body.body(), new TypeReference<List<RivenTion>>() {
-                    }));
-                    break;
-                } catch (Exception e) {
-                    // 忽略解析错误，继续处理其他数据源
-                    log.warn("解析RivenTion数据失败，尝试下一个数据源: {}", e.getMessage());
-                }
-            } else {
-                log.warn("获取RivenTion数据失败，尝试下一个数据源:  HttpCode {} - Url:{}", body.code(), url);
-            }
-        }
-        return rivenTionList;
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION, new TypeReference<>() {
+        });
     }
 
     /**
@@ -67,12 +51,12 @@ public class RivenTionService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTion() {
         synchronized (RIVEN_TION_UPDATE_LOCK) {
-            log.debug("开始更新紫卡词条数据，获取数据源...");
+            log.info("开始更新紫卡词条数据，获取数据源...");
             List<RivenTion> rivenTionList = getRivenTions();
             if (rivenTionList.isEmpty()) {
                 throw new ServiceException("RivenTion数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
+            log.info("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
 
             try {
                 // 策略：查询现有数据，使用唯一约束字段 url_name 进行映射
@@ -101,7 +85,7 @@ public class RivenTionService {
                 List<RivenTion> saved = rivenTionRepository.saveAll(toSave);
                 rivenTionRepository.flush();
 
-                log.debug("紫卡词条数据更新完成，共 {} 条", saved.size());
+                log.info("紫卡词条数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新紫卡词条数据时发生异常", e);

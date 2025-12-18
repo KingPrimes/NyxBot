@@ -1,12 +1,11 @@
 package com.nyx.bot.modules.warframe.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.RivenTionAlias;
 import com.nyx.bot.modules.warframe.repo.RivenTionAliasRepository;
-import com.nyx.bot.utils.http.HttpUtils;
+import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,38 +20,21 @@ import java.util.stream.Collectors;
 @Service
 public class RivenTionAliasService {
 
-    ObjectMapper objectMapper;
-    
     /**
      * 同步锁，用于防止并发更新紫卡词条别名数据时的乐观锁冲突
      */
     private static final Object RIVEN_TION_ALIAS_UPDATE_LOCK = new Object();
+    private final ApiDataSourceUtils apiDataSourceUtils;
+    private final RivenTionAliasRepository rivenTionAliasRepository;
 
-    RivenTionAliasRepository rivenTionAliasRepository;
-
-    public RivenTionAliasService(ObjectMapper objectMapper, RivenTionAliasRepository rivenTionAliasRepository) {
-        this.objectMapper = objectMapper;
+    public RivenTionAliasService(ApiDataSourceUtils apiDataSourceUtils, RivenTionAliasRepository rivenTionAliasRepository) {
+        this.apiDataSourceUtils = apiDataSourceUtils;
         this.rivenTionAliasRepository = rivenTionAliasRepository;
     }
 
     private List<RivenTionAlias> getRivenTionAlias() {
-        List<RivenTionAlias> rats = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    rats.addAll(objectMapper.readValue(body.body(), new TypeReference<List<RivenTionAlias>>() {
-                    }));
-                    break;
-                } catch (Exception e) {
-                    // 忽略解析错误，继续处理其他数据源
-                    log.warn("解析RivenTionAlias数据失败，尝试下一个数据源: {}", e.getMessage());
-                }
-            } else {
-                log.warn("获取RivenTionAlias数据失败，尝试下一个数据源: HttpCode {} - Url:{}", body.code(), url);
-            }
-        }
-        return rats;
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS, new TypeReference<>() {
+        });
     }
 
     /**
@@ -68,13 +50,13 @@ public class RivenTionAliasService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTionAlias() {
         synchronized (RIVEN_TION_ALIAS_UPDATE_LOCK) {
-            log.debug("开始更新紫卡词条别名数据，获取数据源...");
+            log.info("开始更新紫卡词条别名数据，获取数据源...");
             List<RivenTionAlias> rivenTionAliasList = getRivenTionAlias();
             if (rivenTionAliasList.isEmpty()) {
                 throw new ServiceException("RivenTionAlias数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
-            
+            log.info("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
+
             try {
                 // 策略：查询现有数据，使用唯一约束字段 (en + cn) 进行映射
                 List<RivenTionAlias> existingList = rivenTionAliasRepository.findAll();
@@ -85,9 +67,9 @@ public class RivenTionAliasService {
                                 Function.identity(),
                                 (a1, a2) -> a1
                         ));
-                
+
                 log.debug("数据库中现有 {} 条紫卡词条别名数据", existingMap.size());
-                
+
                 // 处理新数据：为已存在的记录复用ID
                 List<RivenTionAlias> toSave = new ArrayList<>();
                 for (RivenTionAlias newAlias : rivenTionAliasList) {
@@ -102,12 +84,12 @@ public class RivenTionAliasService {
                     }
                     toSave.add(newAlias);
                 }
-                
+
                 // 批量保存
                 List<RivenTionAlias> saved = rivenTionAliasRepository.saveAll(toSave);
                 rivenTionAliasRepository.flush();
-                
-                log.debug("紫卡词条别名数据更新完成，共 {} 条", saved.size());
+
+                log.info("紫卡词条别名数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新紫卡词条别名数据时发生异常", e);

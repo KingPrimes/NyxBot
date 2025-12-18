@@ -29,13 +29,13 @@ public class LichSisterWeaponsService {
 
     @Transactional
     public Integer initLichSisterWeaponsData() {
-        log.debug("开始初始化赤毒/信条武器 数据……");
+        log.info("开始初始化赤毒/信条武器 数据……");
         List<LichSisterWeapons> lichWeapons = getLichWeapons();
         List<LichSisterWeapons> sisterWeapons = getSisterWeapons();
         if (lichWeapons != null && sisterWeapons != null) {
             repository.saveAllAndFlush(lichWeapons);
             repository.saveAllAndFlush(sisterWeapons);
-            log.debug("初始化赤毒/信条武器 数据完成，共{}条", lichWeapons.size() + sisterWeapons.size());
+            log.info("初始化赤毒/信条武器 数据完成，共{}条", lichWeapons.size() + sisterWeapons.size());
             return lichWeapons.size() + sisterWeapons.size();
         }
         return -1;

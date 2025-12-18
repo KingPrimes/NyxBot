@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class UpdateAllPlugin {
 
     private final UpdateUtils updateUtils;
+    private final String msg = "权限不足！仅超级管理员权限在私聊中可用。";
 
     public UpdateAllPlugin(UpdateUtils updateUtils) {
         this.updateUtils = updateUtils;
@@ -31,8 +32,8 @@ public class UpdateAllPlugin {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_ITEMS);
         } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD);
-            bot.sendMsg(event, "权限不足！", false);
+            log.info("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD);
+            bot.sendMsg(event, msg, false);
         }
     }
 
@@ -42,30 +43,8 @@ public class UpdateAllPlugin {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_MARKET_RIVEN);
         } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD);
-            bot.sendMsg(event, "权限不足！", false);
-        }
-    }
-
-    @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RES_RM_CMD, at = AtEnum.BOTH)
-    public void updateWarframeResRmHandler(Bot bot, AnyMessageEvent event) {
-        if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
-            updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RES_RM);
-        } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_RM_CMD);
-            bot.sendMsg(event, "权限不足！", false);
-        }
-    }
-
-    @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD, at = AtEnum.BOTH)
-    public void updateWarframeResRivenChangesHandler(Bot bot, AnyMessageEvent event) {
-        if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
-            updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_RIVEN_CHANGES);
-        } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RIVEN_CHANGES_CMD);
-            bot.sendMsg(event, "权限不足！", false);
+            log.info("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD);
+            bot.sendMsg(event, msg, false);
         }
     }
 
@@ -75,8 +54,8 @@ public class UpdateAllPlugin {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_SISTER);
         } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_SISTER_CMD);
-            bot.sendMsg(event, "权限不足！", false);
+            log.info("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_SISTER_CMD);
+            bot.sendMsg(event, msg, false);
         }
     }
 
@@ -86,19 +65,8 @@ public class UpdateAllPlugin {
         if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
             updateUtils.updatePlugin(bot, event, Codes.UPDATE_WARFRAME_TAR);
         } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_TAR_CMD);
-            bot.sendMsg(event, "权限不足！", false);
-        }
-    }
-
-    @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.UPDATE_JAR_CMD, at = AtEnum.BOTH)
-    public void updateJarHandler(Bot bot, AnyMessageEvent event) {
-        if (Permissions.checkAdmin(bot, event) == PermissionsEnums.SUPER_ADMIN) {
-            updateUtils.updatePlugin(bot, event, Codes.UPDATE_JAR);
-        } else {
-            log.debug("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_JAR_CMD);
-            bot.sendMsg(event, "权限不足！", false);
+            log.info("群：{} 用户:{} 没有权限使用 {} 指令", event.getGroupId(), event.getUserId(), CommandConstants.UPDATE_WARFRAME_TAR_CMD);
+            bot.sendMsg(event, msg, false);
         }
     }
 

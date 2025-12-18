@@ -29,13 +29,13 @@ public class EphemerasService {
 
     @Transactional
     public Integer initEphemerasData() {
-        log.debug("开始初始化赤毒/信条幻纹 数据……");
+        log.info("开始初始化赤毒/信条幻纹 数据……");
         List<Ephemeras> lichEphemeras = getLichEphemeras();
         List<Ephemeras> sisterEphemeras = getSisterEphemeras();
         if (lichEphemeras != null && sisterEphemeras != null) {
             repository.saveAllAndFlush(lichEphemeras);
             repository.saveAllAndFlush(sisterEphemeras);
-            log.debug("初始化赤毒/信条幻纹 数据完成，共{}条", lichEphemeras.size() + sisterEphemeras.size());
+            log.info("初始化赤毒/信条幻纹 数据完成，共{}条", lichEphemeras.size() + sisterEphemeras.size());
             return lichEphemeras.size() + sisterEphemeras.size();
         }
         return -1;

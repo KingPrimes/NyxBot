@@ -71,7 +71,7 @@ public class PluginHandlerException {
         Exception ex = null;
         Object result = null;
         try {
-            log.debug("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
+            log.info("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
             if (CqMatcher.isCqAt(Objects.requireNonNull(event).getRawMessage())) {
                 CqParse build = CqParse.build(event.getRawMessage());
                 Bot finalBot = bot;
@@ -85,7 +85,7 @@ public class PluginHandlerException {
             return joinPoint.proceed(new Object[]{bot, event});
         } catch (Exception e) {
             ex = e;
-            log.debug("捕获到@AnyMessageHandler注解方法的异常。方法: {}, 参数: {}, 异常信息: {}",
+            log.error("捕获到@AnyMessageHandler注解方法的异常。方法: {}, 参数: {}, 异常信息: {}",
                     joinPoint.getSignature().toShortString(), Arrays.toString(args), ex.getMessage(), e);
 
             if (bot != null && event != null) {
