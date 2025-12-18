@@ -97,7 +97,7 @@ public class NotificationApplicationService {
             return;
         }
 
-        log.info("检测到 {} 个变化事件", allChanges.size());
+        log.debug("检测到 {} 个变化事件", allChanges.size());
 
         // 2. 按订阅类型分组
         Map<SubscribeEnums, List<ChangeEvent<?>>> changesByType = allChanges.stream()
@@ -121,7 +121,7 @@ public class NotificationApplicationService {
 
                         List<? extends ChangeEvent<?>> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
-                            log.info("Detector {} 检测到 {} 个变化",
+                            log.debug("Detector {} 检测到 {} 个变化",
                                     detector.getClass().getSimpleName(), changes.size());
                         }
                         return changes.stream();
@@ -146,11 +146,11 @@ public class NotificationApplicationService {
         List<MissionSubscribe> subscriptions = subscribeRepo.findSubscriptions(type);
 
         if (subscriptions.isEmpty()) {
-            log.info("类型 {} 没有订阅者", type.getNAME());
+            log.debug("类型 {} 没有订阅者", type.getNAME());
             return;
         }
 
-        log.info("类型 {} 有 {} 个订阅组", type.getNAME(), subscriptions.size());
+        log.debug("类型 {} 有 {} 个订阅组", type.getNAME(), subscriptions.size());
 
         // 遍历订阅组
         subscriptions.forEach(subscription -> {
