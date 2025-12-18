@@ -53,6 +53,7 @@ public class ApiDataSourceUtils {
                     try {
                         dataList = objectMapper.readValue(body.body(), typeReference);
                         log.info("成功从 {} 获取数据", successUrl);
+                        cancelUnfinishedFutures(futures);
                         break;
                     } catch (Exception e) {
                         log.warn("从 {} 解析数据失败: {}", successUrl, e.getMessage());
@@ -69,5 +70,18 @@ public class ApiDataSourceUtils {
         }
 
         return dataList;
+    }
+
+    /**
+     * 取消所有未完成的请求
+     *
+     * @param futures 请求列表
+     */
+    private void cancelUnfinishedFutures(List<CompletableFuture<Map.Entry<String, HttpUtils.Body>>> futures) {
+        for (CompletableFuture<Map.Entry<String, HttpUtils.Body>> future : futures) {
+            if (!future.isDone()) {
+                future.cancel(true);
+            }
+        }
     }
 }
