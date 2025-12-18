@@ -51,12 +51,12 @@ public class AliasService {
     @Transactional(rollbackFor = Exception.class)
     public int updateAlias() {
         synchronized (ALIAS_UPDATE_LOCK) {
-            log.debug("开始更新别名数据，获取数据源...");
+            log.info("开始更新别名数据，获取数据源...");
             List<Alias> aliasList = getAlias();
             if (aliasList.isEmpty()) {
                 throw new ServiceException("别名数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条别名数据，准备更新数据库", aliasList.size());
+            log.info("获取到 {} 条别名数据，准备更新数据库", aliasList.size());
 
             try {
                 // 策略：查询现有数据，智能更新
@@ -65,7 +65,7 @@ public class AliasService {
                 Map<String, Alias> existingMap = existingAliases.stream()
                         .collect(Collectors.toMap(Alias::getCn, Function.identity(), (a1, a2) -> a1));
 
-                log.debug("数据库中现有 {} 条别名数据", existingMap.size());
+                log.info("数据库中现有 {} 条别名数据", existingMap.size());
 
                 // 2. 处理新数据：更新ID以避免冲突
                 List<Alias> toSave = new ArrayList<>();
@@ -85,7 +85,7 @@ public class AliasService {
                 List<Alias> saved = aliasRepository.saveAll(toSave);
                 aliasRepository.flush();
 
-                log.debug("别名数据更新完成，共 {} 条", saved.size());
+                log.info("别名数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新别名数据时发生异常", e);

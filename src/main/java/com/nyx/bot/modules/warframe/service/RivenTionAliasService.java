@@ -50,12 +50,12 @@ public class RivenTionAliasService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTionAlias() {
         synchronized (RIVEN_TION_ALIAS_UPDATE_LOCK) {
-            log.debug("开始更新紫卡词条别名数据，获取数据源...");
+            log.info("开始更新紫卡词条别名数据，获取数据源...");
             List<RivenTionAlias> rivenTionAliasList = getRivenTionAlias();
             if (rivenTionAliasList.isEmpty()) {
                 throw new ServiceException("RivenTionAlias数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
+            log.info("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
 
             try {
                 // 策略：查询现有数据，使用唯一约束字段 (en + cn) 进行映射
@@ -89,7 +89,7 @@ public class RivenTionAliasService {
                 List<RivenTionAlias> saved = rivenTionAliasRepository.saveAll(toSave);
                 rivenTionAliasRepository.flush();
 
-                log.debug("紫卡词条别名数据更新完成，共 {} 条", saved.size());
+                log.info("紫卡词条别名数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新紫卡词条别名数据时发生异常", e);

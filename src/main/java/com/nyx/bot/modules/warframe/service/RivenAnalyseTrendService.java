@@ -51,12 +51,12 @@ public class RivenAnalyseTrendService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenAnalyseTrends() {
         synchronized (RIVEN_ANALYSE_TREND_UPDATE_LOCK) {
-            log.debug("开始更新紫卡分析趋势数据，获取数据源...");
+            log.info("开始更新紫卡分析趋势数据，获取数据源...");
             List<RivenAnalyseTrend> rivenAnalyseTrends = getRivenAnalyseTrends();
             if (rivenAnalyseTrends.isEmpty()) {
                 throw new ServiceException("RivenAnalyseTrends数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条紫卡分析趋势数据，准备更新数据库", rivenAnalyseTrends.size());
+            log.info("获取到 {} 条紫卡分析趋势数据，准备更新数据库", rivenAnalyseTrends.size());
 
             try {
                 // 策略：查询现有数据，使用唯一约束字段 name 进行映射
@@ -85,7 +85,7 @@ public class RivenAnalyseTrendService {
                 List<RivenAnalyseTrend> saved = rivenAnalyseTrendRepository.saveAll(toSave);
                 rivenAnalyseTrendRepository.flush();
 
-                log.debug("紫卡分析趋势数据更新完成，共 {} 条", saved.size());
+                log.info("紫卡分析趋势数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新紫卡分析趋势数据时发生异常", e);

@@ -51,12 +51,12 @@ public class RivenTionService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTion() {
         synchronized (RIVEN_TION_UPDATE_LOCK) {
-            log.debug("开始更新紫卡词条数据，获取数据源...");
+            log.info("开始更新紫卡词条数据，获取数据源...");
             List<RivenTion> rivenTionList = getRivenTions();
             if (rivenTionList.isEmpty()) {
                 throw new ServiceException("RivenTion数据获取失败！", 500);
             }
-            log.debug("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
+            log.info("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
 
             try {
                 // 策略：查询现有数据，使用唯一约束字段 url_name 进行映射
@@ -85,7 +85,7 @@ public class RivenTionService {
                 List<RivenTion> saved = rivenTionRepository.saveAll(toSave);
                 rivenTionRepository.flush();
 
-                log.debug("紫卡词条数据更新完成，共 {} 条", saved.size());
+                log.info("紫卡词条数据更新完成，共 {} 条", saved.size());
                 return saved.size();
             } catch (Exception e) {
                 log.error("更新紫卡词条数据时发生异常", e);

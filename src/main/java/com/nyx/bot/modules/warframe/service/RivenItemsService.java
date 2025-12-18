@@ -29,7 +29,7 @@ public class RivenItemsService {
 
     @Transactional
     public Integer initRivenItemsData() {
-        log.debug("开始初始化紫卡武器数据……");
+        log.info("开始初始化紫卡武器数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_RIVEN_WEAPONS);
         if (body.code().is2xxSuccessful()) {
             try {
@@ -47,7 +47,7 @@ public class RivenItemsService {
                         items.add(item);
                     }
                 }
-                log.debug("成功初始化紫卡武器数据，数量为：{}", items.size());
+                log.info("成功初始化紫卡武器数据，数量为：{}", items.size());
                 return repository.saveAllAndFlush(items).size();
             } catch (Exception e) {
                 log.error("解析紫卡武器数据失败", e);

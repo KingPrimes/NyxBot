@@ -29,7 +29,7 @@ public class OrdersItemsService {
 
     @Transactional
     public Integer initOrdersItemsData() {
-        log.debug("开始初始化Market物品数据……");
+        log.info("开始初始化Market物品数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_ITEMS);
         if (body.code().is2xxSuccessful()) {
             try {
@@ -46,7 +46,7 @@ public class OrdersItemsService {
                         items.add(item);
                     }
                 }
-                log.debug("成功初始化Market物品数据，数量为：{}", items.size());
+                log.info("成功初始化Market物品数据，数量为：{}", items.size());
                 return ordersItemsService.saveAllAndFlush(items).size();
             } catch (Exception e) {
                 log.error("解析Market物品数据失败", e);

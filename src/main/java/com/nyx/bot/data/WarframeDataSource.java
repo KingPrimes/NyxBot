@@ -242,7 +242,7 @@ public class WarframeDataSource {
             List<String> keys = FileUtils.readFileToList(outPath);
             Map<String, String> compared = compareTheHashAndSave(keys);
             if (compared.isEmpty()) {
-                log.debug("Lzma 数据无变化，无需获取更新！");
+                log.info("Lzma 数据无变化，无需获取更新！");
                 return true;
             }
             for (String key : keys) {
@@ -316,7 +316,7 @@ public class WarframeDataSource {
      * @return 不同的Hash值
      */
     Map<String, String> compareTheHashAndSave(List<String> keys) {
-        log.debug("开始对比 Lzma 数据的 Hash 值并保存！");
+        log.info("开始对比 Lzma 数据的 Hash 值并保存！");
         String keysHashPath = "./data/keys.json";
         Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
         try {
@@ -362,7 +362,7 @@ public class WarframeDataSource {
     }
 
     public void initStateTranslation() {
-        log.debug("开始初始化 Lost 翻译 数据！");
+        log.info("开始初始化 Lost 翻译 数据！");
         List<StateTranslation> stateTranslationList = new ArrayList<>();
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportCustoms_zh.json"), "ExportCustoms", StateTypeEnum.ALL));
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportDrones_zh.json"), "ExportDrones", StateTypeEnum.ALL));
@@ -377,8 +377,8 @@ public class WarframeDataSource {
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWarframes_zh.json"), "ExportWarframes", StateTypeEnum.WARFRAMES));
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
         int size = str.saveAll(stateTranslationList).size();
-        log.debug("初始化 Lost 翻译 数据完成，共{}条", size);
-        log.debug("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
+        log.info("初始化 Lost 翻译 数据完成，共{}条", size);
+        log.info("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
         List<StateTranslation> javaList = SpringUtils.getBean(StateTranslationService.class).getStateTranslationsForCnd();
         List<StateTranslation> sts = javaList.stream().peek(s -> {
             Arrays.stream(StateTypeEnum.values())
@@ -388,12 +388,12 @@ public class WarframeDataSource {
                     .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
         }).toList();
         size = str.saveAll(sts).size();
-        log.debug("初始化 自定义 Lost state_translation.json 翻译 数据完成，共{}条", size);
-        log.debug("初始化 Lost 翻译 数据完成");
+        log.info("初始化 自定义 Lost state_translation.json 翻译 数据完成，共{}条", size);
+        log.info("初始化 Lost 翻译 数据完成");
     }
 
     public void initNightWave() {
-        log.debug("开始初始化  NightWave 数据！");
+        log.info("开始初始化  NightWave 数据！");
         try {
             JsonNode rootNode = objectMapper.readTree(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json")));
             JsonNode challengesNode = rootNode.get("ExportNightwave").get("challenges");
@@ -403,7 +403,7 @@ public class WarframeDataSource {
                     }
             );
             int size = nightWaveRepository.saveAll(javaList).size();
-            log.debug("初始化 NightWave 数据完成，共{}条", size);
+            log.info("初始化 NightWave 数据完成，共{}条", size);
         } catch (FileNotFoundException e) {
             log.error("ExportSortieRewards_zh.json文件不存在", e);
             throw new RuntimeException(e);
@@ -414,31 +414,31 @@ public class WarframeDataSource {
     }
 
     public void initNodes() {
-        log.debug("开始初始化  Nodes 数据！");
+        log.info("开始初始化  Nodes 数据！");
         List<Nodes> nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
         int size = nodesRepository.saveAll(nodesList).size();
-        log.debug("初始化 Nodes 数据完成，共{}条", size);
-        log.debug("开始初始化 自定义 Nodes nodes.json 数据！");
+        log.info("初始化 Nodes 数据完成，共{}条", size);
+        log.info("开始初始化 自定义 Nodes nodes.json 数据！");
         List<Nodes> nodes = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_NODES, new TypeReference<List<Nodes>>() {
         });
         size = nodesRepository.saveAll(nodes).size();
-        log.debug("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
+        log.info("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
     }
 
     public void initRewardPool() {
-        log.debug("开始初始化 自定义 RewardPool reward_pool.json 数据！");
+        log.info("开始初始化 自定义 RewardPool reward_pool.json 数据！");
         List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL, new TypeReference<List<RewardPool>>() {
         });
         int size = rewardPoolRepository.saveAll(javaList).size();
-        log.debug("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
+        log.info("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
     }
 
     public void initWeapons() {
-        log.debug("开始初始化  Weapons 数据！");
+        log.info("开始初始化  Weapons 数据！");
         List<Weapons> weapons = parsingExportJson(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", Weapons.class);
         weapons.forEach(w -> w.setEnglishName(w.contEnglishName()));
         int size = weaponsRepository.saveAll(weapons).size();
-        log.debug("初始化 Weapons 数据完成，共{}条", size);
+        log.info("初始化 Weapons 数据完成，共{}条", size);
     }
 
 }

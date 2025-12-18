@@ -95,7 +95,8 @@ public class UpdateUtils {
                 })
                 .thenRun(() -> bot.sendMsg(event, "翻译数据已全部更新完毕！", false))
                 .exceptionally(ex -> {
-                    bot.sendMsg(event, ex.getMessage(), false);
+                    log.error("翻译数据更新失败", ex);
+                    bot.sendMsg(event, "翻译数据更新失败。请查看具体日志信息。", false);
                     return null;
                 });
     }
