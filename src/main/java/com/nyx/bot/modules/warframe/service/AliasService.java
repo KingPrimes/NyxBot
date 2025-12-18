@@ -1,12 +1,11 @@
 package com.nyx.bot.modules.warframe.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
-import com.nyx.bot.utils.http.HttpUtils;
+import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,32 +24,17 @@ public class AliasService {
      * 同步锁，用于防止并发更新别名数据时的乐观锁冲突
      */
     private static final Object ALIAS_UPDATE_LOCK = new Object();
-    ObjectMapper objectMapper;
-    AliasRepository aliasRepository;
+    private final AliasRepository aliasRepository;
+    private final ApiDataSourceUtils apiDataSourceUtils;
 
-    public AliasService(ObjectMapper objectMapper, AliasRepository aliasRepository) {
-        this.objectMapper = objectMapper;
+    public AliasService(AliasRepository aliasRepository, ApiDataSourceUtils apiDataSourceUtils) {
         this.aliasRepository = aliasRepository;
+        this.apiDataSourceUtils = apiDataSourceUtils;
     }
 
     private List<Alias> getAlias() {
-        List<Alias> aliasList = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_ALIAS) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    aliasList.addAll(objectMapper.readValue(body.body(), new TypeReference<List<Alias>>() {
-                    }));
-                    break;
-                } catch (Exception e) {
-                    // 忽略解析错误，继续处理其他数据源
-                    log.warn("解析别名数据失败，尝试下一个数据源: {}", e.getMessage());
-                }
-            } else {
-                log.warn("获取别名数据失败，尝试下一个数据源:  HttpCode {} - Url:{}", body.code(), url);
-            }
-        }
-        return aliasList;
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_ALIAS, new TypeReference<>() {
+        });
     }
 
     /**

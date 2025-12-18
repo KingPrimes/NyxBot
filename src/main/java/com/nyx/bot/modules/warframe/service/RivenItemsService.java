@@ -18,9 +18,9 @@ import java.util.List;
 @Service
 public class RivenItemsService {
 
-    ObjectMapper objectMapper;
-    
-    RivenItemsRepository repository;
+    private final ObjectMapper objectMapper;
+
+    private final RivenItemsRepository repository;
 
     public RivenItemsService(ObjectMapper objectMapper,RivenItemsRepository repository) {
         this.objectMapper = objectMapper;

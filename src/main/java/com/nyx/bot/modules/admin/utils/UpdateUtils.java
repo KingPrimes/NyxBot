@@ -4,9 +4,6 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.Codes;
-import com.nyx.bot.utils.SystemInfoUtils;
-import com.nyx.bot.utils.UpdateJarUtils;
-import com.nyx.bot.utils.gitutils.GitHubUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,39 +19,6 @@ public class UpdateUtils {
         this.dataSource = dataSource;
     }
 
-    private void updateWarframeResRm(Bot bot, AnyMessageEvent event) {
-        // TODO: Implement the logic to update the Warframe Res RM
-    }
-
-    private void updateJar(Bot bot, AnyMessageEvent event) {
-        log.debug("Updating the jar file");
-        //当前版本
-        String lodeVersion = "v" + SystemInfoUtils.getJarVersion();
-        log.debug("Current version：{}", lodeVersion);
-        //判断当前版本是否与最新版本相等
-        if (GitHubUtil.isLatestVersion(lodeVersion)) {
-            log.debug("The current version is the latest version, no need to update!");
-            bot.sendMsg(event, "当前已经是最新版本，无需更新！", false);
-        } else {
-            //最新版本
-            String latestTagName = GitHubUtil.getLatestTagName();
-            log.debug("Latest version：{}", latestTagName);
-            bot.sendMsg(event, "当前版本：" + lodeVersion + "，最新版本：" + latestTagName + "，正在准备更新！", false);
-            String body = GitHubUtil.getBody();
-            log.debug("Latest version update log：{}", body);
-            bot.sendMsg(event, "最新版本更新日志：" + body, false);
-            bot.sendMsg(event, "正在更新，请稍后...\n若长时间没有反应，请手动更新或者回退版本。\n备份文件在backup目录中。", false);
-            if (GitHubUtil.getLatestZip("./tmp/NyxBot.jar")) {
-                log.debug("Update successful!");
-                bot.sendMsg(event, "更新成功，正在重启！", false);
-                UpdateJarUtils.restartUpdate("NyxBot.jar");
-            } else {
-                bot.sendMsg(event, "更新失败，请手动更新！", false);
-            }
-
-        }
-    }
-
     /**
      * 执行更新内容
      */
@@ -68,24 +32,12 @@ public class UpdateUtils {
                 updateWarframeResMarketRiven(bot, event);
                 break;
             }
-            case UPDATE_WARFRAME_RES_RM: {
-                updateWarframeResRm(bot, event);
-                break;
-            }
-            case UPDATE_WARFRAME_RIVEN_CHANGES: {
-                //updateWarframeRivenChanges(bot, event);
-                break;
-            }
             case UPDATE_WARFRAME_SISTER: {
                 updateWarframeSister(bot, event);
                 break;
             }
-//            case UPDATE_WARFRAME_TAR: {
-//                updateWarframeTar(bot, event);
-//                break;
-//            }
-            case UPDATE_JAR: {
-                updateJar(bot, event);
+            case UPDATE_WARFRAME_TAR: {
+                updateWarframeTar(bot, event);
                 break;
             }
             default:
@@ -104,18 +56,6 @@ public class UpdateUtils {
                 });
     }
 
-//    private static void updateWarframeRivenChanges(Bot bot, AnyMessageEvent event) {
-//        bot.sendMsg(event, "已发布任务，正在更新！", false);
-//        CompletableFuture.supplyAsync(() -> new RivenDispositionUpdates().upRivenTrend())
-//                .thenAccept(items -> {
-//                    if (items != -1) {
-//                        bot.sendMsg(event, "紫卡倾向变动 已更新：" + items + " 条数据！", false);
-//                    } else {
-//                        bot.sendMsg(event, "紫卡倾向变动 更新失败！", false);
-//                    }
-//                });
-//    }
-
     private void updateWarframeResMarketRiven(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
         CompletableFuture.supplyAsync(dataSource::getRivenWeapons)
@@ -128,18 +68,37 @@ public class UpdateUtils {
                 });
     }
 
-//    private static void updateWarframeTar(Bot bot, AnyMessageEvent event) {
-//        bot.sendMsg(event, "已发布任务，正在更新！", false);
-//        CompletableFuture.supplyAsync(WarframeDataSource::cloneDataSource).thenAccept(flag -> {
-//            if (flag) {
-//                CompletableFuture.allOf(CompletableFuture.supplyAsync(WarframeDataSource::initTranslation)).thenAccept(items ->
-//                        bot.sendMsg(event, "翻译数据，已更新： " + items + " 条数据！", false)
-//                );
-//            } else {
-//                bot.sendMsg(event, "翻译数据，更新失败！", false);
-//            }
-//        });
-//    }
+    private void updateWarframeTar(Bot bot, AnyMessageEvent event) {
+        bot.sendMsg(event, "已发布任务，正在更新！", false);
+        CompletableFuture.supplyAsync(dataSource::severExportFiles).thenAccept(flag -> {
+                    if (!flag) {
+                        throw new RuntimeException("翻译数据更新失败！");
+                    }
+                })
+                .thenCompose(ignore -> CompletableFuture.runAsync(dataSource::initStateTranslation))
+                .thenCompose(ignore -> {
+                    bot.sendMsg(event, "翻译数据已更新完毕！", false);
+                    // 同时执行所有并行任务
+                    CompletableFuture<Void> nodesFuture = CompletableFuture.runAsync(dataSource::initNodes)
+                            .thenRun(() -> bot.sendMsg(event, "节点翻译数据已更新完毕！", false));
+
+                    CompletableFuture<Void> weaponsFuture = CompletableFuture.runAsync(dataSource::initWeapons)
+                            .thenRun(() -> bot.sendMsg(event, "武器翻译数据已更新完毕！", false));
+
+                    CompletableFuture<Void> rewardPoolFuture = CompletableFuture.runAsync(dataSource::initRewardPool)
+                            .thenRun(() -> bot.sendMsg(event, "奖励池翻译数据已更新完毕！", false));
+
+                    CompletableFuture<Void> nightWaveFuture = CompletableFuture.runAsync(dataSource::initNightWave)
+                            .thenRun(() -> bot.sendMsg(event, "电波翻译数据已更新完毕！", false));
+
+                    return CompletableFuture.allOf(nodesFuture, weaponsFuture, rewardPoolFuture, nightWaveFuture);
+                })
+                .thenRun(() -> bot.sendMsg(event, "翻译数据已全部更新完毕！", false))
+                .exceptionally(ex -> {
+                    bot.sendMsg(event, ex.getMessage(), false);
+                    return null;
+                });
+    }
 
     private void updateWarframeSister(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);

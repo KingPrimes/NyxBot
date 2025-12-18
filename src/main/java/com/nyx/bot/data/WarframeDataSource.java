@@ -19,6 +19,7 @@ import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.service.*;
+import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
 import com.nyx.bot.service.DataCleanupService;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
@@ -62,8 +63,10 @@ public class WarframeDataSource {
     private final RivenTionAliasService rivenTionAliasService;
     private final RivenAnalyseTrendService rivenAnalyseTrendService;
     private final DataCleanupService dataCleanupService;
+    private final NightWaveRepository nightWaveRepository;
+    private final ApiDataSourceUtils apiDataSourceUtils;
 
-    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService) {
+    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService, NightWaveRepository nightWaveRepository, ApiDataSourceUtils apiDataSourceUtils) {
         this.objectMapper = objectMapper;
         this.str = str;
         this.nodesRepository = nodesRepository;
@@ -79,6 +82,8 @@ public class WarframeDataSource {
         this.rivenTionAliasService = rivenTionAliasService;
         this.rivenAnalyseTrendService = rivenAnalyseTrendService;
         this.dataCleanupService = dataCleanupService;
+        this.nightWaveRepository = nightWaveRepository;
+        this.apiDataSourceUtils = apiDataSourceUtils;
     }
 
     public void init() {
@@ -356,7 +361,7 @@ public class WarframeDataSource {
         }
     }
 
-    void initStateTranslation() {
+    public void initStateTranslation() {
         log.debug("开始初始化 Lost 翻译 数据！");
         List<StateTranslation> stateTranslationList = new ArrayList<>();
         stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportCustoms_zh.json"), "ExportCustoms", StateTypeEnum.ALL));
@@ -387,7 +392,7 @@ public class WarframeDataSource {
         log.debug("初始化 Lost 翻译 数据完成");
     }
 
-    void initNightWave() {
+    public void initNightWave() {
         log.debug("开始初始化  NightWave 数据！");
         try {
             JsonNode rootNode = objectMapper.readTree(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json")));
@@ -397,7 +402,7 @@ public class WarframeDataSource {
                     new TypeReference<List<NightWave>>() {
                     }
             );
-            int size = SpringUtils.getBean(NightWaveRepository.class).saveAll(javaList).size();
+            int size = nightWaveRepository.saveAll(javaList).size();
             log.debug("初始化 NightWave 数据完成，共{}条", size);
         } catch (FileNotFoundException e) {
             log.error("ExportSortieRewards_zh.json文件不存在", e);
@@ -408,57 +413,27 @@ public class WarframeDataSource {
         }
     }
 
-    void initNodes() {
+    public void initNodes() {
         log.debug("开始初始化  Nodes 数据！");
         List<Nodes> nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
         int size = nodesRepository.saveAll(nodesList).size();
         log.debug("初始化 Nodes 数据完成，共{}条", size);
-        List<Nodes> nodes = new ArrayList<>();
         log.debug("开始初始化 自定义 Nodes nodes.json 数据！");
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_NODES) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    List<Nodes> customNodes = objectMapper.readValue(
-                            body.body(),
-                            new TypeReference<List<Nodes>>() {
-                            }
-                    );
-                    nodes.addAll(customNodes);
-                    break;
-                } catch (Exception e) {
-                    log.error("解析 Nodes 数据失败: {}", url, e);
-                }
-            }
-        }
+        List<Nodes> nodes = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_NODES, new TypeReference<List<Nodes>>() {
+        });
         size = nodesRepository.saveAll(nodes).size();
         log.debug("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
     }
 
-    void initRewardPool() {
+    public void initRewardPool() {
         log.debug("开始初始化 自定义 RewardPool reward_pool.json 数据！");
-        List<RewardPool> javaList = new ArrayList<>();
-        for (String url : ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL) {
-            HttpUtils.Body body = HttpUtils.sendGet(url);
-            if (body.code().is2xxSuccessful()) {
-                try {
-                    List<RewardPool> pools = objectMapper.readValue(
-                            body.body(),
-                            new TypeReference<List<RewardPool>>() {
-                            }
-                    );
-                    javaList.addAll(pools);
-                    break;
-                } catch (Exception e) {
-                    log.error("解析 RewardPool 数据失败: {}", url, e);
-                }
-            }
-        }
+        List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL, new TypeReference<List<RewardPool>>() {
+        });
         int size = rewardPoolRepository.saveAll(javaList).size();
         log.debug("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
     }
 
-    void initWeapons() {
+    public void initWeapons() {
         log.debug("开始初始化  Weapons 数据！");
         List<Weapons> weapons = parsingExportJson(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", Weapons.class);
         weapons.forEach(w -> w.setEnglishName(w.contEnglishName()));
