@@ -88,7 +88,8 @@ public class SecurityConfiguration {
                                 "/auth/login",
                                 // 机器人链接接口
                                 shiro,
-                                "/v3/api-docs"
+                                "/v3/api-docs",
+                                "/api/**"
                         ).permitAll()
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
