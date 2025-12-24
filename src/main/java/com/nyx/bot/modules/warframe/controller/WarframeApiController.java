@@ -158,7 +158,7 @@ public class WarframeApiController extends BaseController {
         try {
             var result = marketRivenUtils.marketRivenParameter(keyword);
             return success(result);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return error("查询紫卡市场失败: " + e.getMessage());
         }
     }
@@ -183,7 +183,7 @@ public class WarframeApiController extends BaseController {
             return success(result);
         } catch (IllegalArgumentException e) {
             return error("无效的平台类型，支持平台：PC, XB1, PS4, SWITCH, SWI");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return error("查询市场订单失败: " + e.getMessage());
         }
     }
@@ -197,7 +197,7 @@ public class WarframeApiController extends BaseController {
         try {
             var ducats = marketDucatsUtils.getDucats();
             return success(ducats);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return error("查询杜卡德币失败: " + e.getMessage());
         }
     }

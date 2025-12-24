@@ -46,7 +46,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 "/static/",
                 "/favicon",
                 shiro,
-                "/api");
+                "/api/**");
     }
 
     @Override
