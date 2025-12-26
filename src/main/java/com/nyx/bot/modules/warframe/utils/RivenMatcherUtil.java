@@ -5,11 +5,11 @@ import java.util.regex.Pattern;
 
 public class RivenMatcherUtil {
 
-    private static final Pattern IS_CHINES = Pattern.compile("[一-龥]*? ?·?\\&? ?[一-龥]");
+    private static final Pattern IS_CHINES = Pattern.compile("[一-龥]*? ?·?&? ?[一-龥]");
 
-    private static final Pattern WEAPONS_NAME = Pattern.compile("^[一-龥]*?\\&?·?[一-龥]*$");
+    private static final Pattern WEAPONS_NAME = Pattern.compile("^[一-龥]*?&?·?[一-龥]*$");
 
-    private static final Pattern WEAPONS_NAME_ = Pattern.compile("^[一-龥]*?\\&?·?[一-龥] *?[A-Za-z]*?-?[A-Za-z]*?$");
+    private static final Pattern WEAPONS_NAME_ = Pattern.compile("^[一-龥]*?&?·?[一-龥] *?[A-Za-z]*?-?[A-Za-z]*?$");
 
     private static final Pattern RIVEN_NAME = Pattern.compile("[a-zA-Z]*-?$");
 
@@ -19,7 +19,7 @@ public class RivenMatcherUtil {
 
     private static final Pattern IS_DISCRIMINATION = Pattern.compile("^x\\d+(\\.\\d+)?%?.?[一-龥]*?.?（?[a-zA-Z]*?.?[一-龥]+$");
 
-    private static final Pattern IS_ATTRIBUTE_NAME = Pattern.compile("[一-龥]*?（?[a-zA-Z]*?[一-龥]+$");
+    private static final Pattern IS_ATTRIBUTE_NAME = Pattern.compile("[一-龥]*?（?[a-zA-Z]*?[一-龥]+");
 
     private static final Pattern IS_RIVEN_NAME = Pattern.compile("^[一-龥]*? [a-zA-Z]*-[a-zA-Z]*$");
 
