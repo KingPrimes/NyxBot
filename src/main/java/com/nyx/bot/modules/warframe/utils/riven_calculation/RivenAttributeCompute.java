@@ -6,6 +6,7 @@ import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.utils.OCRImage;
 import com.nyx.bot.modules.warframe.utils.RivenMatcherUtil;
+import com.nyx.bot.utils.StringUtils;
 import io.github.kingprimes.model.RivenAnalyseTrendModel;
 import io.github.kingprimes.model.enums.RivenTrendEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -90,8 +91,8 @@ public class RivenAttributeCompute {
             if (s.contains("射速")) {
                 attribute.setAttributeName(s + " 效果加倍）");
                 attribute.setName(RivenMatcherUtil.getAttributeName(s) + " 效果加倍）");
-            } else if (s.contains("暴击几率（")) {
-                attribute.setAttributeName(s.replaceAll("（重?击?时?", "(").trim() + "重击时 x2)");
+            } else if (s.contains("暴击几率（") || s.contains("重击")) {
+                attribute.setAttributeName(StringUtils.substring(s, 0, !s.contains("率") ? s.length() : s.indexOf("率") + 1) + "(重击时 x2)");
                 attribute.setName("暴击几率（重击时 x2）");
             } else if (s.contains("滑行攻击")) {
                 attribute.setAttributeName(s.replaceAll("滑.*+", "滑行攻击暴击几率"));
@@ -111,12 +112,16 @@ public class RivenAttributeCompute {
 
     /**
      * 计算紫卡加成数据
+     *
+     * @param trend 包含武器名称、紫卡名称和属性列表的计算趋势对象
+     * @return 返回根据输入参数计算出的紫卡分析趋势模型列表
      */
     public static List<RivenAnalyseTrendModel> setAttributeNumber(RivenAnalyseTrendCompute trend) {
         //存放多张紫卡
         List<RivenAnalyseTrendModel> models = new ArrayList<>();
         RivenLookup lookup = new RivenLookup();
         List<Weapons> weapons = lookup.findByFuzzyName(trend.getWeaponsName());
+        log.debug("Weapons:{}", weapons);
         for (Weapons weapon : weapons) {
             Double omegaAttenuation = weapon.getOmegaAttenuation();
             RivenAnalyseTrendModel model = new RivenAnalyseTrendModel();
@@ -125,6 +130,7 @@ public class RivenAttributeCompute {
             model.setNum(omegaAttenuation);
             model.setDot(RivenTrendEnum.getRivenTrendDot(omegaAttenuation));
             model.setWeaponType(weapon.getProductCategory().getName());
+            // 处理守护武器类型的特殊情况
             if (weapon.getProductCategory().equals(Weapons.ProductCategory.SentinelWeapons)) {
                 if (weapon.getDescription().contains("霰弹枪")) {
                     weapon.setProductCategory(Weapons.ProductCategory.Shotguns);
@@ -138,6 +144,7 @@ public class RivenAttributeCompute {
             } else {
                 model.setWeaponType(weapon.getProductCategory().getName());
             }
+            // 计算并设置各个属性值
             List<RivenAnalyseTrendModel.Attribute> attrs = new ArrayList<>();
             for (int idx = 0; idx < trend.getAttributes().size(); idx++) {
                 var attr = trend.getAttributes().get(idx);
@@ -146,6 +153,7 @@ public class RivenAttributeCompute {
                 m.setAttributeName(attr.getAttributeName());
                 m.setAttr(attr.getAttribute());
                 m.setName(attr.getName());
+                // 根据武器类型使用对应的计算器进行属性计算
                 AttributeCalculator.CALCULATORS
                         .get(weapon.getProductCategory())
                         .calculate(attr, m, omegaAttenuation, analyse, trend.getAttributes().size());
