@@ -19,7 +19,7 @@ public class RivenMatcherUtil {
 
     private static final Pattern IS_DISCRIMINATION = Pattern.compile("^x\\d+(\\.\\d+)?%?.?[一-龥]*?.?（?[a-zA-Z]*?.?[一-龥]+$");
 
-    private static final Pattern IS_ATTRIBUTE_NAME = Pattern.compile("[一-龥]*?（?[a-zA-Z]*?[一-龥]+");
+    private static final Pattern IS_ATTRIBUTE_NAME = Pattern.compile("[一-龥]*?（?[a-zA-Z]*?[一-龥]+$");
 
     private static final Pattern IS_RIVEN_NAME = Pattern.compile("^[一-龥]*? [a-zA-Z]*-[a-zA-Z]*$");
 
