@@ -45,8 +45,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         EXCLUDE_PATHS = Arrays.asList(
                 "/static/",
                 "/favicon",
-                shiro,
-                "/api/**");
+                shiro);
     }
 
     @Override
