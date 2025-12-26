@@ -99,6 +99,7 @@ public class HandlerException {
     @ResponseBody
     @ExceptionHandler(value = ServiceException.class)
     public Object ServiceException(ServiceException e) {
+        log.error("ServiceException", e);
         return AjaxResult.error(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
