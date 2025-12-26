@@ -92,7 +92,7 @@ public class RivenAttributeCompute {
                 attribute.setAttributeName(s + " 效果加倍）");
                 attribute.setName(RivenMatcherUtil.getAttributeName(s) + " 效果加倍）");
             } else if (s.contains("暴击几率（") || s.contains("重击")) {
-                attribute.setAttributeName(StringUtils.substring(s,0,s.indexOf("率")+1) + "(重击时 x2)");
+                attribute.setAttributeName(StringUtils.substring(s, 0, !s.contains("率") ? s.length() : s.indexOf("率") + 1) + "(重击时 x2)");
                 attribute.setName("暴击几率（重击时 x2）");
             } else if (s.contains("滑行攻击")) {
                 attribute.setAttributeName(s.replaceAll("滑.*+", "滑行攻击暴击几率"));
