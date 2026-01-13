@@ -148,6 +148,7 @@ public class SubscriptionApplicationService {
             // 3. 查找并删除匹配的规则
             List<MissionSubscribeUserCheckType> toRemove = user.getCheckTypes().stream()
                     .filter(rule -> matchesUnsubscribeCondition(rule, subscribeType, missionType, tier))
+                    .filter(rule -> rule.getId() != null)
                     .toList();
 
             if (toRemove.isEmpty()) {
@@ -161,7 +162,7 @@ public class SubscriptionApplicationService {
                     .toList();
 
             if (!ruleIds.isEmpty()) {
-                checkTypeRepo.deleteAllByIdInBatch(ruleIds);
+                ruleIds.forEach(checkTypeRepo::deleteById);
             }
             toRemove.forEach(user.getCheckTypes()::remove);
 
@@ -255,11 +256,7 @@ public class SubscriptionApplicationService {
         }
 
         // 遗物等级匹配（null 表示匹配全部）
-        if (tier != null && !Objects.equals(rule.getTierNum(), tier)) {
-            return false;
-        }
-
-        return true;
+        return tier == null || Objects.equals(rule.getTierNum(), tier);
     }
 
     /**
