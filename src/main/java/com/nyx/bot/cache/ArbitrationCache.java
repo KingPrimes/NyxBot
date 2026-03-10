@@ -37,7 +37,32 @@ public class ArbitrationCache {
      * @return List<ArbitrationPlugin>
      */
     public static List<Arbitration> getArbitrationList() {
-        return loadArbitrationList().stream().filter(Arbitration::isWorth).limit(10).toList();
+        // 获取当前时间（北京时间）
+        long currentMilli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)),
+                                              ZoneOffset.ofHours(8))
+                                          .toInstant()
+                                          .getEpochSecond();
+        
+        // 第一次尝试获取
+        List<Arbitration> result = loadArbitrationList().stream()
+                .filter(Arbitration::isWorth)
+                .filter(ar -> ar.getActivation().getEpochSecond() > currentMilli)
+                .limit(10)
+                .toList();
+        
+        // 如果结果为空，重载数据后再次尝试
+        if (result.isEmpty()) {
+            log.info("仲裁列表为空，开始重载仲裁数据");
+            reloadArbitration();
+            result = loadArbitrationList().stream()
+                    .filter(Arbitration::isWorth)
+                    .filter(ar -> ar.getActivation().getEpochSecond() > currentMilli)
+                    .limit(10)
+                    .toList();
+            log.info("重载后获取到 {} 个符合条件的仲裁", result.size());
+        }
+        
+        return result;
     }
 
     private static List<Arbitration> loadArbitrationList() {
