@@ -13,9 +13,7 @@ import io.github.kingprimes.model.Arbitration;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
@@ -61,7 +59,7 @@ public class TestArbitration {
     @Test
     public void getArbitration() {
         //log.info(arbitration.toString());
-        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().getEpochSecond();
+        long milli = Instant.now().getEpochSecond();
         Arbitration a = arbitration.stream()
                 //过滤掉过期的数据
                 .filter(ar -> ar.getExpiry().getEpochSecond() - milli > 0)
@@ -74,10 +72,7 @@ public class TestArbitration {
     @Test
     public void getArbitrationList() throws JsonProcessingException {
         // 获取当前时间（北京时间）
-        long currentMilli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)),
-                        ZoneOffset.ofHours(8))
-                .toInstant()
-                .getEpochSecond();
+        long currentMilli = Instant.now().getEpochSecond();
 
         // 第一次尝试获取
         List<Arbitration> result = arbitration.stream()

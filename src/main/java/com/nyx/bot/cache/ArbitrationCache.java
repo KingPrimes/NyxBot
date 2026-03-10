@@ -8,9 +8,7 @@ import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.model.Arbitration;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
@@ -38,18 +36,15 @@ public class ArbitrationCache {
      */
     public static List<Arbitration> getArbitrationList() {
         // 获取当前时间（北京时间）
-        long currentMilli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)),
-                                              ZoneOffset.ofHours(8))
-                                          .toInstant()
-                                          .getEpochSecond();
-        
+        long currentMilli = Instant.now().getEpochSecond();
+
         // 第一次尝试获取
         List<Arbitration> result = loadArbitrationList().stream()
                 .filter(Arbitration::isWorth)
                 .filter(ar -> ar.getActivation().getEpochSecond() > currentMilli)
                 .limit(10)
                 .toList();
-        
+
         // 如果结果为空，重载数据后再次尝试
         if (result.isEmpty()) {
             log.info("仲裁列表为空，开始重载仲裁数据");
@@ -61,7 +56,7 @@ public class ArbitrationCache {
                     .toList();
             log.info("重载后获取到 {} 个符合条件的仲裁", result.size());
         }
-        
+
         return result;
     }
 
@@ -98,7 +93,7 @@ public class ArbitrationCache {
         if (arbitrationList.isEmpty()) {
             return Optional.empty();
         }
-        long milli = ZonedDateTime.of(LocalDateTime.now(ZoneOffset.ofHours(8)), ZoneOffset.ofHours(8)).toInstant().getEpochSecond();
+        long milli = Instant.now().getEpochSecond();
         Arbitration a = arbitrationList.stream()
                 //过滤掉过期的数据
                 .filter(ar -> ar.getExpiry().getEpochSecond() - milli > 0)
