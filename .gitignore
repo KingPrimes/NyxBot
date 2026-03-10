@@ -51,3 +51,5 @@ locate.yaml
 /src/main/resources/static/**
 /src/test/resources/templates/**
 /src/test/resources/static/**
+### 忽略提示词文件
+/plans/**

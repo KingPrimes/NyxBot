@@ -8,6 +8,8 @@ import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * 紫卡分析参数
@@ -60,8 +62,24 @@ public class RivenAnalyseTrend extends BaseEntity {
         this.shotgun = rat.shotgun;
         this.suffix = rat.suffix;
     }
+
     @JsonIgnore
     public String getEquation() {
         return archwing + melle + name + pistol + prefix + rifle + shotgun + suffix;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("id", id)
+                .append("archwing", archwing)
+                .append("melle", melle)
+                .append("name", name)
+                .append("pistol", pistol)
+                .append("prefix", prefix)
+                .append("rifle", rifle)
+                .append("shotgun", shotgun)
+                .append("suffix", suffix)
+                .toString();
     }
 }

@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -220,5 +222,34 @@ public class Weapons {
         String name;
         // 伤害数值
         Double damage;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("uniqueName", uniqueName)
+                .append("name", name)
+                .append("codexSecret", codexSecret)
+                .append("damagePerShot", damagePerShot)
+                .append("totalDamage", totalDamage)
+                .append("description", description)
+                .append("englishName", englishName)
+                .append("criticalChance", criticalChance)
+                .append("criticalMultiplier", criticalMultiplier)
+                .append("procChance", procChance)
+                .append("fireRate", fireRate)
+                .append("masteryReq", masteryReq)
+                .append("productCategory", productCategory)
+                .append("slot", slot)
+                .append("accuracy", accuracy)
+                .append("omegaAttenuation", omegaAttenuation)
+                .append("maxLevelCap", maxLevelCap)
+                .append("noise", noise)
+                .append("trigger", trigger)
+                .append("magazineSize", magazineSize)
+                .append("reloadTime", reloadTime)
+                .append("sentinel", sentinel)
+                .append("multishot", multishot)
+                .toString();
     }
 }
