@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.Proxy;
 
 /**
@@ -347,6 +348,59 @@ public class HttpUtils {
         log.warn("downloadFile failed for {} Handers:{}", url, response.getHeaders());
         return false;
 
+    }
+
+    /**
+     * 获取本机 IPv4 地址
+     *
+     * @return 本机 IPv4 地址字符串；如果获取失败则返回 "0.0.0.0"
+     */
+    public static String getLocalIpv4() {
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            if (inetAddress instanceof java.net.Inet4Address) {
+                return inetAddress.getHostAddress();
+            }
+            // 如果默认地址不是 IPv4，则遍历网络接口查找
+            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                java.net.NetworkInterface ni = networkInterfaces.nextElement();
+                java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address instanceof java.net.Inet4Address && !address.isLoopbackAddress()) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("getLocalIpv4 failed", e);
+        }
+        return "0.0.0.0";
+    }
+
+    /**
+     * 获取本机 IPv6 地址
+     *
+     * @return 本机 IPv6 地址字符串；如果获取失败则返回 "::0"
+     */
+    public static String getLocalIpv6() {
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                java.net.NetworkInterface ni = networkInterfaces.nextElement();
+                java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address instanceof java.net.Inet6Address && !address.isLoopbackAddress()) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("getLocalIpv6 failed", e);
+        }
+        return "::0";
     }
 
 

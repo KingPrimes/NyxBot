@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.Arbitration;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 
 import java.util.Collections;
 import java.util.List;
@@ -151,7 +153,12 @@ public class ApiUrl {
      */
     public static List<Arbitration> arbitrationPreList() {
         try {
-            HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION);
+            HttpHeaders headers = new HttpHeaders();
+            // 获取当前Maven项目版本号
+            String version = SystemInfoUtils.getJarVersion();
+            // 创建专属请求头
+            headers.add(HttpHeaders.USER_AGENT, "NyxBot/" + version + "/" + HttpUtils.getLocalIpv4() + "/" + HttpUtils.getLocalIpv6() + "/" + System.currentTimeMillis());
+            HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION, "", headers);
             if (!body.code().is2xxSuccessful()) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();

@@ -16,7 +16,7 @@ public class CommandConstants {
     public static final String WARFRAME_SORTIES_CMD = "^突击$";
     public static final String WARFRAME_LITE_SORITE_CMD = "^执刑官猎杀$|^猎杀$|^执行官$|^执政官$|^执刑官$";
     public static final String WARFRAME_VOID_CMD = "^奸商$";
-    public static final String WARFRAME_ARBITRATION_EX_CMD = "^仲裁Ex$";
+    public static final String WARFRAME_ARBITRATION_EX_CMD = "^仲裁表$";
     public static final String WARFRAME_ARBITRATION_CMD = "^仲裁$";
     public static final String WARFRAME_DAILY_DEALS_CMD = "^每日特惠$|^特惠$";
     public static final String WARFRAME_INVASIONS_CMD = "^入侵$";
