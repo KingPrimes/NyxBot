@@ -43,6 +43,7 @@ public class HandOff {
             load.put("socksProxy", config.getSocksProxy() == null ? load.get("socksProxy") : config.getSocksProxy());
             load.put("proxyUser", config.getProxyUser() == null ? load.get("proxyUser") : config.getProxyUser());
             load.put("proxyPassword", config.getProxyPassword() == null ? load.get("proxyPassword") : config.getProxyPassword());
+            load.put("pluginPrefix", config.getPluginPrefix() == null ? load.get("pluginPrefix") : config.getPluginPrefix());
             String s = yaml.dumpAs(load, Tag.MAP, DumperOptions.FlowStyle.BLOCK);
             writer = new BufferedWriter(new FileWriter(file));
             writer.write(s);
@@ -68,6 +69,7 @@ public class HandOff {
             config.setSocksProxy((String) load.get("socksProxy"));
             config.setProxyUser((String) load.get("proxyUser"));
             config.setProxyPassword((String) load.get("proxyPassword"));
+            config.setPluginPrefix((Boolean) load.get("pluginPrefix"));
             return config;
         } catch (Exception e) {
             config.setWsServerUrl("/ws/shiro");
@@ -79,6 +81,7 @@ public class HandOff {
             config.setSocksProxy("");
             config.setProxyUser("");
             config.setProxyPassword("");
+            config.setPluginPrefix(false);
             handoff(config);
             return config;
         }
@@ -120,6 +123,9 @@ public class HandOff {
 
         // 配置代理
         configureProxy(args, config, map);
+
+        // 配置插件前缀（是否需要艾特触发）
+        map.put("nyx.plugin-prefix", config.getPluginPrefix());
 
         MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
         env.getPropertySources().addFirst(propertySource);
