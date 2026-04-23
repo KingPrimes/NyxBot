@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -114,9 +115,8 @@ public class ConfigLoadingController extends BaseController {
         // 同步更新 Spring Environment 中的 pluginPrefix，使运行时修改即时生效
         if (result) {
             ConfigurableEnvironment env = SpringUtils.getBean(ConfigurableEnvironment.class);
-            MapPropertySource propertySource =
-                    (MapPropertySource) env.getPropertySources().get("dynamicPort");
-            if (propertySource != null) {
+            PropertySource<?> dynamicPort = env.getPropertySources().get("dynamicPort");
+            if (dynamicPort instanceof MapPropertySource propertySource) {
                 propertySource.getSource().put("nyx.plugin-prefix", config.getPluginPrefix());
                 propertySource.getSource().put("shiro.token", config.getToken());
             }

@@ -69,7 +69,7 @@ public class PluginHandlerException {
             return 0;
         }
         // 不处理私聊是否进行了艾特
-        if (event != null && (event.getGroupId() != null || event.getGroupId() != 0L)) {
+        if (event != null && (event.getGroupId() != null && event.getGroupId() != 0L)) {
             // 动态读取 pluginPrefix 配置，判断是否需要艾特触发
             Environment env = SpringUtils.getBean(Environment.class);
             boolean pluginPrefix = env.getProperty("nyx.plugin-prefix", Boolean.class, false);
