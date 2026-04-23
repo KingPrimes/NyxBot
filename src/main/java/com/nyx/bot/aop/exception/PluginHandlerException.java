@@ -69,13 +69,11 @@ public class PluginHandlerException {
             return 0;
         }
         // 不处理私聊是否进行了艾特
-        if (event != null && (event.getGroupId() == null || event.getGroupId() == 0L)) {
-            return 0;
-        } else {
+        if (event != null && (event.getGroupId() != null && event.getGroupId() != 0L)) {
             // 动态读取 pluginPrefix 配置，判断是否需要艾特触发
             Environment env = SpringUtils.getBean(Environment.class);
             boolean pluginPrefix = env.getProperty("nyx.plugin-prefix", Boolean.class, false);
-            if (pluginPrefix && event != null) {
+            if (pluginPrefix) {
                 CqParse build = CqParse.build(event.getRawMessage());
                 Bot finalBot2 = bot;
                 if (build.getCqAt().stream().noneMatch(a -> a.equals(Objects.requireNonNull(finalBot2).getSelfId()))) {
