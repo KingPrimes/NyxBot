@@ -23,6 +23,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -66,6 +67,21 @@ public class PluginHandlerException {
         // 黑白名单检查是否继续执行后续操作
         if (event != null && !bs.isCheck(event.getGroupId(), event.getUserId())) {
             return 0;
+        }
+        // 不处理私聊是否进行了艾特
+        if (event != null && (event.getGroupId() == null || event.getGroupId() == 0L)) {
+            return 0;
+        } else {
+            // 动态读取 pluginPrefix 配置，判断是否需要艾特触发
+            Environment env = SpringUtils.getBean(Environment.class);
+            boolean pluginPrefix = env.getProperty("nyx.plugin-prefix", Boolean.class, false);
+            if (pluginPrefix && event != null) {
+                CqParse build = CqParse.build(event.getRawMessage());
+                Bot finalBot2 = bot;
+                if (build.getCqAt().stream().noneMatch(a -> a.equals(Objects.requireNonNull(finalBot2).getSelfId()))) {
+                    return 0;
+                }
+            }
         }
         long startTime = System.currentTimeMillis();
         Exception ex = null;

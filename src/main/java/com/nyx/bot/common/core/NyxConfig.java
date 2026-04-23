@@ -37,6 +37,9 @@ public class NyxConfig {
 
     String proxyPassword;
 
+    // 插件前缀，是否使用艾特触发指令，默认为false
+    Boolean pluginPrefix = false;
+
     // 不进行序列化
     @JsonIgnore
     public boolean isValidateClientUrl() {

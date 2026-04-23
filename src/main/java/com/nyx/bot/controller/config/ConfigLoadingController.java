@@ -6,6 +6,7 @@ import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import com.nyx.bot.utils.I18nUtils;
+import com.nyx.bot.utils.SpringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -16,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -107,7 +110,18 @@ public class ConfigLoadingController extends BaseController {
         if (!config.isValidateClientUrl()) {
             return error(I18nUtils.RequestValidClientUrl());
         }
-        return toAjax(HandOff.handoff(config));
+        boolean result = HandOff.handoff(config);
+        // 同步更新 Spring Environment 中的 pluginPrefix，使运行时修改即时生效
+        if (result) {
+            ConfigurableEnvironment env = SpringUtils.getBean(ConfigurableEnvironment.class);
+            MapPropertySource propertySource =
+                    (MapPropertySource) env.getPropertySources().get("dynamicPort");
+            if (propertySource != null) {
+                propertySource.getSource().put("nyx.plugin-prefix", config.getPluginPrefix());
+                propertySource.getSource().put("shiro.token", config.getToken());
+            }
+        }
+        return toAjax(result);
     }
 
 }
