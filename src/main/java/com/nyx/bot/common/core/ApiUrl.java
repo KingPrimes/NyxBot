@@ -157,7 +157,7 @@ public class ApiUrl {
             // 获取当前Maven项目版本号
             String version = SystemInfoUtils.getJarVersion();
             // 创建专属请求头
-            headers.add(HttpHeaders.USER_AGENT, "NyxBot/" + version + "/" + HttpUtils.getLocalIpv4() + "/" + HttpUtils.getLocalIpv6() + "/" + System.currentTimeMillis());
+            headers.add(HttpHeaders.USER_AGENT, "NyxBot/" + version);
             HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION, "", headers);
             if (!body.code().is2xxSuccessful()) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
