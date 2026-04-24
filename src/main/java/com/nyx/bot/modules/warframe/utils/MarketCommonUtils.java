@@ -115,7 +115,7 @@ public class MarketCommonUtils {
             }
         }
         // 确定最大前缀长度 - 最多4个字符，但不能超过字符串总长度-1
-        int maxPrefixLength = Math.max(3, key.length() - 1);
+        int maxPrefixLength = Math.min(4, key.length() - 1);
         // 从最长前缀开始尝试，逐步减少到1个字符
         for (int prefixLength = maxPrefixLength; prefixLength >= 1; prefixLength--) {
             String header = key.substring(0, prefixLength);
