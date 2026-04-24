@@ -104,7 +104,16 @@ public class MarketCommonUtils {
         }
         // 获取最后一个字符
         String end = key.substring(key.length() - 1);
-
+        if (key.contains("P")) {
+            String header = key.substring(0, 1);
+            if (!end.contains("P")) {
+                Optional<E> items = re.findByNameRegex("^" + header + ".*?P.*?" + end + ".*?");
+                if (items.isPresent()) {
+                    market.setEntity(items.get());
+                    return true;
+                }
+            }
+        }
         // 确定最大前缀长度 - 最多4个字符，但不能超过字符串总长度-1
         int maxPrefixLength = Math.min(4, key.length() - 1);
         // 从最长前缀开始尝试，逐步减少到1个字符
