@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -209,10 +208,33 @@ public class AliasController extends BaseController {
             }
     )
     @GetMapping("/edit/{id}")
-    public AjaxResult edit(@NonNull @PathVariable Long id) {
+    public AjaxResult edit(@PathVariable Long id) {
         AjaxResult ar = success();
         repository.findById(id).ifPresent(a -> ar.put("alias", a));
         return ar;
     }
 
+    @Operation(
+            summary = "删除别名",
+            description = "根据ID删除别名信息",
+            method = HttpMethod.DELETE,
+            parameters = {
+                    @Parameter(
+                            name = "id",
+                            description = "别名ID",
+                            required = true,
+                            in = ParameterIn.PATH,
+                            schema = @Schema(implementation = Long.class),
+                            example = "1"
+                    )
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "成功")
+            }
+    )
+    @DeleteMapping("/remove/{id}")
+    public AjaxResult remove(@PathVariable Long id) {
+        repository.deleteById(id);
+        return success();
+    }
 }
