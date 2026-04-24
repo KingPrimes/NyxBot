@@ -191,7 +191,7 @@ public class MarketOrderUtils {
      * @param key 物品名称
      * @return 处理后的结果
      */
-    private MarketResult<OrdersItems, ?> toDataBase(String key) {
+    public MarketResult<OrdersItems, ?> toDataBase(String key) {
         MarketResult<OrdersItems, ?> market = new MarketResult<>();
         try {
             // 标准化输入
