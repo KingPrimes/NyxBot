@@ -9,12 +9,17 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Proxy;
+import java.security.cert.X509Certificate;
 
 /**
  * Http请求工具类</br>
@@ -34,6 +39,10 @@ public class HttpUtils {
      * 默认的 RestTemplate
      */
     private static final RestTemplate client;
+    /**
+     * 忽略SSL验证的 RestTemplate
+     */
+    private static final RestTemplate insecureClient;
     /**
      * 请求超时时间
      */
@@ -60,12 +69,57 @@ public class HttpUtils {
         requestFactory.setProxy(ProxyUtils.getEffectiveProxyForUrl());
 
         client = new RestTemplate(requestFactory);
+        insecureClient = createInsecureRestTemplate();
         headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, "*/*");
         headers.add(HttpHeaders.CONNECTION, "keep-alive");
         headers.add(HttpHeaders.CACHE_CONTROL, "no-cache");
         headers.add(HttpHeaders.PRAGMA, "no-cache");
         headers.add(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0");
+    }
+
+    /**
+     * 创建忽略SSL证书验证的RestTemplate
+     * 用于处理cdn.jsdelivr.net等证书链不完整的网站
+     *
+     * @return 忽略SSL验证的RestTemplate实例
+     */
+    private static RestTemplate createInsecureRestTemplate() {
+        try {
+            // 创建信任所有证书的TrustManager
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    }
+            };
+
+            // 安装全信任的TrustManager
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            // 创建忽略SSL验证的ConnectionFactory
+            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+                @Override
+                protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws IOException {
+                    super.prepareConnection(connection, httpMethod);
+                    if (connection instanceof HttpsURLConnection) {
+                        ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
+                        ((HttpsURLConnection) connection).setHostnameVerifier((hostname, session) -> true);
+                    }
+                }
+            };
+
+            factory.setConnectTimeout(CONNECT_TIMEOUT);
+            factory.setReadTimeout(READ_TIMEOUT);
+            factory.setProxy(ProxyUtils.getEffectiveProxyForUrl());
+
+            return new RestTemplate(factory);
+        } catch (Exception e) {
+            log.error("创建忽略SSL的RestTemplate失败，将使用默认RestTemplate", e);
+            return client;
+        }
     }
 
     /**
@@ -228,6 +282,10 @@ public class HttpUtils {
             factory.setReadTimeout(READ_TIMEOUT);
             factory.setProxy(Proxy.NO_PROXY);
             return new RestTemplate(factory);
+        }
+        // 对于cdn.jsdelivr.net等存在SSL证书问题的域名，使用忽略SSL验证的客户端
+        if (url.contains("cdn.jsdelivr.net")) {
+            return insecureClient;
         }
         return client;
     }
