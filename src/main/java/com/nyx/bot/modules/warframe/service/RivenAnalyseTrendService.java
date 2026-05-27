@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,7 @@ public class RivenAnalyseTrendService {
     /**
      * 同步锁，用于防止并发更新紫卡分析趋势数据时的乐观锁冲突
      */
-    private static final Object RIVEN_ANALYSE_TREND_UPDATE_LOCK = new Object();
+    private final Lock rivenAnalyseTrendUpdateLock = new ReentrantLock();
     private final ApiDataSourceUtils apiDataSourceUtils;
     private final RivenAnalyseTrendRepository rivenAnalyseTrendRepository;
 
@@ -50,7 +52,8 @@ public class RivenAnalyseTrendService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenAnalyseTrends() {
-        synchronized (RIVEN_ANALYSE_TREND_UPDATE_LOCK) {
+        rivenAnalyseTrendUpdateLock.lock();
+        try {
             log.info("开始更新紫卡分析趋势数据，获取数据源...");
             List<RivenAnalyseTrend> rivenAnalyseTrends = getRivenAnalyseTrends();
             if (rivenAnalyseTrends.isEmpty()) {
@@ -91,6 +94,8 @@ public class RivenAnalyseTrendService {
                 log.error("更新紫卡分析趋势数据时发生异常", e);
                 throw new ServiceException("更新紫卡分析趋势数据失败: " + e.getMessage(), 500);
             }
+        } finally {
+            rivenAnalyseTrendUpdateLock.unlock();
         }
     }
 

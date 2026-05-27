@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,7 @@ public class RivenTionService {
     /**
      * 同步锁，用于防止并发更新紫卡词条数据时的乐观锁冲突
      */
-    private static final Object RIVEN_TION_UPDATE_LOCK = new Object();
+    private final Lock rivenTionUpdateLock = new ReentrantLock();
     private final ApiDataSourceUtils apiDataSourceUtils;
     private final RivenTionRepository rivenTionRepository;
 
@@ -50,7 +52,8 @@ public class RivenTionService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTion() {
-        synchronized (RIVEN_TION_UPDATE_LOCK) {
+        rivenTionUpdateLock.lock();
+        try {
             log.info("开始更新紫卡词条数据，获取数据源...");
             List<RivenTion> rivenTionList = getRivenTions();
             if (rivenTionList.isEmpty()) {
@@ -91,6 +94,8 @@ public class RivenTionService {
                 log.error("更新紫卡词条数据时发生异常", e);
                 throw new ServiceException("更新紫卡词条数据失败: " + e.getMessage(), 500);
             }
+        } finally {
+            rivenTionUpdateLock.unlock();
         }
     }
 

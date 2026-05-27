@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,7 @@ public class AliasService {
     /**
      * 同步锁，用于防止并发更新别名数据时的乐观锁冲突
      */
-    private static final Object ALIAS_UPDATE_LOCK = new Object();
+    private final Lock aliasUpdateLock = new ReentrantLock();
     private final AliasRepository aliasRepository;
     private final ApiDataSourceUtils apiDataSourceUtils;
 
@@ -50,7 +52,8 @@ public class AliasService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateAlias() {
-        synchronized (ALIAS_UPDATE_LOCK) {
+        aliasUpdateLock.lock();
+        try {
             log.info("开始更新别名数据，获取数据源...");
             List<Alias> aliasList = getAlias();
             if (aliasList.isEmpty()) {
@@ -91,6 +94,8 @@ public class AliasService {
                 log.error("更新别名数据时发生异常", e);
                 throw new ServiceException("更新别名数据失败: " + e.getMessage(), 500);
             }
+        } finally {
+            aliasUpdateLock.unlock();
         }
     }
 }
