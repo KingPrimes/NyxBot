@@ -31,11 +31,13 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,59 +91,51 @@ public class WarframeDataSource {
     public void init() {
         log.info("开始初始化数据！");
 
-        // 优化后的任务编排：
-        // 1. 首先执行 initStateTranslation（可能被其他任务依赖）
-        // 2. 然后并行执行所有数据库更新任务
-        // 3. 注意：虽然添加了同步锁，但仍保持单线程执行数据库批量更新任务以提高性能
+        Executor executor = SpringUtils.getBean("initDataExecutor");
+
+        // Phase 1c: 无 Phase 0 依赖的独立 HTTP 任务，与 Phase 0 并行启动
+        CompletableFuture<Void> independentHttpTasks = CompletableFuture.allOf(
+                CompletableFuture.runAsync(this::initOrdersItemsData, executor),
+                CompletableFuture.runAsync(this::initRewardPool, executor),
+                CompletableFuture.runAsync(this::initWarframeStatus, executor),
+                CompletableFuture.runAsync(this::getEphemeras, executor),
+                CompletableFuture.runAsync(this::getLichSisterWeapons, executor),
+                CompletableFuture.runAsync(this::getRivenWeapons, executor)
+        );
+
         CompletableFuture
-                .supplyAsync(this::severExportFiles)
+                .supplyAsync(this::severExportFiles, executor)
                 .thenAccept(flag -> {
                     if (!flag) {
                         log.error("获取导出数据文件失败！请检查网络环境");
                         throw new RuntimeException("获取导出数据文件失败");
                     }
                 })
-                // 步骤1: 初始化状态翻译数据（优先级最高，可能被其他任务依赖）
                 .thenCompose(ignore ->
-                        CompletableFuture.runAsync(() -> this.initStateTranslation())
-                                // 步骤2: 并行执行所有数据初始化任务
+                        CompletableFuture.runAsync(() -> this.initStateTranslation(), executor)
                                 .thenRunAsync(() -> {
-                                    // 数据库批量更新任务组（这些任务各自已有同步锁保护）
-                                    CompletableFuture<Void> dbUpdateTasks = CompletableFuture.allOf(
-                                            CompletableFuture.runAsync(this::getAlias),
-                                            CompletableFuture.runAsync(this::getRivenTion),
-                                            CompletableFuture.runAsync(this::getRivenTionAlias),
-                                            CompletableFuture.runAsync(this::getRivenAnalyseTrend)
+                                    // Phase 2: 所有依赖 Phase 0/Phase 1 的任务 + 异步更新任务 一起并行
+                                    CompletableFuture<Void> allTasks = CompletableFuture.allOf(
+                                            CompletableFuture.runAsync(this::getAlias, executor),
+                                            CompletableFuture.runAsync(this::getRivenTion, executor),
+                                            CompletableFuture.runAsync(this::getRivenTionAlias, executor),
+                                            CompletableFuture.runAsync(this::getRivenAnalyseTrend, executor),
+                                            CompletableFuture.runAsync(() -> this.initNodes(), executor),
+                                            CompletableFuture.runAsync(() -> this.initWeapons(), executor),
+                                            CompletableFuture.runAsync(() -> this.initNightWave(), executor),
+                                            CompletableFuture.runAsync(this::getRelics, executor),
+                                            independentHttpTasks
                                     );
 
-                                    // 其他数据初始化任务组（读取操作为主，可以完全并行）
-                                    CompletableFuture<Void> otherTasks = CompletableFuture.allOf(
-                                            CompletableFuture.runAsync(this::initWarframeStatus),
-                                            CompletableFuture.runAsync(this::getEphemeras),
-                                            CompletableFuture.runAsync(this::initOrdersItemsData),
-                                            CompletableFuture.runAsync(this::getLichSisterWeapons),
-                                            CompletableFuture.runAsync(this::getRivenWeapons),
-                                            CompletableFuture.runAsync(() -> this.initNodes()),
-                                            CompletableFuture.runAsync(() -> this.initWeapons()),
-                                            CompletableFuture.runAsync(() -> this.initRewardPool()),
-                                            CompletableFuture.runAsync(() -> this.initNightWave()),
-                                            CompletableFuture.runAsync(this::getRelics)
-                                    );
-
-                                    // 等待所有任务完成
-                                    CompletableFuture.allOf(dbUpdateTasks, otherTasks).join();
-                                }))
-                // 所有任务完成后输出信息
+                                    allTasks.join();
+                                }, executor))
                 .thenRun(() -> log.info("数据初始化完成！"))
-                // 异常处理
                 .exceptionally(ex -> {
                     log.error("初始化过程中发生异常，正在回退操作...", ex);
 
-                    // 回退操作：清理已生成的文件
                     FileUtils.delAllFile("./data/export");
                     FileUtils.delAllFile("./data/lzma");
                     FileUtils.deleteFile("./data/keys.json");
-                    // 清理数据库
                     dataCleanupService.performAtomicCleanup();
 
                     log.error("回退操作完成，程序即将退出。");
@@ -167,27 +161,32 @@ public class WarframeDataSource {
     }
 
     //幻纹
+    @Transactional
     public Integer getEphemeras() {
         return ephemerasService.initEphemerasData();
     }
 
 
     //Market
+    @Transactional
     public Integer initOrdersItemsData() {
         return ordersItemsService.initOrdersItemsData();
     }
 
     //赤毒武器/信条武器
+    @Transactional
     public Integer getLichSisterWeapons() {
         return lichSisterWeaponsService.initLichSisterWeaponsData();
     }
 
     //紫卡武器
+    @Transactional
     public Integer getRivenWeapons() {
         return rivenItemsService.initRivenItemsData();
     }
 
     // 遗物
+    @Transactional
     public Integer getRelics() {
         return relicsService.initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
     }
@@ -361,6 +360,7 @@ public class WarframeDataSource {
         }
     }
 
+    @Transactional
     public void initStateTranslation() {
         log.info("开始初始化 Lost 翻译 数据！");
         List<StateTranslation> stateTranslationList = new ArrayList<>();
@@ -392,6 +392,7 @@ public class WarframeDataSource {
         log.info("初始化 Lost 翻译 数据完成");
     }
 
+    @Transactional
     public void initNightWave() {
         log.info("开始初始化  NightWave 数据！");
         try {
@@ -413,6 +414,7 @@ public class WarframeDataSource {
         }
     }
 
+    @Transactional
     public void initNodes() {
         log.info("开始初始化  Nodes 数据！");
         List<Nodes> nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
@@ -425,6 +427,7 @@ public class WarframeDataSource {
         log.info("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
     }
 
+    @Transactional
     public void initRewardPool() {
         log.info("开始初始化 自定义 RewardPool reward_pool.json 数据！");
         List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL, new TypeReference<List<RewardPool>>() {
@@ -433,6 +436,7 @@ public class WarframeDataSource {
         log.info("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
     }
 
+    @Transactional
     public void initWeapons() {
         log.info("开始初始化  Weapons 数据！");
         List<Weapons> weapons = parsingExportJson(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", Weapons.class);
