@@ -155,7 +155,8 @@ public class LogInfoAspect {
                                     .append(jsonObj)
                                     .append(" ");
                         }
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.debug("Failed to serialize param to JSON", e);
                     }
                 }
             }
