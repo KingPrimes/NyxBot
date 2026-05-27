@@ -251,39 +251,36 @@ public class MarketRivenUtils {
     private RivenItems getRiveItems(String key) {
         log.debug("------紫卡查询--查询数据库------");
         log.debug("原始数据：{}", key);
-        // 假设用户输入的是正确值，直接查询数据库
-        var repository = rivenItemsRepository;
-        Optional<RivenItems> items = repository.findByName(key);
-        log.debug("假设正确:{}", items.orElse(new RivenItems()));
+
+        // 使用 MarketCommonUtils 进行输入标准化
+        key = MarketCommonUtils.processPrimeKeyword(key);
+
+        // 1. 精确匹配
+        Optional<RivenItems> items = rivenItemsRepository.findByName(key);
         if (items.isPresent()) {
             return items.get();
         }
 
-        // 假设用户输入的是别名，查询数据库
-        key = key.toLowerCase(Locale.ROOT);
-        if (!key.contains("prime") && key.contains("p")) {
-            key = key.replace("p", "Prime");
+        // 2. 别名匹配
+        key = MarketCommonUtils.processAliases(key, aliasRepository);
+        items = rivenItemsRepository.findByName(key);
+        if (items.isPresent()) {
+            return items.get();
         }
-        Optional<Alias> a = aliasRepository.findByCn(key);
-        if (a.isPresent()) {
-            items = repository.findByName(a.get().getEn());
-            log.debug("别名:{}", items);
+
+        // 3. 正则模糊匹配
+        if (key.length() >= 2) {
+            String start = String.valueOf(key.charAt(0));
+            String end = String.valueOf(key.charAt(key.length() - 1));
+            items = rivenItemsRepository.findByNameRegex("^" + start + ".*?" + end + ".*?");
             if (items.isPresent()) {
                 return items.get();
             }
         }
 
-        // 正则查询
-        String start = String.valueOf(key.charAt(0));
-        String end = String.valueOf(key.charAt(key.length() - 1));
-        items = repository.findByNameRegex("^" + start + ".*?" + end + ".*?");
-        log.debug("正则查询:{}", items);
-        if (items.isPresent()) {
-            return items.get();
-        }
-
-        //最后查询所有以该字符开头的物品，并返回
-        List<RivenItems> itemsList = repository.nameLikes(start);
+        // 4. 首字符模糊匹配，返回可能列表
+        List<RivenItems> itemsList = rivenItemsRepository.nameLikes(
+                String.valueOf(key.charAt(0)));
         RivenItems finalItems = new RivenItems();
         finalItems.setItems(itemsList);
         log.debug("可能存在的值：{}", finalItems);
