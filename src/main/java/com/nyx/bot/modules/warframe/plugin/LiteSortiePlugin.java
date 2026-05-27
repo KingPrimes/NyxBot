@@ -16,29 +16,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 电波
+ * 执刑官猎杀
  */
 @Shiro
 @Component
 @Slf4j
-public class NighWavePlugin {
+public class LiteSortiePlugin {
+    private final WorldStateUtils worldStateUtils;
 
     private final DrawImagePlugin drawImagePlugin;
 
-    private final WorldStateUtils worldStateUtils;
-
-    public NighWavePlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
-        this.drawImagePlugin = drawImagePlugin;
+    public LiteSortiePlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
         this.worldStateUtils = worldStateUtils;
+        this.drawImagePlugin = drawImagePlugin;
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_NIGH_WAVE_CMD, at = AtEnum.BOTH)
-    public void nighWave(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, postNighWaveImage(), Codes.WARFRAME_NIGH_WAVE_PLUGIN, log);
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LITE_SORITE_CMD, at = AtEnum.BOTH)
+    public void liteSoriteHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
+        SendUtils.send(bot, event, postLiteSoriteImage(), Codes.WARFRAME_LITE_SORITE_PLUGIN, log);
     }
 
-    private byte[] postNighWaveImage() throws DataNotInfoException {
-        return drawImagePlugin.drawSeasonInfoImage(worldStateUtils.getSeasonInfo());
+    private byte[] postLiteSoriteImage() throws DataNotInfoException {
+        return drawImagePlugin.drawLiteSoriteImage(worldStateUtils.getLiteSorite().getFirst());
     }
 }

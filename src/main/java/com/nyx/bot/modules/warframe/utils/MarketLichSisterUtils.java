@@ -20,13 +20,13 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class MarketLichsSisterUtils {
+public class MarketLichSisterUtils {
 
     private final ObjectMapper objectMapper;
     private final LichSisterWeaponsRepository lswRepository;
     private final AliasRepository aliasRepository;
 
-    public MarketLichsSisterUtils(ObjectMapper objectMapper, LichSisterWeaponsRepository lswRepository, AliasRepository aliasRepository) {
+    public MarketLichSisterUtils(ObjectMapper objectMapper, LichSisterWeaponsRepository lswRepository, AliasRepository aliasRepository) {
         this.objectMapper = objectMapper;
         this.lswRepository = lswRepository;
         this.aliasRepository = aliasRepository;

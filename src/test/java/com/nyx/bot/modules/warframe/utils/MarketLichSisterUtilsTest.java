@@ -13,19 +13,19 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * MarketLichsSisterUtils 工具类集成测试
+ * MarketLichSisterUtils 工具类集成测试
  *
  * @author KingPrimes
  */
 @Slf4j
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @ActiveProfiles("test")
-@DisplayName("MarketLichsSisterUtils 集成测试")
-class MarketLichsSisterUtilsTest {
+@DisplayName("MarketLichSisterUtils 集成测试")
+class MarketLichSisterUtilsTest {
 
-    private final MarketLichsSisterUtils marketLichsSisterUtils;
+    private final MarketLichSisterUtils marketLichsSisterUtils;
 
-    public MarketLichsSisterUtilsTest(MarketLichsSisterUtils marketLichsSisterUtils) {
+    public MarketLichSisterUtilsTest(MarketLichSisterUtils marketLichsSisterUtils) {
         this.marketLichsSisterUtils = marketLichsSisterUtils;
     }
 
@@ -38,7 +38,7 @@ class MarketLichsSisterUtilsTest {
 
         // 测试武器关键字
         String weaponKey = "信客";
-        MarketLichsSisterUtils.SearchType searchType = MarketLichsSisterUtils.SearchType.SISTER;
+        MarketLichSisterUtils.SearchType searchType = MarketLichSisterUtils.SearchType.SISTER;
 
         log.info("测试参数：");
         log.info("  - 武器关键字: {}", weaponKey);
