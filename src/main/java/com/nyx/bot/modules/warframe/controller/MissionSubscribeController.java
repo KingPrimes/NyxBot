@@ -8,9 +8,6 @@ import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,19 +51,10 @@ import java.util.stream.Collectors;
 public class MissionSubscribeController extends BaseController {
 
 
-    private final MissionSubscribeRepository repository;
-
     private final SubscriptionApplicationService subscriptionService;
 
-    private final MissionSubscribeUserRepository msu;
-
-    private final MissionSubscribeUserCheckTypeRepository msuct;
-
-    public MissionSubscribeController(MissionSubscribeRepository repository, SubscriptionApplicationService subscriptionService, MissionSubscribeUserRepository msu, MissionSubscribeUserCheckTypeRepository msuct) {
-        this.repository = repository;
+    public MissionSubscribeController(SubscriptionApplicationService subscriptionService) {
         this.subscriptionService = subscriptionService;
-        this.msu = msu;
-        this.msuct = msuct;
     }
 
     @Operation(
@@ -164,7 +153,7 @@ public class MissionSubscribeController extends BaseController {
     @PostMapping("/list")
     public TableDataInfo list(@RequestBody MissionSubscribe ms) {
         Pageable pageable = PageRequest.of(ms.getCurrent() - 1, ms.getSize());
-        Page<MissionSubscribe> page = repository.findAllPageable(ms.getSubGroup(), pageable);
+        Page<@NonNull MissionSubscribe> page = subscriptionService.findAllSubscriptions(ms.getSubGroup(), pageable);
         return getDataTable(page);
     }
 
@@ -194,7 +183,7 @@ public class MissionSubscribeController extends BaseController {
     @PostMapping("/user/list")
     public TableDataInfo userList(@RequestBody @Validated MissionSubscribe ms) {
         Pageable pageable = PageRequest.of(ms.getCurrent() - 1, ms.getSize());
-        Page<MissionSubscribeUser> page = msu.findAllBySUB_ID(ms.getId(), pageable);
+        Page<@NonNull MissionSubscribeUser> page = subscriptionService.findAllUsersBySubId(ms.getId(), pageable);
         return getDataTable(page);
     }
 
@@ -224,7 +213,7 @@ public class MissionSubscribeController extends BaseController {
     @PostMapping("/type/list")
     public TableDataInfo typeList(@RequestBody @Validated MissionSubscribeUser user) {
         Pageable pageable = PageRequest.of(user.getCurrent() - 1, user.getSize());
-        Page<MissionSubscribeUserCheckType> page = msuct.findAllBySUBU_ID(user.getId(), pageable);
+        Page<@NonNull MissionSubscribeUserCheckType> page = subscriptionService.findAllCheckTypesByUserId(user.getId(), pageable);
         return getDataTable(page);
     }
 
