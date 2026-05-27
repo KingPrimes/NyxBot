@@ -18,6 +18,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @Slf4j
 public class TestArbitration {
     private static final ObjectMapper objectMapper = JsonMapper.builder()
@@ -66,6 +68,7 @@ public class TestArbitration {
                 //判断两个时间相差的毫秒数，并取最小值的元素
                 .min(Comparator.comparingLong(obj -> obj.getExpiry().getEpochSecond() - milli))
                 .orElse(null);
+        assertNotNull(a);
         log.info("Arbitration:{}", a);
     }
 
@@ -81,6 +84,7 @@ public class TestArbitration {
                 .limit(10)
                 .toList();
 
+        assertNotNull(result);
         log.info("ArbitrationList:{}", objectMapper.writeValueAsString(result));
     }
 }

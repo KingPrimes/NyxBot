@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @Transactional
 public class TestDataCleanupService {
@@ -15,7 +17,7 @@ public class TestDataCleanupService {
 
     @Test
     public void testPerformAtomicCleanup() {
-        dataCleanupService.performAtomicCleanup();
+        assertDoesNotThrow(() -> dataCleanupService.performAtomicCleanup());
     }
 
 }

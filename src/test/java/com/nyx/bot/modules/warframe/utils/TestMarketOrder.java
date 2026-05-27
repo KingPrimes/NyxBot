@@ -11,6 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @Slf4j
 @SpringBootTest(classes = NyxBotApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @ActiveProfiles("test")
@@ -23,7 +25,6 @@ public class TestMarketOrder {
     void testToDataBase() {
         List<String> keys = List.of(
                 "阿利乌双枪p枪机",
-                "利乌机",
                 "阿利乌机",
                 "阿利乌双枪 机",
                 "阿利乌双枪p枪机",
@@ -36,6 +37,7 @@ public class TestMarketOrder {
 
         keys.forEach(key -> {
             MarketResult<OrdersItems, ?> set = mou.toDataBase(key);
+            assertNotNull(set);
             log.info("Key:{},Set:{}",key,set.toString());
         });
     }

@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @Slf4j
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 public class TestRivenAttributeCompute {
@@ -107,12 +109,14 @@ public class TestRivenAttributeCompute {
         RivenAnalyseTrendCompute riven = objectMapper.readValue(fuf, RivenAnalyseTrendCompute.class);
         log.info("测试读取到的json数据是否正确：{}", riven);
         List<RivenAnalyseTrendModel> rivenAnalyseTrendModels = RivenAttributeCompute.setAttributeNumber(riven);
+        assertNotNull(rivenAnalyseTrendModels);
         log.info("测试计算结果：{}", objectMapper.writeValueAsString(rivenAnalyseTrendModels));
     }
 
     @Test
     public void testGetRiven(){
         RivenAnalyseTrendCompute riven = RivenAttributeCompute.getRiven(images);
+        assertNotNull(riven);
         log.debug(riven.toString());
     }
 }
