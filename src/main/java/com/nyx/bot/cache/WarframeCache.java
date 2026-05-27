@@ -16,7 +16,13 @@ import static com.nyx.bot.utils.CacheUtils.WARFRAME_STATUS;
 @Slf4j
 public class WarframeCache {
 
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+    private static class ObjectMapperHolder {
+        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        return ObjectMapperHolder.INSTANCE;
+    }
 
     public static WorldState getWarframeStatus() throws DataNotInfoException {
         WorldState worldState = CacheUtils.get(WARFRAME_STATUS, "data", WorldState.class);
@@ -29,7 +35,7 @@ public class WarframeCache {
     public static void setWarframeStatus(Object object) {
         CacheUtils.set(WARFRAME_STATUS, "data", object, 3L, TimeUnit.MINUTES);
         try {
-            FileUtils.writeFile("./data/status", objectMapper.writeValueAsBytes(object));
+            FileUtils.writeFile("./data/status", getObjectMapper().writeValueAsBytes(object));
         } catch (Exception e) {
             log.error("序列化WorldState失败: {}", e.getMessage());
         }

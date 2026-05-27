@@ -15,9 +15,21 @@ import java.util.Optional;
 
 @Slf4j
 public class RivenLookup {
-    private static final WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
+    private static class WeaponsRepositoryHolder {
+        static final WeaponsRepository INSTANCE = SpringUtils.getBean(WeaponsRepository.class);
+    }
 
-    private static final RivenAnalyseTrendRepository rivenTrendRepository = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
+    private static WeaponsRepository getWeaponsRepository() {
+        return WeaponsRepositoryHolder.INSTANCE;
+    }
+
+    private static class RivenTrendRepositoryHolder {
+        static final RivenAnalyseTrendRepository INSTANCE = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
+    }
+
+    private static RivenAnalyseTrendRepository getRivenTrendRepository() {
+        return RivenTrendRepositoryHolder.INSTANCE;
+    }
 
     // 字符替换映射表：key=需要替换的字符，value=目标字符
     private static final Map<String, String> CHAR_REPLACEMENTS = new LinkedHashMap<>();
@@ -62,7 +74,7 @@ public class RivenLookup {
                 fixedName = fixedName.replace(replacement.getKey(), replacement.getValue());
             }
         }
-        return weaponsRepository.findByNameContaining(fixedName);
+        return getWeaponsRepository().findByNameContaining(fixedName);
     }
 
     public Optional<RivenAnalyseTrend> findRivenTrendByAnalyseName(String analyseName) {
@@ -72,7 +84,7 @@ public class RivenLookup {
             String targetName = entry.getValue();
 
             if (analyseName.contains(keyword)) {
-                Optional<RivenAnalyseTrend> trend = rivenTrendRepository.findByName(targetName);
+                Optional<RivenAnalyseTrend> trend = getRivenTrendRepository().findByName(targetName);
                 if (trend.isPresent()) {
                     return trend;
                 }
@@ -80,6 +92,6 @@ public class RivenLookup {
         }
 
         // 无匹配时使用原始名称查询
-        return rivenTrendRepository.findByName(analyseName);
+        return getRivenTrendRepository().findByName(analyseName);
     }
 }

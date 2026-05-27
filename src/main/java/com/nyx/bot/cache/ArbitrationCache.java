@@ -20,7 +20,13 @@ import static com.nyx.bot.utils.CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION;
 @Slf4j
 public class ArbitrationCache {
 
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+    private static class ObjectMapperHolder {
+        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        return ObjectMapperHolder.INSTANCE;
+    }
 
     /**
      * 重载仲裁数据
@@ -114,7 +120,7 @@ public class ArbitrationCache {
     public static void setArbitration(List<Arbitration> arbitrationList) {
         CacheUtils.set(WARFRAME_GLOBAL_STATES_ARBITRATION, "data", arbitrationList, 15L, TimeUnit.DAYS);
         try {
-            FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(arbitrationList)));
+            FileUtils.writeFile("./data/arbitration", Base64.getEncoder().encodeToString(getObjectMapper().writeValueAsBytes(arbitrationList)));
         } catch (Exception e) {
             log.error("序列化Arbitration失败: {}", e.getMessage());
         }
