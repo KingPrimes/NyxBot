@@ -10,35 +10,30 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Shiro
 @Component
-@Slf4j
-public class KnownCalendarSeasonsPlugin {
-
-    private final WorldStateUtils worldStateUtils;
-
-    private final DrawImagePlugin drawImagePlugin;
+public class KnownCalendarSeasonsPlugin extends AbstractWorldStatePlugin {
 
     public KnownCalendarSeasonsPlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
-        this.worldStateUtils = worldStateUtils;
-        this.drawImagePlugin = drawImagePlugin;
+        super(drawImagePlugin, worldStateUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_KNOWN_CALENDAR_SEASONS_CMD, at = AtEnum.BOTH)
     public void knownCalendarSeasonsHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, postKnownCalendarSeasonsImage(), Codes.WARFRAME_KNOWN_CALENDAR_SEASONS_PLUGIN, log);
+        sendImage(bot, event);
     }
 
-
-    private byte[] postKnownCalendarSeasonsImage() throws DataNotInfoException {
+    @Override
+    protected byte[] getImage() throws DataNotInfoException {
         return drawImagePlugin.drawKnownCalendarSeasonsImage(worldStateUtils.getKnownCalendarSeasons());
     }
 
-
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_KNOWN_CALENDAR_SEASONS_PLUGIN;
+    }
 }

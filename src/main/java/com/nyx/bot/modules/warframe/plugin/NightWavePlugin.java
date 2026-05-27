@@ -14,29 +14,29 @@ import io.github.kingprimes.DrawImagePlugin;
 import org.springframework.stereotype.Component;
 
 /**
- * 入侵
+ * 电波
  */
 @Shiro
 @Component
-public class InvasionPlugin extends AbstractWorldStatePlugin {
+public class NightWavePlugin extends AbstractWorldStatePlugin {
 
-    public InvasionPlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+    public NightWavePlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
         super(drawImagePlugin, worldStateUtils);
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_INVASIONS_CMD, at = AtEnum.BOTH)
-    public void invasionHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_NIGH_WAVE_CMD, at = AtEnum.BOTH)
+    public void nighWave(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
         sendImage(bot, event);
     }
 
     @Override
     protected byte[] getImage() throws DataNotInfoException {
-        return drawImagePlugin.drawInvasionImage(worldStateUtils.getInvasions());
+        return drawImagePlugin.drawSeasonInfoImage(worldStateUtils.getSeasonInfo());
     }
 
     @Override
     protected Codes getCode() {
-        return Codes.WARFRAME_INVASIONS_PLUGIN;
+        return Codes.WARFRAME_NIGH_WAVE_PLUGIN;
     }
 }

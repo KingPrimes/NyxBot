@@ -9,43 +9,33 @@ import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.MarketDucatsUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import io.github.kingprimes.model.Ducats;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * 查询 Market市场中的金垃圾
  */
 @Shiro
 @Component
-@Slf4j
-public class MarketGodDumpPlugin {
-
-    private final DrawImagePlugin drawImagePlugin;
-
-    private final MarketDucatsUtils marketDucatsUtils;
+public class MarketGodDumpPlugin extends AbstractMarketDumpPlugin {
 
     public MarketGodDumpPlugin(DrawImagePlugin drawImagePlugin, MarketDucatsUtils marketDucatsUtils) {
-        this.drawImagePlugin = drawImagePlugin;
-        this.marketDucatsUtils = marketDucatsUtils;
+        super(drawImagePlugin, marketDucatsUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_MARKET_GOD_DUMP_CMD, at = AtEnum.BOTH)
     public void marketGodDump(Bot bot, AnyMessageEvent event) {
-        Ducats ducats = marketDucatsUtils.getDucats();
-        if (Objects.isNull(ducats)) {
-            log.debug("获取ducat失败");
-            bot.sendMsg(event, "获取ducat失败", false);
-            return;
-        }
-
-        byte[] bytes = drawImagePlugin.drawMarketGodDumpImage(marketDucatsUtils.getDuats(MarketDucatsUtils.DucatsType.GOD, ducats));
-        SendUtils.send(bot, event, bytes, Codes.WARFRAME_MARKET_GOD_DUMP, log);
+        handle(bot, event);
     }
 
+    @Override
+    protected MarketDucatsUtils.DucatsType getDucatsType() {
+        return MarketDucatsUtils.DucatsType.GOD;
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_MARKET_GOD_DUMP;
+    }
 }

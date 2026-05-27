@@ -10,9 +10,7 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,25 +18,25 @@ import org.springframework.stereotype.Component;
  */
 @Shiro
 @Component
-@Slf4j
-public class VoidPlugin {
-
-    private final WorldStateUtils worldStateUtils;
-
-    private final DrawImagePlugin drawImagePlugin;
+public class VoidPlugin extends AbstractWorldStatePlugin {
 
     public VoidPlugin(WorldStateUtils worldStateUtils, DrawImagePlugin drawImagePlugin) {
-        this.worldStateUtils = worldStateUtils;
-        this.drawImagePlugin = drawImagePlugin;
+        super(drawImagePlugin, worldStateUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_VOID_CMD, at = AtEnum.BOTH)
     public void voidHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, postVoidImage(), Codes.WARFRAME_VOID_PLUGIN, log);
+        sendImage(bot, event);
     }
 
-    private byte[] postVoidImage() throws DataNotInfoException {
+    @Override
+    protected byte[] getImage() throws DataNotInfoException {
         return drawImagePlugin.drawVoidTraderImage(worldStateUtils.getVoidTraders());
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_VOID_PLUGIN;
     }
 }

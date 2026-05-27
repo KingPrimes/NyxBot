@@ -10,9 +10,7 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.SyndicateMissionsUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.model.enums.SyndicateEnum;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,18 +18,25 @@ import org.springframework.stereotype.Component;
  */
 @Shiro
 @Component
-@Slf4j
-public class SyndicateSolarisUnitedPlugin {
-
-    private final SyndicateMissionsUtils syndicateMissionsUtils;
+public class SyndicateSolarisUnitedPlugin extends AbstractSyndicatePlugin {
 
     public SyndicateSolarisUnitedPlugin(SyndicateMissionsUtils syndicateMissionsUtils) {
-        this.syndicateMissionsUtils = syndicateMissionsUtils;
+        super(syndicateMissionsUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_SOLARIS_UNITED_CMD, at = AtEnum.BOTH)
     public void syndicateSolarisUnitedHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, syndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.SolarisSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
+        sendImage(bot, event);
+    }
+
+    @Override
+    protected SyndicateEnum getSyndicate() {
+        return SyndicateEnum.SolarisSyndicate;
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_SYNDICATE_SOLARIS_UNITED;
     }
 }

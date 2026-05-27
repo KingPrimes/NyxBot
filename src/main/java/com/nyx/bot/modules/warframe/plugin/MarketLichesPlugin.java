@@ -8,13 +8,9 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
-import com.nyx.bot.modules.warframe.entity.LichSisterWeapons;
-import com.nyx.bot.modules.warframe.entity.MarketResult;
-import com.nyx.bot.modules.warframe.utils.MarketLichsSisterUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
+import com.nyx.bot.modules.warframe.utils.MarketLichSisterUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.model.market.MarketLichSister;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,34 +18,30 @@ import org.springframework.stereotype.Component;
  */
 @Shiro
 @Component
-@Slf4j
-public class MarketLichesPlugin {
+public class MarketLichesPlugin extends AbstractMarketLichSisterPlugin {
 
-    private final DrawImagePlugin drawImagePlugin;
-
-    private final MarketLichsSisterUtils marketLichsSisterUtils;
-
-    public MarketLichesPlugin(DrawImagePlugin drawImagePlugin, MarketLichsSisterUtils marketLichsSisterUtils) {
-        this.drawImagePlugin = drawImagePlugin;
-        this.marketLichsSisterUtils = marketLichsSisterUtils;
+    public MarketLichesPlugin(DrawImagePlugin drawImagePlugin, MarketLichSisterUtils marketLichSisterUtils) {
+        super(drawImagePlugin, marketLichSisterUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_LICHES_CMD, at = AtEnum.BOTH)
     public void marketLiches(Bot bot, AnyMessageEvent event) {
-        String key = event.getMessage().replaceAll(CommandConstants.WARFRAME_LICHES_CMD, "").trim();
-        if (key.isEmpty()) {
-            log.debug("用户:{} 输入了错误的指令 {}", event.getUserId(), event.getMessage());
-            bot.sendMsg(event, "请输入正确的指令！", false);
-            return;
-        }
-        MarketResult<LichSisterWeapons, MarketLichSister> auctions = marketLichsSisterUtils.getAuctions(key, MarketLichsSisterUtils.SearchType.LICH);
-        if (auctions.getPossibleItems() != null) {
-            byte[] bytes = drawImagePlugin.drawMarketOrdersImage(auctions.getPossibleItems());
-            SendUtils.send(bot, event, bytes, Codes.WARFRAME_LICHES_PLUGIN, log);
-            return;
-        }
-        byte[] bytes = drawImagePlugin.drawMarketLichesImage(auctions.getResult());
-        SendUtils.send(bot, event, bytes, Codes.WARFRAME_LICHES_PLUGIN, log);
+        handle(bot, event, CommandConstants.WARFRAME_LICHES_CMD);
+    }
+
+    @Override
+    protected MarketLichSisterUtils.SearchType getSearchType() {
+        return MarketLichSisterUtils.SearchType.LICH;
+    }
+
+    @Override
+    protected byte[] getResultImage(MarketLichSister result) {
+        return drawImagePlugin.drawMarketLichesImage(result);
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_LICHES_PLUGIN;
     }
 }
