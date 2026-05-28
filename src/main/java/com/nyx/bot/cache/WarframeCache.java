@@ -2,8 +2,8 @@ package com.nyx.bot.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.exception.DataNotInfoException;
+import com.nyx.bot.utils.CachePersistenceUtils;
 import com.nyx.bot.utils.CacheUtils;
-import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.model.WorldState;
@@ -16,14 +16,12 @@ import static com.nyx.bot.utils.CacheUtils.WARFRAME_STATUS;
 @Slf4j
 public class WarframeCache {
 
-    private static class ObjectMapperHolder {
-        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
-    }
-
-    private static ObjectMapper getObjectMapper() {
-        return ObjectMapperHolder.INSTANCE;
-    }
-
+    /**
+     * 从缓存中获取当前的Warframe世界状态数据
+     *
+     * @return 世界状态对象，包含警报、入侵、突击等信息
+     * @throws DataNotInfoException 缓存中无数据时抛出
+     */
     public static WorldState getWarframeStatus() throws DataNotInfoException {
         WorldState worldState = CacheUtils.get(WARFRAME_STATUS, "data", WorldState.class);
         if (worldState == null) {
@@ -32,12 +30,16 @@ public class WarframeCache {
         return worldState;
     }
 
+    /**
+     * 设置Warframe世界状态数据并持久化到本地文件
+     * <p>同时将数据写入缓存(3分钟TTL)和本地JSON文件用于重启后恢复</p>
+     *
+     * @param object 世界状态数据对象
+     */
     public static void setWarframeStatus(Object object) {
-        CacheUtils.set(WARFRAME_STATUS, "data", object, 3L, TimeUnit.MINUTES);
-        try {
-            FileUtils.writeFile("./data/status", getObjectMapper().writeValueAsBytes(object));
-        } catch (Exception e) {
-            log.error("序列化WorldState失败: {}", e.getMessage());
-        }
+        ObjectMapper mapper = SpringUtils.getBean(ObjectMapper.class);
+        CachePersistenceUtils.setAndPersist(
+                WARFRAME_STATUS, object, 3L, TimeUnit.MINUTES,
+                "./data/status", mapper, "WorldState");
     }
 }
