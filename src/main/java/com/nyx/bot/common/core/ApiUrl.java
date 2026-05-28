@@ -26,6 +26,16 @@ public class ApiUrl {
     public static final String WARFRAME_PUBLIC_EXPORT_INDEX = "https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
 
     /**
+     * CDN数据源
+     */
+    public static final List<String> WARFRAME_DATA_SOURCE_BASE = List.of(
+            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@",
+            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@",
+            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@",
+            "https://kingprimes.top"
+    );
+
+    /**
      * Warframe 别名数据源
      */
     public static final List<String> WARFRAME_DATA_SOURCE_ALIAS = List.of(

@@ -54,3 +54,4 @@ locate.yaml
 ### 忽略提示词文件
 /plans/**
 .workflow
+/CLAUDE.md
