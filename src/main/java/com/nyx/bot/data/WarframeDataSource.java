@@ -25,7 +25,7 @@ import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.ZipUtils;
-import com.nyx.bot.utils.http.HttpUtils;
+import com.nyx.bot.utils.http.HttpFileDownloader;
 import io.github.kingprimes.model.WorldState;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -261,7 +261,7 @@ public class WarframeDataSource {
      * @param key  语言
      */
     Boolean getExportLZMAFiles(String key, String path) {
-        return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted(key), path);
+        return HttpFileDownloader.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted(key), path);
     }
 
     /**
@@ -301,7 +301,7 @@ public class WarframeDataSource {
      */
     Boolean getExportFiles(String key, String path) {
         log.debug("ExportFiles URL:{} Path:{}", key, path);
-        return HttpUtils.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
+        return HttpFileDownloader.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
     }
 
     <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {

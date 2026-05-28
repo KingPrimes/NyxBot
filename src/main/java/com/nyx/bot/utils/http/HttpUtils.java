@@ -1,11 +1,10 @@
 package com.nyx.bot.utils.http;
 
-import com.nyx.bot.utils.FileUtils;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,12 +12,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.Proxy;
+import java.net.*;
 import java.security.cert.X509Certificate;
 
 /**
@@ -28,7 +23,7 @@ import java.security.cert.X509Certificate;
  * @author KingPrimes
  */
 @Slf4j
-@SuppressWarnings({ "ALL", "null" })
+@SuppressWarnings("null")
 public class HttpUtils {
 
     /**
@@ -44,6 +39,10 @@ public class HttpUtils {
      */
     private static final RestTemplate insecureClient;
     /**
+     * 无代理的 RestTemplate（用于 *.warframe.com）
+     */
+    private static final RestTemplate noProxyClient;
+    /**
      * 请求超时时间
      */
     private static final int CONNECT_TIMEOUT = 5000;
@@ -51,10 +50,6 @@ public class HttpUtils {
      * 读取超时
      */
     private static final int READ_TIMEOUT = 15000;
-    /**
-     * 上传进度
-     */
-    private static double lastProgress = -1;
 
     /*
       静态初始化
@@ -70,6 +65,13 @@ public class HttpUtils {
 
         client = new RestTemplate(requestFactory);
         insecureClient = createInsecureRestTemplate();
+
+        // 无代理的 RestTemplate（用于 *.warframe.com）
+        SimpleClientHttpRequestFactory noProxyFactory = new SimpleClientHttpRequestFactory();
+        noProxyFactory.setConnectTimeout(CONNECT_TIMEOUT);
+        noProxyFactory.setReadTimeout(READ_TIMEOUT);
+        noProxyFactory.setProxy(Proxy.NO_PROXY);
+        noProxyClient = new RestTemplate(noProxyFactory);
         headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, "*/*");
         headers.add(HttpHeaders.CONNECTION, "keep-alive");
@@ -100,20 +102,7 @@ public class HttpUtils {
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 
             // 创建忽略SSL验证的ConnectionFactory
-            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
-                @Override
-                protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws IOException {
-                    super.prepareConnection(connection, httpMethod);
-                    if (connection instanceof HttpsURLConnection) {
-                        ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
-                        ((HttpsURLConnection) connection).setHostnameVerifier((hostname, session) -> true);
-                    }
-                }
-            };
-
-            factory.setConnectTimeout(CONNECT_TIMEOUT);
-            factory.setReadTimeout(READ_TIMEOUT);
-            factory.setProxy(ProxyUtils.getEffectiveProxyForUrl());
+            SimpleClientHttpRequestFactory factory = getSimpleClientHttpRequestFactory(sslContext);
 
             return new RestTemplate(factory);
         } catch (Exception e) {
@@ -123,10 +112,58 @@ public class HttpUtils {
     }
 
     /**
+     * 创建带有SSL配置的 RequestFactory（跳过证书验证，仅信任已知CDN）
+     */
+    private static SimpleClientHttpRequestFactory getSimpleClientHttpRequestFactory(SSLContext sslContext) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                if (connection instanceof HttpsURLConnection httpsConn) {
+                    httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
+                    // 仅信任已知CDN域名，防止MITM攻击泛化到任意目标
+                    httpsConn.setHostnameVerifier((hostname, session) ->
+                            hostname != null && (hostname.endsWith("jsdelivr.net") || hostname.endsWith("kingprimes.top")));
+                }
+            }
+        };
+
+        factory.setConnectTimeout(CONNECT_TIMEOUT);
+        factory.setReadTimeout(READ_TIMEOUT);
+        factory.setProxy(ProxyUtils.getEffectiveProxyForUrl());
+        return factory;
+    }
+
+    // ══════════════════════════════════════════════
+    // 包内可见 — 供 HttpFileDownloader / HttpCacheManager 使用
+    // ══════════════════════════════════════════════
+
+    /**
+     * 获取默认请求头（供同包工具类使用）
+     */
+    static HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    /**
+     * 根据URL选择对应的 RestTemplate（供同包工具类使用）
+     */
+    static RestTemplate getRestTemplateForUrl(String url) {
+        if (url.contains("warframe.com")) {
+            return noProxyClient;
+        }
+        if (url.contains("cdn.jsdelivr.net") || url.contains("kingprimes.top")) {
+            return insecureClient;
+        }
+        return client;
+    }
+
+    // ══════════════════════════════════════════════
+    // 公共 API — GET 请求
+    // ══════════════════════════════════════════════
+
+    /**
      * Http Get请求
-     *
-     * @param url 请求地址
-     * @return 响应结果
      */
     public static Body sendGet(String url) {
         return sendGet(url, "");
@@ -134,10 +171,6 @@ public class HttpUtils {
 
     /**
      * Http Get请求
-     *
-     * @param url   请求地址
-     * @param param 请求参数
-     * @return 响应结果
      */
     public static Body sendGet(String url, String param) {
         return sendGet(url, param, null);
@@ -145,38 +178,43 @@ public class HttpUtils {
 
     /**
      * Http Get请求
-     *
-     * @param url     请求地址
-     * @param headers 请求头
-     * @return 响应结果
      */
     public static Body sendGet(String url, HttpHeaders headers) {
         return sendGet(url, "", headers);
     }
 
     /**
-     * Http Get请求
-     *
-     * @param url     请求地址
-     * @param param   请求参数
-     * @param headers 请求头
-     * @return 返回的文本
+     * Http Get请求（无缓存）
      */
     public static Body sendGet(String url, String param, HttpHeaders headers) {
-        return doExchange(
-                appendParam(url, param),
-                HttpMethod.GET,
-                null,
-                headers,
-                String.class
-        );
+        return sendGet(url, param, headers, 0);
     }
 
     /**
+     * Http Get请求（支持缓存）
+     */
+    public static Body sendGet(String url, String param, HttpHeaders headers, long cacheSeconds) {
+        if (cacheSeconds > 0) {
+            String key = HttpCacheManager.buildCacheKey(url, param);
+            Body cached = HttpCacheManager.cacheGet(key);
+            if (cached != null) {
+                return cached;
+            }
+            Body result = doExchange(appendParam(url, param), HttpMethod.GET, null, headers, Object.class);
+            if (result.code() != null && result.code().is2xxSuccessful()) {
+                HttpCacheManager.cachePut(key, result, cacheSeconds);
+            }
+            return result;
+        }
+        return doExchange(appendParam(url, param), HttpMethod.GET, null, headers, String.class);
+    }
+
+    // ══════════════════════════════════════════════
+    // 公共 API — Market 请求
+    // ══════════════════════════════════════════════
+
+    /**
      * Http Get请求 Market 交易
-     *
-     * @param url 链接
-     * @return 响应结果
      */
     public static Body marketSendGet(String url) {
         return marketSendGet(url, "", MarketPlatformEnum.PC);
@@ -184,24 +222,22 @@ public class HttpUtils {
 
     /**
      * Http Get请求 Market 交易
-     *
-     * @param url   链接
-     * @param param 参数
-     * @return 响应结果
      */
     public static Body marketSendGet(String url, String param) {
         return marketSendGet(url, param, MarketPlatformEnum.PC);
     }
 
     /**
-     * Http Get请求 Market 交易
-     *
-     * @param url   链接
-     * @param param 参数
-     * @param form  平台
-     * @return 响应结果
+     * Http Get请求 Market 交易（无缓存）
      */
     public static Body marketSendGet(String url, String param, MarketPlatformEnum form) {
+        return marketSendGet(url, param, form, 0);
+    }
+
+    /**
+     * Http Get请求 Market 交易（支持缓存）
+     */
+    public static Body marketSendGet(String url, String param, MarketPlatformEnum form, long cacheSeconds) {
         HttpHeaders h = new HttpHeaders();
         h.setContentType(MediaType.APPLICATION_JSON);
         h.add(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
@@ -209,16 +245,28 @@ public class HttpUtils {
         h.add("Platform", form.getPlatform());
         h.add("Pragma", "no-cache");
         h.add("Crossplay", "true");
+
+        if (cacheSeconds > 0) {
+            String key = HttpCacheManager.buildCacheKey(url, param + "_" + form.getPlatform());
+            Body cached = HttpCacheManager.cacheGet(key);
+            if (cached != null) {
+                return cached;
+            }
+            Body result = doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);
+            if (result.code() != null && result.code().is2xxSuccessful()) {
+                HttpCacheManager.cachePut(key, result, cacheSeconds);
+            }
+            return result;
+        }
         return doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);
     }
 
+    // ══════════════════════════════════════════════
+    // 公共 API — POST 请求
+    // ══════════════════════════════════════════════
 
     /**
      * Http Post请求
-     *
-     * @param url  请求地址
-     * @param json 请求参数
-     * @return 响应结果
      */
     public static Body sendPost(String url, String json) {
         HttpHeaders h = new HttpHeaders();
@@ -226,98 +274,15 @@ public class HttpUtils {
         return doExchange(url, HttpMethod.POST, json, h, String.class);
     }
 
-    /**
-     * 根据URL网址获取文件
-     *
-     * @param url  - url
-     * @param path - 文件输出路径
-     */
-    public static Boolean sendGetForFile(String url, String path) {
-        File outputFile = new File(path);
-        // 若目录不存在,创建目录
-        FileUtils.createDir(outputFile);
-        return downloadFile(url, HttpMethod.GET, null, null, outputFile);
-    }
-
-    /**
-     * 发送Post请求 获取文件
-     *
-     * @param url  - url
-     * @param json Json格式的请求参数
-     * @return byte[] 文件
-     */
-    public static Body sendPostForFile(String url, String json) {
-        try {
-            HttpHeaders h = new HttpHeaders(headers);
-            h.setContentType(MediaType.APPLICATION_JSON);
-            h.add("Accept-Encoding", "application/octet-stream");
-            HttpEntity<String> request = new HttpEntity<>(json, h);
-            ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url).exchange(url, HttpMethod.POST, request, Resource.class);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                log.warn("请求失败 code:{}, message:{}", response.getStatusCode().value(), response.getBody());
-                return new Body(response.getStatusCode());
-            }
-            return new Body("", response.getStatusCode(), response.getHeaders(), url, response.getBody().getContentAsByteArray());
-        } catch (RestClientException e) {
-            log.warn("请求异常", e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (IOException e) {
-            log.warn("请求异常", e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * 根据URL判断是否需要使用无代理的RestTemplate
-     * <p>*.warframe.com 不使用代理</p>
-     *
-     * @param url URL地址
-     * @return RestTemplate实例
-     */
-    private static RestTemplate getRestTemplateWithoutProxyIfNeeded(String url) {
-        if (url.matches(".*\\.?warframe\\.com.*")) {
-            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(CONNECT_TIMEOUT);
-            factory.setReadTimeout(READ_TIMEOUT);
-            factory.setProxy(Proxy.NO_PROXY);
-            return new RestTemplate(factory);
-        }
-        // 对于cdn.jsdelivr.net等存在SSL证书问题的域名，使用忽略SSL验证的客户端
-        if (url.contains("cdn.jsdelivr.net")) {
-            return insecureClient;
-        }
-        return client;
-    }
-
-    /**
-     * 打印文件下载进度
-     *
-     * @param fileSize   文件总大小
-     * @param downloaded 已下载的字节数
-     */
-    private static void printDownloadProgress(long fileSize, long downloaded) {
-        double progress = (double) downloaded / fileSize * 100;
-        progress = Math.floor(progress); // Round down to nearest integer
-
-        if (progress - lastProgress >= 1) {
-            log.debug("文件下载进度:{}%", String.format("%.2f", progress));
-            lastProgress = progress;
-        }
-    }
+    // ══════════════════════════════════════════════
+    // 内部实现
+    // ══════════════════════════════════════════════
 
     /**
      * 执行HTTP请求交换操作
-     *
-     * @param url          请求URL
-     * @param method       HTTP方法
-     * @param requestBody  请求体内容
-     * @param extraHeaders 额外的请求头
-     * @param responseType 响应类型
-     * @param <T>          响应泛型类型
-     * @return Body 响应结果包装对象
      */
-    private static <T> Body doExchange(String url, HttpMethod method, Object requestBody, HttpHeaders extraHeaders, Class<T> responseType) {
+    private static <T> Body doExchange(String url, HttpMethod method, Object requestBody,
+                                       HttpHeaders extraHeaders, Class<T> responseType) {
         HttpHeaders hers = new HttpHeaders(headers);
         if (extraHeaders != null) hers.putAll(extraHeaders);
 
@@ -327,86 +292,36 @@ public class HttpUtils {
 
         try {
             ResponseEntity<T> resp =
-                    getRestTemplateWithoutProxyIfNeeded(url)
+                    getRestTemplateForUrl(url)
                             .exchange(url, method, req, responseType);
 
-            return new Body(
-                    resp.getBody() instanceof byte[]
-                            ? ""
-                            : (String) resp.getBody(),
-                    resp.getStatusCode(),
-                    resp.getHeaders(),
-                    url,
-                    resp.getBody() instanceof byte[]
-                            ? (byte[]) resp.getBody()
-                            : null
-            );
+            // 区分 byte[]（文件下载）与 String（文本响应）
+            T body = resp.getBody();
+            boolean isByteArray = body instanceof byte[];
+            String textBody = isByteArray ? "" : (String) body;
+            byte[] fileBody = isByteArray ? (byte[]) body : null;
+
+            return new Body(textBody, resp.getStatusCode(), resp.getHeaders(), url, fileBody);
         } catch (RestClientException e) {
             log.error("HTTP {} {} failed", method, url, e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
+            // 保留原始HTTP状态码，避免4xx/5xx被统一转为500
+            HttpStatusCode statusCode = (e instanceof HttpStatusCodeException hsce)
+                    ? hsce.getStatusCode()
+                    : HttpStatus.INTERNAL_SERVER_ERROR;
+            return new Body(statusCode);
         }
     }
 
-    /**
-     * 将参数追加到URL中
-     *
-     * @param url   原始URL
-     * @param param 要追加的参数
-     * @return 拼接后的URL
-     */
     private static String appendParam(String url, String param) {
-        String urlNameString = url;
-        if (!param.isEmpty()) {
-            urlNameString = url + "?" + param;
+        if (param == null || param.isEmpty()) {
+            return url;
         }
-        return urlNameString;
+        return url + "?" + param;
     }
 
-    /**
-     * 下载文件
-     *
-     * @param url          请求URL
-     * @param method       HTTP方法
-     * @param extraHeaders 额外的请求头
-     * @param output       输出文件
-     * @return boolean 下载是否成功
-     */
-    private static boolean downloadFile(String url, HttpMethod method, Object requestBody, HttpHeaders extraHeaders, File output) {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Accept-Encoding", "application/octet-stream");
-        HttpHeaders hers = new HttpHeaders(headers);
-        if (extraHeaders != null) hers.putAll(extraHeaders);
-
-        HttpEntity<?> req = (requestBody != null)
-                ? new HttpEntity<>(requestBody, hers)
-                : new HttpEntity<>(hers);
-
-        ResponseEntity<Resource> response = getRestTemplateWithoutProxyIfNeeded(url)
-                .exchange(url, method,
-                        req,
-                        Resource.class);
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            try (InputStream in = response.getBody().getInputStream();
-                 FileOutputStream out = new FileOutputStream(output)) {
-
-                byte[] buf = new byte[1024];
-                int n;
-                long read = 0, total = output.length();
-                while ((n = in.read(buf)) > 0) {
-                    out.write(buf, 0, n);
-                    read += n;
-                    printDownloadProgress(total, read);
-                }
-                return true;
-            } catch (Exception e) {
-                log.error("downloadFile failed for {} Handers:{}", url, response.getHeaders(), e);
-                return false;
-            }
-        }
-        log.warn("downloadFile failed for {} Handers:{}", url, response.getHeaders());
-        return false;
-
-    }
+    // ══════════════════════════════════════════════
+    // 网络工具
+    // ══════════════════════════════════════════════
 
     /**
      * 获取本机 IPv4 地址
@@ -420,7 +335,8 @@ public class HttpUtils {
                 return inetAddress.getHostAddress();
             }
             // 如果默认地址不是 IPv4，则遍历网络接口查找
-            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces =
+                    java.net.NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 java.net.NetworkInterface ni = networkInterfaces.nextElement();
                 java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
@@ -431,7 +347,7 @@ public class HttpUtils {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (SocketException | UnknownHostException e) {
             log.error("getLocalIpv4 failed", e);
         }
         return "0.0.0.0";
@@ -444,7 +360,8 @@ public class HttpUtils {
      */
     public static String getLocalIpv6() {
         try {
-            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces =
+                    java.net.NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 java.net.NetworkInterface ni = networkInterfaces.nextElement();
                 java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
@@ -461,6 +378,9 @@ public class HttpUtils {
         return "::0";
     }
 
+    // ══════════════════════════════════════════════
+    // 响应体包装
+    // ══════════════════════════════════════════════
 
     public record Body(String body, HttpStatusCode code, HttpHeaders headers, String url, byte[] file) {
         public Body(HttpStatusCode code) {
@@ -487,5 +407,4 @@ public class HttpUtils {
             this(body, code, headers, url, null);
         }
     }
-
 }
