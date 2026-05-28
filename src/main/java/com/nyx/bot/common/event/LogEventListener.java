@@ -1,6 +1,7 @@
 package com.nyx.bot.common.event;
 
 import com.nyx.bot.cache.LogCacheManager;
+import com.nyx.bot.controller.sse.LogSseController;
 import com.nyx.bot.controller.websocket.LogInfoWebSocket;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -29,6 +30,9 @@ public class LogEventListener {
 
     @Resource
     private LogInfoWebSocket webSocketHandler;
+
+    @Resource
+    private LogSseController logSseController;
 
     /**
      * 日志批量发送队列
@@ -114,9 +118,10 @@ public class LogEventListener {
             logQueue.drainTo(batch, BATCH_SIZE);
 
             if (!batch.isEmpty()) {
-                // 广播到所有 WebSocket 客户端
+                // 广播到 WebSocket 客户端（旧前端）
                 webSocketHandler.broadcastLogs(batch);
-                //log.debug("批量发送 {} 条日志到 WebSocket 客户端", batch.size());
+                // 广播到 SSE 客户端（新前端）
+                logSseController.broadcastLogs(batch);
             }
 
         } catch (Exception e) {
