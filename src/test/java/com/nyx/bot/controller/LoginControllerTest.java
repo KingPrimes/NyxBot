@@ -1,7 +1,7 @@
 package com.nyx.bot.controller;
 
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.modules.system.entity.SysUser;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,11 +62,11 @@ public class LoginControllerTest {
 
         // Act & Assert
         assertDoesNotThrow(() -> { // 添加异常捕获
-            AjaxResult result = loginController.login(user);
+            ApiResponse<?> result = loginController.login(user);
 
             assertTrue(result.isSuccess()); // 验证登录成功
             assertEquals("登录成功", result.getMsg()); // 验证消息
-            assertEquals("testToken", ((Map<?, ?>) result.get("data")).get("token")); //验证令牌
+            assertEquals("testToken", ((Map<?, ?>) result.getData()).get("token")); //验证令牌
 
             // Verify interactions
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class)); //验证认证管理器调用
@@ -88,9 +88,9 @@ public class LoginControllerTest {
                 .thenThrow(new UsernameNotFoundException("User not found"));
 
         // Act
-        AjaxResult result = loginController.login(user);
+        ApiResponse<?> result = loginController.login(user);
 
-        assertEquals("User not found", result.get("msg"));
+        assertEquals("User not found", result.getMsg());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verifyNoInteractions(userDetailsService, jwtUtil); //确保未调用其他服务
     }

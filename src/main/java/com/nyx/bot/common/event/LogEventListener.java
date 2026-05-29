@@ -152,12 +152,16 @@ public class LogEventListener {
     @PreDestroy
     public void destroy() {
         log.info("LogEventListener 正在关闭...");
-        
-        // 发送剩余的日志
-        flushLogs();
-        
-        // 关闭调度器
+
+        // 先停止调度器，避免新的 flush 任务触发
         scheduler.shutdown();
+
+        // 关闭所有 SSE 连接，避免向已回收的 response 推送数据
+        logSseController.shutdown();
+
+        // 清空队列（不再尝试发送，连接已关闭）
+        logQueue.clear();
+
         try {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                 scheduler.shutdownNow();
@@ -166,7 +170,7 @@ public class LogEventListener {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        
+
         log.info("LogEventListener 已关闭");
     }
 }

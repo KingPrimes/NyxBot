@@ -27,8 +27,6 @@ spring:
     active: dev
   main:
     allow-circular-references: true
-  mvc:
-    static-path-pattern: /static/**
   thymeleaf:
     mode: HTML
     encoding: UTF-8

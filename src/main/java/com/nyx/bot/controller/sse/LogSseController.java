@@ -2,6 +2,7 @@ package com.nyx.bot.controller.sse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.config.LogFilterConfig;
 import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.event.DownloadProgressEvent;
@@ -16,7 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -66,23 +66,43 @@ public class LogSseController {
         filterConfigMap.put(sessionId, LogFilterConfig.createDefault());
         log.debug("SSE 连接建立: sessionId={}, level={}", sessionId, level);
 
+        // 首先发送 sessionId 给客户端，以便后续调用过滤接口时使用
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("session")
+                    .data(objectMapper.writeValueAsString(Map.of("sessionId", sessionId)),
+                            MediaType.APPLICATION_JSON));
+        } catch (Exception e) {
+            log.error("发送 sessionId 失败: sessionId={}", sessionId, e);
+            removeEmitter(sessionId);
+            return emitter;
+        }
+
         // 连接建立时发送历史日志
         sendHistoryLogs(sessionId, emitter, level.toUpperCase());
 
         // 清理回调
-        emitter.onCompletion(() -> removeEmitter(sessionId));
-        emitter.onTimeout(() -> removeEmitter(sessionId));
-        emitter.onError(e -> removeEmitter(sessionId));
+        emitter.onCompletion(() -> removeEmitter(sessionId, true));
+        emitter.onTimeout(() -> removeEmitter(sessionId, true));
+        emitter.onError(e -> removeEmitter(sessionId, false));
 
         return emitter;
     }
 
     private void removeEmitter(String sessionId) {
+        removeEmitter(sessionId, true);
+    }
+
+    private void removeEmitter(String sessionId, boolean complete) {
         SseEmitter emitter = emitters.remove(sessionId);
         levelFilterMap.remove(sessionId);
         filterConfigMap.remove(sessionId);
-        if (emitter != null) {
-            try { emitter.complete(); } catch (Exception ignored) {}
+        if (emitter != null && complete) {
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+                // 响应已不可用
+            }
         }
     }
 
@@ -113,10 +133,9 @@ public class LogSseController {
                             .name("log")
                             .data(objectMapper.writeValueAsString(filtered), MediaType.APPLICATION_JSON));
                 }
-            } catch (IOException e) {
-                removeEmitter(sessionId);
             } catch (Exception e) {
-                log.error("SSE 推送日志失败: sessionId={}", sessionId, e);
+                log.debug("SSE 推送日志失败，移除连接: sessionId={}", sessionId);
+                removeEmitter(sessionId);
             }
         });
     }
@@ -147,10 +166,20 @@ public class LogSseController {
                 emitter.send(SseEmitter.event()
                         .name("progress")
                         .data(objectMapper.writeValueAsString(data), MediaType.APPLICATION_JSON));
-            } catch (IOException e) {
+            } catch (Exception e) {
+                log.debug("SSE 推送进度失败，移除连接: sessionId={}", sessionId);
                 removeEmitter(sessionId);
             }
         });
+    }
+
+    /**
+     * 关闭所有 SSE 连接（容器销毁时调用）
+     */
+    public void shutdown() {
+        log.info("正在关闭所有 SSE 连接，活跃数: {}", emitters.size());
+        emitters.keySet().forEach(this::removeEmitter);
+        log.info("所有 SSE 连接已关闭");
     }
 
     // ══════════════════════════════════════════════
@@ -161,39 +190,39 @@ public class LogSseController {
      * 更新过滤配置（通过 sessionId 定位客户端）
      */
     @PostMapping("/filter/update")
-    public Map<String, Object> updateFilter(@RequestParam String sessionId, @RequestBody LogFilterConfig config) {
+    public ApiResponse<?> updateFilter(@RequestParam String sessionId, @RequestBody LogFilterConfig config) {
         if (!emitters.containsKey(sessionId)) {
-            return Map.of("status", "error", "message", "会话不存在");
+            return ApiResponse.error(400, "会话不存在");
         }
         if (!config.isValid()) {
-            return Map.of("status", "error", "message", "无效的过滤配置");
+            return ApiResponse.error(400, "无效的过滤配置");
         }
         filterConfigMap.put(sessionId, config);
         log.info("SSE 会话 {} 更新过滤配置", sessionId);
-        return Map.of("status", "success", "message", "过滤配置已更新", "config", (Object) config);
+        return ApiResponse.ok("过滤配置已更新", Map.of("config", config));
     }
 
     /**
      * 重置过滤配置
      */
     @PostMapping("/filter/reset")
-    public Map<String, Object> resetFilter(@RequestParam String sessionId) {
+    public ApiResponse<?> resetFilter(@RequestParam String sessionId) {
         if (!emitters.containsKey(sessionId)) {
-            return Map.of("status", "error", "message", "会话不存在");
+            return ApiResponse.error(400, "会话不存在");
         }
         LogFilterConfig defaultConfig = LogFilterConfig.createDefault();
         String minLevel = levelFilterMap.getOrDefault(sessionId, "INFO");
         defaultConfig.setMinLevel(minLevel);
         filterConfigMap.put(sessionId, defaultConfig);
-        return Map.of("status", "success", "message", "过滤配置已重置", "config", (Object) defaultConfig);
+        return ApiResponse.ok("过滤配置已重置", Map.of("config", (Object) defaultConfig));
     }
 
     /**
      * 获取当前活跃的 SSE 连接数
      */
     @GetMapping("/stats")
-    public Map<String, Object> stats() {
-        return Map.of("activeConnections", emitters.size(), "protocol", "SSE (Server-Sent Events)");
+    public ApiResponse<?> stats() {
+        return ApiResponse.ok(Map.of("activeConnections", emitters.size(), "protocol", "SSE (Server-Sent Events)"));
     }
 
     // ══════════════════════════════════════════════

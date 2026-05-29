@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.I18nUtils;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class ApiResponse<T> {
 
@@ -73,6 +75,7 @@ public class ApiResponse<T> {
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
+            log.error("ApiResponse 序列化失败: {}", e.getMessage(), e);
             return "{}";
         }
     }

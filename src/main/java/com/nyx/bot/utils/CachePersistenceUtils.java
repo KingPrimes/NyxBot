@@ -80,11 +80,12 @@ public class CachePersistenceUtils {
      */
     private static void doPersist(String cacheName, Object value, long duration, TimeUnit unit,
                                    String filePath, byte[] bytes, String logName) {
-        CacheUtils.set(cacheName, "data", value, duration, unit);
         try {
             FileUtils.writeFile(filePath, bytes);
         } catch (Exception e) {
-            log.error("序列化{}失败: {}", logName, e.getMessage());
+            log.error("持久化{}失败，跳过缓存写入: {}", logName, e.getMessage());
+            return;
         }
+        CacheUtils.set(cacheName, "data", value, duration, unit);
     }
 }

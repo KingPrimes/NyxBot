@@ -27,8 +27,6 @@ spring:
     active: server
   main:
     allow-circular-references: true
-  mvc:
-    static-path-pattern: /static/**
   thymeleaf:
     mode: HTML
     encoding: UTF-8
@@ -66,7 +64,7 @@ spring:
   #H2
   h2:
     console:
-      enabled: true
+      enabled: false
   #JPA
   jpa:
     show-sql: false
