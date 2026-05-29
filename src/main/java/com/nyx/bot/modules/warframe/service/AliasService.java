@@ -35,7 +35,7 @@ public class AliasService {
     }
 
     private List<Alias> getAlias() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_ALIAS, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceAlias(), new TypeReference<>() {
         });
     }
 

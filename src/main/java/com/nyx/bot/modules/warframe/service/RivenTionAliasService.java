@@ -35,7 +35,7 @@ public class RivenTionAliasService {
     }
 
     private List<RivenTionAlias> getRivenTionAlias() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceMarketRivenTionAlias(), new TypeReference<>() {
         });
     }
 

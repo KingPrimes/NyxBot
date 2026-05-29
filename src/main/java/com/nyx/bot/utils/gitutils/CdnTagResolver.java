@@ -1,4 +1,4 @@
-package com.nyx.bot.utils;
+package com.nyx.bot.utils.gitutils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

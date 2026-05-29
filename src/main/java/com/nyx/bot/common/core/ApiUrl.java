@@ -2,6 +2,7 @@ package com.nyx.bot.common.core;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.utils.gitutils.CdnTagResolver;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
@@ -26,78 +27,53 @@ public class ApiUrl {
     public static final String WARFRAME_PUBLIC_EXPORT_INDEX = "https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
 
     /**
-     * CDN数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_BASE = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@",
-            "https://kingprimes.top"
-    );
-
-    /**
      * Warframe 别名数据源
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_ALIAS = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/alias.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/alias.json",
-            "https://kingprimes.top/warframe/alias.json"
-    );
+    public static List<String> warframeDataSourceAlias() {
+        return CdnTagResolver.buildUrls("warframe/alias.json");
+    }
+
     /**
-     * RivenTion 数据源
+     * RivenTion 紫卡属性查询参数
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion.json",
-            "https://kingprimes.top/warframe/market_riven_tion.json"
-    );
+    public static List<String> warframeDataSourceMarketRivenTion() {
+        return CdnTagResolver.buildUrls("warframe/market_riven_tion.json");
+    }
+
     /**
-     * RivenTion 别名数据源
+     * RivenTion 紫卡属性查询别名
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion_alias.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion_alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/market_riven_tion_alias.json",
-            "https://kingprimes.top/warframe/market_riven_tion_alias.json"
-    );
+    public static List<String> warframeDataSourceMarketRivenTionAlias() {
+        return CdnTagResolver.buildUrls("warframe/market_riven_tion_alias.json");
+    }
+
     /**
-     * 节点数据源
+     * 星图节点数据源
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_NODES = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/nodes.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/nodes.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/nodes.json",
-            "https://kingprimes.top/warframe/nodes.json"
-    );
+    public static List<String> warframeDataSourceNodes() {
+        return CdnTagResolver.buildUrls("warframe/nodes.json");
+    }
+
     /**
      * 奖励池数据源
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_REWARD_POOL = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/reward_pool.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/reward_pool.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/reward_pool.json",
-            "https://kingprimes.top/warframe/reward_pool.json"
-    );
+    public static List<String> warframeDataSourceRewardPool() {
+        return CdnTagResolver.buildUrls("warframe/reward_pool.json");
+    }
+
     /**
      * 紫卡计算器数据源
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_RIVEN_ANALYSE_TREND = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/riven_analyse_trend.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/riven_analyse_trend.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/riven_analyse_trend.json",
-            "https://kingprimes.top/warframe/riven_analyse_trend.json"
-    );
+    public static List<String> warframeDataSourceRivenAnalyseTrend() {
+        return CdnTagResolver.buildUrls("warframe/riven_analyse_trend.json");
+    }
+
     /**
      * 状态翻译数据源
      */
-    public static final List<String> WARFRAME_DATA_SOURCE_STATE_TRANSLATION = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/state_translation.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource@latest/warframe/state_translation.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource@latest/warframe/state_translation.json",
-            "https://kingprimes.top/warframe/state_translation.json"
-    );
+    public static List<String> warframeDataSourceStateTranslation() {
+        return CdnTagResolver.buildUrls("warframe/state_translation.json");
+    }
     /**
      * 赤毒幻纹
      */

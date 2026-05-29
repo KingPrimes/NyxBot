@@ -36,7 +36,7 @@ public class RivenAnalyseTrendService {
     }
 
     private List<RivenAnalyseTrend> getRivenAnalyseTrends() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_RIVEN_ANALYSE_TREND, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceRivenAnalyseTrend(), new TypeReference<>() {
         });
     }
 

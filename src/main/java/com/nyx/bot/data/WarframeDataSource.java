@@ -421,7 +421,7 @@ public class WarframeDataSource {
         int size = nodesRepository.saveAll(nodesList).size();
         log.info("初始化 Nodes 数据完成，共{}条", size);
         log.info("开始初始化 自定义 Nodes nodes.json 数据！");
-        List<Nodes> nodes = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_NODES, new TypeReference<List<Nodes>>() {
+        List<Nodes> nodes = apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceNodes(), new TypeReference<List<Nodes>>() {
         });
         size = nodesRepository.saveAll(nodes).size();
         log.info("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
@@ -430,7 +430,7 @@ public class WarframeDataSource {
     @Transactional
     public void initRewardPool() {
         log.info("开始初始化 自定义 RewardPool reward_pool.json 数据！");
-        List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_REWARD_POOL, new TypeReference<List<RewardPool>>() {
+        List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceRewardPool(), new TypeReference<List<RewardPool>>() {
         });
         int size = rewardPoolRepository.saveAll(javaList).size();
         log.info("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
