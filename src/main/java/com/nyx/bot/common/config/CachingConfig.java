@@ -27,7 +27,9 @@ public class CachingConfig {
                         // 配置名称为 global-states 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
                         b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES).entryCapacity(1).expireAfterWrite(30, TimeUnit.MINUTES),
                         // 配置名称为 global-states-arbitration 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(1).expireAfterWrite(1, TimeUnit.DAYS)
+                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(1).expireAfterWrite(1, TimeUnit.DAYS),
+                        // 令牌黑名单，jti → true，过期时间由每次put时设置为token剩余有效期
+                        b -> b.name(CacheUtils.TOKEN_BLACKLIST).permitNullValues(false).entryCapacity(1000)
                 );
         cacheManager.setAllowUnknownCache(true);
         //cacheManager.defaultSetup(builder -> builder.entryCapacity(100).disableStatistics(true));

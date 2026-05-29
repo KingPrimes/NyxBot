@@ -1,8 +1,6 @@
 package com.nyx.bot.common.core;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -53,6 +52,7 @@ public class JwtUtil {
                 .issuer("NyxBot")        // 设置签发者
                 .issuedAt(now)           // 设置签发时间
                 .expiration(expirationDate) // 设置过期时间
+                .id(UUID.randomUUID().toString()) // JWT ID, 用于令牌撤销
                 .signWith(key)           // 使用密钥签名
                 .compact();
     }
@@ -65,6 +65,16 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    /**
+     * 从JWT令牌中提取令牌ID
+     *
+     * @param token JWT令牌
+     * @return 令牌ID
+     */
+    public String extractJti(String token) {
+        return extractClaim(token, Claims::getId);
     }
 
     /**
@@ -94,21 +104,13 @@ public class JwtUtil {
      *
      * @param token JWT令牌
      * @return 所有声明
-     * @throws JwtException 如果令牌无效或已过期
      */
     private Claims extractAllClaims(String token) {
-        try {
-            // 使用最新API替代弃用方法
-            return Jwts.parser()
-                    .verifyWith(key)       // 替代 setSigningKey(key)
-                    .build()
-                    .parseSignedClaims(token)  // 替代 parseClaimsJws(token)
-                    .getPayload();             // 替代 getBody()
-        } catch (ExpiredJwtException e) {
-            throw new JwtException("Token已过期", e);
-        } catch (JwtException e) {
-            throw new JwtException("无效的Token", e);
-        }
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**

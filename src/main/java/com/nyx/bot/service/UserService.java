@@ -32,6 +32,7 @@ public class UserService implements UserDetailsService {
         return User
                 .withUsername(user.get().getUserName())
                 .password(user.get().getPassword())
+                .authorities("ROLE_USER")
                 .build();
     }
 }

@@ -19,6 +19,7 @@ public class CacheUtils {
     public static final String WARFRAME = "warframe";
 
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
+    public static final String TOKEN_BLACKLIST = "token-blacklist";
 
     private static class CacheManagerHolder {
         static final CacheManager INSTANCE = SpringUtils.getBean(CacheManager.class);
