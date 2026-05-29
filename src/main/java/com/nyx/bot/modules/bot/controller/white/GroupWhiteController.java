@@ -1,11 +1,9 @@
 package com.nyx.bot.modules.bot.controller.white;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.modules.bot.entity.white.GroupWhite;
 import com.nyx.bot.modules.bot.service.black.BlackService;
 import com.nyx.bot.modules.bot.service.white.WhiteService;
@@ -18,7 +16,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -76,13 +73,13 @@ public class GroupWhiteController extends BaseController {
                     }
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = TableDataInfo.class),
+                                            schema = @Schema(implementation = PageData.class),
                                             examples = {
                                                     @ExampleObject(value = """
                                                             {
@@ -105,8 +102,7 @@ public class GroupWhiteController extends BaseController {
             }
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody GroupWhite white) {
+    public ApiResponse<PageData<?>> list(@RequestBody GroupWhite white) {
         return getDataTable(ws.list(white));
     }
 
@@ -138,7 +134,7 @@ public class GroupWhiteController extends BaseController {
             )
     )
     @PostMapping("/save")
-    public AjaxResult add(@Validated @RequestBody GroupWhite white) {
+    public ApiResponse<Void> add(@Validated @RequestBody GroupWhite white) {
         if (bs.isBlack(white.getGroupUid(), null)) {
             return toAjax(ws.save(white) != null);
         }
@@ -161,7 +157,7 @@ public class GroupWhiteController extends BaseController {
             }
     )
     @DeleteMapping("/remove/{id}")
-    public AjaxResult remove(@PathVariable("id") Long id) {
+    public ApiResponse<Void> remove(@PathVariable("id") Long id) {
         ws.remove(id);
         return success();
     }

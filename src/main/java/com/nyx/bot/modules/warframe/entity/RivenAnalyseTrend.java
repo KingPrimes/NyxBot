@@ -2,8 +2,6 @@ package com.nyx.bot.modules.warframe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,7 +16,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "name"))
-@JsonView(Views.View.class)
 public class RivenAnalyseTrend extends BaseEntity {
 
     @Id

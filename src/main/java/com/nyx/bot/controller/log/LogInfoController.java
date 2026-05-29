@@ -1,11 +1,9 @@
 package com.nyx.bot.controller.log;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.LogTitleEnum;
 import com.nyx.bot.modules.system.entity.LogInfo;
@@ -19,7 +17,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,21 +52,21 @@ public class LogInfoController extends BaseController {
             description = "获取系统支持的所有代码列表",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class)
+                                            schema = @Schema(implementation = ApiResponse.class)
                                     )
                             }
                     )
             }
     )
     @GetMapping("/codes")
-    public AjaxResult info() {
-        return success().put("data", Arrays.stream(Codes.values())
+    public ApiResponse<Object> info() {
+        return success(Arrays.stream(Codes.values())
                 .map(c -> Map.of("label", StringUtils.removeMatcher(c.getComm()), "value", StringUtils.removeMatcher(c.getComm())))
                 .collect(Collectors.toList())
         );
@@ -79,21 +76,21 @@ public class LogInfoController extends BaseController {
             description = "获取系统支持的所有日志标题列表",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class)
+                                            schema = @Schema(implementation = ApiResponse.class)
                                     )
                             }
                     )
             }
     )
     @GetMapping("/titles")
-    public AjaxResult logTitle() {
-        return success().put("data", Arrays.stream(LogTitleEnum.values())
+    public ApiResponse<Object> logTitle() {
+        return success(Arrays.stream(LogTitleEnum.values())
                 .map(t -> Map.of("label", t.getTitle(), "value", t.name()))
                 .toList());
     }
@@ -112,21 +109,20 @@ public class LogInfoController extends BaseController {
                     }
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = TableDataInfo.class)
+                                            schema = @Schema(implementation = PageData.class)
                                     )
                             }
                     )
             }
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody LogInfo info) {
+    public ApiResponse<PageData<?>> list(@RequestBody LogInfo info) {
         return getDataTable(repository.findAllPageable(
                 info.getTitle(),
                 info.getCode(),
@@ -147,13 +143,13 @@ public class LogInfoController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {
                                                     @ExampleObject(
                                                             value = """
@@ -176,9 +172,11 @@ public class LogInfoController extends BaseController {
             }
     )
     @GetMapping("/detail/{logId}")
-    public AjaxResult detail(@NonNull @PathVariable("logId") Long logId) {
-        AjaxResult ar = success();
-        repository.findById(logId).ifPresent(l -> ar.put("data", l));
-        return ar;
+    public ApiResponse<?> detail(@NonNull @PathVariable("logId") Long logId) {
+        var logOpt = repository.findById(logId);
+        if (logOpt.isPresent()) {
+            return success(logOpt.get());
+        }
+        return success();
     }
 }

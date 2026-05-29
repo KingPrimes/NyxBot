@@ -1,11 +1,10 @@
 package com.nyx.bot.modules.bot.service;
 
 import com.mikuac.shiro.core.BotContainer;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.modules.bot.service.black.BlackService;
 import com.nyx.bot.modules.bot.service.white.WhiteService;
 import com.nyx.bot.utils.I18nUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -28,9 +27,9 @@ public class BotsService {
     /***
      * 获取机器人列表
      */
-    public AjaxResult getBots() {
-        if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
-        return AjaxResult.success().put("data", container.robots.keySet().stream().map(k -> Map.of("label", container.robots.get(k).getLoginInfo().getData().getNickname(), "value", k)).collect(Collectors.toList()));
+    public ApiResponse<?> getBots() {
+        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
+        return ApiResponse.ok(container.robots.keySet().stream().map(k -> Map.of("label", container.robots.get(k).getLoginInfo().getData().getNickname(), "value", k)).collect(Collectors.toList()));
 
     }
 
@@ -39,14 +38,14 @@ public class BotsService {
      *
      * @param botUid 机器人UID
      */
-    public AjaxResult getFriendList(Long botUid) {
-        if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
+    public ApiResponse<?> getFriendList(Long botUid) {
+        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
-                    ? new AjaxResult(HttpStatus.OK, "", container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
-                    : new AjaxResult(HttpStatus.NO_CONTENT, "此机器人未链接", null);
+                    ? ApiResponse.ok(container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
+                    : ApiResponse.error(204, "此机器人未链接");
         } catch (Exception e) {
-            return new AjaxResult(HttpStatus.NO_CONTENT, "获取好友列表失败,请手动输入管理员账号！");
+            return ApiResponse.error(204, "获取好友列表失败,请手动输入管理员账号！");
         }
     }
 
@@ -55,14 +54,14 @@ public class BotsService {
      *
      * @param botUid 机器人UID
      */
-    public AjaxResult getGroupList(Long botUid) {
-        if (container.robots.isEmpty()) return AjaxResult.error(I18nUtils.message("request.error.bot.not.container"));
+    public ApiResponse<?> getGroupList(Long botUid) {
+        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
-                    ? new AjaxResult(HttpStatus.OK, "", container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
-                    : new AjaxResult(HttpStatus.NO_CONTENT, "此机器人未链接", null);
+                    ? ApiResponse.ok(container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))
+                    : ApiResponse.error(204, "此机器人未链接");
         } catch (Exception e) {
-            return new AjaxResult(HttpStatus.NO_CONTENT, "获取群列表失败，请手动输入群账号！");
+            return ApiResponse.error(204, "获取群列表失败，请手动输入群账号！");
         }
     }
 

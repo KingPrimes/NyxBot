@@ -10,6 +10,10 @@ import java.io.Serial;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**
+ * @deprecated 使用 {@link ApiResponse} 替代
+ */
+@Deprecated
 @SuppressWarnings("unused")
 public class AjaxResult extends HashMap<String, Object> {
     /**

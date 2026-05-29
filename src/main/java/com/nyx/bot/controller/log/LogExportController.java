@@ -2,7 +2,7 @@ package com.nyx.bot.controller.log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.event.LogEvent;
@@ -164,7 +164,7 @@ public class LogExportController extends BaseController {
     @GetMapping("/stats")
     @Operation(summary = "获取日志统计信息", description = "返回当前缓存的日志数量和各级别分布")
     @SuppressWarnings("ALL")
-    public AjaxResult getLogStats() {
+    public ApiResponse<Object> getLogStats() {
         List<LogEvent> allLogs = logCacheManager.getAllLogs();
 
         // 统计各级别数量
@@ -175,12 +175,13 @@ public class LogExportController extends BaseController {
                 ));
 
         // 构建响应数据
-        return success()
-                .put("total", allLogs.size())
-                .put("maxCacheSize", logCacheManager.getMaxCacheSize())
-                .put("levelCounts", levelCounts)
-                .put("cacheStatus", logCacheManager.getStatus())
-                .put("statistics", logSearchService.getStatistics());
+        Map<String, Object> data = new HashMap<>();
+        data.put("total", allLogs.size());
+        data.put("maxCacheSize", logCacheManager.getMaxCacheSize());
+        data.put("levelCounts", levelCounts);
+        data.put("cacheStatus", logCacheManager.getStatus());
+        data.put("statistics", logSearchService.getStatistics());
+        return success(data);
     }
 
 
@@ -197,7 +198,7 @@ public class LogExportController extends BaseController {
     @GetMapping("/search")
     @Operation(summary = "搜索日志", description = "支持多条件组合搜索")
     @SuppressWarnings("ALL")
-    public AjaxResult searchLogs(
+    public ApiResponse<Object> searchLogs(
             @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
             @Parameter(description = "开始时间戳(毫秒)") @RequestParam(required = false) Long startTime,
             @Parameter(description = "结束时间戳(毫秒)") @RequestParam(required = false) Long endTime,
@@ -218,10 +219,11 @@ public class LogExportController extends BaseController {
                 .collect(Collectors.toList());
 
         // 构建响应
-        return success()
-                .put("total", dtoList.size())
-                .put("filter", buildFilter(keyword, startTime, endTime, levels, useRegex))
-                .put("logs", dtoList);
+        Map<String, Object> data = new HashMap<>();
+        data.put("total", dtoList.size());
+        data.put("filter", buildFilter(keyword, startTime, endTime, levels, useRegex));
+        data.put("logs", dtoList);
+        return success(data);
     }
 
     private Map<String, Object> buildFilter(

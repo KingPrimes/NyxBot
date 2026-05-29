@@ -1,6 +1,6 @@
 package com.nyx.bot.controller.config;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.controller.BaseController;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,10 +45,10 @@ public class ConfigLoadingController extends BaseController {
             description = "获取当前配置",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(responseCode = "200", description = "成功",
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功",
                             content = {
                                     @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {
                                                     @ExampleObject(value = """
                                                             {
@@ -71,8 +70,8 @@ public class ConfigLoadingController extends BaseController {
             }
     )
     @GetMapping
-    public AjaxResult loading() {
-        return success().put("data", HandOff.getConfig());
+    public ApiResponse<Object> loading() {
+        return success(HandOff.getConfig());
     }
 
 
@@ -104,7 +103,7 @@ public class ConfigLoadingController extends BaseController {
             )
     )
     @PostMapping
-    public AjaxResult save(@Validated @RequestBody NyxConfig config) {
+    public ApiResponse<Void> save(@Validated @RequestBody NyxConfig config) {
         if (!config.isValidateServerUrl()) {
             return error(I18nUtils.RequestValidServerUrl());
         }

@@ -2,8 +2,6 @@ package com.nyx.bot.modules.warframe.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,7 +17,6 @@ import java.util.List;
 @Data
 @Entity
 @Table
-@JsonView(Views.View.class)
 @Accessors(chain = true)
 public class RivenItems extends BaseEntity {
 

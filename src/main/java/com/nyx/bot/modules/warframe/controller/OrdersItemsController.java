@@ -1,11 +1,9 @@
 package com.nyx.bot.modules.warframe.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
@@ -16,7 +14,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,19 +69,18 @@ public class OrdersItemsController extends BaseController {
                     )}
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = TableDataInfo.class)
+                                    schema = @Schema(implementation = PageData.class)
                             )}
                     )
             }
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody OrdersItems oi) {
+    public ApiResponse<PageData<?>> list(@RequestBody OrdersItems oi) {
         return getDataTable(
                 repository.findAllPageable(
                         oi.getName(),
@@ -99,18 +96,18 @@ public class OrdersItemsController extends BaseController {
             description = "异步更新可交易物品相关数据",
             method = HttpMethod.POST,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "更新任务已启动",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AjaxResult.class)
+                                    schema = @Schema(implementation = ApiResponse.class)
                             )}
                     )
             }
     )
     @PostMapping("/update")
-    public AjaxResult update() {
+    public ApiResponse<Void> update() {
         CompletableFuture.runAsync(dataSource::initOrdersItemsData);
         return success(I18nUtils.RequestTaskRun());
     }

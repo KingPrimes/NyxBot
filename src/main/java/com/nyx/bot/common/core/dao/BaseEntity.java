@@ -1,8 +1,6 @@
 package com.nyx.bot.common.core.dao;
 
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,9 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class BaseEntity {
-    @JsonView(Views.BaseView.class)
     protected Integer current = 1;
-    @JsonView(Views.BaseView.class)
     protected Integer size = 10;
 
     @Override

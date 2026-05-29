@@ -3,9 +3,7 @@ package com.nyx.bot.modules.warframe.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.nyx.bot.annotation.NotEmpty;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import com.nyx.bot.enums.StateTypeEnum;
 import com.nyx.bot.utils.StringUtils;
@@ -20,7 +18,6 @@ import java.util.List;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"NAME", "UNIQUE_NAME"}))
-@JsonView(Views.View.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StateTranslation extends BaseEntity {
     // 唯一名词

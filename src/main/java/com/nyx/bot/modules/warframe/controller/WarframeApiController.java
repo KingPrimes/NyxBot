@@ -1,6 +1,6 @@
 package com.nyx.bot.modules.warframe.controller;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.modules.warframe.entity.MarketResult;
@@ -57,7 +57,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取平原时间", description = "获取各个平原的时间循环信息")
     @GetMapping("/cycle")
-    public AjaxResult getCycle() {
+    public ApiResponse<?> getCycle() {
         try {
             AllCycle cycle = worldStateUtils.getAllCycle();
             return success(cycle);
@@ -71,7 +71,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取入侵信息", description = "获取当前的入侵任务列表")
     @GetMapping("/invasions")
-    public AjaxResult getInvasions() {
+    public ApiResponse<?> getInvasions() {
         try {
             List<Invasion> invasions = worldStateUtils.getInvasions();
             return success(invasions);
@@ -87,7 +87,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取裂隙信息", description = "获取裂隙任务列表，支持按类型筛选")
     @GetMapping("/fissures")
-    public AjaxResult getFissures(
+    public ApiResponse<?> getFissures(
             @Parameter(description = "裂隙类型：ACTIVE_MISSION, STEEL_PATH, VOID_STORMS")
             @RequestParam(defaultValue = "ACTIVE_MISSION") String type
     ) {
@@ -107,7 +107,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取电波信息", description = "获取Nightwave电波任务信息")
     @GetMapping("/nightwave")
-    public AjaxResult getNightwave() {
+    public ApiResponse<?> getNightwave() {
         try {
             SeasonInfo seasonInfo = worldStateUtils.getSeasonInfo();
             return success(seasonInfo);
@@ -121,7 +121,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取突击信息", description = "获取每日突击任务列表")
     @GetMapping("/sorties")
-    public AjaxResult getSorties() {
+    public ApiResponse<?> getSorties() {
         try {
             var sorties = worldStateUtils.getSorties();
             return success(sorties);
@@ -135,7 +135,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取执刑官猎杀", description = "获取执刑官猎杀任务信息")
     @GetMapping("/archon")
-    public AjaxResult getArchonHunt() {
+    public ApiResponse<?> getArchonHunt() {
         try {
             var archonHunt = worldStateUtils.getLiteSorite();
             return success(archonHunt);
@@ -151,7 +151,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "WM紫卡查询", description = "查询紫卡市场信息")
     @GetMapping("/wm/riven")
-    public AjaxResult getRivenMarket(
+    public ApiResponse<?> getRivenMarket(
             @Parameter(description = "紫卡武器名称关键词")
             @RequestParam String keyword
     ) {
@@ -171,7 +171,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "WM市场订单查询", description = "查询Warframe.Market物品订单信息")
     @GetMapping("/wm/order")
-    public AjaxResult getMarketOrder(
+    public ApiResponse<?> getMarketOrder(
             @Parameter(description = "物品名称关键词")
             @RequestParam String keyword,
             @Parameter(description = "平台：PC, XB1, PS4, SWITCH, SWI")
@@ -193,7 +193,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "WM杜卡德币查询", description = "查询物品的杜卡德币兑换信息")
     @GetMapping("/wm/ducats")
-    public AjaxResult getDucats() {
+    public ApiResponse<?> getDucats() {
         try {
             var ducats = marketDucatsUtils.getDucats();
             return success(ducats);
@@ -207,7 +207,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取警报信息", description = "获取世界警报任务列表")
     @GetMapping("/alerts")
-    public AjaxResult getAlerts() {
+    public ApiResponse<?> getAlerts() {
         try {
             var alerts = worldStateUtils.getAlerts();
             return success(alerts);
@@ -221,7 +221,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取每日特惠", description = "获取虚空商人每日特惠信息")
     @GetMapping("/dailydeals")
-    public AjaxResult getDailyDeals() {
+    public ApiResponse<?> getDailyDeals() {
         try {
             var dailyDeals = worldStateUtils.getDailyDeals();
             return success(dailyDeals);
@@ -235,7 +235,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取虚空商人", description = "获取虚空商人位置和到达时间")
     @GetMapping("/voidtrader")
-    public AjaxResult getVoidTrader() {
+    public ApiResponse<?> getVoidTrader() {
         try {
             var voidTrader = worldStateUtils.getVoidTraders();
             return success(voidTrader);
@@ -249,7 +249,7 @@ public class WarframeApiController extends BaseController {
      */
     @Operation(summary = "获取双衍王境", description = "获取双衍王境轮换信息")
     @GetMapping("/duvalier")
-    public AjaxResult getDuvalierCycle() {
+    public ApiResponse<?> getDuvalierCycle() {
         try {
             var duvalierCycle = worldStateUtils.getDuvalierCycle();
             return success(duvalierCycle);

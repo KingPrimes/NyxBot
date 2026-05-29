@@ -1,11 +1,9 @@
 package com.nyx.bot.modules.warframe.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
@@ -66,8 +64,7 @@ public class MarketRivenController extends BaseController {
             )
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody RivenItems rivenItems) {
+    public ApiResponse<PageData<?>> list(@RequestBody RivenItems rivenItems) {
         return getDataTable(
                 repository.findAllPageable(
                         rivenItems.getName(),
@@ -85,7 +82,7 @@ public class MarketRivenController extends BaseController {
             method = HttpMethod.POST
     )
     @PostMapping("/update")
-    public AjaxResult update() {
+    public ApiResponse<Void> update() {
         CompletableFuture.runAsync(dataSource::getRivenWeapons);
         return success(I18nUtils.RequestTaskRun());
     }

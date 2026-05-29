@@ -1,9 +1,9 @@
 package com.nyx.bot.modules.bot.controller.bot;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.modules.bot.service.BotsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,13 +48,13 @@ public class BotController extends BaseController {
             description = "获取机器人列表",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = TableDataInfo.class),
+                                            schema = @Schema(implementation = PageData.class),
                                             examples = {
                                                     @ExampleObject(
                                                             value = """
@@ -77,7 +76,7 @@ public class BotController extends BaseController {
             }
     )
     @GetMapping("/bots")
-    public AjaxResult getBots() {
+    public ApiResponse<?> getBots() {
         return botsService.getBots();
     }
 
@@ -95,13 +94,13 @@ public class BotController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {
                                                     @ExampleObject(
                                                             value = """
@@ -123,7 +122,7 @@ public class BotController extends BaseController {
             }
     )
     @GetMapping("/friend/{botUid}")
-    public AjaxResult getFriendList(@PathVariable Long botUid) {
+    public ApiResponse<?> getFriendList(@PathVariable Long botUid) {
         return botsService.getFriendList(botUid);
     }
 
@@ -141,13 +140,13 @@ public class BotController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {
                                                     @ExampleObject(
                                                             value = """
@@ -170,7 +169,7 @@ public class BotController extends BaseController {
             }
     )
     @GetMapping("/group/{botUid}")
-    public AjaxResult getGroupList(@PathVariable Long botUid) {
+    public ApiResponse<?> getGroupList(@PathVariable Long botUid) {
         return botsService.getGroupList(botUid);
     }
 
