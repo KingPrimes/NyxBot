@@ -21,7 +21,7 @@ public class ThePerlinSequencePlugin {
 
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_THE_PERLIN_SEQUENCE_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_THE_PERLIN_SEQUENCE_CMD, at = AtEnum.BOTH)
     public void thePerlinSequence(Bot bot, AnyMessageEvent event) {
         // TODO 实现查询 佩兰数列 武器轮换信息
         SendUtils.not(bot, event);

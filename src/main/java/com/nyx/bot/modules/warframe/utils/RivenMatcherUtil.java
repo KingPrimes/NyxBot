@@ -119,7 +119,8 @@ public class RivenMatcherUtil {
 
     /**
      * 统一判定属性是否为负属性（含特殊属性反转逻辑）
-     * @param attributeName 属性名称
+     *
+     * @param attributeName  属性名称
      * @param attributeValue 属性值
      * @return true=负属性，false=正属性
      */

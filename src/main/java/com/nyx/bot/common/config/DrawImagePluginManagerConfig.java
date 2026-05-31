@@ -5,10 +5,10 @@ import com.nyx.bot.repo.PluginConfigRepository;
 import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
+import lombok.NonNull;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -22,6 +22,17 @@ public class DrawImagePluginManagerConfig {
 
     public DrawImagePluginManagerConfig(PluginConfigRepository repository) {
         this.repository = repository;
+    }
+
+    /**
+     * 动态注册插件bean
+     *
+     * @param plugin 要注册的插件
+     */
+    public static void registerDrawImagePlugin(@NonNull DrawImagePlugin plugin) {
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getApplicationContext().getAutowireCapableBeanFactory();
+        beanFactory.destroySingleton("drawImagePlugin");
+        beanFactory.registerSingleton("drawImagePlugin", plugin);
     }
 
     /**
@@ -54,15 +65,5 @@ public class DrawImagePluginManagerConfig {
             }
         }
         return drawImagePluginManager().getFirstPlugin();
-    }
-
-    /**
-     * 动态注册插件bean
-     * @param plugin 要注册的插件
-     */
-    public static void registerDrawImagePlugin(@NonNull DrawImagePlugin plugin) {
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getApplicationContext().getAutowireCapableBeanFactory();
-        beanFactory.destroySingleton("drawImagePlugin");
-        beanFactory.registerSingleton("drawImagePlugin", plugin);
     }
 }

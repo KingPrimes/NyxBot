@@ -8,7 +8,6 @@ import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
-import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.domain.valueobject.SubscriptionCommand;

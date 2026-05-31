@@ -21,7 +21,7 @@ public class TranslationPlugin {
 
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_TRA_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_TRA_CMD, at = AtEnum.BOTH)
     public void translation(Bot bot, AnyMessageEvent event) {
         //TODO 实现翻译数据
         SendUtils.not(bot, event);

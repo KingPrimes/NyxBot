@@ -33,17 +33,8 @@ import java.util.stream.Stream;
 @Component
 public class RelicsImportUtil {
     private static final int BATCH_SIZE = 500;
-    private static class ObjectMapperHolder {
-        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
-    }
-
-    private static ObjectMapper getObjectMapper() {
-        return ObjectMapperHolder.INSTANCE;
-    }
-
     // 用于收集未翻译的奖励名称
     private final List<Map<String, String>> untranslatedItems = new ArrayList<>();
-
     private final StateTranslationRepository stateTranslationRepository;
     private final RelicsRepository relicsRepository;
 
@@ -52,6 +43,10 @@ public class RelicsImportUtil {
                             RelicsRepository relicsRepo) {
         this.stateTranslationRepository = stateTranslationRepo;
         this.relicsRepository = relicsRepo;
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        return ObjectMapperHolder.INSTANCE;
     }
 
     /**
@@ -321,6 +316,10 @@ public class RelicsImportUtil {
             relicsRepository.saveAll(batch);
             log.info("完成第{}批插入，处理{}条记录", i + 1, batch.size());
         }
+    }
+
+    private static class ObjectMapperHolder {
+        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
     }
 
 }

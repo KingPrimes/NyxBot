@@ -2,7 +2,6 @@ package com.nyx.bot.modules.warframe.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.entity.RivenTion;
 import com.nyx.bot.modules.warframe.entity.RivenTionAlias;

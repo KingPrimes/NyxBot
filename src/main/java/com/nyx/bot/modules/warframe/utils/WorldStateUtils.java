@@ -280,10 +280,9 @@ public class WorldStateUtils {
             return cachedSeasons; // 直接使用缓存数据生成图片
         }
 
-        // 缓存未命中时才进行深拷贝和处理
+        // 缓存未命中时才进行处理
         List<KnownCalendarSeasons> processedSeasons = originalSeasons.stream()
-                .map(KnownCalendarSeasons::copy) // 使用优化后的copy方法
-                .peek(this::processSeason) // 提取处理逻辑为独立方法
+                .peek(this::processSeason)
                 .toList();
         CacheUtils.set(CacheUtils.WARFRAME, cacheKey, processedSeasons, 300, TimeUnit.MINUTES);
         return processedSeasons;
@@ -304,14 +303,13 @@ public class WorldStateUtils {
     private void processEvent(KnownCalendarSeasons.Events event) {
         switch (event.getType()) {
             case CET_CHALLENGE -> str.findByUniqueName(StringUtils.getLastThreeSegments(event.getChallenge()))
-                    .ifPresent(s -> event.setChallengeInfo(new KnownCalendarSeasons.Events.Challenge(s.getName(), s.getDescription())));
+                    .ifPresent(s -> event.setChallenge(s.getName()));
 
             case CET_REWARD -> str.findByUniqueName(StringUtils.getLastThreeSegments(event.getReward()))
                     .ifPresent(s -> event.setReward(StringUtils.deleteBetweenAndMarkers(s.getName(), '<', '>')));
 
             case CET_UPGRADE -> str.findByUniqueName(StringUtils.getLastThreeSegments(event.getUpgrade()))
-                    .ifPresent(s -> event.setUpgradeInfo(new KnownCalendarSeasons.Events.Upgrade(s.getName(), s.getDescription())));
-
+                    .ifPresent(s -> event.setUpgrade(s.getName()));
         }
     }
 

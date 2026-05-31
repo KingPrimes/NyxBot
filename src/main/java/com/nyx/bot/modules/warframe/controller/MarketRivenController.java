@@ -45,7 +45,7 @@ public class MarketRivenController extends BaseController {
 
     private final WarframeDataSource dataSource;
 
-    public MarketRivenController(RivenItemsRepository repository,WarframeDataSource dataSource) {
+    public MarketRivenController(RivenItemsRepository repository, WarframeDataSource dataSource) {
         this.repository = repository;
         this.dataSource = dataSource;
     }

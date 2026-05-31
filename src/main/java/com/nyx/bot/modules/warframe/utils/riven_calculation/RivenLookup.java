@@ -15,22 +15,6 @@ import java.util.Optional;
 
 @Slf4j
 public class RivenLookup {
-    private static class WeaponsRepositoryHolder {
-        static final WeaponsRepository INSTANCE = SpringUtils.getBean(WeaponsRepository.class);
-    }
-
-    private static WeaponsRepository getWeaponsRepository() {
-        return WeaponsRepositoryHolder.INSTANCE;
-    }
-
-    private static class RivenTrendRepositoryHolder {
-        static final RivenAnalyseTrendRepository INSTANCE = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
-    }
-
-    private static RivenAnalyseTrendRepository getRivenTrendRepository() {
-        return RivenTrendRepositoryHolder.INSTANCE;
-    }
-
     // 字符替换映射表：key=需要替换的字符，value=目标字符
     private static final Map<String, String> CHAR_REPLACEMENTS = new LinkedHashMap<>();
     private static final Map<String, String> CHAR_ANALYSE = new LinkedHashMap<>();
@@ -39,7 +23,6 @@ public class RivenLookup {
     static {
         CHAR_REPLACEMENTS.put("淞", "凇");
     }
-
 
     static {
         CHAR_ANALYSE.put("射速", "射速/攻击速度");
@@ -65,6 +48,14 @@ public class RivenLookup {
         CHAR_ANALYSE.put("投射物", "投射物飞行速度");
         CHAR_ANALYSE.put("后坐力", "后坐力");
         CHAR_ANALYSE.put("伤害", "伤害/近战伤害");
+    }
+
+    private static WeaponsRepository getWeaponsRepository() {
+        return WeaponsRepositoryHolder.INSTANCE;
+    }
+
+    private static RivenAnalyseTrendRepository getRivenTrendRepository() {
+        return RivenTrendRepositoryHolder.INSTANCE;
     }
 
     public List<Weapons> findByFuzzyName(String name) {
@@ -93,5 +84,13 @@ public class RivenLookup {
 
         // 无匹配时使用原始名称查询
         return getRivenTrendRepository().findByName(analyseName);
+    }
+
+    private static class WeaponsRepositoryHolder {
+        static final WeaponsRepository INSTANCE = SpringUtils.getBean(WeaponsRepository.class);
+    }
+
+    private static class RivenTrendRepositoryHolder {
+        static final RivenAnalyseTrendRepository INSTANCE = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
     }
 }

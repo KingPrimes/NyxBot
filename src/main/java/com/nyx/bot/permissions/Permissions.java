@@ -39,7 +39,7 @@ public class Permissions {
         Optional<BotAdmin> admin = SpringUtils.getBean(BotAdminRepository.class).findByAdminUid(userId);
         boolean isAdmin = admin.isPresent()
                 && (Objects.requireNonNull(admin.get().getPermissions()) == PermissionsEnums.ADMIN
-                    || admin.get().getPermissions() == PermissionsEnums.SUPER_ADMIN);
+                || admin.get().getPermissions() == PermissionsEnums.SUPER_ADMIN);
         CacheUtils.putWithExpiry(CacheUtils.SYSTEM, cacheKey, isAdmin, 5, TimeUnit.MINUTES);
         return isAdmin;
     }

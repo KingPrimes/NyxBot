@@ -21,7 +21,7 @@ public class RivenMarketPlugin {
 
 
     @AnyMessageHandler
-    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_MARKET_CMD,at = AtEnum.BOTH)
+    @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_RIVEN_MARKET_CMD, at = AtEnum.BOTH)
     public void rivenMarket(Bot bot, AnyMessageEvent event) {
         // TODO 实现查询 Riven Market 市场拍卖的紫卡
         SendUtils.not(bot, event);
