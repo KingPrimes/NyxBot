@@ -202,9 +202,9 @@ public class HandOff {
         map.put("shiro.ws.server.url", config.getWsServerUrl());
 
         // 配置WebSocket客户端启用状态
-        if(wsserverenable){
+        if (wsserverenable) {
             map.put("shiro.ws.client.enable", false);
-        }else{
+        } else {
             boolean wsclientenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsclientenable"));
             config.setIsServerOrClient(!wsclientenable);
             map.put("shiro.ws.client.enable", !config.getIsServerOrClient());

@@ -25,20 +25,18 @@ import java.util.concurrent.*;
 @Component
 public class LogEventListener {
 
-    @Resource
-    private LogCacheManager logCacheManager;
-
-    @Resource
-    private LogInfoWebSocket webSocketHandler;
-
-    @Resource
-    private LogSseController logSseController;
-
+    /**
+     * 批量发送阈值（条数）
+     */
+    private static final int BATCH_SIZE = 10;
+    /**
+     * 批量发送超时（毫秒）
+     */
+    private static final long FLUSH_INTERVAL_MS = 500;
     /**
      * 日志批量发送队列
      */
     private final BlockingQueue<LogEvent> logQueue = new LinkedBlockingQueue<>(100);
-
     /**
      * 定时刷新调度器
      */
@@ -47,16 +45,12 @@ public class LogEventListener {
         thread.setDaemon(true);
         return thread;
     });
-
-    /**
-     * 批量发送阈值（条数）
-     */
-    private static final int BATCH_SIZE = 10;
-
-    /**
-     * 批量发送超时（毫秒）
-     */
-    private static final long FLUSH_INTERVAL_MS = 500;
+    @Resource
+    private LogCacheManager logCacheManager;
+    @Resource
+    private LogInfoWebSocket webSocketHandler;
+    @Resource
+    private LogSseController logSseController;
 
     /**
      * 初始化定时刷新任务

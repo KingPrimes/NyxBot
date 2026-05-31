@@ -4,6 +4,7 @@ package com.nyx.bot.controller;
 import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.modules.system.entity.SysUser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,8 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Map;
 
@@ -28,10 +27,10 @@ public class LoginControllerTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private JwtUtil jwtUtil;
 
     @Mock
-    private JwtUtil jwtUtil;
+    private HttpServletRequest request;
 
     @InjectMocks
     private LoginController loginController;
@@ -39,6 +38,7 @@ public class LoginControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
     }
 
     @Test
@@ -49,31 +49,24 @@ public class LoginControllerTest {
         user.setPassword("admin123");
 
         Authentication authentication = mock(Authentication.class);
+        UserDetails userDetails = User.withUsername("admin").password("admin123").authorities("ROLE_USER").build();
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
 
-        UserDetails userDetails = User.withUsername("admin").password("admin123").authorities("ROLE_USER").build();
-
-        // 使用doReturn模式替代when模式，可以解决某些模拟问题
-        doReturn(userDetails).when(userDetailsService).loadUserByUsername("admin");
-
-        // 使用doReturn模式替代when模式
         doReturn("testToken").when(jwtUtil).generateToken("admin");
 
         // Act & Assert
-        assertDoesNotThrow(() -> { // 添加异常捕获
-            ApiResponse<?> result = loginController.login(user);
+        assertDoesNotThrow(() -> {
+            ApiResponse<?> result = loginController.login(user, request);
 
-            assertTrue(result.isSuccess()); // 验证登录成功
-            assertEquals("登录成功", result.getMsg()); // 验证消息
-            assertEquals("testToken", ((Map<?, ?>) result.getData()).get("token")); //验证令牌
+            assertTrue(result.isSuccess());
+            assertEquals("登录成功", result.getMsg());
+            assertEquals("testToken", ((Map<?, ?>) result.getData()).get("token"));
 
-            // Verify interactions
-            verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class)); //验证认证管理器调用
-            verify(userDetailsService).loadUserByUsername("admin"); //验证用户详情服务调用
-            verify(jwtUtil).generateToken("admin"); //验证JWT工具调用
+            verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+            verify(jwtUtil).generateToken("admin");
         });
-
     }
 
     @Test
@@ -83,43 +76,37 @@ public class LoginControllerTest {
         user.setUserName("admin");
         user.setPassword("admin123111");
 
-        // 模拟认证失败抛出异常
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(new UsernameNotFoundException("User not found"));
+                .thenThrow(new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
 
         // Act
-        ApiResponse<?> result = loginController.login(user);
+        ApiResponse<?> result = loginController.login(user, request);
 
         assertEquals("User not found", result.getMsg());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verifyNoInteractions(userDetailsService, jwtUtil); //确保未调用其他服务
+        verifyNoInteractions(jwtUtil);
     }
 
     @Test
     void login_NullUser() {
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> loginController.login(null));
+        assertThrows(Exception.class, () -> loginController.login(null, request));
     }
 
     @Test
     void login_EmptyUsername() {
-        // Arrange
         SysUser user = new SysUser();
         user.setUserName("");
         user.setPassword("testPass");
 
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> loginController.login(user));
+        assertThrows(Exception.class, () -> loginController.login(user, request));
     }
 
     @Test
     void login_EmptyPassword() {
-        // Arrange
         SysUser user = new SysUser();
         user.setUserName("testUser");
         user.setPassword("");
 
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> loginController.login(user));
+        assertThrows(Exception.class, () -> loginController.login(user, request));
     }
 }

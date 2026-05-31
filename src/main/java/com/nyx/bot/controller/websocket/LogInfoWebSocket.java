@@ -59,6 +59,25 @@ public class LogInfoWebSocket {
     private static LogSearchService logSearchService;
     private static WebSocketMessageSender webSocketMessageSender;
 
+    /**
+     * 移除会话以及相关的过滤配置，避免资源泄漏
+     */
+    private static void removeSession(Session session) {
+        if (session == null) {
+            return;
+        }
+        removeSession(session.getId());
+    }
+
+    private static void removeSession(String sessionId) {
+        if (sessionId == null) {
+            return;
+        }
+        sessionMap.remove(sessionId);
+        levelFilterMap.remove(sessionId);
+        filterConfigMap.remove(sessionId);
+    }
+
     @Resource
     public void setLogInfoMapper(LogInfoMapper logInfoMapper) {
         LogInfoWebSocket.logInfoMapper = logInfoMapper;
@@ -77,25 +96,6 @@ public class LogInfoWebSocket {
     @Resource
     public void setWebSocketMessageSender(WebSocketMessageSender webSocketMessageSender) {
         LogInfoWebSocket.webSocketMessageSender = webSocketMessageSender;
-    }
-
-    /**
-     * 移除会话以及相关的过滤配置，避免资源泄漏
-     */
-    private static void removeSession(Session session) {
-        if (session == null) {
-            return;
-        }
-        removeSession(session.getId());
-    }
-
-    private static void removeSession(String sessionId) {
-        if (sessionId == null) {
-            return;
-        }
-        sessionMap.remove(sessionId);
-        levelFilterMap.remove(sessionId);
-        filterConfigMap.remove(sessionId);
     }
 
     /**

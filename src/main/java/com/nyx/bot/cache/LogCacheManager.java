@@ -42,10 +42,10 @@ public class LogCacheManager {
             if (logCache.size() >= MAX_CACHE_SIZE) {
                 logCache.pollFirst();
             }
-            
+
             // 添加新日志到队列尾部
             logCache.offerLast(event);
-            
+
         } catch (Exception e) {
             log.error("添加日志到缓存失败: {}", e.getMessage(), e);
         }
@@ -59,7 +59,7 @@ public class LogCacheManager {
      */
     public List<LogEvent> getRecentLogs(String minLevel) {
         int minValue = getLevelValue(minLevel);
-        
+
         synchronized (this) {
             return logCache.stream()
                     .filter(log -> log.getLevelValue() >= minValue)
@@ -114,7 +114,7 @@ public class LogCacheManager {
         if (level == null) {
             return 2; // 默认 INFO
         }
-        
+
         return switch (level.toUpperCase()) {
             case "TRACE" -> 0;
             case "DEBUG" -> 1;

@@ -8,6 +8,7 @@ import com.nyx.bot.modules.warframe.utils.RelicsImportUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +31,7 @@ public class RelicsService {
         this.relicsImportUtil = relicsImportUtil;
     }
 
+    @Transactional
     public Integer initRelicsData(String filePath) {
         log.info("开始初始化遗物数据");
         return relicsImportUtil.importRelicsData(filePath);

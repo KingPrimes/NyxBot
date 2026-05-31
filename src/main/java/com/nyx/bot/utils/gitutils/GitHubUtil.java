@@ -1,8 +1,8 @@
 package com.nyx.bot.utils.gitutils;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.http.HttpFileDownloader;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;

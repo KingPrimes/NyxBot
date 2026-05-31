@@ -28,7 +28,8 @@ public class BotsService {
      * 获取机器人列表
      */
     public ApiResponse<?> getBots() {
-        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
+        if (container.robots.isEmpty())
+            return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
         return ApiResponse.ok(container.robots.keySet().stream().map(k -> Map.of("label", container.robots.get(k).getLoginInfo().getData().getNickname(), "value", k)).collect(Collectors.toList()));
 
     }
@@ -39,7 +40,8 @@ public class BotsService {
      * @param botUid 机器人UID
      */
     public ApiResponse<?> getFriendList(Long botUid) {
-        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
+        if (container.robots.isEmpty())
+            return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
                     ? ApiResponse.ok(container.robots.get(botUid).getFriendList().getData().stream().map(f -> Map.of("label", f.getNickname(), "value", f.getUserId())).collect(Collectors.toList()))
@@ -55,7 +57,8 @@ public class BotsService {
      * @param botUid 机器人UID
      */
     public ApiResponse<?> getGroupList(Long botUid) {
-        if (container.robots.isEmpty()) return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
+        if (container.robots.isEmpty())
+            return ApiResponse.error(500, I18nUtils.message("request.error.bot.not.container"));
         try {
             return container.robots.containsKey(botUid)
                     ? ApiResponse.ok(container.robots.get(botUid).getGroupList().getData().stream().map(f -> Map.of("label", f.getGroupName(), "value", f.getGroupId())).collect(Collectors.toList()))

@@ -58,7 +58,7 @@ public class ResetPasswordController extends BaseController {
     private final PasswordEncoder passwordEncoder;
 
     public ResetPasswordController(UserService userService, SysUserRepository repository, JwtUtil jwtUtil,
-                                  PasswordEncoder passwordEncoder) {
+                                   PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.repository = repository;
         this.jwtUtil = jwtUtil;
@@ -91,7 +91,7 @@ public class ResetPasswordController extends BaseController {
             ))
     @PostMapping("/auth/restorePassword")
     public ApiResponse<Void> restPwd(Authentication authentication, @Validated @RequestBody ResetPassword params,
-                                    HttpServletRequest request) {
+                                     HttpServletRequest request) {
         if (params.isValidOld()) return error(I18nUtils.ControllerRestPassWordON());
         if (!params.isValid()) return error(I18nUtils.ControllerRestPassWordONError());
 

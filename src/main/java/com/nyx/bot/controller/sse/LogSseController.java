@@ -2,8 +2,8 @@ package com.nyx.bot.controller.sse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.LogCacheManager;
-import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.config.LogFilterConfig;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.event.DownloadProgressEvent;
 import com.nyx.bot.common.event.LogEvent;
@@ -17,7 +17,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -32,11 +35,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/sse")
 public class LogSseController {
 
+    private static final long SSE_TIMEOUT = 30 * 60 * 1000L;
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, String> levelFilterMap = new ConcurrentHashMap<>();
     private final Map<String, LogFilterConfig> filterConfigMap = new ConcurrentHashMap<>();
-    private static final long SSE_TIMEOUT = 30 * 60 * 1000L;
-
     @Resource
     private ObjectMapper objectMapper;
     @Resource

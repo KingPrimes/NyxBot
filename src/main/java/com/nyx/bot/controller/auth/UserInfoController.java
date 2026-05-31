@@ -32,8 +32,8 @@ import java.util.Map;
         paramName = "Authorization",
         in = SecuritySchemeIn.HEADER
 )
-@Tag(name="auth.user_info", description = "用户信息接口")
-@SecurityRequirement(name="Bearer")
+@Tag(name = "auth.user_info", description = "用户信息接口")
+@SecurityRequirement(name = "Bearer")
 @RestController
 @CrossOrigin
 public class UserInfoController extends BaseController {

@@ -5,12 +5,9 @@ public class CommandConstants {
     public static final String HELP_CMD = "^HELP$|^帮助$|^指令$|^命令$|^菜单$|^help$";
     public static final String UPDATE_WARFRAME_RES_MARKET_ITEMS_CMD = "^更新WM物品$";
     public static final String UPDATE_WARFRAME_RES_MARKET_RIVEN_CMD = "^更新WM紫卡$";
-    public static final String UPDATE_WARFRAME_RES_RM_CMD = "^更新RM紫卡$";
-    public static final String UPDATE_WARFRAME_RIVEN_CHANGES_CMD = "^更新紫卡倾向变动$";
 
     public static final String UPDATE_WARFRAME_SISTER_CMD = "^更新信条$";
     public static final String UPDATE_WARFRAME_TAR_CMD = "^更新翻译$";
-    public static final String UPDATE_JAR_CMD = "^自动更新$|^更新版本$|^版本更新$";
 
     public static final String WARFRAME_ALERTS_CMD = "^警报$";
     public static final String WARFRAME_SORTIES_CMD = "^突击$";

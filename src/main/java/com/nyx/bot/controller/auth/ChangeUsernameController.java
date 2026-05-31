@@ -89,7 +89,7 @@ public class ChangeUsernameController extends BaseController {
             ))
     @PostMapping("/auth/changeUsername")
     public ApiResponse<Void> changeUsername(Authentication authentication, @Validated @RequestBody ChangeUsername params,
-                                           HttpServletRequest request) {
+                                            HttpServletRequest request) {
         if (params == null) {
             return error(I18nUtils.RequestErrorParam());
         }
