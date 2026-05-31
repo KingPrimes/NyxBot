@@ -26,7 +26,7 @@ public class FissuresMessageBuilder implements MessageBuilder<ActiveMission> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<ActiveMission> event, MissionSubscribeUserCheckType rule) {
-        ActiveMission mission = worldStateUtils.translateActiveMission(event.getData());
+        ActiveMission mission = worldStateUtils.translateActiveMission(event.data());
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         // 消息标题

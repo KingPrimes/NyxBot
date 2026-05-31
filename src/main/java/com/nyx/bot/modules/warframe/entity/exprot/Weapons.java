@@ -195,35 +195,6 @@ public class Weapons {
         return String.format("%.2f", reloadTime);
     }
 
-
-    @Getter
-    public enum ProductCategory {
-        Pistols("次要武器"),
-        LongGuns("主要武器"),
-        Melee("近战武器"),
-        SpaceGuns("Archwing武器"),
-        SpaceMelee("Archwing近战武器"),
-        SpecialItems("显赫武器"),
-        CrewShipWeapons("星舰武器"),
-        SentinelWeapons("守护武器"),
-        Shotguns("霰弹枪"),
-        ;
-        final String name;
-
-        ProductCategory(String name) {
-            this.name = name;
-        }
-    }
-
-    @Data
-    @Accessors(chain = true)
-    public static class DamagePerShot {
-        // 伤害类型
-        String name;
-        // 伤害数值
-        Double damage;
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
@@ -251,5 +222,33 @@ public class Weapons {
                 .append("sentinel", sentinel)
                 .append("multishot", multishot)
                 .toString();
+    }
+
+    @Getter
+    public enum ProductCategory {
+        Pistols("次要武器"),
+        LongGuns("主要武器"),
+        Melee("近战武器"),
+        SpaceGuns("Archwing武器"),
+        SpaceMelee("Archwing近战武器"),
+        SpecialItems("显赫武器"),
+        CrewShipWeapons("星舰武器"),
+        SentinelWeapons("守护武器"),
+        Shotguns("霰弹枪"),
+        ;
+        final String name;
+
+        ProductCategory(String name) {
+            this.name = name;
+        }
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class DamagePerShot {
+        // 伤害类型
+        String name;
+        // 伤害数值
+        Double damage;
     }
 }

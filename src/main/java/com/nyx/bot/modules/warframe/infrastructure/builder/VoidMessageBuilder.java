@@ -34,7 +34,7 @@ public class VoidMessageBuilder implements MessageBuilder<VoidTrader> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<VoidTrader> event, MissionSubscribeUserCheckType rule) {
-        VoidTrader trader = worldStateUtils.translateVoidTraders(event.getData());
+        VoidTrader trader = worldStateUtils.translateVoidTraders(event.data());
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 
         if (trader.getManifest() != null && trader.getManifest().isEmpty()) {

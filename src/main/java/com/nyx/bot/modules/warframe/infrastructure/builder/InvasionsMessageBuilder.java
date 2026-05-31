@@ -27,7 +27,7 @@ public class InvasionsMessageBuilder implements MessageBuilder<Invasion> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<Invasion> event, MissionSubscribeUserCheckType rule) {
-        Invasion invasion = worldStateUtils.translateInvasion(event.getData());
+        Invasion invasion = worldStateUtils.translateInvasion(event.data());
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 

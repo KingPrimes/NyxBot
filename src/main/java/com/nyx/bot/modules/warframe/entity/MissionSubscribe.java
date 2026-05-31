@@ -27,14 +27,14 @@ public class MissionSubscribe extends BaseEntity {
 
     @Column(name = "group_name")
     String groupName;
-    
+
     //发送消息的Bot
     @Column(name = "sub_bot_uid", nullable = false)
     Long subBotUid;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotEmpty(message = "id.not.empty",groups = Validated.class)
+    @NotEmpty(message = "id.not.empty", groups = Validated.class)
     private Long id;
 
     @Column(name = "sub_group", unique = true, nullable = false)

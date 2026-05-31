@@ -12,16 +12,16 @@ import java.util.Objects;
 /**
  * 通知历史记录
  * 用于防止重复通知
- * 
+ *
  * @author Nyx Bot
  */
 @Getter
 @Setter
 @Entity
-@Table(name = "notification_history", 
-       indexes = {
-           @Index(name = "idx_type_expiry", columnList = "subscribe_type,expiry_timestamp", unique = true)
-       })
+@Table(name = "notification_history",
+        indexes = {
+                @Index(name = "idx_type_expiry", columnList = "subscribe_type,expiry_timestamp", unique = true)
+        })
 public class NotificationHistory extends BaseEntity {
 
     @Id
@@ -59,8 +59,8 @@ public class NotificationHistory extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotificationHistory that = (NotificationHistory) o;
-        return Objects.equals(subscribeType, that.subscribeType) && 
-               Objects.equals(expiryTimestamp, that.expiryTimestamp);
+        return Objects.equals(subscribeType, that.subscribeType) &&
+                Objects.equals(expiryTimestamp, that.expiryTimestamp);
     }
 
     @Override

@@ -31,6 +31,7 @@ public class RivenTionAlias extends BaseEntity {
         this.en = ra.en;
         this.cn = ra.cn;
     }
+
     @JsonIgnore
     public String getEquation() {
         return en + cn;

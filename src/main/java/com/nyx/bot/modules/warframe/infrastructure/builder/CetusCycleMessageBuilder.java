@@ -19,7 +19,7 @@ public class CetusCycleMessageBuilder implements MessageBuilder<CetusCycle> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<CetusCycle> event, MissionSubscribeUserCheckType rule) {
-        CetusCycle cycle = event.getData();
+        CetusCycle cycle = event.data();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 

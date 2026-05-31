@@ -60,7 +60,7 @@ public class OrdersItems extends BaseEntity {
     @JsonProperty("vaulted")
     Boolean vaulted;
     /**
-     *  阿耶檀识 黄星星
+     * 阿耶檀识 黄星星
      */
     @JsonProperty("maxAmberStars")
     Integer maxAmberStars;

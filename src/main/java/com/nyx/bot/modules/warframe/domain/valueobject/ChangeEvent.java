@@ -2,40 +2,17 @@ package com.nyx.bot.modules.warframe.domain.valueobject;
 
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
-import lombok.Value;
 
 /**
  * 变化事件值对象
  * 用于封装检测到的游戏状态变化
+ *
+ * @param type        订阅类型
+ * @param missionType 任务类型（可选，null表示不限）
+ * @param tier        遗物等级（可选，null表示不限）
+ * @param data        变化的具体数据
  */
-@Value
-public class ChangeEvent<T> {
-    /**
-     * 订阅类型
-     */
-    SubscribeEnums type;
-
-    /**
-     * 任务类型（可选，null表示不限）
-     */
-    MissionTypeEnum missionType;
-
-    /**
-     * 遗物等级（可选，null表示不限）
-     */
-    Integer tier;
-
-    /**
-     * 变化的具体数据
-     */
-    T data;
-
-    public ChangeEvent(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
-        this.type = type;
-        this.missionType = missionType;
-        this.tier = tier;
-        this.data = data;
-    }
+public record ChangeEvent<T>(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
 
     /**
      * 创建变化事件

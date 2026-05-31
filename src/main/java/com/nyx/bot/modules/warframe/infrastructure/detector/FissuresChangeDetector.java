@@ -74,7 +74,7 @@ public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
         if (voidEnum == null) {
             return null;
         }
-        
+
         return switch (voidEnum) {
             case VoidT1 -> 1;
             case VoidT2 -> 2;
