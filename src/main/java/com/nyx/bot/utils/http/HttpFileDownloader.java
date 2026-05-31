@@ -59,7 +59,7 @@ public class HttpFileDownloader {
             if (response.getBody() != null) {
                 return new Body("", response.getStatusCode(), response.getHeaders(), url,
                         response.getBody().getContentAsByteArray());
-            }else{
+            } else {
                 return new Body("", response.getStatusCode(), response.getHeaders(), url,
                         null);
             }
@@ -73,7 +73,7 @@ public class HttpFileDownloader {
      * 下载文件（核心逻辑）
      */
     public static boolean downloadFile(String url, HttpMethod method, Object requestBody,
-                                        HttpHeaders extraHeaders, File output) {
+                                       HttpHeaders extraHeaders, File output) {
         HttpHeaders hers = new HttpHeaders(HttpUtils.getHeaders());
         hers.setContentType(MediaType.APPLICATION_JSON);
         hers.add("Accept-Encoding", "application/octet-stream");

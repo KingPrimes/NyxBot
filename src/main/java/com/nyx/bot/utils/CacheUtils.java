@@ -14,16 +14,12 @@ import java.util.concurrent.TimeUnit;
 public class CacheUtils {
     public static final String SYSTEM = "system";
     public static final String WARFRAME_STATUS = "warframe-status";
-    public static final String WARFRAME_GLOBAL_STATES = "global-states";
 
     public static final String WARFRAME = "warframe";
 
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
     public static final String TOKEN_BLACKLIST = "token-blacklist";
-
-    private static class CacheManagerHolder {
-        static final CacheManager INSTANCE = SpringUtils.getBean(CacheManager.class);
-    }
+    public static final String HTTP_RESPONSE = "http-response";
 
     private static CacheManager getCacheManager() {
         return CacheManagerHolder.INSTANCE;
@@ -54,7 +50,7 @@ public class CacheUtils {
             return;
         }
         // 遍历动态参数
-        for (int i = 0; i < kv.length + 1;) {
+        for (int i = 0; i < kv.length + 1; ) {
             if (i + 1 < kv.length + 1) {
                 Objects.requireNonNull(getCacheManager().getCache(name)).put(kv[i], kv[i + 1]);
             }
@@ -103,7 +99,7 @@ public class CacheUtils {
      * @param unit      时间单位
      */
     public static void putWithExpiry(@NonNull String cacheName, @NonNull Object key, Object value, long duration,
-            TimeUnit unit) {
+                                     TimeUnit unit) {
         try {
             Cache springCache = getCacheManager().getCache(cacheName);
             if (springCache instanceof SpringCache2kCache) {
@@ -125,5 +121,9 @@ public class CacheUtils {
         } catch (IllegalStateException e) {
             log.warn("CacheManager已关闭，无法设置带过期时间的缓存: {}", cacheName);
         }
+    }
+
+    private static class CacheManagerHolder {
+        static final CacheManager INSTANCE = SpringUtils.getBean(CacheManager.class);
     }
 }

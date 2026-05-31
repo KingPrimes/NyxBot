@@ -13,15 +13,21 @@ public class ApiResponse<T> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    /** 业务状态码 */
+    /**
+     * 业务状态码
+     */
     @JsonProperty
     private final int code;
 
-    /** 提示信息 */
+    /**
+     * 提示信息
+     */
     @JsonProperty
     private final String msg;
 
-    /** 业务数据（可空） */
+    /**
+     * 业务数据（可空）
+     */
     @JsonProperty
     private final T data;
 

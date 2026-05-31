@@ -9,6 +9,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
+import static com.nyx.bot.utils.CacheUtils.HTTP_RESPONSE;
+
 /**
  * HTTP 响应缓存管理
  * 基于 Cache2k 的缓存读写，用于减少重复 API 请求
@@ -18,10 +20,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 class HttpCacheManager {
 
-    /**
-     * HTTP 响应缓存名称，对应 Cache2k 缓存区域
-     */
-    static final String HTTP_RESPONSE_CACHE = "http-response";
 
     /**
      * 生成缓存 Key（URL + param 的 SHA-256 前16位）
@@ -48,7 +46,7 @@ class HttpCacheManager {
      */
     static Body cacheGet(String key) {
         try {
-            Body cached = CacheUtils.get(HTTP_RESPONSE_CACHE, key, Body.class);
+            Body cached = CacheUtils.get(HTTP_RESPONSE, key, Body.class);
             if (cached != null && cached.code() != null && cached.code().is2xxSuccessful()) {
                 log.debug("HTTP缓存命中: key={}", key);
                 return cached;
@@ -64,7 +62,7 @@ class HttpCacheManager {
      */
     static void cachePut(String key, Body body, long cacheSeconds) {
         try {
-            CacheUtils.putWithExpiry(HTTP_RESPONSE_CACHE, key, body, cacheSeconds, TimeUnit.SECONDS);
+            CacheUtils.putWithExpiry(HTTP_RESPONSE, key, body, cacheSeconds, TimeUnit.SECONDS);
             log.debug("HTTP缓存写入: key={}, ttl={}s", key, cacheSeconds);
         } catch (Throwable e) {
             log.debug("HTTP缓存写入失败(缓存不可用): {}", e.getMessage());

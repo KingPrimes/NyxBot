@@ -28,8 +28,6 @@ public class CdnTagResolver {
             "https://kingprimes.top"
     );
 
-    private CdnTagResolver() { }
-
     /**
      * 获取 DataSource 仓库最新 tag，HTTP 层缓存 120 秒。
      * 失败时回退到 "latest"。

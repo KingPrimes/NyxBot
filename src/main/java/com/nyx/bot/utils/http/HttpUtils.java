@@ -14,7 +14,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.*;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
 /**
  * Http请求工具类</br>
@@ -91,15 +93,21 @@ public class HttpUtils {
             // 创建信任所有证书的TrustManager
             TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
-                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
-                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
-                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                        }
+
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                        }
+
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
                     }
             };
 
             // 安装全信任的TrustManager
             SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            sslContext.init(null, trustAllCerts, new SecureRandom());
 
             // 创建忽略SSL验证的ConnectionFactory
             SimpleClientHttpRequestFactory factory = getSimpleClientHttpRequestFactory(sslContext);
@@ -196,17 +204,21 @@ public class HttpUtils {
     public static Body sendGet(String url, String param, HttpHeaders headers, long cacheSeconds) {
         if (cacheSeconds > 0) {
             String key = HttpCacheManager.buildCacheKey(url, param);
-            Body cached = HttpCacheManager.cacheGet(key);
-            if (cached != null) {
-                return cached;
-            }
-            Body result = doExchange(appendParam(url, param), HttpMethod.GET, null, headers, Object.class);
-            if (result.code() != null && result.code().is2xxSuccessful()) {
-                HttpCacheManager.cachePut(key, result, cacheSeconds);
-            }
-            return result;
+            return getMarketBody(url, param, headers, cacheSeconds, key);
         }
-        return doExchange(appendParam(url, param), HttpMethod.GET, null, headers, String.class);
+        return doExchange(appendParam(url, param), HttpMethod.GET, null, headers);
+    }
+
+    private static Body getMarketBody(String url, String param, HttpHeaders headers, long cacheSeconds, String key) {
+        Body cached = HttpCacheManager.cacheGet(key);
+        if (cached != null) {
+            return cached;
+        }
+        Body result = doExchange(appendParam(url, param), HttpMethod.GET, null, headers);
+        if (result.code() != null && result.code().is2xxSuccessful()) {
+            HttpCacheManager.cachePut(key, result, cacheSeconds);
+        }
+        return result;
     }
 
     // ══════════════════════════════════════════════
@@ -217,7 +229,7 @@ public class HttpUtils {
      * Http Get请求 Market 交易
      */
     public static Body marketSendGet(String url) {
-        return marketSendGet(url, "", MarketPlatformEnum.PC);
+        return marketSendGet(url, "", MarketPlatformEnum.PC, 0);
     }
 
     /**
@@ -231,7 +243,7 @@ public class HttpUtils {
      * Http Get请求 Market 交易（无缓存）
      */
     public static Body marketSendGet(String url, String param, MarketPlatformEnum form) {
-        return marketSendGet(url, param, form, 0);
+        return marketSendGet(url, param, form, 120);
     }
 
     /**
@@ -248,17 +260,9 @@ public class HttpUtils {
 
         if (cacheSeconds > 0) {
             String key = HttpCacheManager.buildCacheKey(url, param + "_" + form.getPlatform());
-            Body cached = HttpCacheManager.cacheGet(key);
-            if (cached != null) {
-                return cached;
-            }
-            Body result = doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);
-            if (result.code() != null && result.code().is2xxSuccessful()) {
-                HttpCacheManager.cachePut(key, result, cacheSeconds);
-            }
-            return result;
+            return getMarketBody(url, param, h, cacheSeconds, key);
         }
-        return doExchange(appendParam(url, param), HttpMethod.GET, null, h, String.class);
+        return doExchange(appendParam(url, param), HttpMethod.GET, null, h);
     }
 
     // ══════════════════════════════════════════════
@@ -271,7 +275,7 @@ public class HttpUtils {
     public static Body sendPost(String url, String json) {
         HttpHeaders h = new HttpHeaders();
         h.setContentType(MediaType.APPLICATION_JSON);
-        return doExchange(url, HttpMethod.POST, json, h, String.class);
+        return doExchange(url, HttpMethod.POST, json, h);
     }
 
     // ══════════════════════════════════════════════
@@ -281,8 +285,8 @@ public class HttpUtils {
     /**
      * 执行HTTP请求交换操作
      */
-    private static <T> Body doExchange(String url, HttpMethod method, Object requestBody,
-                                       HttpHeaders extraHeaders, Class<T> responseType) {
+    private static Body doExchange(String url, HttpMethod method, Object requestBody,
+                                   HttpHeaders extraHeaders) {
         HttpHeaders hers = new HttpHeaders(headers);
         if (extraHeaders != null) hers.putAll(extraHeaders);
 
@@ -291,19 +295,14 @@ public class HttpUtils {
                 : new HttpEntity<>(hers);
 
         try {
-            ResponseEntity<T> resp =
+            ResponseEntity<String> resp =
                     getRestTemplateForUrl(url)
-                            .exchange(url, method, req, responseType);
+                            .exchange(url, method, req, String.class);
 
-            // 区分 byte[]（文件下载）与 String（文本响应）
-            T body = resp.getBody();
-            boolean isByteArray = body instanceof byte[];
-            String textBody = isByteArray ? "" : (String) body;
-            byte[] fileBody = isByteArray ? (byte[]) body : null;
-
-            return new Body(textBody, resp.getStatusCode(), resp.getHeaders(), url, fileBody);
+            String textBody = resp.getBody() != null ? resp.getBody() : "";
+            return new Body(textBody, resp.getStatusCode(), resp.getHeaders(), url, null);
         } catch (RestClientException e) {
-            log.error("HTTP {} {} failed", method, url, e);
+            log.warn("HTTP {} {} {}", method, url, e.getMessage());
             // 保留原始HTTP状态码，避免4xx/5xx被统一转为500
             HttpStatusCode statusCode = (e instanceof HttpStatusCodeException hsce)
                     ? hsce.getStatusCode()
@@ -331,18 +330,18 @@ public class HttpUtils {
     public static String getLocalIpv4() {
         try {
             InetAddress inetAddress = InetAddress.getLocalHost();
-            if (inetAddress instanceof java.net.Inet4Address) {
+            if (inetAddress instanceof Inet4Address) {
                 return inetAddress.getHostAddress();
             }
             // 如果默认地址不是 IPv4，则遍历网络接口查找
-            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces =
-                    java.net.NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> networkInterfaces =
+                    NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                java.net.NetworkInterface ni = networkInterfaces.nextElement();
-                java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                NetworkInterface ni = networkInterfaces.nextElement();
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress address = addresses.nextElement();
-                    if (address instanceof java.net.Inet4Address && !address.isLoopbackAddress()) {
+                    if (address instanceof Inet4Address && !address.isLoopbackAddress()) {
                         return address.getHostAddress();
                     }
                 }
@@ -360,14 +359,14 @@ public class HttpUtils {
      */
     public static String getLocalIpv6() {
         try {
-            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces =
-                    java.net.NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> networkInterfaces =
+                    NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                java.net.NetworkInterface ni = networkInterfaces.nextElement();
-                java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                NetworkInterface ni = networkInterfaces.nextElement();
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress address = addresses.nextElement();
-                    if (address instanceof java.net.Inet6Address && !address.isLoopbackAddress()) {
+                    if (address instanceof Inet6Address && !address.isLoopbackAddress()) {
                         return address.getHostAddress();
                     }
                 }

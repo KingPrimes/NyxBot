@@ -25,7 +25,7 @@ public class CachePersistenceUtils {
      * @param logName   日志中标识该数据的名称，用于失败时的错误信息
      */
     public static void setAndPersist(String cacheName, Object value, long duration, TimeUnit unit,
-                                      String filePath, ObjectMapper mapper, String logName) {
+                                     String filePath, ObjectMapper mapper, String logName) {
         try {
             doPersist(cacheName, value, duration, unit, filePath, mapper.writeValueAsBytes(value), logName);
         } catch (Exception e) {
@@ -46,7 +46,7 @@ public class CachePersistenceUtils {
      * @param logName   日志中标识该数据的名称，用于失败时的错误信息
      */
     public static void setAndPersist(String cacheName, Object value, long duration, TimeUnit unit,
-                                      String filePath, byte[] bytes, String logName) {
+                                     String filePath, byte[] bytes, String logName) {
         doPersist(cacheName, value, duration, unit, filePath, bytes, logName);
     }
 
@@ -63,7 +63,7 @@ public class CachePersistenceUtils {
      * @param logName   日志中标识该数据的名称，用于失败时的错误信息
      */
     public static void setAndPersist(String cacheName, Object value, long duration, TimeUnit unit,
-                                      String filePath, String str, String logName) {
+                                     String filePath, String str, String logName) {
         doPersist(cacheName, value, duration, unit, filePath, str.getBytes(StandardCharsets.UTF_8), logName);
     }
 
@@ -79,7 +79,7 @@ public class CachePersistenceUtils {
      * @param logName   日志数据名称标识
      */
     private static void doPersist(String cacheName, Object value, long duration, TimeUnit unit,
-                                   String filePath, byte[] bytes, String logName) {
+                                  String filePath, byte[] bytes, String logName) {
         try {
             FileUtils.writeFile(filePath, bytes);
         } catch (Exception e) {

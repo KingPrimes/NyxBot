@@ -22,16 +22,18 @@ public class CachingConfig {
         SpringCache2kCacheManager cacheManager = new SpringCache2kCacheManager()
                 .addCaches(
                         //配置名称为 system 的缓存策略，permitNullValues允许为空值，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(100).expireAfterWrite(10, TimeUnit.MINUTES),
-                        b -> b.name(CacheUtils.WARFRAME).expireAfterWrite(30, TimeUnit.MINUTES).entryCapacity(2),
-                        // 配置名称为 global-states 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES).entryCapacity(1).expireAfterWrite(30, TimeUnit.MINUTES),
+                        b -> b.name(CacheUtils.SYSTEM).permitNullValues(false).entryCapacity(50).expireAfterWrite(10, TimeUnit.MINUTES),
+                        b -> b.name(CacheUtils.WARFRAME).expireAfterWrite(10, TimeUnit.MINUTES).entryCapacity(2),
                         // 配置名称为 global-states-arbitration 的缓存策略，expireAfterWrite设置过期时间，entryCapacity 可以有多少个缓存
-                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(1).expireAfterWrite(1, TimeUnit.DAYS),
+                        b -> b.name(CacheUtils.WARFRAME_GLOBAL_STATES_ARBITRATION).entryCapacity(1),
                         // 令牌黑名单，jti → true，过期时间由每次put时设置为token剩余有效期
-                        b -> b.name(CacheUtils.TOKEN_BLACKLIST).permitNullValues(false).entryCapacity(1000)
+                        b -> b.name(CacheUtils.TOKEN_BLACKLIST).permitNullValues(false).entryCapacity(500),
+                        // Warframe 状态缓存，存 WorldState 对象，TTL 由 TaskWarframeStatus 动态设定
+                        b -> b.name(CacheUtils.WARFRAME_STATUS).entryCapacity(1),
+                        // HTTP 响应缓存，TTL 由 HttpCacheManager 每次调用时动态设定
+                        b -> b.name(CacheUtils.HTTP_RESPONSE).entryCapacity(100)
                 );
-        cacheManager.setAllowUnknownCache(true);
+        cacheManager.setAllowUnknownCache(false);
         //cacheManager.defaultSetup(builder -> builder.entryCapacity(100).disableStatistics(true));
         return cacheManager;
 
