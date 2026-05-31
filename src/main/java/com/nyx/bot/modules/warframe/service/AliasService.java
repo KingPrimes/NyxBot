@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,10 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class AliasService {
 
-    /**
-     * 同步锁，用于防止并发更新别名数据时的乐观锁冲突
-     */
-    private final Lock aliasUpdateLock = new ReentrantLock();
     private final AliasRepository aliasRepository;
     private final ApiDataSourceUtils apiDataSourceUtils;
 
@@ -52,50 +46,39 @@ public class AliasService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateAlias() {
-        aliasUpdateLock.lock();
+        log.info("开始更新别名数据，获取数据源...");
+        List<Alias> aliasList = getAlias();
+        if (aliasList.isEmpty()) {
+            throw new ServiceException("别名数据获取失败！", 500);
+        }
+        log.info("获取到 {} 条别名数据，准备更新数据库", aliasList.size());
+
         try {
-            log.info("开始更新别名数据，获取数据源...");
-            List<Alias> aliasList = getAlias();
-            if (aliasList.isEmpty()) {
-                throw new ServiceException("别名数据获取失败！", 500);
-            }
-            log.info("获取到 {} 条别名数据，准备更新数据库", aliasList.size());
+            List<Alias> existingAliases = aliasRepository.findAll();
+            Map<String, Alias> existingMap = existingAliases.stream()
+                    .collect(Collectors.toMap(Alias::getCn, Function.identity(), (a1, a2) -> a1));
 
-            try {
-                // 策略：查询现有数据，智能更新
-                // 1. 获取现有数据建立映射 (cn -> Alias)
-                List<Alias> existingAliases = aliasRepository.findAll();
-                Map<String, Alias> existingMap = existingAliases.stream()
-                        .collect(Collectors.toMap(Alias::getCn, Function.identity(), (a1, a2) -> a1));
+            log.debug("数据库中现有 {} 条别名数据", existingMap.size());
 
-                log.info("数据库中现有 {} 条别名数据", existingMap.size());
-
-                // 2. 处理新数据：更新ID以避免冲突
-                List<Alias> toSave = new ArrayList<>();
-                for (Alias newAlias : aliasList) {
-                    Alias existing = existingMap.get(newAlias.getCn());
-                    if (existing != null) {
-                        // 存在相同的cn，复用ID
-                        newAlias.setId(existing.getId());
-                    } else {
-                        // 新数据，确保ID为null以便自动生成
-                        newAlias.setId(null);
-                    }
-                    toSave.add(newAlias);
+            List<Alias> toSave = new ArrayList<>();
+            for (Alias newAlias : aliasList) {
+                Alias existing = existingMap.get(newAlias.getCn());
+                if (existing != null) {
+                    newAlias.setId(existing.getId());
+                } else {
+                    newAlias.setId(null);
                 }
-
-                // 3. 批量保存（save会根据ID判断是insert还是update）
-                List<Alias> saved = aliasRepository.saveAll(toSave);
-                aliasRepository.flush();
-
-                log.info("别名数据更新完成，共 {} 条", saved.size());
-                return saved.size();
-            } catch (Exception e) {
-                log.error("更新别名数据时发生异常", e);
-                throw new ServiceException("更新别名数据失败: " + e.getMessage(), 500);
+                toSave.add(newAlias);
             }
-        } finally {
-            aliasUpdateLock.unlock();
+
+            List<Alias> saved = aliasRepository.saveAll(toSave);
+            aliasRepository.flush();
+
+            log.info("别名数据更新完成，共 {} 条", saved.size());
+            return saved.size();
+        } catch (Exception e) {
+            log.error("更新别名数据时发生异常", e);
+            throw new ServiceException("更新别名数据失败: " + e.getMessage(), 500);
         }
     }
 }
