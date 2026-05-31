@@ -7,9 +7,9 @@ import com.nyx.bot.modules.warframe.entity.RivenItems;
 import com.nyx.bot.modules.warframe.repo.RivenItemsRepository;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class RivenItemsService {
 
     private final RivenItemsRepository repository;
 
-    public RivenItemsService(ObjectMapper objectMapper,RivenItemsRepository repository) {
+    public RivenItemsService(ObjectMapper objectMapper, RivenItemsRepository repository) {
         this.objectMapper = objectMapper;
         this.repository = repository;
     }
@@ -67,7 +67,7 @@ public class RivenItemsService {
             String rivenType = object.has("rivenType") ? object.get("rivenType").asText() : null;
             Double disposition = object.has("disposition") ? object.get("disposition").asDouble() : null;
             Integer reqMasteryRank = object.has("reqMasteryRank") ? object.get("reqMasteryRank").asInt() : null;
-            
+
             if (StringUtils.isAnyBlank(id, slug, gameRef, group) || disposition == null || reqMasteryRank == null) {
                 log.warn("物品关键信息缺失，跳过处理: {}", object);
                 return null;
@@ -79,7 +79,7 @@ public class RivenItemsService {
             String name = (zhHansNode != null && zhHansNode.has("name")) ? zhHansNode.get("name").asText() : slug;
             String icon = (zhHansNode != null && zhHansNode.has("icon")) ? zhHansNode.get("icon").asText() : null;
             String thumb = (zhHansNode != null && zhHansNode.has("thumb")) ? zhHansNode.get("thumb").asText() : null;
-            
+
             return new RivenItems()
                     .setId(id)
                     .setSlug(slug)

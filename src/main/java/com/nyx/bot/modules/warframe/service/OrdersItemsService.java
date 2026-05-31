@@ -7,9 +7,9 @@ import com.nyx.bot.modules.warframe.entity.OrdersItems;
 import com.nyx.bot.modules.warframe.repo.OrdersItemsRepository;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +17,12 @@ import java.util.List;
 @Slf4j
 @Service
 public class OrdersItemsService {
-    
+
     ObjectMapper objectMapper;
-    
+
     OrdersItemsRepository ordersItemsService;
 
-    public OrdersItemsService(ObjectMapper objectMapper,OrdersItemsRepository ordersItemsService) {
+    public OrdersItemsService(ObjectMapper objectMapper, OrdersItemsRepository ordersItemsService) {
         this.objectMapper = objectMapper;
         this.ordersItemsService = ordersItemsService;
     }
