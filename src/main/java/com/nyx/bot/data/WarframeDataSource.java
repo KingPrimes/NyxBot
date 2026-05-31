@@ -21,6 +21,7 @@ import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.service.*;
 import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
 import com.nyx.bot.service.DataCleanupService;
+import com.nyx.bot.task.TaskWarframeStatus;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.StringUtils;
@@ -67,8 +68,9 @@ public class WarframeDataSource {
     private final DataCleanupService dataCleanupService;
     private final NightWaveRepository nightWaveRepository;
     private final ApiDataSourceUtils apiDataSourceUtils;
+    private final TaskWarframeStatus taskWarframeStatus;
 
-    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService, NightWaveRepository nightWaveRepository, ApiDataSourceUtils apiDataSourceUtils) {
+    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService, NightWaveRepository nightWaveRepository, ApiDataSourceUtils apiDataSourceUtils, TaskWarframeStatus taskWarframeStatus) {
         this.objectMapper = objectMapper;
         this.str = str;
         this.nodesRepository = nodesRepository;
@@ -86,6 +88,7 @@ public class WarframeDataSource {
         this.dataCleanupService = dataCleanupService;
         this.nightWaveRepository = nightWaveRepository;
         this.apiDataSourceUtils = apiDataSourceUtils;
+        this.taskWarframeStatus = taskWarframeStatus;
     }
 
     public void init() {
@@ -129,7 +132,10 @@ public class WarframeDataSource {
 
                                     allTasks.join();
                                 }, executor))
-                .thenRun(() -> log.info("数据初始化完成！"))
+                .thenRun(() -> {
+                    log.info("数据初始化完成！");
+                    taskWarframeStatus.startSchedule();
+                })
                 .exceptionally(ex -> {
                     log.error("初始化过程中发生异常，正在回退操作...", ex);
 
@@ -150,7 +156,7 @@ public class WarframeDataSource {
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
             WorldState worldState = objectMapper.readValue(str, WorldState.class);
-            WarframeCache.setWarframeStatus(worldState);
+            WarframeCache.setWarframeStatus(worldState, 300);
         }
         if (!a.isEmpty()) {
             List arbitration = objectMapper.readValue(Base64.getDecoder().decode(a), List.class);

@@ -2,8 +2,8 @@ package com.nyx.bot.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.exception.DataNotInfoException;
-import com.nyx.bot.utils.CachePersistenceUtils;
 import com.nyx.bot.utils.CacheUtils;
+import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.model.WorldState;
@@ -32,14 +32,19 @@ public class WarframeCache {
 
     /**
      * 设置Warframe世界状态数据并持久化到本地文件
-     * <p>同时将数据写入缓存(3分钟TTL)和本地JSON文件用于重启后恢复</p>
+     * <p>先写入本地JSON文件（用于重启后恢复），再写入缓存（带 TTL）</p>
      *
-     * @param object 世界状态数据对象
+     * @param object     世界状态数据对象
+     * @param ttlSeconds 缓存过期时间（秒），与下次轮询时间对齐
      */
-    public static void setWarframeStatus(Object object) {
+    public static void setWarframeStatus(Object object, long ttlSeconds) {
         ObjectMapper mapper = SpringUtils.getBean(ObjectMapper.class);
-        CachePersistenceUtils.setAndPersist(
-                WARFRAME_STATUS, object, 3L, TimeUnit.MINUTES,
-                "./data/status", mapper, "WorldState");
+        try {
+            FileUtils.writeFile("./data/status", mapper.writeValueAsBytes(object));
+        } catch (Exception e) {
+            log.error("持久化WorldState失败: {}", e.getMessage());
+            return;
+        }
+        CacheUtils.putWithExpiry(WARFRAME_STATUS, "data", object, ttlSeconds, TimeUnit.SECONDS);
     }
 }
