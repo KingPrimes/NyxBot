@@ -16,8 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Shiro
@@ -42,12 +41,14 @@ public class HelpPlugin {
     }
 
     private byte[] getHelpImage() {
-        Map<String, String> helpMap = Arrays.stream(Codes.values())
-                .collect(Collectors.toMap(
-                        c -> StringUtils.removeMatcher(c.getComm()),
-                        Codes::getDesc,
-                        (a, b) -> a,
-                        LinkedHashMap::new));
-        return drawImagePlugin.drawHelpImage(helpMap);
+        List<String> collect = Arrays.stream(Codes.values())
+                .map(c -> StringUtils.removeMatcher(c.getComm()))
+                .map(s -> {
+                    if (s.startsWith("取消订阅")) return "取消订阅 [0-9] -[0-9]";
+                    if (s.startsWith("订阅")) return "订阅 [0-9] -[0-9]";
+                    return s;
+                })
+                .collect(Collectors.toList());
+        return drawImagePlugin.drawHelpImage(collect);
     }
 }

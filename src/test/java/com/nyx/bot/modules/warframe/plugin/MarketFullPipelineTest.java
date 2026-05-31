@@ -42,7 +42,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -295,13 +294,16 @@ class MarketFullPipelineTest {
 
     // ======================== Help 数据构建 ========================
 
-    private static Map<String, String> buildHelpMap() {
+    private static List<String> buildHelpCommands() {
         return Arrays.stream(Codes.values())
-                .collect(Collectors.toMap(
-                        c -> StringUtils.removeMatcher(c.getComm()),
-                        Codes::getDesc,
-                        (a, b) -> a,
-                        LinkedHashMap::new));
+                .map(c -> StringUtils.removeMatcher(c.getComm()))
+                .map(s -> {
+                    if (s.startsWith("取消订阅")) return "取消订阅 [0-9] -[0-9]";
+                    if (s.startsWith("订阅")) return "订阅 [0-9] -[0-9]";
+                    return s;
+                })
+                .distinct()
+                .toList();
     }
 
     // ======================== Market API 辅助方法 ========================
@@ -324,12 +326,12 @@ class MarketFullPipelineTest {
     class Help_ {
         @Test
         void test() throws Exception {
-            Map<String, String> helpMap = buildHelpMap();
-            assertFalse(helpMap.isEmpty(), "帮助命令列表不应为空");
-            byte[] img = drawImagePlugin.drawHelpImage(helpMap);
+            List<String> commands = buildHelpCommands();
+            assertFalse(commands.isEmpty(), "帮助命令列表不应为空");
+            byte[] img = drawImagePlugin.drawHelpImage(commands);
             assertTrue(img.length > 0);
             Files.write(OUT.resolve("help.png"), img);
-            System.out.println("[help] OK " + img.length + "B " + helpMap.size() + "条命令");
+            System.out.println("[help] OK " + img.length + "B " + commands.size() + "条命令");
         }
     }
 
