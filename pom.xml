@@ -33,7 +33,7 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.8.3</oshi.version>
         <jjwt.version>0.13.0</jjwt.version>
-        <draw-image.varsion>1.0.7</draw-image.varsion>
+        <draw-image.varsion>1.0.8</draw-image.varsion>
     </properties>
 
     <dependencyManagement>
@@ -306,7 +306,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>false</skipTests>
                 </configuration>
             </plugin>
 

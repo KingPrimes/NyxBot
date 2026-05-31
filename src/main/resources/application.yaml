@@ -4,15 +4,6 @@ test:
 jwt:
   expiration: 3600
   secret: @JWT_SECRET@
-#线程池
-async:
-  executor:
-    thread:
-      core_pool_size: 5
-      max_pool_size: 20
-      queue_capacity: 80
-      name:
-        prefix: async-
 
 springdoc:
   api-docs:
