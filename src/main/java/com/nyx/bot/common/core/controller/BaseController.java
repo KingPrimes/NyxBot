@@ -1,8 +1,8 @@
 package com.nyx.bot.common.core.controller;
 
 
-import com.nyx.bot.common.core.AjaxResult;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.ApiResponse;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.utils.DateUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.ServletUtils;
@@ -25,8 +25,8 @@ public class BaseController {
     /**
      * 返回成功数据
      */
-    public static AjaxResult success(Object data) {
-        return AjaxResult.success(I18nUtils.message("result.success"), data);
+    public static ApiResponse<Object> success(Object data) {
+        return ApiResponse.ok(data);
     }
 
     /**
@@ -46,28 +46,23 @@ public class BaseController {
     /**
      * 响应请求分页数据
      */
-    protected TableDataInfo getDataTable(List<?> list, Long totalElements) {
-        TableDataInfo rspData = new TableDataInfo();
-        rspData.setCode(200);
-        TableDataInfo.Data data = new TableDataInfo.Data();
-        data.setRecords(list);
-        data.setTotal(totalElements);
-        rspData.setData(data);
-        return rspData;
+    protected ApiResponse<PageData<?>> getDataTable(List<?> list, long total, long size, long current) {
+        PageData<?> pageData = new PageData<>(total, size, current, list);
+        return ApiResponse.ok(pageData);
     }
 
+    protected ApiResponse<PageData<?>> getDataTable(List<?> list, long totalElements) {
+        return getDataTable(list, totalElements, 0, 0);
+    }
 
-    protected TableDataInfo getDataTable(Page<?> page) {
-        TableDataInfo td = new TableDataInfo();
-        TableDataInfo.Data data = new TableDataInfo.Data();
-        data.setTotal(page.getTotalElements());
-        data.setSize(page.getSize());
-        data.setRecords(page.getContent());
-        data.setCurrent(page.getNumber() + 1);
-        td.setData(data);
-        td.setMsg(I18nUtils.message("result.success"));
-        td.setCode(HttpStatus.OK.value());
-        return td;
+    protected ApiResponse<PageData<?>> getDataTable(Page<?> page) {
+        PageData<?> pageData = new PageData<>(
+                page.getTotalElements(),
+                page.getSize(),
+                page.getNumber() + 1,
+                page.getContent()
+        );
+        return ApiResponse.ok(pageData);
     }
 
     /**
@@ -97,7 +92,7 @@ public class BaseController {
      * @param rows 影响行数
      * @return 操作结果
      */
-    protected AjaxResult toAjax(int rows) {
+    protected ApiResponse<Void> toAjax(int rows) {
         return rows > 0 ? success() : error();
     }
 
@@ -107,47 +102,47 @@ public class BaseController {
      * @param result 结果
      * @return 操作结果
      */
-    protected AjaxResult toAjax(boolean result) {
+    protected ApiResponse<Void> toAjax(boolean result) {
         return result ? success() : error();
     }
 
     /**
      * 返回成功
      */
-    public AjaxResult success() {
-        return AjaxResult.success();
+    public ApiResponse<Void> success() {
+        return ApiResponse.ok();
     }
 
     /**
      * 返回失败消息
      */
-    public AjaxResult error() {
-        return AjaxResult.error();
+    public ApiResponse<Void> error() {
+        return ApiResponse.error(500, I18nUtils.message("controller.error"));
     }
 
     /**
      * 返回成功消息
      */
-    public AjaxResult success(String message) {
-        return AjaxResult.success(message);
+    public ApiResponse<Void> success(String message) {
+        return ApiResponse.ok(message);
     }
 
-    public AjaxResult success(String msg, Object data) {
-        return new AjaxResult(HttpStatus.OK, msg, data);
+    public ApiResponse<Object> success(String msg, Object data) {
+        return ApiResponse.ok(msg, data);
     }
 
     /**
      * 返回失败消息
      */
-    public AjaxResult error(String message) {
-        return AjaxResult.error(message);
+    public ApiResponse<Void> error(String message) {
+        return ApiResponse.error(500, message);
     }
 
     /**
      * 返回错误码消息
      */
-    public AjaxResult error(HttpStatus code, String message) {
-        return new AjaxResult(code, message);
+    public ApiResponse<Void> error(HttpStatus code, String message) {
+        return ApiResponse.error(code.value(), message);
     }
 
 }

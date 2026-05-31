@@ -31,7 +31,7 @@ public class Relics extends BaseEntity {
     private String description;
 
     @JsonProperty("relicRewards")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "relics_id") // 外键列将在relic_rewards表中
     private List<RelicRewards> relicRewards;
 }

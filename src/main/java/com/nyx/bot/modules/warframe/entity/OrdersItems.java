@@ -1,8 +1,6 @@
 package com.nyx.bot.modules.warframe.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +14,6 @@ import lombok.experimental.Accessors;
 @Data
 @Entity
 @Table
-@JsonView(Views.View.class)
 @Accessors(chain = true)
 public class OrdersItems extends BaseEntity {
 
@@ -63,7 +60,7 @@ public class OrdersItems extends BaseEntity {
     @JsonProperty("vaulted")
     Boolean vaulted;
     /**
-     *  阿耶檀识 黄星星
+     * 阿耶檀识 黄星星
      */
     @JsonProperty("maxAmberStars")
     Integer maxAmberStars;

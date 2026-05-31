@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RewardRepository extends JpaRepository<Reward, String>, JpaSpecificationExecutor<Reward>  {
+public interface RewardRepository extends JpaRepository<Reward, String>, JpaSpecificationExecutor<Reward> {
 }

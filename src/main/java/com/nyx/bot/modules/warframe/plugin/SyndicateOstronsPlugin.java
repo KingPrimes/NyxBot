@@ -10,9 +10,7 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.SyndicateMissionsUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.model.enums.SyndicateEnum;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,21 +18,25 @@ import org.springframework.stereotype.Component;
  */
 @Shiro
 @Component
-@Slf4j
-public class SyndicateOstronsPlugin {
-
-    private final SyndicateMissionsUtils syndicateMissionsUtils;
+public class SyndicateOstronsPlugin extends AbstractSyndicatePlugin {
 
     public SyndicateOstronsPlugin(SyndicateMissionsUtils syndicateMissionsUtils) {
-        this.syndicateMissionsUtils = syndicateMissionsUtils;
+        super(syndicateMissionsUtils);
     }
 
-    /**
-     * 希图斯 赏金
-     */
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_SYNDICATE_OSTRONS_CMD, at = AtEnum.BOTH)
     public void cetusSyndicateHandler(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, syndicateMissionsUtils.postSyndicateEntratiImage(SyndicateEnum.CetusSyndicate), Codes.WARFRAME_SYNDICATE_OSTRONS, log);
+        sendImage(bot, event);
+    }
+
+    @Override
+    protected SyndicateEnum getSyndicate() {
+        return SyndicateEnum.CetusSyndicate;
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_SYNDICATE_OSTRONS;
     }
 }

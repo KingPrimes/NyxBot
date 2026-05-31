@@ -101,7 +101,7 @@ public class NotificationApplicationService {
 
         // 2. 按订阅类型分组
         Map<SubscribeEnums, List<ChangeEvent<?>>> changesByType = allChanges.stream()
-                .collect(Collectors.groupingBy(ChangeEvent::getType));
+                .collect(Collectors.groupingBy(ChangeEvent::type));
 
         // 3. 异步处理每种类型的通知
         changesByType.forEach((type, changes) ->
@@ -190,20 +190,20 @@ public class NotificationApplicationService {
      */
     private boolean matchesRule(ChangeEvent<?> event, MissionSubscribeUserCheckType rule) {
         // 1. 订阅类型必须匹配
-        if (rule.getSubscribe() != event.getType()) {
+        if (rule.getSubscribe() != event.type()) {
             return false;
         }
 
         // 2. 任务类型匹配（null 表示全部）
         if (rule.getMissionTypeEnum() != null) {
-            if (event.getMissionType() == null || !rule.getMissionTypeEnum().equals(event.getMissionType())) {
+            if (event.missionType() == null || !rule.getMissionTypeEnum().equals(event.missionType())) {
                 return false;
             }
         }
 
         // 3. 遗物等级匹配（null 表示全部）
         if (rule.getTierNum() != null) {
-            return event.getTier() != null && rule.getTierNum().equals(event.getTier());
+            return event.tier() != null && rule.getTierNum().equals(event.tier());
         }
 
         return true;
@@ -231,7 +231,7 @@ public class NotificationApplicationService {
             }
 
             // 获取 MessageBuilder
-            SubscribeEnums type = changes.getFirst().getType();
+            SubscribeEnums type = changes.getFirst().type();
             MessageBuilder<?> builder = builders.get(type);
             if (builder == null) {
                 log.warn("类型 {} 没有对应的 MessageBuilder", type.getNAME());

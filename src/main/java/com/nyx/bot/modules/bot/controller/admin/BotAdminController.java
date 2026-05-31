@@ -1,11 +1,9 @@
 package com.nyx.bot.modules.bot.controller.admin;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.enums.PermissionsEnums;
 import com.nyx.bot.modules.bot.entity.BotAdmin;
 import com.nyx.bot.modules.bot.repo.BotAdminRepository;
@@ -18,7 +16,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,13 +74,13 @@ public class BotAdminController extends BaseController {
                                     })
                     }),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = TableDataInfo.class),
+                                            schema = @Schema(implementation = PageData.class),
                                             examples = {
                                                     @ExampleObject(value = """
                                                             {
@@ -108,8 +105,7 @@ public class BotAdminController extends BaseController {
             }
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody BotAdmin ba) {
+    public ApiResponse<PageData<?>> list(@RequestBody BotAdmin ba) {
         return getDataTable(botAdminRepository.findAllByBotUid(ba.getBotUid(), PageRequest.of(ba.getCurrent() - 1, ba.getSize())));
     }
 
@@ -125,13 +121,13 @@ public class BotAdminController extends BaseController {
             description = "获取机器人管理员权限列表",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {
                                                     @ExampleObject(value = """
                                                                 {
@@ -161,8 +157,8 @@ public class BotAdminController extends BaseController {
             }
     )
     @GetMapping("/permissions")
-    public AjaxResult getPermissions() {
-        return success().put("data", getPe());
+    public ApiResponse<Object> getPermissions() {
+        return success(getPe());
     }
 
     @Operation(
@@ -190,7 +186,7 @@ public class BotAdminController extends BaseController {
             )
     )
     @PostMapping("/save")
-    public AjaxResult save(@Validated @RequestBody BotAdmin ba) {
+    public ApiResponse<Void> save(@Validated @RequestBody BotAdmin ba) {
         if (ba.isValidatePermissions()) {
             return error(I18nUtils.PermissionsBan());
         }
@@ -220,7 +216,7 @@ public class BotAdminController extends BaseController {
             }
     )
     @DeleteMapping("/remove/{id}")
-    public AjaxResult remove(@NonNull @PathVariable("id") Long id) {
+    public ApiResponse<Void> remove(@NonNull @PathVariable("id") Long id) {
         botAdminRepository.deleteById(id);
         return success();
     }

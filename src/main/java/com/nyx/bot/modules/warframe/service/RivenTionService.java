@@ -21,10 +21,6 @@ import java.util.stream.Collectors;
 public class RivenTionService {
 
 
-    /**
-     * 同步锁，用于防止并发更新紫卡词条数据时的乐观锁冲突
-     */
-    private static final Object RIVEN_TION_UPDATE_LOCK = new Object();
     private final ApiDataSourceUtils apiDataSourceUtils;
     private final RivenTionRepository rivenTionRepository;
 
@@ -34,7 +30,7 @@ public class RivenTionService {
     }
 
     private List<RivenTion> getRivenTions() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceMarketRivenTion(), new TypeReference<>() {
         });
     }
 
@@ -50,47 +46,40 @@ public class RivenTionService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTion() {
-        synchronized (RIVEN_TION_UPDATE_LOCK) {
-            log.info("开始更新紫卡词条数据，获取数据源...");
-            List<RivenTion> rivenTionList = getRivenTions();
-            if (rivenTionList.isEmpty()) {
-                throw new ServiceException("RivenTion数据获取失败！", 500);
-            }
-            log.info("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
+        log.info("开始更新紫卡词条数据，获取数据源...");
+        List<RivenTion> rivenTionList = getRivenTions();
+        if (rivenTionList.isEmpty()) {
+            throw new ServiceException("RivenTion数据获取失败！", 500);
+        }
+        log.info("获取到 {} 条紫卡词条数据，准备更新数据库", rivenTionList.size());
 
-            try {
-                // 策略：查询现有数据，使用唯一约束字段 url_name 进行映射
-                List<RivenTion> existingList = rivenTionRepository.findAll();
-                Map<String, RivenTion> existingMap = existingList.stream()
-                        .filter(rt -> rt.getUrlName() != null)
-                        .collect(Collectors.toMap(RivenTion::getUrlName, Function.identity(), (a1, a2) -> a1));
+        try {
+            List<RivenTion> existingList = rivenTionRepository.findAll();
+            Map<String, RivenTion> existingMap = existingList.stream()
+                    .filter(rt -> rt.getUrlName() != null)
+                    .collect(Collectors.toMap(RivenTion::getUrlName, Function.identity(), (a1, a2) -> a1));
 
-                log.debug("数据库中现有 {} 条紫卡词条数据", existingMap.size());
+            log.debug("数据库中现有 {} 条紫卡词条数据", existingMap.size());
 
-                // 处理新数据：为已存在的记录复用ID
-                List<RivenTion> toSave = new ArrayList<>();
-                for (RivenTion newRivenTion : rivenTionList) {
-                    RivenTion existing = existingMap.get(newRivenTion.getUrlName());
-                    if (existing != null) {
-                        // 存在相同的 url_name，复用ID
-                        newRivenTion.setIds(existing.getIds());
-                    } else {
-                        // 新数据，确保ID为null以便自动生成
-                        newRivenTion.setIds(null);
-                    }
-                    toSave.add(newRivenTion);
+            List<RivenTion> toSave = new ArrayList<>();
+            for (RivenTion newRivenTion : rivenTionList) {
+                RivenTion existing = existingMap.get(newRivenTion.getUrlName());
+                if (existing != null) {
+                    newRivenTion.setIds(existing.getIds());
+                } else {
+                    newRivenTion.setIds(null);
                 }
-
-                // 批量保存
-                List<RivenTion> saved = rivenTionRepository.saveAll(toSave);
-                rivenTionRepository.flush();
-
-                log.info("紫卡词条数据更新完成，共 {} 条", saved.size());
-                return saved.size();
-            } catch (Exception e) {
-                log.error("更新紫卡词条数据时发生异常", e);
-                throw new ServiceException("更新紫卡词条数据失败: " + e.getMessage(), 500);
+                toSave.add(newRivenTion);
             }
+
+            List<RivenTion> saved = rivenTionRepository.saveAll(toSave);
+            rivenTionRepository.flush();
+
+            log.info("紫卡词条数据更新完成，共 {} 条", saved.size());
+            return saved.size();
+        } catch (Exception e) {
+            log.error("更新紫卡词条数据时发生异常", e);
+            throw new ServiceException("更新紫卡词条数据失败: " + e.getMessage(), 500);
         }
     }
 

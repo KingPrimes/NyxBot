@@ -3,6 +3,7 @@ package com.nyx.bot.common.core.dao;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  * 日志数据传输对象
  */

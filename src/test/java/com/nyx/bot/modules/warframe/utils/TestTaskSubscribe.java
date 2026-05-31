@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @Slf4j
 @SpringBootTest(classes = NyxBotApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 public class TestTaskSubscribe {
@@ -57,6 +59,6 @@ public class TestTaskSubscribe {
                 .userName("TestUser")
                 .subscribeType(SubscribeEnums.FISSURES)
                 .missionType(MissionTypeEnum.MT_ARTIFACT).build();
-        subscriptionService.subscribe(build);
+        assertDoesNotThrow(() -> subscriptionService.subscribe(build));
     }
 }

@@ -16,13 +16,13 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(
-    name = "mission_subscribe_user_check_type",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_user_subscribe_rule",
-            columnNames = {"subu_id", "subscribe", "mission_type_enum", "tier_num"}
-        )
-    }
+        name = "mission_subscribe_user_check_type",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_user_subscribe_rule",
+                        columnNames = {"subu_id", "subscribe", "mission_type_enum", "tier_num"}
+                )
+        }
 )
 public class MissionSubscribeUserCheckType extends BaseEntity {
 

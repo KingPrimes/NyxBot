@@ -159,7 +159,8 @@ public class ProxyUtils {
                     return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hp[0], Integer.parseInt(hp[1])));
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.debug("Failed to detect Windows system proxy", e);
         }
         return Proxy.NO_PROXY; // 否则继续向下查找
     }
@@ -193,7 +194,8 @@ public class ProxyUtils {
                 // mode 不是 manual，说明未启用代理
                 return Proxy.NO_PROXY;
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.debug("Failed to detect Linux system proxy", e);
             return Proxy.NO_PROXY;
         }
     }
@@ -225,7 +227,8 @@ public class ProxyUtils {
             if (enabled && host != null && port > 0) {
                 return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.debug("Failed to detect macOS system proxy", e);
         }
         return Proxy.NO_PROXY;
     }
@@ -250,7 +253,8 @@ public class ProxyUtils {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     if (getRequestingHost() != null && getRequestingHost().equals(host)
                             && getRequestingPort() == port) {
-                        if (username == null || username.isEmpty() || password == null || password.isEmpty()) return null;
+                        if (username == null || username.isEmpty() || password == null || password.isEmpty())
+                            return null;
                         return new PasswordAuthentication(username, password.toCharArray());
                     }
                     return null;
@@ -263,9 +267,9 @@ public class ProxyUtils {
     private static Proxy fromSpringConfig() {
         try {
             var utils = SpringUtils.getBean(SpringValues.class);
-            String proxyUrl = utils.url;
-            String username = utils.username;
-            String password = utils.password;
+            String proxyUrl = utils.getUrl();
+            String username = utils.getUsername();
+            String password = utils.getPassword();
             if (username == null || username.isEmpty())
                 username = null;
             if (password == null || password.isEmpty())
@@ -274,7 +278,8 @@ public class ProxyUtils {
                 return parseStandardProxy(proxyUrl, username, password);
             }
             return Proxy.NO_PROXY;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.debug("Failed to read Spring proxy config", e);
             return Proxy.NO_PROXY;
         }
     }

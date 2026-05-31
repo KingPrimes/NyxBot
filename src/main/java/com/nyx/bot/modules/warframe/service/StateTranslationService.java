@@ -25,7 +25,7 @@ public class StateTranslationService {
     }
 
     public List<StateTranslation> getStateTranslationsForCnd() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_STATE_TRANSLATION, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceStateTranslation(), new TypeReference<>() {
         });
     }
 

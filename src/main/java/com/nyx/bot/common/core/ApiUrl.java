@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
+import com.nyx.bot.utils.gitutils.CdnTagResolver;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.Arbitration;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
@@ -24,70 +25,6 @@ public class ApiUrl {
     public static final String WARFRAME_PUBLIC_EXPORT = "http://content.warframe.com/PublicExport/%s";
     public static final String WARFRAME_PUBLIC_EXPORT_MANIFESTS = "http://content.warframe.com/PublicExport/Manifest/%s";
     public static final String WARFRAME_PUBLIC_EXPORT_INDEX = "https://origin.warframe.com/PublicExport/index_%s.txt.lzma";
-
-    /**
-     * Warframe 别名数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_ALIAS = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/alias.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/alias.json",
-            "https://kingprimes.top/warframe/alias.json"
-    );
-    /**
-     * RivenTion 数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion.json",
-            "https://kingprimes.top/warframe/market_riven_tion.json"
-    );
-    /**
-     * RivenTion 别名数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/market_riven_tion_alias.json",
-            "https://kingprimes.top/warframe/market_riven_tion_alias.json"
-    );
-    /**
-     * 节点数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_NODES = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/nodes.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/nodes.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/nodes.json",
-            "https://kingprimes.top/warframe/nodes.json"
-    );
-    /**
-     * 奖励池数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_REWARD_POOL = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/reward_pool.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/reward_pool.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/reward_pool.json",
-            "https://kingprimes.top/warframe/reward_pool.json"
-    );
-    /**
-     * 紫卡计算器数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_RIVEN_ANALYSE_TREND = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/riven_analyse_trend.json",
-            "https://kingprimes.top/warframe/riven_analyse_trend.json"
-    );
-    /**
-     * 状态翻译数据源
-     */
-    public static final List<String> WARFRAME_DATA_SOURCE_STATE_TRANSLATION = List.of(
-            "https://testingcf.jsdelivr.net/gh/KingPrimes/DataSource/warframe/state_translation.json",
-            "https://jsd.onmicrosoft.cn/gh/KingPrimes/DataSource/warframe/state_translation.json",
-            "https://cdn.jsdelivr.net/gh/KingPrimes/DataSource/warframe/state_translation.json",
-            "https://kingprimes.top/warframe/state_translation.json"
-    );
     /**
      * 赤毒幻纹
      */
@@ -112,14 +49,64 @@ public class ApiUrl {
      * 信条武器
      */
     public static final String WARFRAME_MARKET_SISTER_WEAPONS = "https://api.warframe.market/v2/sister/weapons";
-
     /**
      * Market 拍卖
      */
     public static final String WARFRAME_MARKET_SEARCH = "https://api.warframe.market/v1/auctions/search";
-
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
+
+    /**
+     * Warframe 别名数据源
+     */
+    public static List<String> warframeDataSourceAlias() {
+        return CdnTagResolver.buildUrls("warframe/alias.json");
+    }
+
+    /**
+     * RivenTion 紫卡属性查询参数
+     */
+    public static List<String> warframeDataSourceMarketRivenTion() {
+        return CdnTagResolver.buildUrls("warframe/market_riven_tion.json");
+    }
+
+    /**
+     * RivenTion 紫卡属性查询别名
+     */
+    public static List<String> warframeDataSourceMarketRivenTionAlias() {
+        return CdnTagResolver.buildUrls("warframe/market_riven_tion_alias.json");
+    }
+
+    /**
+     * 星图节点数据源
+     */
+    public static List<String> warframeDataSourceNodes() {
+        return CdnTagResolver.buildUrls("warframe/nodes.json");
+    }
+
+    /**
+     * 奖励池数据源
+     */
+    public static List<String> warframeDataSourceRewardPool() {
+        return CdnTagResolver.buildUrls("warframe/reward_pool.json");
+    }
+
+    /**
+     * 紫卡计算器数据源
+     */
+    public static List<String> warframeDataSourceRivenAnalyseTrend() {
+        return CdnTagResolver.buildUrls("warframe/riven_analyse_trend.json");
+    }
+
+    /**
+     * 状态翻译数据源
+     */
+    public static List<String> warframeDataSourceStateTranslation() {
+        return CdnTagResolver.buildUrls("warframe/state_translation.json");
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        return ObjectMapperHolder.INSTANCE;
+    }
 
     /**
      * Market 物品查询
@@ -163,11 +150,15 @@ public class ApiUrl {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }
-            return objectMapper.readValue(body.body(), new TypeReference<>() {
+            return getObjectMapper().readValue(body.body(), new TypeReference<>() {
             });
         } catch (Exception e) {
             log.error("解析仲裁数据失败: {}", e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    private static class ObjectMapperHolder {
+        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
     }
 }

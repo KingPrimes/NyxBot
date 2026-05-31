@@ -1,6 +1,6 @@
 package com.nyx.bot.aop.exception;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.common.exception.ServiceException;
 import com.nyx.bot.utils.I18nUtils;
@@ -13,9 +13,11 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.thymeleaf.exceptions.TemplateInputException;
 
@@ -33,7 +35,6 @@ public class HandlerException {
                 .header("Content-Type", "text/html; charset=utf-8")
                 .body("<body>" + e.getMessage() + "</body>");
     }
-
 
     @ResponseBody
     @ExceptionHandler(value = TemplateInputException.class)
@@ -53,62 +54,69 @@ public class HandlerException {
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     public Object HttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.warn("HttpRequestMethodNotSupportedException", e);
-        return AjaxResult.error(HttpStatus.METHOD_NOT_ALLOWED, I18nUtils.RequestErrorMethod());
+        return ApiResponse.error(HttpStatus.METHOD_NOT_ALLOWED.value(), I18nUtils.RequestErrorMethod());
     }
 
     @ResponseBody
     @ExceptionHandler(value = BadCredentialsException.class)
     public Object BadCredentialsException(BadCredentialsException e) {
-        return AjaxResult.error(HttpStatus.LOCKED, e.getMessage());
+        return ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = IllegalArgumentException.class)
     public Object IllegalArgumentException(IllegalArgumentException e) {
         log.warn("IllegalArgumentException", e);
-        return AjaxResult.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(value = ExpiredJwtException.class)
     public Object ExpiredJwtException(ExpiredJwtException e) {
         log.warn("ExpiredJwtException", e);
-        return AjaxResult.error(HttpStatus.BAD_REQUEST, I18nUtils.RequestErrorParam());
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), I18nUtils.RequestErrorParam());
     }
 
     @ResponseBody
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public Object HttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.warn("HttpMessageNotReadableException", e);
-        return AjaxResult.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = MissingServletRequestParameterException.class)
+    public Object MissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "缺少必填参数: " + e.getParameterName());
     }
 
     @ResponseBody
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Object MethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        // 获取原始消息（可能是国际化key或普通文本）
         String messageKey = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
-        // 尝试进行国际化解析
         assert messageKey != null;
         String i18nMessage = I18nUtils.message(messageKey);
-        // 若解析结果与原始key相同，说明不是有效国际化key，直接使用原始消息；否则使用国际化结果
         String finalMessage = i18nMessage.equals(messageKey) ? messageKey : i18nMessage;
-        return AjaxResult.error(HttpStatus.BAD_REQUEST, finalMessage);
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), finalMessage);
     }
 
     @ResponseBody
     @ExceptionHandler(value = ServiceException.class)
     public Object ServiceException(ServiceException e) {
         log.error("ServiceException", e);
-        return AjaxResult.error(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+    }
+
+    @ExceptionHandler(value = AsyncRequestNotUsableException.class)
+    public void AsyncRequestNotUsableException() {
+        // SSE / 异步请求客户端断开，正常生命周期，无需处理
     }
 
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public Object Exception(Exception e) {
         log.error("Exception", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("出现未知错误信息：" + e.getMessage());
+        return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现未知错误信息：" + e.getMessage());
     }
 
 }

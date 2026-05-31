@@ -49,12 +49,12 @@ public class DailyDealsChangeDetector implements ChangeDetector<DailyDeals> {
         // 检测新增的特惠
         for (DailyDeals newDeal : newState.getDailyDeals()) {
             BastWorldState.Id newDealId = newDeal.get_id();
-            
+
             if (!oldDealIds.contains(newDealId)) {
                 log.info("检测到新的每日特惠 [商品:{}] [原价:{}]",
                         newDeal.getItem(),
                         newDeal.getOriginalPrice());
-                
+
                 events.add(createChangeEvent(newDeal));
             }
         }

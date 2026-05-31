@@ -1,16 +1,13 @@
 package com.nyx.bot.modules.warframe.controller;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
-import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,10 +18,10 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,19 +50,10 @@ import java.util.stream.Collectors;
 public class MissionSubscribeController extends BaseController {
 
 
-    private final MissionSubscribeRepository repository;
-
     private final SubscriptionApplicationService subscriptionService;
 
-    private final MissionSubscribeUserRepository msu;
-
-    private final MissionSubscribeUserCheckTypeRepository msuct;
-
-    public MissionSubscribeController(MissionSubscribeRepository repository, SubscriptionApplicationService subscriptionService, MissionSubscribeUserRepository msu, MissionSubscribeUserCheckTypeRepository msuct) {
-        this.repository = repository;
+    public MissionSubscribeController(SubscriptionApplicationService subscriptionService) {
         this.subscriptionService = subscriptionService;
-        this.msu = msu;
-        this.msuct = msuct;
     }
 
     @Operation(
@@ -73,7 +61,7 @@ public class MissionSubscribeController extends BaseController {
             description = "获取所有可用的订阅类型",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
@@ -99,8 +87,8 @@ public class MissionSubscribeController extends BaseController {
             }
     )
     @GetMapping("/sub")
-    public AjaxResult subscribe() {
-        return success().put("data", Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME)));
+    public ApiResponse<Object> subscribe() {
+        return success(Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME)));
     }
 
     @Operation(
@@ -108,7 +96,7 @@ public class MissionSubscribeController extends BaseController {
             description = "获取所有Warframe任务类型枚举值",
             method = HttpMethod.GET,
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
@@ -134,8 +122,8 @@ public class MissionSubscribeController extends BaseController {
             }
     )
     @GetMapping("/type")
-    public AjaxResult getTypeEnums() {
-        return success().put("data", Arrays.stream(MissionTypeEnum.values()).collect(Collectors.toMap(MissionTypeEnum::name, MissionTypeEnum::getName)));
+    public ApiResponse<Object> getTypeEnums() {
+        return success(Arrays.stream(MissionTypeEnum.values()).collect(Collectors.toMap(MissionTypeEnum::name, MissionTypeEnum::getName)));
     }
 
     @Operation(
@@ -151,20 +139,20 @@ public class MissionSubscribeController extends BaseController {
                     )}
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = TableDataInfo.class)
+                                    schema = @Schema(implementation = PageData.class)
                             )}
                     )
             }
     )
     @PostMapping("/list")
-    public TableDataInfo list(@RequestBody MissionSubscribe ms) {
+    public ApiResponse<PageData<?>> list(@RequestBody MissionSubscribe ms) {
         Pageable pageable = PageRequest.of(ms.getCurrent() - 1, ms.getSize());
-        Page<MissionSubscribe> page = repository.findAllPageable(ms.getSubGroup(), pageable);
+        Page<@NonNull MissionSubscribe> page = subscriptionService.findAllSubscriptions(ms.getSubGroup(), pageable);
         return getDataTable(page);
     }
 
@@ -181,20 +169,20 @@ public class MissionSubscribeController extends BaseController {
                     )}
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = TableDataInfo.class)
+                                    schema = @Schema(implementation = PageData.class)
                             )}
                     )
             }
     )
     @PostMapping("/user/list")
-    public TableDataInfo userList(@RequestBody @Validated MissionSubscribe ms) {
+    public ApiResponse<PageData<?>> userList(@RequestBody @Validated MissionSubscribe ms) {
         Pageable pageable = PageRequest.of(ms.getCurrent() - 1, ms.getSize());
-        Page<MissionSubscribeUser> page = msu.findAllBySUB_ID(ms.getId(), pageable);
+        Page<@NonNull MissionSubscribeUser> page = subscriptionService.findAllUsersBySubId(ms.getId(), pageable);
         return getDataTable(page);
     }
 
@@ -211,20 +199,20 @@ public class MissionSubscribeController extends BaseController {
                     )}
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = TableDataInfo.class)
+                                    schema = @Schema(implementation = PageData.class)
                             )}
                     )
             }
     )
     @PostMapping("/type/list")
-    public TableDataInfo typeList(@RequestBody @Validated MissionSubscribeUser user) {
+    public ApiResponse<PageData<?>> typeList(@RequestBody @Validated MissionSubscribeUser user) {
         Pageable pageable = PageRequest.of(user.getCurrent() - 1, user.getSize());
-        Page<MissionSubscribeUserCheckType> page = msuct.findAllBySUBU_ID(user.getId(), pageable);
+        Page<@NonNull MissionSubscribeUserCheckType> page = subscriptionService.findAllCheckTypesByUserId(user.getId(), pageable);
         return getDataTable(page);
     }
 
@@ -243,18 +231,18 @@ public class MissionSubscribeController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "删除成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AjaxResult.class)
+                                    schema = @Schema(implementation = ApiResponse.class)
                             )}
                     )
             }
     )
     @DeleteMapping("/{id}")
-    public AjaxResult delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         subscriptionService.deleteSubscribeGroup(id);
         return success();
     }
@@ -273,18 +261,18 @@ public class MissionSubscribeController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "删除成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AjaxResult.class)
+                                    schema = @Schema(implementation = ApiResponse.class)
                             )}
                     )
             }
     )
     @DeleteMapping("/user/{id}")
-    public AjaxResult deleteUser(@PathVariable Long id) {
+    public ApiResponse<Void> deleteUser(@PathVariable Long id) {
         subscriptionService.deleteSubscribeUser(id);
         return success();
     }
@@ -303,18 +291,18 @@ public class MissionSubscribeController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "删除成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AjaxResult.class)
+                                    schema = @Schema(implementation = ApiResponse.class)
                             )}
                     )
             }
     )
     @DeleteMapping("/type/{id}")
-    public AjaxResult deleteCheckType(@PathVariable Long id) {
+    public ApiResponse<Void> deleteCheckType(@PathVariable Long id) {
         subscriptionService.deleteCheckType(id);
         return success();
     }

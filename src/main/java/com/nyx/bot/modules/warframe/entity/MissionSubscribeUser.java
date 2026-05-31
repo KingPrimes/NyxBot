@@ -25,15 +25,15 @@ public class MissionSubscribeUser extends BaseEntity {
 
     @Column(name = "user_id", nullable = false)
     Long userId;
-    
+
     @Column(name = "user_name")
     String userName;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotEmpty(message = "id.not.empty", groups = Validated.class)
     private Long id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_id", nullable = false)
     @JsonIgnore

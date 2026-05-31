@@ -32,7 +32,7 @@ public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<DailyDeals> event, MissionSubscribeUserCheckType rule) {
-        DailyDeals deal = worldStateUtils.translateDailyDeals(event.getData());
+        DailyDeals deal = worldStateUtils.translateDailyDeals(event.data());
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 

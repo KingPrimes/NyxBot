@@ -41,7 +41,14 @@ public class HelpPlugin {
     }
 
     private byte[] getHelpImage() {
-        List<String> collect = Arrays.stream(Codes.values()).map(c -> StringUtils.removeMatcher(c.getComm())).collect(Collectors.toList());
+        List<String> collect = Arrays.stream(Codes.values())
+                .map(c -> StringUtils.removeMatcher(c.getComm()))
+                .map(s -> {
+                    if (s.startsWith("取消订阅")) return "取消订阅 [0-9] -[0-9]";
+                    if (s.startsWith("订阅")) return "订阅 [0-9] -[0-9]";
+                    return s;
+                })
+                .collect(Collectors.toList());
         return drawImagePlugin.drawHelpImage(collect);
     }
 }

@@ -1,6 +1,7 @@
 package com.nyx.bot.common.event;
 
 import com.nyx.bot.cache.LogCacheManager;
+import com.nyx.bot.controller.sse.LogSseController;
 import com.nyx.bot.controller.websocket.LogInfoWebSocket;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -24,17 +25,18 @@ import java.util.concurrent.*;
 @Component
 public class LogEventListener {
 
-    @Resource
-    private LogCacheManager logCacheManager;
-
-    @Resource
-    private LogInfoWebSocket webSocketHandler;
-
+    /**
+     * 批量发送阈值（条数）
+     */
+    private static final int BATCH_SIZE = 10;
+    /**
+     * 批量发送超时（毫秒）
+     */
+    private static final long FLUSH_INTERVAL_MS = 500;
     /**
      * 日志批量发送队列
      */
     private final BlockingQueue<LogEvent> logQueue = new LinkedBlockingQueue<>(100);
-
     /**
      * 定时刷新调度器
      */
@@ -43,16 +45,12 @@ public class LogEventListener {
         thread.setDaemon(true);
         return thread;
     });
-
-    /**
-     * 批量发送阈值（条数）
-     */
-    private static final int BATCH_SIZE = 10;
-
-    /**
-     * 批量发送超时（毫秒）
-     */
-    private static final long FLUSH_INTERVAL_MS = 500;
+    @Resource
+    private LogCacheManager logCacheManager;
+    @Resource
+    private LogInfoWebSocket webSocketHandler;
+    @Resource
+    private LogSseController logSseController;
 
     /**
      * 初始化定时刷新任务
@@ -114,9 +112,10 @@ public class LogEventListener {
             logQueue.drainTo(batch, BATCH_SIZE);
 
             if (!batch.isEmpty()) {
-                // 广播到所有 WebSocket 客户端
+                // 广播到 WebSocket 客户端（旧前端）
                 webSocketHandler.broadcastLogs(batch);
-                //log.debug("批量发送 {} 条日志到 WebSocket 客户端", batch.size());
+                // 广播到 SSE 客户端（新前端）
+                logSseController.broadcastLogs(batch);
             }
 
         } catch (Exception e) {
@@ -147,12 +146,16 @@ public class LogEventListener {
     @PreDestroy
     public void destroy() {
         log.info("LogEventListener 正在关闭...");
-        
-        // 发送剩余的日志
-        flushLogs();
-        
-        // 关闭调度器
+
+        // 先停止调度器，避免新的 flush 任务触发
         scheduler.shutdown();
+
+        // 关闭所有 SSE 连接，避免向已回收的 response 推送数据
+        logSseController.shutdown();
+
+        // 清空队列（不再尝试发送，连接已关闭）
+        logQueue.clear();
+
         try {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                 scheduler.shutdownNow();
@@ -161,7 +164,7 @@ public class LogEventListener {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        
+
         log.info("LogEventListener 已关闭");
     }
 }

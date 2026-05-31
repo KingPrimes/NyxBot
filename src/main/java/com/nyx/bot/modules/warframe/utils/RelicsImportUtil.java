@@ -33,11 +33,8 @@ import java.util.stream.Stream;
 @Component
 public class RelicsImportUtil {
     private static final int BATCH_SIZE = 500;
-    private static final ObjectMapper objectMapper = SpringUtils.getBean(ObjectMapper.class);
-
     // 用于收集未翻译的奖励名称
     private final List<Map<String, String>> untranslatedItems = new ArrayList<>();
-
     private final StateTranslationRepository stateTranslationRepository;
     private final RelicsRepository relicsRepository;
 
@@ -46,6 +43,10 @@ public class RelicsImportUtil {
                             RelicsRepository relicsRepo) {
         this.stateTranslationRepository = stateTranslationRepo;
         this.relicsRepository = relicsRepo;
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        return ObjectMapperHolder.INSTANCE;
     }
 
     /**
@@ -103,9 +104,9 @@ public class RelicsImportUtil {
      */
     private List<Relics> readRelicsFromFile(String filePath) throws IOException {
         try (FileInputStream fis = new FileInputStream(filePath)) {
-            JsonNode rootNode = objectMapper.readTree(fis);
+            JsonNode rootNode = getObjectMapper().readTree(fis);
             JsonNode relicArcaneNode = rootNode.get("ExportRelicArcane");
-            return objectMapper.readValue(relicArcaneNode.toString(), new TypeReference<>() {
+            return getObjectMapper().readValue(relicArcaneNode.toString(), new TypeReference<>() {
             });
         } catch (FileNotFoundException e) {
             log.error("数据文件不存在: {}", filePath);
@@ -288,7 +289,7 @@ public class RelicsImportUtil {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
 
-            String json = objectMapper.writeValueAsString(untranslatedItems);
+            String json = getObjectMapper().writeValueAsString(untranslatedItems);
             writer.write(json);
             log.info("成功导出{}条未翻译数据到: {}", untranslatedItems.size(), "./UntranslatedItems.json");
         } catch (IOException e) {
@@ -315,6 +316,10 @@ public class RelicsImportUtil {
             relicsRepository.saveAll(batch);
             log.info("完成第{}批插入，处理{}条记录", i + 1, batch.size());
         }
+    }
+
+    private static class ObjectMapperHolder {
+        static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
     }
 
 }

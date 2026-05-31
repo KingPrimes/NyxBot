@@ -811,7 +811,9 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     public static String removeMatcher(String str) {
-        return str.replace("^", "").replace("$", "").replace(".*?", "").trim();
+        // 按 | 分割取第一个（帮助菜单只显示每个指令的第一个别名）
+        String first = str.contains("|") ? str.split("\\|")[0] : str;
+        return first.replace("^", "").replace("$", "").replace(".*?", "").trim();
     }
 
     /**

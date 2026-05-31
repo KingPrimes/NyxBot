@@ -1,11 +1,9 @@
 package com.nyx.bot.modules.warframe.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.modules.warframe.entity.Alias;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
@@ -18,7 +16,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -81,13 +79,13 @@ public class AliasController extends BaseController {
                     }
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = TableDataInfo.class),
+                                            schema = @Schema(implementation = PageData.class),
                                             examples = {@ExampleObject(value = """
                                                     {
                                                         "code": 200,
@@ -112,8 +110,7 @@ public class AliasController extends BaseController {
             }
     )
     @PostMapping("/list")
-    @JsonView(Views.View.class)
-    public TableDataInfo list(@RequestBody Alias alias) {
+    public ApiResponse<PageData<?>> list(@RequestBody Alias alias) {
         return getDataTable(repository.findByLikeCn(alias.getCn(), PageRequest.of(alias.getCurrent() - 1, alias.getSize())));
     }
 
@@ -123,7 +120,7 @@ public class AliasController extends BaseController {
             method = HttpMethod.POST
     )
     @PostMapping("/update")
-    public AjaxResult update() {
+    public ApiResponse<Void> update() {
         CompletableFuture.runAsync(dataSource::getAlias);
         return success(I18nUtils.RequestTaskRun());
     }
@@ -151,7 +148,7 @@ public class AliasController extends BaseController {
             )
     )
     @PostMapping("/save")
-    public AjaxResult save(@Validated @RequestBody Alias a) {
+    public ApiResponse<Void> save(@Validated @RequestBody Alias a) {
         if (!a.isValidEnglish()) {
             return error(I18nUtils.message("request.valid.alias.en"));
         }
@@ -181,13 +178,13 @@ public class AliasController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "成功",
                             content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = AjaxResult.class),
+                                            schema = @Schema(implementation = ApiResponse.class),
                                             examples = {@ExampleObject(value = """
                                                     {
                                                         "code": 200,
@@ -208,10 +205,12 @@ public class AliasController extends BaseController {
             }
     )
     @GetMapping("/edit/{id}")
-    public AjaxResult edit(@PathVariable Long id) {
-        AjaxResult ar = success();
-        repository.findById(id).ifPresent(a -> ar.put("alias", a));
-        return ar;
+    public ApiResponse<?> edit(@PathVariable Long id) {
+        Optional<Alias> alias = repository.findById(id);
+        if (alias.isPresent()) {
+            return success(Map.of("alias", alias.get()));
+        }
+        return success();
     }
 
     @Operation(
@@ -229,11 +228,11 @@ public class AliasController extends BaseController {
                     )
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "成功")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功")
             }
     )
     @DeleteMapping("/remove/{id}")
-    public AjaxResult remove(@PathVariable Long id) {
+    public ApiResponse<Void> remove(@PathVariable Long id) {
         repository.deleteById(id);
         return success();
     }

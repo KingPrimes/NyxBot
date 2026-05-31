@@ -10,6 +10,10 @@ import java.io.Serial;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**
+ * @deprecated 使用 {@link ApiResponse} 替代
+ */
+@Deprecated
 @SuppressWarnings("unused")
 public class AjaxResult extends HashMap<String, Object> {
     /**
@@ -26,7 +30,7 @@ public class AjaxResult extends HashMap<String, Object> {
     public static final String DATA_TAG = "data";
     @Serial
     private static final long serialVersionUID = 1L;
-    
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -193,7 +197,7 @@ public class AjaxResult extends HashMap<String, Object> {
         return this;
     }
 
-    public String getMsg(){
+    public String getMsg() {
         return (String) this.get(MSG_TAG);
     }
 

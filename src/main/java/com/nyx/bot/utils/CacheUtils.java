@@ -1,10 +1,10 @@
 package com.nyx.bot.utils;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.extra.spring.SpringCache2kCache;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.lang.NonNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -14,13 +14,16 @@ import java.util.concurrent.TimeUnit;
 public class CacheUtils {
     public static final String SYSTEM = "system";
     public static final String WARFRAME_STATUS = "warframe-status";
-    public static final String WARFRAME_GLOBAL_STATES = "global-states";
 
     public static final String WARFRAME = "warframe";
 
     public static final String WARFRAME_GLOBAL_STATES_ARBITRATION = "global-states-arbitration";
+    public static final String TOKEN_BLACKLIST = "token-blacklist";
+    public static final String HTTP_RESPONSE = "http-response";
 
-    private static final CacheManager cm = SpringUtils.getBean(CacheManager.class);
+    private static CacheManager getCacheManager() {
+        return CacheManagerHolder.INSTANCE;
+    }
 
     /**
      * 设置缓存
@@ -30,7 +33,7 @@ public class CacheUtils {
      */
     @SuppressWarnings("null")
     public static void set(@NonNull String name, @NonNull Map<Object, Object> map) {
-        map.forEach((k, v) -> Objects.requireNonNull(cm.getCache(name)).put(k, v));
+        map.forEach((k, v) -> Objects.requireNonNull(getCacheManager().getCache(name)).put(k, v));
     }
 
     /**
@@ -47,9 +50,9 @@ public class CacheUtils {
             return;
         }
         // 遍历动态参数
-        for (int i = 0; i < kv.length + 1;) {
+        for (int i = 0; i < kv.length + 1; ) {
             if (i + 1 < kv.length + 1) {
-                Objects.requireNonNull(cm.getCache(name)).put(kv[i], kv[i + 1]);
+                Objects.requireNonNull(getCacheManager().getCache(name)).put(kv[i], kv[i + 1]);
             }
             if (i + 2 < kv.length + 1) {
                 i += 2;
@@ -67,7 +70,7 @@ public class CacheUtils {
      * @return Object
      */
     public static Object get(@NonNull String name, @NonNull Object key) {
-        return Objects.requireNonNull(Objects.requireNonNull(cm.getCache(name)).get(key)).get();
+        return Objects.requireNonNull(Objects.requireNonNull(getCacheManager().getCache(name)).get(key)).get();
     }
 
     /**
@@ -79,11 +82,11 @@ public class CacheUtils {
      * @return type参数的类
      */
     public static <T> T get(@NonNull String name, @NonNull Object key, @NonNull Class<T> type) {
-        return Objects.requireNonNull(cm.getCache(name)).get(key, type);
+        return Objects.requireNonNull(getCacheManager().getCache(name)).get(key, type);
     }
 
     public static boolean exists(@NonNull String name, @NonNull Object key) {
-        return Objects.requireNonNull(cm.getCache(name)).get(key) != null;
+        return Objects.requireNonNull(getCacheManager().getCache(name)).get(key) != null;
     }
 
     /**
@@ -96,9 +99,9 @@ public class CacheUtils {
      * @param unit      时间单位
      */
     public static void putWithExpiry(@NonNull String cacheName, @NonNull Object key, Object value, long duration,
-            TimeUnit unit) {
+                                     TimeUnit unit) {
         try {
-            Cache springCache = cm.getCache(cacheName);
+            Cache springCache = getCacheManager().getCache(cacheName);
             if (springCache instanceof SpringCache2kCache) {
                 // 获取 Cache2k 原生缓存实例
                 org.cache2k.Cache<Object, Object> nativeCache = ((SpringCache2kCache) springCache).getNativeCache();
@@ -118,5 +121,9 @@ public class CacheUtils {
         } catch (IllegalStateException e) {
             log.warn("CacheManager已关闭，无法设置带过期时间的缓存: {}", cacheName);
         }
+    }
+
+    private static class CacheManagerHolder {
+        static final CacheManager INSTANCE = SpringUtils.getBean(CacheManager.class);
     }
 }

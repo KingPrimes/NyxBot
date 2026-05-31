@@ -10,9 +10,7 @@ import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.enums.CommandConstants;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import com.nyx.bot.utils.onebot.SendUtils;
 import io.github.kingprimes.DrawImagePlugin;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,26 +18,25 @@ import org.springframework.stereotype.Component;
  */
 @Shiro
 @Component
-@Slf4j
-public class DuviriCyclePlugin {
-
-    private final DrawImagePlugin drawImagePlugin;
-
-    private final WorldStateUtils worldStateUtils;
-
+public class DuviriCyclePlugin extends AbstractWorldStatePlugin {
 
     public DuviriCyclePlugin(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
-        this.drawImagePlugin = drawImagePlugin;
-        this.worldStateUtils = worldStateUtils;
+        super(drawImagePlugin, worldStateUtils);
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = CommandConstants.WARFRAME_DUVIRI_CYCLE_CMD, at = AtEnum.BOTH)
     public void duviriCycle(Bot bot, AnyMessageEvent event) throws DataNotInfoException {
-        SendUtils.send(bot, event, postDuviriCycleImage(), Codes.WARFRAME_DUVIRI_CYCLE, log);
+        sendImage(bot, event);
     }
 
-    private byte[] postDuviriCycleImage() throws DataNotInfoException {
+    @Override
+    protected byte[] getImage() throws DataNotInfoException {
         return drawImagePlugin.drawDuviriCycleImage(worldStateUtils.getDuvalierCycle());
+    }
+
+    @Override
+    protected Codes getCode() {
+        return Codes.WARFRAME_DUVIRI_CYCLE;
     }
 }

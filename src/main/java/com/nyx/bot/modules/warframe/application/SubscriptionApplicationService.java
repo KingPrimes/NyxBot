@@ -11,7 +11,10 @@ import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepositor
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -333,6 +336,27 @@ public class SubscriptionApplicationService {
 
         userRepo.delete(user);
         log.info("删除订阅用户成功 [id:{}]", userId);
+    }
+
+    /**
+     * 分页查询订阅组列表
+     */
+    public Page<@NonNull MissionSubscribe> findAllSubscriptions(Long subGroup, Pageable pageable) {
+        return subscribeRepo.findAllPageable(subGroup, pageable);
+    }
+
+    /**
+     * 分页查询订阅用户列表
+     */
+    public Page<@NonNull MissionSubscribeUser> findAllUsersBySubId(Long subId, Pageable pageable) {
+        return userRepo.findAllBySUB_ID(subId, pageable);
+    }
+
+    /**
+     * 分页查询检查类型列表
+     */
+    public Page<@NonNull MissionSubscribeUserCheckType> findAllCheckTypesByUserId(Long userId, Pageable pageable) {
+        return checkTypeRepo.findAllBySUBU_ID(userId, pageable);
     }
 
     /**

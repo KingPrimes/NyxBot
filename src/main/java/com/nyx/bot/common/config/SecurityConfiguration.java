@@ -1,15 +1,13 @@
 package com.nyx.bot.common.config;
 
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.filter.JwtRequestFilter;
 import com.nyx.bot.handler.AuthenticationEntryPointImpl;
 import com.nyx.bot.handler.LogoutSuccessHandler;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,22 +15,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.sql.DataSource;
-
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
@@ -43,24 +35,11 @@ public class SecurityConfiguration {
     Boolean test;
 
     @Resource
-    private UserDetailsService userDetailService;
-    @Resource
     private AuthenticationEntryPointImpl unauthorizedHandler;
     @Resource
     private LogoutSuccessHandler logoutSuccessHandler;
     @Resource
     private JwtRequestFilter jwtRequestFilter;
-
-    /**
-     * 配置持久化Token
-     */
-    @Bean
-    public PersistentTokenRepository tokenRepository(@NonNull DataSource dataSource) {
-        JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
-        repository.setDataSource(dataSource);
-        repository.setCreateTableOnStartup(false);
-        return repository;
-    }
 
     //设置密码加密类型
     @Bean
@@ -101,7 +80,7 @@ public class SecurityConfiguration {
                         .authenticationEntryPoint(unauthorizedHandler)
                         .accessDeniedHandler((req, res, e) -> {  // 权限不足
                             res.setContentType("application/json;charset=UTF-8");
-                            res.getWriter().write(AjaxResult.error("权限不足").toJsonString());
+                            res.getWriter().write(ApiResponse.error(403, "权限不足").toJsonString());
                         })
                 )
                 //禁用默认的登录表单
@@ -134,8 +113,4 @@ public class SecurityConfiguration {
     }
 
 }
-
-
-
-
 

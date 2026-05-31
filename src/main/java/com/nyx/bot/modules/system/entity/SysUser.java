@@ -1,7 +1,5 @@
 package com.nyx.bot.modules.system.entity;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -17,9 +15,7 @@ import lombok.Data;
 public class SysUser {
 
     @Id
-    @JsonView(Views.View.class)
     Long userId;
-    @JsonView(Views.View.class)
     String userName;
 
     String password;

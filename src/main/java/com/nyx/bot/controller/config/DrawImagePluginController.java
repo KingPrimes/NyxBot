@@ -1,7 +1,7 @@
 package com.nyx.bot.controller.config;
 
 import com.nyx.bot.common.config.DrawImagePluginManagerConfig;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.entity.PluginConfig;
 import com.nyx.bot.repo.PluginConfigRepository;
 import com.nyx.bot.utils.SpringUtils;
@@ -55,11 +55,11 @@ public class DrawImagePluginController {
      * @return 插件名称列表
      */
     @GetMapping("/list")
-    public AjaxResult getPluginNames() {
+    public ApiResponse<Object> getPluginNames() {
         List<String> pluginNames = drawImagePluginManager.getAllPlugins().stream()
                 .map(DrawImagePlugin::getPluginName)
                 .collect(Collectors.toList());
-        return AjaxResult.success("获取插件列表成功", pluginNames);
+        return ApiResponse.ok("获取插件列表成功", pluginNames);
     }
 
     /**
@@ -69,14 +69,14 @@ public class DrawImagePluginController {
      * @return 加载结果信息
      */
     @PostMapping("/load")
-    public AjaxResult loadPluginByName(@RequestParam String pluginName) {
+    public ApiResponse<Void> loadPluginByName(@RequestParam String pluginName) {
         DrawImagePlugin plugin = drawImagePluginManager.getPluginByName(pluginName);
         if (plugin != null) {
             DrawImagePluginManagerConfig.registerDrawImagePlugin(plugin);
             savePluginSelection(pluginName);
-            return AjaxResult.success("插件加载成功: " + pluginName);
+            return ApiResponse.ok("插件加载成功: " + pluginName, null);
         } else {
-            return AjaxResult.error("未找到插件: " + pluginName);
+            return ApiResponse.error(500, "未找到插件: " + pluginName);
         }
     }
 
@@ -86,9 +86,9 @@ public class DrawImagePluginController {
      * @return 当前插件名称
      */
     @GetMapping("/current")
-    public AjaxResult getCurrentPlugin() {
+    public ApiResponse<Object> getCurrentPlugin() {
         DrawImagePlugin currentPlugin = SpringUtils.getBean(DrawImagePlugin.class);
-        return AjaxResult.success("获取当前插件成功", currentPlugin.getPluginName());
+        return ApiResponse.ok("获取当前插件成功", currentPlugin.getPluginName());
     }
 
     /**
@@ -98,16 +98,16 @@ public class DrawImagePluginController {
      */
     @SuppressWarnings("null")
     @PostMapping("/reload")
-    public AjaxResult reloadPlugins() {
+    public ApiResponse<Void> reloadPlugins() {
         try {
             drawImagePluginManager.loadPlugins("./plugin");
             DrawImagePlugin firstPlugin = drawImagePluginManager.getFirstPlugin();
             DrawImagePluginManagerConfig.registerDrawImagePlugin(firstPlugin);
             log.info("插件重新加载完成，目录: {}", "./plugin");
-            return AjaxResult.success("插件重新加载完成，共加载了 " + drawImagePluginManager.getPluginCount() + " 个插件");
+            return ApiResponse.ok("插件重新加载完成，共加载了 " + drawImagePluginManager.getPluginCount() + " 个插件", null);
         } catch (Exception e) {
             log.error("插件重新加载失败", e);
-            return AjaxResult.error("插件重新加载失败: " + e.getMessage());
+            return ApiResponse.error(500, "插件重新加载失败: " + e.getMessage());
         }
     }
 }

@@ -1,8 +1,9 @@
 package com.nyx.bot.modules.warframe.controller;
 
+import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.controller.BaseController;
-import com.nyx.bot.common.core.page.TableDataInfo;
+import com.nyx.bot.common.core.page.PageData;
 import com.nyx.bot.modules.warframe.entity.exprot.Relics;
 import com.nyx.bot.modules.warframe.service.RelicsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,19 +59,19 @@ public class RelicsController extends BaseController {
                     )}
             ),
             responses = {
-                    @ApiResponse(
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "200",
                             description = "查询成功",
                             content = {@Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = TableDataInfo.class)
+                                    schema = @Schema(implementation = PageData.class)
                             )}
                     )
             }
     )
     @PostMapping("/list")
-    public TableDataInfo list(@RequestBody Relics relics) {
-        return rs.findAllPageable(relics);
+    public ApiResponse<PageData<?>> list(@RequestBody Relics relics) {
+        return ApiResponse.ok(rs.findAllPageable(relics));
     }
 
 

@@ -1,7 +1,5 @@
 package com.nyx.bot.modules.system.entity;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import com.nyx.bot.common.core.dao.BaseEntity;
 import com.nyx.bot.enums.LogTitleEnum;
 import jakarta.persistence.*;
@@ -20,7 +18,6 @@ import java.util.Date;
 @Data
 @Entity
 @Table
-@JsonView(Views.View.class)
 public class LogInfo extends BaseEntity implements Serializable {
 
     @Id

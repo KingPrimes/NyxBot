@@ -11,11 +11,11 @@ import static com.nyx.bot.modules.warframe.entity.exprot.Weapons.ProductCategory
 
 @FunctionalInterface
 public interface AttributeCalculator {
-   Map<Weapons.ProductCategory, AttributeCalculator> CALCULATORS =
+    Map<Weapons.ProductCategory, AttributeCalculator> CALCULATORS =
             Map.of(
                     Pistols, WeaponSetters::setPistols,
                     LongGuns, WeaponSetters::setLongGuns,
-                    Melee,  WeaponSetters::setMelee,
+                    Melee, WeaponSetters::setMelee,
                     SpaceGuns, WeaponSetters::setSpaceGuns,
                     SpaceMelee, WeaponSetters::setSpaceMelee,
                     SpecialItems, WeaponSetters::setSpecialItems,

@@ -1,8 +1,9 @@
 package com.nyx.bot.utils.gitutils;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nyx.bot.utils.http.HttpFileDownloader;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.Data;
 
@@ -75,7 +76,7 @@ public class GitHubUtil {
      * @return Boolean 是否完成
      */
     public static Boolean getLatestZip(String path) {
-        return HttpUtils.sendGetForFile(getLatestDownLoadUrl(), path);
+        return HttpFileDownloader.sendGetForFile(getLatestDownLoadUrl(), path);
     }
 
     /**

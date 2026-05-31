@@ -1,7 +1,5 @@
 package com.nyx.bot.common.core.page;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.nyx.bot.common.core.Views;
 import lombok.Data;
 
 import java.io.Serial;
@@ -10,9 +8,11 @@ import java.util.List;
 
 /**
  * 表格分页数据对象
+ *
+ * @deprecated 使用 {@link PageData} + {@link com.nyx.bot.common.core.ApiResponse} 替代
  */
+@Deprecated
 @Data
-@JsonView(Views.View.class)
 public class TableDataInfo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -45,7 +45,6 @@ public class TableDataInfo implements Serializable {
     }
 
     @lombok.Data
-    @JsonView(Views.View.class)
     public static class Data {
 
         /**

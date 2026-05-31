@@ -18,8 +18,8 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
     /**
      * 检查指定订阅类型和过期时间戳的通知是否已存在
      *
-     * @param subscribeType    订阅类型
-     * @param expiryTimestamp  过期时间戳（秒）
+     * @param subscribeType   订阅类型
+     * @param expiryTimestamp 过期时间戳（秒）
      * @return 如果已存在返回 true
      */
     boolean existsBySubscribeTypeAndExpiryTimestamp(SubscribeEnums subscribeType, Long expiryTimestamp);
@@ -27,8 +27,8 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
     /**
      * 查找指定订阅类型和过期时间戳的通知记录
      *
-     * @param subscribeType    订阅类型
-     * @param expiryTimestamp  过期时间戳（秒）
+     * @param subscribeType   订阅类型
+     * @param expiryTimestamp 过期时间戳（秒）
      * @return 通知历史记录
      */
     Optional<NotificationHistory> findBySubscribeTypeAndExpiryTimestamp(SubscribeEnums subscribeType, Long expiryTimestamp);
@@ -46,7 +46,7 @@ public interface NotificationHistoryRepository extends JpaRepository<Notificatio
      * 用于按订阅类型精确清理过期数据
      *
      * @param subscribeType 订阅类型
-     * @param before 指定时间之前
+     * @param before        指定时间之前
      * @return 删除的记录数
      */
     long deleteBySubscribeTypeAndNotifiedAtBefore(SubscribeEnums subscribeType, Instant before);

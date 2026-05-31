@@ -61,11 +61,11 @@ public class SystemInfoUtils {
         long totalCpu = user + nice + cSys + idle + wait + irq + softirq + steal;
         // CPU信息
         cpuInfo.setModel(processor.getProcessorIdentifier().getName());
-        // CPU核数
-        cpuInfo.setCores(processor.getLogicalProcessorCount());
+        // CPU物理核心数
+        cpuInfo.setCores(processor.getPhysicalProcessorCount());
         // CPU 线程数
         cpuInfo.setThreads(processor.getLogicalProcessorCount());
-        // CPU频率
+        // CPU频率 (Hz → GHz)
         cpuInfo.setFrequency(Double.parseDouble(new DecimalFormat("#.##").format(processor.getMaxFreq() / 1_000_000_000.0)));
         // CPU使用率
         cpuInfo.setUserUsage(Double.parseDouble(new DecimalFormat("#.##").format(user * 1.0 / totalCpu)));
@@ -135,10 +135,6 @@ public class SystemInfoUtils {
         List<SysFileInfos.SysFileInfo> sysFiles = new ArrayList<>();
         FileSystem fileSystem = operatingSystem.getFileSystem();
         List<OSFileStore> fsArray = fileSystem.getFileStores();
-        //限制获取盘符
-        if (fsArray.size() >= 4) {
-            fsArray = fsArray.subList(0, 4);
-        }
         for (OSFileStore fs : fsArray) {
             SysFileInfos.SysFileInfo fileInfo = new SysFileInfos.SysFileInfo();
             //盘符路径
@@ -150,11 +146,11 @@ public class SystemInfoUtils {
             //总大小
             fileInfo.setTotal(fs.getTotalSpace());
             //已经使用量
-            fileInfo.setUsed(fs.getUsableSpace());
+            fileInfo.setUsed(fs.getTotalSpace() - fs.getUsableSpace());
 
             sysFiles.add(fileInfo);
         }
-        sysFileInfos.setSysFileInfos(sysFiles.stream().limit(2).toList());
+        sysFileInfos.setSysFileInfos(sysFiles);
         return sysFileInfos;
     }
 
@@ -169,7 +165,7 @@ public class SystemInfoUtils {
         //系统架构
         systemInfo.setOsArch(props.getProperty("os.arch"));
         //服务器名称
-        systemInfo.setComputerName(props.getProperty("computerName"));
+        systemInfo.setComputerName(InetAddress.getLocalHost().getHostName());
         //服务器Ip
         systemInfo.setComputerIp(InetAddress.getLocalHost().getHostAddress());
         return systemInfo;

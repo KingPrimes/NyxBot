@@ -12,5 +12,5 @@ public enum FissureTypeEnum {
     /**
      * 裂隙
      */
-    ACTIVE_MISSION;
+    ACTIVE_MISSION
 }

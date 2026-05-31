@@ -20,10 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class RivenTionAliasService {
 
-    /**
-     * 同步锁，用于防止并发更新紫卡词条别名数据时的乐观锁冲突
-     */
-    private static final Object RIVEN_TION_ALIAS_UPDATE_LOCK = new Object();
     private final ApiDataSourceUtils apiDataSourceUtils;
     private final RivenTionAliasRepository rivenTionAliasRepository;
 
@@ -33,7 +29,7 @@ public class RivenTionAliasService {
     }
 
     private List<RivenTionAlias> getRivenTionAlias() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_MARKET_RIVEN_TION_ALIAS, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceMarketRivenTionAlias(), new TypeReference<>() {
         });
     }
 
@@ -49,52 +45,45 @@ public class RivenTionAliasService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenTionAlias() {
-        synchronized (RIVEN_TION_ALIAS_UPDATE_LOCK) {
-            log.info("开始更新紫卡词条别名数据，获取数据源...");
-            List<RivenTionAlias> rivenTionAliasList = getRivenTionAlias();
-            if (rivenTionAliasList.isEmpty()) {
-                throw new ServiceException("RivenTionAlias数据获取失败！", 500);
-            }
-            log.info("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
+        log.info("开始更新紫卡词条别名数据，获取数据源...");
+        List<RivenTionAlias> rivenTionAliasList = getRivenTionAlias();
+        if (rivenTionAliasList.isEmpty()) {
+            throw new ServiceException("RivenTionAlias数据获取失败！", 500);
+        }
+        log.info("获取到 {} 条紫卡词条别名数据，准备更新数据库", rivenTionAliasList.size());
 
-            try {
-                // 策略：查询现有数据，使用唯一约束字段 (en + cn) 进行映射
-                List<RivenTionAlias> existingList = rivenTionAliasRepository.findAll();
-                Map<String, RivenTionAlias> existingMap = existingList.stream()
-                        .filter(rta -> rta.getEn() != null && rta.getCn() != null)
-                        .collect(Collectors.toMap(
-                                rta -> rta.getEn() + "|" + rta.getCn(),
-                                Function.identity(),
-                                (a1, a2) -> a1
-                        ));
+        try {
+            List<RivenTionAlias> existingList = rivenTionAliasRepository.findAll();
+            Map<String, RivenTionAlias> existingMap = existingList.stream()
+                    .filter(rta -> rta.getEn() != null && rta.getCn() != null)
+                    .collect(Collectors.toMap(
+                            rta -> rta.getEn() + "|" + rta.getCn(),
+                            Function.identity(),
+                            (a1, a2) -> a1
+                    ));
 
-                log.debug("数据库中现有 {} 条紫卡词条别名数据", existingMap.size());
+            log.debug("数据库中现有 {} 条紫卡词条别名数据", existingMap.size());
 
-                // 处理新数据：为已存在的记录复用ID
-                List<RivenTionAlias> toSave = new ArrayList<>();
-                for (RivenTionAlias newAlias : rivenTionAliasList) {
-                    String key = newAlias.getEn() + "|" + newAlias.getCn();
-                    RivenTionAlias existing = existingMap.get(key);
-                    if (existing != null) {
-                        // 存在相同的 en + cn 组合，复用ID
-                        newAlias.setId(existing.getId());
-                    } else {
-                        // 新数据，确保ID为null以便自动生成
-                        newAlias.setId(null);
-                    }
-                    toSave.add(newAlias);
+            List<RivenTionAlias> toSave = new ArrayList<>();
+            for (RivenTionAlias newAlias : rivenTionAliasList) {
+                String key = newAlias.getEn() + "|" + newAlias.getCn();
+                RivenTionAlias existing = existingMap.get(key);
+                if (existing != null) {
+                    newAlias.setId(existing.getId());
+                } else {
+                    newAlias.setId(null);
                 }
-
-                // 批量保存
-                List<RivenTionAlias> saved = rivenTionAliasRepository.saveAll(toSave);
-                rivenTionAliasRepository.flush();
-
-                log.info("紫卡词条别名数据更新完成，共 {} 条", saved.size());
-                return saved.size();
-            } catch (Exception e) {
-                log.error("更新紫卡词条别名数据时发生异常", e);
-                throw new ServiceException("更新紫卡词条别名数据失败: " + e.getMessage(), 500);
+                toSave.add(newAlias);
             }
+
+            List<RivenTionAlias> saved = rivenTionAliasRepository.saveAll(toSave);
+            rivenTionAliasRepository.flush();
+
+            log.info("紫卡词条别名数据更新完成，共 {} 条", saved.size());
+            return saved.size();
+        } catch (Exception e) {
+            log.error("更新紫卡词条别名数据时发生异常", e);
+            throw new ServiceException("更新紫卡词条别名数据失败: " + e.getMessage(), 500);
         }
     }
 }

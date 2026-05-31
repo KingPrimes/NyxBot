@@ -7,12 +7,13 @@ import com.nyx.bot.modules.warframe.entity.Ephemeras;
 import com.nyx.bot.modules.warframe.repo.EphemerasRepository;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.http.HttpUtils;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 @Service
 public class EphemerasService {
@@ -22,7 +23,7 @@ public class EphemerasService {
 
     EphemerasRepository repository;
 
-    public EphemerasService(ObjectMapper objectMapper,EphemerasRepository repository) {
+    public EphemerasService(ObjectMapper objectMapper, EphemerasRepository repository) {
         this.objectMapper = objectMapper;
         this.repository = repository;
     }

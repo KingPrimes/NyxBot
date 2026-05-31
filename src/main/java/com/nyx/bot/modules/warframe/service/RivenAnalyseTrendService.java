@@ -21,10 +21,6 @@ import java.util.stream.Collectors;
 @Service
 public class RivenAnalyseTrendService {
 
-    /**
-     * 同步锁，用于防止并发更新紫卡分析趋势数据时的乐观锁冲突
-     */
-    private static final Object RIVEN_ANALYSE_TREND_UPDATE_LOCK = new Object();
     private final ApiDataSourceUtils apiDataSourceUtils;
     private final RivenAnalyseTrendRepository rivenAnalyseTrendRepository;
 
@@ -34,7 +30,7 @@ public class RivenAnalyseTrendService {
     }
 
     private List<RivenAnalyseTrend> getRivenAnalyseTrends() {
-        return apiDataSourceUtils.getDataFromSources(ApiUrl.WARFRAME_DATA_SOURCE_RIVEN_ANALYSE_TREND, new TypeReference<>() {
+        return apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceRivenAnalyseTrend(), new TypeReference<>() {
         });
     }
 
@@ -50,47 +46,40 @@ public class RivenAnalyseTrendService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int updateRivenAnalyseTrends() {
-        synchronized (RIVEN_ANALYSE_TREND_UPDATE_LOCK) {
-            log.info("开始更新紫卡分析趋势数据，获取数据源...");
-            List<RivenAnalyseTrend> rivenAnalyseTrends = getRivenAnalyseTrends();
-            if (rivenAnalyseTrends.isEmpty()) {
-                throw new ServiceException("RivenAnalyseTrends数据获取失败！", 500);
-            }
-            log.info("获取到 {} 条紫卡分析趋势数据，准备更新数据库", rivenAnalyseTrends.size());
+        log.info("开始更新紫卡分析趋势数据，获取数据源...");
+        List<RivenAnalyseTrend> rivenAnalyseTrends = getRivenAnalyseTrends();
+        if (rivenAnalyseTrends.isEmpty()) {
+            throw new ServiceException("RivenAnalyseTrends数据获取失败！", 500);
+        }
+        log.info("获取到 {} 条紫卡分析趋势数据，准备更新数据库", rivenAnalyseTrends.size());
 
-            try {
-                // 策略：查询现有数据，使用唯一约束字段 name 进行映射
-                List<RivenAnalyseTrend> existingList = rivenAnalyseTrendRepository.findAll();
-                Map<String, RivenAnalyseTrend> existingMap = existingList.stream()
-                        .filter(rat -> rat.getName() != null)
-                        .collect(Collectors.toMap(RivenAnalyseTrend::getName, Function.identity(), (a1, a2) -> a1));
+        try {
+            List<RivenAnalyseTrend> existingList = rivenAnalyseTrendRepository.findAll();
+            Map<String, RivenAnalyseTrend> existingMap = existingList.stream()
+                    .filter(rat -> rat.getName() != null)
+                    .collect(Collectors.toMap(RivenAnalyseTrend::getName, Function.identity(), (a1, a2) -> a1));
 
-                log.debug("数据库中现有 {} 条紫卡分析趋势数据", existingMap.size());
+            log.debug("数据库中现有 {} 条紫卡分析趋势数据", existingMap.size());
 
-                // 处理新数据：为已存在的记录复用ID
-                List<RivenAnalyseTrend> toSave = new ArrayList<>();
-                for (RivenAnalyseTrend newTrend : rivenAnalyseTrends) {
-                    RivenAnalyseTrend existing = existingMap.get(newTrend.getName());
-                    if (existing != null) {
-                        // 存在相同的 name，复用ID
-                        newTrend.setId(existing.getId());
-                    } else {
-                        // 新数据，确保ID为null以便自动生成
-                        newTrend.setId(null);
-                    }
-                    toSave.add(newTrend);
+            List<RivenAnalyseTrend> toSave = new ArrayList<>();
+            for (RivenAnalyseTrend newTrend : rivenAnalyseTrends) {
+                RivenAnalyseTrend existing = existingMap.get(newTrend.getName());
+                if (existing != null) {
+                    newTrend.setId(existing.getId());
+                } else {
+                    newTrend.setId(null);
                 }
-
-                // 批量保存
-                List<RivenAnalyseTrend> saved = rivenAnalyseTrendRepository.saveAll(toSave);
-                rivenAnalyseTrendRepository.flush();
-
-                log.info("紫卡分析趋势数据更新完成，共 {} 条", saved.size());
-                return saved.size();
-            } catch (Exception e) {
-                log.error("更新紫卡分析趋势数据时发生异常", e);
-                throw new ServiceException("更新紫卡分析趋势数据失败: " + e.getMessage(), 500);
+                toSave.add(newTrend);
             }
+
+            List<RivenAnalyseTrend> saved = rivenAnalyseTrendRepository.saveAll(toSave);
+            rivenAnalyseTrendRepository.flush();
+
+            log.info("紫卡分析趋势数据更新完成，共 {} 条", saved.size());
+            return saved.size();
+        } catch (Exception e) {
+            log.error("更新紫卡分析趋势数据时发生异常", e);
+            throw new ServiceException("更新紫卡分析趋势数据失败: " + e.getMessage(), 500);
         }
     }
 

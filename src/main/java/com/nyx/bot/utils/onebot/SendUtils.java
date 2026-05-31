@@ -6,17 +6,24 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.nyx.bot.enums.Codes;
 import com.nyx.bot.utils.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(SendUtils.class);
+
     public static void send(Bot bot, AnyMessageEvent event, byte[] imageBytes, Codes code, Logger log) {
         if (imageBytes != null && imageBytes.length > 0) {
-            // 直接使用字节数组构建图片消息
             bot.sendMsg(event, ArrayMsgUtils.builder().img(imageBytes).build(), false);
             log.debug("群：{} 用户:{} 指令 {} 执行成功", event.getGroupId(), event.getUserId(), StringUtils.removeMatcher(code.getComm()));
             return;
         }
         sendErrorMsg(bot, event, code);
         log.debug("群：{} 用户:{} 指令 {} 执行失败", event.getGroupId(), event.getUserId(), StringUtils.removeMatcher(code.getComm()));
+    }
+
+    public static void send(Bot bot, AnyMessageEvent event, byte[] imageBytes, Codes code) {
+        send(bot, event, imageBytes, code, log);
     }
 
     public static void sendErrorMsg(Bot bot, AnyMessageEvent event, Codes codes) {

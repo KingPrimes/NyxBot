@@ -53,3 +53,8 @@ locate.yaml
 /src/test/resources/static/**
 ### 忽略提示词文件
 /plans/**
+.workflow
+/CLAUDE.md
+/docs
+/temp
+/.playwright-cli

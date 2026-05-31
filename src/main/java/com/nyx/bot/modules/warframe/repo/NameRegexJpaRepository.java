@@ -6,6 +6,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.util.Optional;
 
 @NoRepositoryBean
-public interface NameRegexJpaRepository<T,ID> extends JpaRepository<T,ID> {
+public interface NameRegexJpaRepository<T, ID> extends JpaRepository<T, ID> {
     Optional<T> findByNameRegex(String name);
 }

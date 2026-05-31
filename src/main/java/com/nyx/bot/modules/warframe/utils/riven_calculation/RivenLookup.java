@@ -15,10 +15,6 @@ import java.util.Optional;
 
 @Slf4j
 public class RivenLookup {
-    private static final WeaponsRepository weaponsRepository = SpringUtils.getBean(WeaponsRepository.class);
-
-    private static final RivenAnalyseTrendRepository rivenTrendRepository = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
-
     // 字符替换映射表：key=需要替换的字符，value=目标字符
     private static final Map<String, String> CHAR_REPLACEMENTS = new LinkedHashMap<>();
     private static final Map<String, String> CHAR_ANALYSE = new LinkedHashMap<>();
@@ -27,7 +23,6 @@ public class RivenLookup {
     static {
         CHAR_REPLACEMENTS.put("淞", "凇");
     }
-
 
     static {
         CHAR_ANALYSE.put("射速", "射速/攻击速度");
@@ -55,6 +50,14 @@ public class RivenLookup {
         CHAR_ANALYSE.put("伤害", "伤害/近战伤害");
     }
 
+    private static WeaponsRepository getWeaponsRepository() {
+        return WeaponsRepositoryHolder.INSTANCE;
+    }
+
+    private static RivenAnalyseTrendRepository getRivenTrendRepository() {
+        return RivenTrendRepositoryHolder.INSTANCE;
+    }
+
     public List<Weapons> findByFuzzyName(String name) {
         String fixedName = name;
         if (fixedName != null) {
@@ -62,7 +65,7 @@ public class RivenLookup {
                 fixedName = fixedName.replace(replacement.getKey(), replacement.getValue());
             }
         }
-        return weaponsRepository.findByNameContaining(fixedName);
+        return getWeaponsRepository().findByNameContaining(fixedName);
     }
 
     public Optional<RivenAnalyseTrend> findRivenTrendByAnalyseName(String analyseName) {
@@ -72,7 +75,7 @@ public class RivenLookup {
             String targetName = entry.getValue();
 
             if (analyseName.contains(keyword)) {
-                Optional<RivenAnalyseTrend> trend = rivenTrendRepository.findByName(targetName);
+                Optional<RivenAnalyseTrend> trend = getRivenTrendRepository().findByName(targetName);
                 if (trend.isPresent()) {
                     return trend;
                 }
@@ -80,6 +83,14 @@ public class RivenLookup {
         }
 
         // 无匹配时使用原始名称查询
-        return rivenTrendRepository.findByName(analyseName);
+        return getRivenTrendRepository().findByName(analyseName);
+    }
+
+    private static class WeaponsRepositoryHolder {
+        static final WeaponsRepository INSTANCE = SpringUtils.getBean(WeaponsRepository.class);
+    }
+
+    private static class RivenTrendRepositoryHolder {
+        static final RivenAnalyseTrendRepository INSTANCE = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
     }
 }

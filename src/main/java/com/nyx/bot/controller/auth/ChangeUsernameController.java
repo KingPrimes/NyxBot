@@ -1,12 +1,15 @@
 package com.nyx.bot.controller.auth;
 
 import com.nyx.bot.annotation.NotEmpty;
-import com.nyx.bot.common.core.AjaxResult;
+import com.nyx.bot.common.core.ApiResponse;
+import com.nyx.bot.common.core.Constants;
 import com.nyx.bot.common.core.HttpMethod;
+import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
 import com.nyx.bot.service.UserService;
+import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.http.MediaType;
@@ -29,8 +33,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 更改用户名
@@ -52,9 +56,12 @@ public class ChangeUsernameController extends BaseController {
 
     private final SysUserRepository repository;
 
-    public ChangeUsernameController(UserService userService, SysUserRepository repository) {
+    private final JwtUtil jwtUtil;
+
+    public ChangeUsernameController(UserService userService, SysUserRepository repository, JwtUtil jwtUtil) {
         this.userService = userService;
         this.repository = repository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Operation(
@@ -81,7 +88,8 @@ public class ChangeUsernameController extends BaseController {
                     }
             ))
     @PostMapping("/auth/changeUsername")
-    public AjaxResult changeUsername(Authentication authentication, @Validated @RequestBody ChangeUsername params) {
+    public ApiResponse<Void> changeUsername(Authentication authentication, @Validated @RequestBody ChangeUsername params,
+                                            HttpServletRequest request) {
         if (params == null) {
             return error(I18nUtils.RequestErrorParam());
         }
@@ -103,8 +111,8 @@ public class ChangeUsernameController extends BaseController {
         if (!encoder.matches(params.getPassword(), userDetails.getPassword())) {
             return error(I18nUtils.ControllerRestPassWordOldError());
         }
-        // 检查新用户名是否已存在
-        if (userDetails.getUsername().equals(params.getNewUsername())) {
+        // 检查新用户名是否已被占用
+        if (repository.findSysUsersByUserName(params.getNewUsername()).isPresent()) {
             return error(I18nUtils.Validated("UserNameExists"));
         }
         // 更新用户名
@@ -119,7 +127,27 @@ public class ChangeUsernameController extends BaseController {
         }
         repository.save(user);
 
+        // 使当前令牌失效，强制重新登录
+        revokeToken(request);
+
         return success(I18nUtils.AuthSuccess("EditUserName"));
+    }
+
+    private void revokeToken(HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("authorization");
+            if (authHeader != null && authHeader.startsWith(Constants.TOKEN_PREFIX)) {
+                String token = authHeader.substring(Constants.TOKEN_PREFIX.length());
+                String jti = jwtUtil.extractJti(token);
+                long remainingSeconds = jwtUtil.getRemainingExpirationSeconds(token);
+                if (jti != null && remainingSeconds > 0) {
+                    CacheUtils.putWithExpiry(CacheUtils.TOKEN_BLACKLIST, jti, true,
+                            remainingSeconds, TimeUnit.SECONDS);
+                }
+            }
+        } catch (Exception ignored) {
+            // 令牌解析失败时静默处理
+        }
     }
 
 

@@ -4,7 +4,10 @@ import com.nyx.bot.data.WarframeDataSource;
 import com.nyx.bot.enums.AsyncBeanName;
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.modules.system.repo.SysUserRepository;
-import com.nyx.bot.utils.*;
+import com.nyx.bot.utils.AsyncUtils;
+import com.nyx.bot.utils.IoUtils;
+import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
@@ -58,6 +61,9 @@ public class Runners {
             if (!test) {
                 //程序启动之后获取WarframeDataSource
                 dataSource.init();
+            } else {
+                // 仅在测试状态下会执行
+                dataSource.initWarframeStatus();
             }
         };
     }
