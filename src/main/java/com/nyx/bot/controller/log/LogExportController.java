@@ -8,9 +8,6 @@ import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
 import com.nyx.bot.common.event.LogEvent;
 import com.nyx.bot.service.log.LogInfoMapper;
 import com.nyx.bot.service.log.LogSearchService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api/logs")
-@Tag(name = "日志管理", description = "日志查询、导出和统计接口")
 public class LogExportController extends BaseController {
 
     private final LogSearchService logSearchService;
@@ -63,13 +59,8 @@ public class LogExportController extends BaseController {
      * @throws IOException IO 异常
      */
     @GetMapping("/export/txt")
-    @Operation(summary = "导出日志为TXT文件", description = "支持按关键词、时间范围、级别过滤后导出")
-    public void exportToTxt(
-            @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
-            @Parameter(description = "开始时间戳(毫秒)") @RequestParam(required = false) Long startTime,
-            @Parameter(description = "结束时间戳(毫秒)") @RequestParam(required = false) Long endTime,
-            @Parameter(description = "日志级别列表") @RequestParam(required = false) List<String> levels,
-            HttpServletResponse response
+    public void exportToTxt(@RequestParam(required = false) String keyword, @RequestParam(required = false) Long startTime, @RequestParam(required = false) Long endTime, @RequestParam(required = false) List<String> levels,
+                            HttpServletResponse response
     ) throws IOException {
         log.debug("导出日志为TXT: keyword={}, startTime={}, endTime={}, levels={}",
                 keyword, startTime, endTime, levels);
@@ -118,13 +109,8 @@ public class LogExportController extends BaseController {
      * @throws IOException IO 异常
      */
     @GetMapping("/export/json")
-    @Operation(summary = "导出日志为JSON文件", description = "支持按关键词、时间范围、级别过滤后导出")
-    public void exportToJson(
-            @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
-            @Parameter(description = "开始时间戳(毫秒)") @RequestParam(required = false) Long startTime,
-            @Parameter(description = "结束时间戳(毫秒)") @RequestParam(required = false) Long endTime,
-            @Parameter(description = "日志级别列表") @RequestParam(required = false) List<String> levels,
-            HttpServletResponse response
+    public void exportToJson(@RequestParam(required = false) String keyword, @RequestParam(required = false) Long startTime, @RequestParam(required = false) Long endTime, @RequestParam(required = false) List<String> levels,
+                             HttpServletResponse response
     ) throws IOException {
         log.info("导出日志为JSON: keyword={}, startTime={}, endTime={}, levels={}",
                 keyword, startTime, endTime, levels);
@@ -162,7 +148,6 @@ public class LogExportController extends BaseController {
      * @return 统计信息
      */
     @GetMapping("/stats")
-    @Operation(summary = "获取日志统计信息", description = "返回当前缓存的日志数量和各级别分布")
     @SuppressWarnings("ALL")
     public ApiResponse<Object> getLogStats() {
         List<LogEvent> allLogs = logCacheManager.getAllLogs();
@@ -196,14 +181,8 @@ public class LogExportController extends BaseController {
      * @return 搜索结果
      */
     @GetMapping("/search")
-    @Operation(summary = "搜索日志", description = "支持多条件组合搜索")
     @SuppressWarnings("ALL")
-    public ApiResponse<Object> searchLogs(
-            @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
-            @Parameter(description = "开始时间戳(毫秒)") @RequestParam(required = false) Long startTime,
-            @Parameter(description = "结束时间戳(毫秒)") @RequestParam(required = false) Long endTime,
-            @Parameter(description = "日志级别列表") @RequestParam(required = false) List<String> levels,
-            @Parameter(description = "是否使用正则表达式") @RequestParam(required = false, defaultValue = "false") boolean useRegex
+    public ApiResponse<Object> searchLogs(@RequestParam(required = false) String keyword, @RequestParam(required = false) Long startTime, @RequestParam(required = false) Long endTime, @RequestParam(required = false) List<String> levels, @RequestParam(required = false, defaultValue = "false") boolean useRegex
     ) {
         log.info("搜索日志: keyword={}, startTime={}, endTime={}, levels={}, useRegex={}",
                 keyword, startTime, endTime, levels, useRegex);

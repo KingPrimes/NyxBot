@@ -7,12 +7,39 @@ services:
       - "8080:8080"
     environment:
       - TZ=Asia/Shanghai
+      # === 以下变量在 Docker GUI 中会生成带注释的输入框 ===
+      # 服务端口
+      - SERVER_PORT=${SERVER_PORT:-8080}
+      # Debug 模式 (true/false)
+      - DEBUG=${DEBUG:-false}
+      # === WebSocket 模式：服务端 or 客户端，二选一 ===
+      # 作为服务端运行 (true)；设为 false 则启用客户端模式
+      - SHIRO_WS_SERVER_ENABLE=${SHIRO_WS_SERVER_ENABLE:-true}
+      # 服务端模式下的监听路径
+      - SHIRO_WS_SERVER_URL=${SHIRO_WS_SERVER_URL:-/ws/shiro}
+      # 客户端模式：显式启用 (true，需同时设 SERVER_ENABLE=false)
+      - SHIRO_WS_CLIENT_ENABLE=${SHIRO_WS_CLIENT_ENABLE:-false}
+      # 客户端模式下的目标地址
+      - SHIRO_WS_CLIENT_URL=${SHIRO_WS_CLIENT_URL:-ws://localhost:3001}
+      # OneBot 连接 Token（必填）
+      - SHIRO_TOKEN=${SHIRO_TOKEN:-}
+      # HTTP 代理地址，如 http://127.0.0.1:7890
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      # SOCKS5 代理地址，如 socks5://127.0.0.1:7890
+      - SOCKS_PROXY=${SOCKS_PROXY:-}
+      # 代理认证用户名
+      - PROXY_USER=${PROXY_USER:-}
+      # 代理认证密码
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-}
+      # 指令是否需要 @机器人 (true/false)
+      - PLUGIN_PREFIX=${PLUGIN_PREFIX:-false}
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
     restart: unless-stopped
+    # 健康检查使用 TCP 端口探测（无需 Actuator）
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
-      interval: 30s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/ || exit 1" ]
+      interval: 60s
       timeout: 10s
-      retries: 3
+      retries: 2

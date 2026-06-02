@@ -1,0 +1,39 @@
+name: 功能要求
+description: 为项目提出一个新的功能或改进建议
+title: '[功能要求] '
+labels: enhancement
+assignees: KingPrimes
+body:
+  - type: markdown
+    attributes:
+      value: "## 需求背景"
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      placeholder: 请描述您的需求，这个功能要解决什么问题？
+      label: 请描述您的需求
+  - type: markdown
+    attributes:
+      value: "## 方案建议"
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 如果你有想法，请描述你建议的实现方案
+      label: 实现方案建议
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 有没有考虑过其他替代方案？
+      label: 替代方案
+  - type: markdown
+    attributes:
+      value: "## 附加信息"
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 可以贴截图、日志、参考链接等
+      label: 附加信息

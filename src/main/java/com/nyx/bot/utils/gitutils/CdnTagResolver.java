@@ -35,7 +35,7 @@ public class CdnTagResolver {
     public static String getLatestTag() {
         try {
             HttpUtils.Body body = HttpUtils.sendGet(GITHUB_TAGS_URL, "", null, 120);
-            if (body.code().is2xxSuccessful()) {
+            if (body.is2xxSuccessful()) {
                 JsonNode root = mapper.readTree(body.body());
                 if (root.isArray() && !root.isEmpty()) {
                     String tag = root.get(0).get("name").asText();

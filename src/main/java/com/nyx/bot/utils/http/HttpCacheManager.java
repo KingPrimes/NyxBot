@@ -47,7 +47,7 @@ class HttpCacheManager {
     static Body cacheGet(String key) {
         try {
             Body cached = CacheUtils.get(HTTP_RESPONSE, key, Body.class);
-            if (cached != null && cached.code() != null && cached.code().is2xxSuccessful()) {
+            if (cached != null && cached.is2xxSuccessful()) {
                 log.debug("HTTP缓存命中: key={}", key);
                 return cached;
             }
