@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,14 @@ public class TaskWarframeStatus {
     private final NotificationApplicationService notificationService;
     private final NotificationHistoryRepository historyRepository;
     private final Environment environment;
+    /**
+     * 定时触发器（仅负责延迟后回调，不执行业务逻辑）
+     */
     private final ScheduledExecutorService scheduler;
+    /**
+     * 有界执行器（受 Semaphore 限流保护）
+     */
+    private final ExecutorService boundedExecutor;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private ScheduledFuture<?> scheduledFuture;
 
@@ -48,20 +56,23 @@ public class TaskWarframeStatus {
                               NotificationApplicationService notificationService,
                               NotificationHistoryRepository historyRepository,
                               Environment environment,
-                              ScheduledExecutorService scheduler) {
+                              ScheduledExecutorService scheduler,
+                              ExecutorService taskExecutor) {
         this.objectMapper = objectMapper;
         this.notificationService = notificationService;
         this.historyRepository = historyRepository;
         this.environment = environment;
         this.scheduler = scheduler;
+        this.boundedExecutor = taskExecutor;
     }
 
     /**
      * 启动动态轮询调度。
      * 由 WarframeDataSource.init() 在数据初始化完成后调用。
+     * scheduler 只负责延迟触发，实际任务提交到 boundedExecutor 受 Semaphore 限流。
      */
     public void startSchedule() {
-        scheduler.schedule(this::executeWarframeStatus, 5, TimeUnit.SECONDS);
+        scheduler.schedule(() -> boundedExecutor.execute(this::executeWarframeStatus), 5, TimeUnit.SECONDS);
         log.info("动态轮询调度已启动，首次执行延迟 5 秒");
     }
 
@@ -71,37 +82,65 @@ public class TaskWarframeStatus {
             return;
         }
         try {
-            HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
-            if (body.code().is2xxSuccessful() || body.code().is3xxRedirection()) {
-                try {
-                    WorldState newState = objectMapper.readValue(body.body(), WorldState.class);
-                    WorldState oldState;
-                    try {
-                        oldState = WarframeCache.getWarframeStatus();
-                    } catch (DataNotInfoException e) {
-                        oldState = newState;
-                    }
-                    notificationService.handleStateUpdate(oldState, newState);
-
-                    List<Instant> expiries = collectExpiryTimestamps(newState);
-                    long nextDelaySeconds = calculateNextDelay(expiries);
-                    long ttlSeconds = nextDelaySeconds + TimeUnit.MILLISECONDS.toSeconds(BUFFER_MS);
-
-                    WarframeCache.setWarframeStatus(newState, ttlSeconds);
-
-                    log.debug("Warframe 状态数据更新成功，下次轮询: {}s 后", nextDelaySeconds);
-                    scheduleNext(nextDelaySeconds);
-                } catch (Exception e) {
-                    log.error("Warframe 状态数据解析错误: {}", e.getMessage());
-                    scheduleNext(TimeUnit.MILLISECONDS.toSeconds(MAX_INTERVAL_MS));
-                }
-            } else {
-                log.error("Warframe 状态数据错误Code: {} - Body:{}", body.code(), body.body());
-                scheduleNext(TimeUnit.MILLISECONDS.toSeconds(MAX_INTERVAL_MS));
-            }
+            executeWithRetry();
         } finally {
             running.set(false);
         }
+    }
+
+    private void executeWithRetry() {
+        int maxRetries = 3;
+        long retryDelaySeconds = 10;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            boolean success = false;
+            try {
+                HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
+                if (body.is2xxSuccessful() || body.is3xxRedirection()) {
+                    try {
+                        String rawJson = body.body();
+                        WorldState newState = objectMapper.readValue(rawJson, WorldState.class);
+                        WorldState oldState;
+                        try {
+                            oldState = WarframeCache.getWarframeStatus();
+                        } catch (DataNotInfoException e) {
+                            oldState = newState;
+                        }
+                        notificationService.handleStateUpdate(oldState, newState);
+
+                        List<Instant> expiries = collectExpiryTimestamps(newState);
+                        long nextDelaySeconds = calculateNextDelay(expiries);
+                        long ttlSeconds = nextDelaySeconds + TimeUnit.MILLISECONDS.toSeconds(BUFFER_MS);
+
+                        WarframeCache.setWarframeStatus(newState, rawJson, ttlSeconds);
+
+                        log.debug("Warframe 状态数据更新成功，下次轮询: {}s 后", nextDelaySeconds);
+                        scheduleNext(nextDelaySeconds);
+                        success = true;
+                    } catch (Exception e) {
+                        log.error("Warframe 状态数据解析错误 (第 {} 次尝试): {}", attempt, e.getMessage());
+                    }
+                } else {
+                    log.error("Warframe 状态数据错误Code: {} (第 {} 次尝试) - Body:{}", body.code(), attempt, body.body());
+                }
+            } catch (Exception e) {
+                log.error("Warframe 状态数据请求异常 (第 {} 次尝试): {}", attempt, e.getMessage());
+            }
+
+            if (success) {
+                return;
+            }
+            if (attempt < maxRetries) {
+                log.warn("等待 {}s 后重试 (第 {} / {} 次)...", retryDelaySeconds, attempt + 1, maxRetries);
+                try {
+                    TimeUnit.SECONDS.sleep(retryDelaySeconds);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        log.error("Warframe 状态数据获取失败，已重试 {} 次，等待下次轮询", maxRetries);
+        scheduleNext(TimeUnit.MILLISECONDS.toSeconds(MAX_INTERVAL_MS));
     }
 
     /**
@@ -157,11 +196,17 @@ public class TaskWarframeStatus {
                 Math.clamp(nextDelayMs, MIN_INTERVAL_MS, MAX_INTERVAL_MS));
     }
 
+    /**
+     * 调度下一次轮询。
+     * scheduler 轻量触发 → boundedExecutor 受 Semaphore 保护执行实际任务。
+     */
     void scheduleNext(long delaySeconds) {
         if (scheduledFuture != null && !scheduledFuture.isDone()) {
             scheduledFuture.cancel(false);
         }
-        scheduledFuture = scheduler.schedule(this::executeWarframeStatus, delaySeconds, TimeUnit.SECONDS);
+        scheduledFuture = scheduler.schedule(
+                () -> boundedExecutor.execute(this::executeWarframeStatus),
+                delaySeconds, TimeUnit.SECONDS);
     }
 
     @Async("taskExecutor")

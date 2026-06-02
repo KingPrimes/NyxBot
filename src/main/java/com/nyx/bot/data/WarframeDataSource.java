@@ -1,61 +1,29 @@
 package com.nyx.bot.data;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.cache.ArbitrationCache;
 import com.nyx.bot.cache.WarframeCache;
-import com.nyx.bot.common.core.ApiUrl;
-import com.nyx.bot.enums.StateTypeEnum;
-import com.nyx.bot.modules.warframe.entity.StateTranslation;
-import com.nyx.bot.modules.warframe.entity.exprot.NightWave;
-import com.nyx.bot.modules.warframe.entity.exprot.Nodes;
-import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
-import com.nyx.bot.modules.warframe.entity.exprot.reward.RewardPool;
-import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
-import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.service.*;
-import com.nyx.bot.modules.warframe.utils.ApiDataSourceUtils;
-import com.nyx.bot.service.DataCleanupService;
 import com.nyx.bot.task.TaskWarframeStatus;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
-import com.nyx.bot.utils.StringUtils;
-import com.nyx.bot.utils.ZipUtils;
-import com.nyx.bot.utils.http.HttpFileDownloader;
 import io.github.kingprimes.model.WorldState;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @SuppressWarnings("all")
 public class WarframeDataSource {
 
-    static final String EXPORT_PATH = "./data/export/%s";
-    static final String LAMA_PATH = "./data/lzma/index_zh.txt.lzma";
-    static final String INDEX_PATH = "./data/lzma/index_zh.txt";
     private final ObjectMapper objectMapper;
-    private final StateTranslationRepository str;
-    private final NodesRepository nodesRepository;
-    private final WeaponsRepository weaponsRepository;
-    private final RewardPoolRepository rewardPoolRepository;
     private final AliasService aliasService;
     private final EphemerasService ephemerasService;
     private final OrdersItemsService ordersItemsService;
@@ -65,17 +33,35 @@ public class WarframeDataSource {
     private final RivenTionService rivenTionService;
     private final RivenTionAliasService rivenTionAliasService;
     private final RivenAnalyseTrendService rivenAnalyseTrendService;
-    private final DataCleanupService dataCleanupService;
-    private final NightWaveRepository nightWaveRepository;
-    private final ApiDataSourceUtils apiDataSourceUtils;
     private final TaskWarframeStatus taskWarframeStatus;
+    /**
+     * 以下为数据初始化专用 Service
+     */
+    private final RewardPoolService rewardPoolService;
+    private final WeaponService weaponService;
+    private final WarframeService warframeService;
+    private final NightWaveService nightWaveService;
+    private final NodeService nodeService;
+    private final StateTranslationService stateTranslationService;
 
-    public WarframeDataSource(ObjectMapper objectMapper, StateTranslationRepository str, NodesRepository nodesRepository, WeaponsRepository weaponsRepository, RewardPoolRepository rewardPoolRepository, AliasService aliasService, EphemerasService ephemerasService, OrdersItemsService ordersItemsService, LichSisterWeaponsService lichSisterWeaponsService, RivenItemsService rivenItemsService, RelicsService relicsService, RivenTionService rivenTionService, RivenTionAliasService rivenTionAliasService, RivenAnalyseTrendService rivenAnalyseTrendService, DataCleanupService dataCleanupService, NightWaveRepository nightWaveRepository, ApiDataSourceUtils apiDataSourceUtils, TaskWarframeStatus taskWarframeStatus) {
+    public WarframeDataSource(ObjectMapper objectMapper,
+                              AliasService aliasService,
+                              EphemerasService ephemerasService,
+                              OrdersItemsService ordersItemsService,
+                              LichSisterWeaponsService lichSisterWeaponsService,
+                              RivenItemsService rivenItemsService,
+                              RelicsService relicsService,
+                              RivenTionService rivenTionService,
+                              RivenTionAliasService rivenTionAliasService,
+                              RivenAnalyseTrendService rivenAnalyseTrendService,
+                              TaskWarframeStatus taskWarframeStatus,
+                              RewardPoolService rewardPoolService,
+                              WeaponService weaponService,
+                              WarframeService warframeService,
+                              NightWaveService nightWaveService,
+                              NodeService nodeService,
+                              StateTranslationService stateTranslationService) {
         this.objectMapper = objectMapper;
-        this.str = str;
-        this.nodesRepository = nodesRepository;
-        this.weaponsRepository = weaponsRepository;
-        this.rewardPoolRepository = rewardPoolRepository;
         this.aliasService = aliasService;
         this.ephemerasService = ephemerasService;
         this.ordersItemsService = ordersItemsService;
@@ -85,68 +71,84 @@ public class WarframeDataSource {
         this.rivenTionService = rivenTionService;
         this.rivenTionAliasService = rivenTionAliasService;
         this.rivenAnalyseTrendService = rivenAnalyseTrendService;
-        this.dataCleanupService = dataCleanupService;
-        this.nightWaveRepository = nightWaveRepository;
-        this.apiDataSourceUtils = apiDataSourceUtils;
         this.taskWarframeStatus = taskWarframeStatus;
+        this.rewardPoolService = rewardPoolService;
+        this.weaponService = weaponService;
+        this.warframeService = warframeService;
+        this.nightWaveService = nightWaveService;
+        this.nodeService = nodeService;
+        this.stateTranslationService = stateTranslationService;
     }
 
+    /**
+     * 分阶段降级初始化：
+     * Phase 0 下载失败 → 使用本地缓存；Phase 1/2 子任务失败 → 事务回滚，不影响其他数据。
+     * 不再全量清库和强制退出。
+     */
     public void init() {
         log.info("开始初始化数据！");
 
         Executor executor = SpringUtils.getBean("initDataExecutor");
 
         // Phase 1c: 无 Phase 0 依赖的独立 HTTP 任务，与 Phase 0 并行启动
+        // 直接调用 Service 代理，@Transactional 生效
         CompletableFuture<Void> independentHttpTasks = CompletableFuture.allOf(
-                CompletableFuture.runAsync(this::initOrdersItemsData, executor),
-                CompletableFuture.runAsync(this::initRewardPool, executor),
+                CompletableFuture.runAsync(() -> ordersItemsService.initOrdersItemsData(), executor),
+                CompletableFuture.runAsync(() -> rewardPoolService.initRewardPool(), executor),
                 CompletableFuture.runAsync(this::initWarframeStatus, executor),
-                CompletableFuture.runAsync(this::getEphemeras, executor),
-                CompletableFuture.runAsync(this::getLichSisterWeapons, executor),
-                CompletableFuture.runAsync(this::getRivenWeapons, executor)
+                CompletableFuture.runAsync(() -> ephemerasService.initEphemerasData(), executor),
+                CompletableFuture.runAsync(() -> lichSisterWeaponsService.initLichSisterWeaponsData(), executor),
+                CompletableFuture.runAsync(() -> rivenItemsService.initRivenItemsData(), executor)
         );
 
         CompletableFuture
-                .supplyAsync(this::severExportFiles, executor)
-                .thenAccept(flag -> {
-                    if (!flag) {
-                        log.error("获取导出数据文件失败！请检查网络环境");
-                        throw new RuntimeException("获取导出数据文件失败");
+                // Phase 0: 下载导出文件（失败时检查本地缓存降级）
+                .supplyAsync(() -> {
+                    try {
+                        return ExportFilePath.severExportFiles();
+                    } catch (Exception e) {
+                        log.warn("下载导出数据失败: {}", e.getMessage());
+                        return false;
                     }
+                }, executor)
+                .thenCompose(downloadOk -> {
+                    if (!downloadOk && !ExportFilePath.localCacheExists()) {
+                        log.error("本地无导出数据缓存且下载失败，无法继续初始化");
+                        throw new RuntimeException("初始化失败: 无可用数据源");
+                    }
+                    if (!downloadOk) {
+                        log.warn("将使用本地缓存的导出数据进行初始化");
+                    }
+                    // Phase 1: 翻译数据（失败可跳过，不影响其他模块）
+                    return CompletableFuture
+                            .runAsync(() -> stateTranslationService.initData(), executor)
+                            .exceptionally(ex -> {
+                                log.warn("初始化翻译数据失败，翻译功能不可用: {}", ex.getMessage());
+                                return null;
+                            });
                 })
-                .thenCompose(ignore ->
-                        CompletableFuture.runAsync(() -> this.initStateTranslation(), executor)
-                                .thenRunAsync(() -> {
-                                    // Phase 2: 所有依赖 Phase 0/Phase 1 的任务 + 异步更新任务 一起并行
-                                    CompletableFuture<Void> allTasks = CompletableFuture.allOf(
-                                            CompletableFuture.runAsync(this::getAlias, executor),
-                                            CompletableFuture.runAsync(this::getRivenTion, executor),
-                                            CompletableFuture.runAsync(this::getRivenTionAlias, executor),
-                                            CompletableFuture.runAsync(this::getRivenAnalyseTrend, executor),
-                                            CompletableFuture.runAsync(() -> this.initNodes(), executor),
-                                            CompletableFuture.runAsync(() -> this.initWeapons(), executor),
-                                            CompletableFuture.runAsync(() -> this.initNightWave(), executor),
-                                            CompletableFuture.runAsync(this::getRelics, executor),
-                                            independentHttpTasks
-                                    );
-
-                                    allTasks.join();
-                                }, executor))
-                .thenRun(() -> {
-                    log.info("数据初始化完成！");
+                // Phase 2: 所有依赖 Phase 0/Phase 1 的任务并行执行
+                // 直接调用 Service 代理，路径由 Service 内部通过 ExportFilePath 解析
+                // 使用 thenCompose 链式组合，避免 .join() 阻塞虚拟线程并持有 Semaphore 许可
+                .thenCompose(v -> CompletableFuture.allOf(
+                        CompletableFuture.runAsync(() -> aliasService.updateAlias(), executor),
+                        CompletableFuture.runAsync(() -> rivenTionService.updateRivenTion(), executor),
+                        CompletableFuture.runAsync(() -> rivenTionAliasService.updateRivenTionAlias(), executor),
+                        CompletableFuture.runAsync(() -> rivenAnalyseTrendService.updateRivenAnalyseTrends(), executor),
+                        CompletableFuture.runAsync(() -> nodeService.initData(), executor),
+                        CompletableFuture.runAsync(() -> weaponService.initFromExport(), executor),
+                        CompletableFuture.runAsync(() -> nightWaveService.initFromExport(), executor),
+                        CompletableFuture.runAsync(() -> warframeService.initFromExport(), executor),
+                        CompletableFuture.runAsync(() -> relicsService.initRelicsData(), executor),
+                        independentHttpTasks
+                ))
+                .whenComplete((v, ex) -> {
+                    if (ex != null) {
+                        log.error("数据初始化过程中出现错误，部分数据可能不可用: {}", ex.getMessage());
+                    }
+                    // 无论是否有错误，启动定时任务
                     taskWarframeStatus.startSchedule();
-                })
-                .exceptionally(ex -> {
-                    log.error("初始化过程中发生异常，正在回退操作...", ex);
-
-                    FileUtils.delAllFile("./data/export");
-                    FileUtils.delAllFile("./data/lzma");
-                    FileUtils.deleteFile("./data/keys.json");
-                    dataCleanupService.performAtomicCleanup();
-
-                    log.error("回退操作完成，程序即将退出。");
-                    System.exit(SpringApplication.exit(SpringUtils.getApplicationContext(), () -> -1));
-                    return null;
+                    log.info("数据初始化完成！");
                 });
     }
 
@@ -156,7 +158,7 @@ public class WarframeDataSource {
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
             WorldState worldState = objectMapper.readValue(str, WorldState.class);
-            WarframeCache.setWarframeStatus(worldState, 300);
+            WarframeCache.setWarframeStatus(worldState, str, 300);
         }
         if (!a.isEmpty()) {
             List arbitration = objectMapper.readValue(Base64.getDecoder().decode(a), List.class);
@@ -164,291 +166,6 @@ public class WarframeDataSource {
         } else {
             ArbitrationCache.reloadArbitration();
         }
-    }
-
-    //幻纹
-    @Transactional
-    public Integer getEphemeras() {
-        return ephemerasService.initEphemerasData();
-    }
-
-
-    //Market
-    @Transactional
-    public Integer initOrdersItemsData() {
-        return ordersItemsService.initOrdersItemsData();
-    }
-
-    //赤毒武器/信条武器
-    @Transactional
-    public Integer getLichSisterWeapons() {
-        return lichSisterWeaponsService.initLichSisterWeaponsData();
-    }
-
-    //紫卡武器
-    @Transactional
-    public Integer getRivenWeapons() {
-        return rivenItemsService.initRivenItemsData();
-    }
-
-    // 遗物
-    @Transactional
-    public Integer getRelics() {
-        return relicsService.initRelicsData(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"));
-    }
-
-    //别名
-    public void getAlias() {
-        log.info("开始初始化别名数据！");
-        int i = aliasService.updateAlias();
-        log.info("总计更新 Warframe.Alias {} 数据！", i);
-    }
-
-    // 紫卡词条
-    public void getRivenTion() {
-        log.info("开始初始化 RivenTion 数据！");
-        int i = rivenTionService.updateRivenTion();
-        log.info("总计更新 Warframe.RivenTion {} 数据！", i);
-    }
-
-    // 紫卡词条别名
-    public void getRivenTionAlias() {
-        log.info("开始初始化 RivenTion 别名数据！");
-        int i = rivenTionAliasService.updateRivenTionAlias();
-        log.info("总计更新 Warframe.RivenTion.Alias {} 数据！", i);
-    }
-
-    //紫卡计算器数据
-    public void getRivenAnalyseTrend() {
-        log.info("开始初始化 RivenAnalyseTrend 数据！");
-        int r = rivenAnalyseTrendService.updateRivenAnalyseTrends();
-        log.info("总计更新 Warframe.RivenAnalyseTrend {} 数据！", r);
-    }
-
-    public Boolean severExportFiles() {
-        return severExportFiles("zh", LAMA_PATH, INDEX_PATH, EXPORT_PATH);
-    }
-
-    /**
-     * 获取DE官方数据文件并保存到本地
-     *
-     * @param languagesKey 语言
-     * @param path         lzma 文件保存路径
-     * @param outPath      解压文件保存路径
-     * @param exportPath   索引数据保存路径 ./data/export/%s
-     */
-    Boolean severExportFiles(String languagesKey, String path, String outPath, String exportPath) {
-        Boolean files = getExportLZMAFiles(languagesKey, path);
-        if (!files) {
-            return false;
-        }
-        Boolean falg = true;
-        if (ZipUtils.unLzma(path, outPath)) {
-            List<String> keys = FileUtils.readFileToList(outPath);
-            Map<String, String> compared = compareTheHashAndSave(keys);
-            if (compared.isEmpty()) {
-                log.info("Lzma 数据无变化，无需获取更新！");
-                return true;
-            }
-            for (String key : keys) {
-                if (key.contains("ExportRecipes") || key.contains("ExportFusionBundles")) {
-                    continue;
-                }
-                falg = getExportFiles(key, exportPath.formatted(StringUtils.substring(key, 0, key.indexOf("!"))));
-            }
-        }
-        return falg;
-    }
-
-    /**
-     * 获取LZMA 索引文件
-     *
-     * @param path - 文件保存路径
-     * @param key  语言
-     */
-    Boolean getExportLZMAFiles(String key, String path) {
-        return HttpFileDownloader.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_INDEX.formatted(key), path);
-    }
-
-    /**
-     * 解析导出文件到  List<StateTranslation>
-     *
-     * @param exportPath 文件路径
-     * @return List<StateTranslation>
-     */
-    List<StateTranslation> parsingExportJsonToStateTranslation(String exportPath, String key, StateTypeEnum typeEnum) {
-        JsonNode rootNode;
-        try {
-            rootNode = objectMapper.readTree(new FileInputStream(exportPath));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            JsonNode arrayNode = rootNode.get(key);
-            List<StateTranslation> list = objectMapper.convertValue(
-                    arrayNode,
-                    new TypeReference<List<StateTranslation>>() {
-                    }
-            );
-            return list.stream().filter(s -> !s.getName().isEmpty()).peek(s -> {
-                s.setType(StateTypeEnum.RESOURCES);
-                Arrays.stream(StateTypeEnum.values()).filter(stateTypeEnum -> s.getUniqueName().matches(stateTypeEnum.getKEY())).findFirst().ifPresentOrElse(s::setType, () -> s.setType(typeEnum));
-            }).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse " + key + " from " + exportPath, e);
-        }
-    }
-
-    /**
-     * 根据索引获取数据
-     *
-     * @param key  索引
-     * @param path 文件保存路径
-     */
-    Boolean getExportFiles(String key, String path) {
-        log.debug("ExportFiles URL:{} Path:{}", key, path);
-        return HttpFileDownloader.sendGetForFile(ApiUrl.WARFRAME_PUBLIC_EXPORT_MANIFESTS.formatted(key), path);
-    }
-
-    <T, K> Map<K, T> createMap(Collection<T> items, Function<T, K> keyMapper, BinaryOperator<T> mergeFunction) {
-        return items.stream().collect(Collectors.toMap(keyMapper, Function.identity(), mergeFunction));
-    }
-
-    /**
-     * 对比Lzma数据的Hash值并保存，返回不同的Hash值
-     *
-     * @param keys Lzma读取的列表
-     * @return 不同的Hash值
-     */
-    Map<String, String> compareTheHashAndSave(List<String> keys) {
-        log.info("开始对比 Lzma 数据的 Hash 值并保存！");
-        String keysHashPath = "./data/keys.json";
-        Map<String, String> collect = keys.stream().map(key -> key.split("!", 2)).filter(parts -> parts.length == 2).collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
-        try {
-            Map<String, String> map = objectMapper.readValue(
-                    new FileInputStream(keysHashPath),
-                    new TypeReference<Map<String, String>>() {
-                    }
-            );
-            FileUtils.writeFile(keysHashPath, objectMapper.writeValueAsString(collect));
-            return collect.entrySet().stream().filter(e -> !Objects.equals(e.getValue(), map.get(e.getKey()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        } catch (FileNotFoundException e) {
-            try {
-                FileUtils.writeFile(keysHashPath, objectMapper.writeValueAsString(collect));
-            } catch (Exception ex) {
-                throw new RuntimeException("Failed to write keys file", ex);
-            }
-            return collect;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse keys file", e);
-        }
-    }
-
-    <T> List<T> parsingExportJson(String exportPath, String key, Class<T> c) {
-        JsonNode rootNode;
-        try {
-            rootNode = objectMapper.readTree(new FileInputStream(exportPath));
-        } catch (FileNotFoundException e) {
-            log.error("{} 路径文件不存在", exportPath);
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            log.error("解析文件失败: {}", exportPath, e);
-            throw new RuntimeException(e);
-        }
-        try {
-            JsonNode arrayNode = rootNode.get(key);
-            return objectMapper.convertValue(
-                    arrayNode,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, c)
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse " + key + " from " + exportPath, e);
-        }
-    }
-
-    @Transactional
-    public void initStateTranslation() {
-        log.info("开始初始化 Lost 翻译 数据！");
-        List<StateTranslation> stateTranslationList = new ArrayList<>();
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportCustoms_zh.json"), "ExportCustoms", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportDrones_zh.json"), "ExportDrones", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportFlavour_zh.json"), "ExportFlavour", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportGear_zh.json"), "ExportGear", StateTypeEnum.GEAR));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportKeys_zh.json"), "ExportKeys", StateTypeEnum.KEYS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportRelicArcane_zh.json"), "ExportRelicArcane", StateTypeEnum.ALL));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportResources_zh.json"), "ExportResources", StateTypeEnum.RESOURCES));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportSentinels_zh.json"), "ExportSentinels", StateTypeEnum.SENTINELS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportSortieRewards_zh.json"), "ExportOther", StateTypeEnum.OTHER));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportUpgrades_zh.json"), "ExportUpgrades", StateTypeEnum.MODS));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWarframes_zh.json"), "ExportWarframes", StateTypeEnum.WARFRAMES));
-        stateTranslationList.addAll(parsingExportJsonToStateTranslation(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", StateTypeEnum.WEAPONS));
-        int size = str.saveAll(stateTranslationList).size();
-        log.info("初始化 Lost 翻译 数据完成，共{}条", size);
-        log.info("开始初始化 自定义 Lost state_translation.json 翻译 数据！");
-        List<StateTranslation> javaList = SpringUtils.getBean(StateTranslationService.class).getStateTranslationsForCnd();
-        List<StateTranslation> sts = javaList.stream().peek(s -> {
-            Arrays.stream(StateTypeEnum.values())
-                    .filter(stateTypeEnum -> s.getUniqueName()
-                            .matches(stateTypeEnum.getKEY()))
-                    .findFirst()
-                    .ifPresentOrElse(s::setType, () -> s.setType(StateTypeEnum.RESOURCES));
-        }).toList();
-        size = str.saveAll(sts).size();
-        log.info("初始化 自定义 Lost state_translation.json 翻译 数据完成，共{}条", size);
-        log.info("初始化 Lost 翻译 数据完成");
-    }
-
-    @Transactional
-    public void initNightWave() {
-        log.info("开始初始化  NightWave 数据！");
-        try {
-            JsonNode rootNode = objectMapper.readTree(new FileInputStream(EXPORT_PATH.formatted("ExportSortieRewards_zh.json")));
-            JsonNode challengesNode = rootNode.get("ExportNightwave").get("challenges");
-            List<NightWave> javaList = objectMapper.convertValue(
-                    challengesNode,
-                    new TypeReference<List<NightWave>>() {
-                    }
-            );
-            int size = nightWaveRepository.saveAll(javaList).size();
-            log.info("初始化 NightWave 数据完成，共{}条", size);
-        } catch (FileNotFoundException e) {
-            log.error("ExportSortieRewards_zh.json文件不存在", e);
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            log.error("解析 NightWave 数据失败", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Transactional
-    public void initNodes() {
-        log.info("开始初始化  Nodes 数据！");
-        List<Nodes> nodesList = parsingExportJson(EXPORT_PATH.formatted("ExportRegions_zh.json"), "ExportRegions", Nodes.class);
-        int size = nodesRepository.saveAll(nodesList).size();
-        log.info("初始化 Nodes 数据完成，共{}条", size);
-        log.info("开始初始化 自定义 Nodes nodes.json 数据！");
-        List<Nodes> nodes = apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceNodes(), new TypeReference<List<Nodes>>() {
-        });
-        size = nodesRepository.saveAll(nodes).size();
-        log.info("初始化 自定义 Nodes nodes.json 数据完成，共{}条", size);
-    }
-
-    @Transactional
-    public void initRewardPool() {
-        log.info("开始初始化 自定义 RewardPool reward_pool.json 数据！");
-        List<RewardPool> javaList = apiDataSourceUtils.getDataFromSources(ApiUrl.warframeDataSourceRewardPool(), new TypeReference<List<RewardPool>>() {
-        });
-        int size = rewardPoolRepository.saveAll(javaList).size();
-        log.info("初始化 自定义 RewardPool reward_pool.json 数据完成，共{}条", size);
-    }
-
-    @Transactional
-    public void initWeapons() {
-        log.info("开始初始化  Weapons 数据！");
-        List<Weapons> weapons = parsingExportJson(EXPORT_PATH.formatted("ExportWeapons_zh.json"), "ExportWeapons", Weapons.class);
-        weapons.forEach(w -> w.setEnglishName(w.contEnglishName()));
-        int size = weaponsRepository.saveAll(weapons).size();
-        log.info("初始化 Weapons 数据完成，共{}条", size);
     }
 
 }

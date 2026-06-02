@@ -5,6 +5,7 @@ import com.nyx.bot.cache.LogCacheManager;
 import com.nyx.bot.common.config.LogFilterConfig;
 import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.dao.LogInfoWebSocketDto;
+import com.nyx.bot.common.event.DataRefreshEvent;
 import com.nyx.bot.common.event.DownloadProgressEvent;
 import com.nyx.bot.common.event.LogEvent;
 import com.nyx.bot.service.log.LogInfoMapper;
@@ -91,6 +92,36 @@ public class LogSseController {
         return emitter;
     }
 
+    /**
+     * 订阅数据刷新事件流
+     * 前端在用户点击"更新数据"按钮后连接此端点，接收刷新进度通知
+     */
+    @GetMapping(value = "/data-refresh", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribeDataRefresh() {
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
+        String sessionId = UUID.randomUUID().toString();
+
+        emitters.put(sessionId, emitter);
+        log.debug("数据刷新 SSE 连接建立: sessionId={}", sessionId);
+
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("connected")
+                    .data(objectMapper.writeValueAsString(Map.of("sessionId", sessionId)),
+                            MediaType.APPLICATION_JSON));
+        } catch (Exception e) {
+            log.error("发送数据刷新 sessionId 失败: sessionId={}", sessionId, e);
+            removeEmitter(sessionId);
+            return emitter;
+        }
+
+        emitter.onCompletion(() -> removeEmitter(sessionId, true));
+        emitter.onTimeout(() -> removeEmitter(sessionId, true));
+        emitter.onError(e -> removeEmitter(sessionId, false));
+
+        return emitter;
+    }
+
     private void removeEmitter(String sessionId) {
         removeEmitter(sessionId, true);
     }
@@ -150,7 +181,7 @@ public class LogSseController {
      * 监听下载进度事件并推送到所有 SSE 客户端
      */
     @EventListener
-    @Async
+    @Async("taskExecutor")
     @SuppressWarnings("unused")
     public void onDownloadProgress(DownloadProgressEvent event) {
         Map<String, Object> data = new LinkedHashMap<>();
@@ -170,6 +201,31 @@ public class LogSseController {
                         .data(objectMapper.writeValueAsString(data), MediaType.APPLICATION_JSON));
             } catch (Exception e) {
                 log.debug("SSE 推送进度失败，移除连接: sessionId={}", sessionId);
+                removeEmitter(sessionId);
+            }
+        });
+    }
+
+    /**
+     * 监听数据刷新事件并推送到所有 SSE 客户端
+     */
+    @EventListener
+    @Async("taskExecutor")
+    @SuppressWarnings("unused")
+    public void onDataRefresh(DataRefreshEvent event) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("type", "dataRefresh");
+        data.put("taskName", event.getTaskName());
+        data.put("status", event.getStatus().name());
+        data.put("message", event.resolveMessage());
+
+        emitters.forEach((sessionId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("data-refresh")
+                        .data(objectMapper.writeValueAsString(data), MediaType.APPLICATION_JSON));
+            } catch (Exception e) {
+                log.debug("SSE 推送数据刷新状态失败，移除连接: sessionId={}", sessionId);
                 removeEmitter(sessionId);
             }
         });

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class NotificationApplicationService {
     private final Map<SubscribeEnums, MessageBuilder<?>> builders;
     private final MissionSubscribeRepository subscribeRepo;
     private final BotContainer botContainer;
+    private final ExecutorService taskExecutor;
 
     /**
      * 构造函数 - Spring 自动注入所有实现类
@@ -53,7 +55,8 @@ public class NotificationApplicationService {
             List<ChangeDetector<?>> detectorList,
             List<MessageBuilder<?>> builderList,
             MissionSubscribeRepository subscribeRepo,
-            BotContainer botContainer
+            BotContainer botContainer,
+            ExecutorService taskExecutor
     ) {
         // 将 List 转换为 Map，key 为订阅类型，value 为实现类
         this.detectors = detectorList.stream()
@@ -70,6 +73,7 @@ public class NotificationApplicationService {
 
         this.subscribeRepo = subscribeRepo;
         this.botContainer = botContainer;
+        this.taskExecutor = taskExecutor;
 
         log.info("NotificationApplicationService 初始化完成");
         log.info("已注册 {} 个 ChangeDetector: {}", detectors.size(), detectors.keySet());
@@ -105,7 +109,7 @@ public class NotificationApplicationService {
 
         // 3. 异步处理每种类型的通知
         changesByType.forEach((type, changes) ->
-                CompletableFuture.runAsync(() -> notifySubscribers(type, changes))
+                CompletableFuture.runAsync(() -> notifySubscribers(type, changes), taskExecutor)
         );
     }
 

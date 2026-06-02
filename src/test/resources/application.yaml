@@ -2,16 +2,9 @@
 test:
   isTest: true
 jwt:
-  expiration: 3600
+  expiration: 360
   secret: 8HcUOOhNGddRKMqe6UXXhJy7bo4ktHUHrdshmgq8y7I=
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-    enabled: true
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
 
 spring:
   profiles:
@@ -36,11 +29,10 @@ spring:
   task:
     execution:
       pool:
-        allow-core-thread-timeout: true
-        core-size: 8
-        keep-alive: 60s
-        max-size: 8
-        queue-capacity: 8
+        core-size: 0
+        keep-alive: 10s
+        max-size: 1
+        queue-capacity: 1
     scheduling:
       shutdown:
         await-termination: false
