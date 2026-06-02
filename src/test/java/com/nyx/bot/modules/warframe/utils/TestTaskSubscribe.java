@@ -50,7 +50,7 @@ public class TestTaskSubscribe {
 //    }
 
     @Test
-    public void testTaskSubscribe(){
+    public void testTaskSubscribe() {
         SubscriptionCommand build = SubscriptionCommand.builder()
                 .botUid(123456L)
                 .groupId(123456L)
