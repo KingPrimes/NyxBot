@@ -18,20 +18,20 @@ import java.util.List;
 @Service
 public class OrdersItemsService {
 
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    OrdersItemsRepository ordersItemsService;
+    private final OrdersItemsRepository repository;
 
-    public OrdersItemsService(ObjectMapper objectMapper, OrdersItemsRepository ordersItemsService) {
+    public OrdersItemsService(ObjectMapper objectMapper, OrdersItemsRepository repository) {
         this.objectMapper = objectMapper;
-        this.ordersItemsService = ordersItemsService;
+        this.repository = repository;
     }
 
     @Transactional
     public Integer initOrdersItemsData() {
         log.info("开始初始化Market物品数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_ITEMS);
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -47,7 +47,7 @@ public class OrdersItemsService {
                     }
                 }
                 log.info("成功初始化Market物品数据，数量为：{}", items.size());
-                return ordersItemsService.saveAllAndFlush(items).size();
+                return repository.saveAllAndFlush(items).size();
             } catch (Exception e) {
                 log.error("解析Market物品数据失败", e);
                 return -1;

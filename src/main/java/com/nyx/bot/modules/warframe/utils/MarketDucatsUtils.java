@@ -35,7 +35,7 @@ public class MarketDucatsUtils {
      */
     public Ducats getDucats() {
         HttpUtils.Body body = HttpUtils.marketSendGet("https://api.warframe.market/v1/tools/ducats", "");
-        if (!body.code().is2xxSuccessful()) {
+        if (!body.is2xxSuccessful()) {
             log.debug("获取Ducats数据失败：{}", body.body());
             return null;
         }

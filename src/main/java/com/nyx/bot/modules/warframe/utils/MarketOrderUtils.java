@@ -15,7 +15,6 @@ import io.github.kingprimes.model.enums.TransactionEnum;
 import io.github.kingprimes.model.market.BaseOrder;
 import io.github.kingprimes.model.market.OrderWithUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -96,7 +95,7 @@ public class MarketOrderUtils {
         log.debug("查询参数 Key:{}", dataBase.getEntity().getSlug());
         HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getEntity().getSlug(), form);
         log.debug("查询结果:{}", body.body());
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -115,10 +114,10 @@ public class MarketOrderUtils {
             } catch (Exception e) {
                 throw new RuntimeException("解析Market数据失败", e);
             }
-        } else if (body.code().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+        } else if (body.isTooManyRequests()) {
             throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
         } else {
-            throw new RuntimeException("查询Market数据失败, Code:%d Headers:%s".formatted(body.code().value(), body.headers().toSingleValueMap().toString()));
+            throw new RuntimeException("查询Market数据失败, Code:%d Headers:%s".formatted(body.code(), body.toSingleValueMap()));
         }
         return dataBase;
     }
@@ -137,7 +136,7 @@ public class MarketOrderUtils {
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
         BaseOrder<OrderWithUser> owu = new BaseOrder<>();
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -177,7 +176,7 @@ public class MarketOrderUtils {
                 return owu;
             }
         }
-        if (body.code().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+        if (body.isTooManyRequests()) {
             owu.setError("触发速率限制，请稍后再次尝试查询。");
             return owu;
         }

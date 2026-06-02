@@ -114,7 +114,7 @@ public class JwtUtil {
     }
 
     /**
-     * 验证JWT令牌有效性
+     * 验证JWT令牌
      *
      * @param token    JWT令牌
      * @param username 用户名

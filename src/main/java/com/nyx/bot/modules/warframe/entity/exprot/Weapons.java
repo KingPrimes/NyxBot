@@ -2,9 +2,11 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.common.core.dao.BaseEntity;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -18,10 +20,11 @@ import java.util.stream.IntStream;
  * 武器数据
  */
 @SuppressWarnings("unused")
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table
 @Data
-public class Weapons {
+public class Weapons extends BaseEntity {
     // 武器唯一名称
     @Id
     @JsonProperty("uniqueName")

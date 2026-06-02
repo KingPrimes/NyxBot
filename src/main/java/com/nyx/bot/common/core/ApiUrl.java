@@ -10,10 +10,10 @@ import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.Arbitration;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 @Slf4j
@@ -140,13 +140,14 @@ public class ApiUrl {
      */
     public static List<Arbitration> arbitrationPreList() {
         try {
-            HttpHeaders headers = new HttpHeaders();
             // 获取当前Maven项目版本号
             String version = SystemInfoUtils.getJarVersion();
             // 创建专属请求头
-            headers.add(HttpHeaders.USER_AGENT, "NyxBot/" + version);
+            Map<String, List<String>> headers = Map.of(
+                    "User-Agent", List.of("NyxBot/" + version)
+            );
             HttpUtils.Body body = HttpUtils.sendGet(WARFRAME_ARBITRATION, "", headers);
-            if (!body.code().is2xxSuccessful()) {
+            if (!body.is2xxSuccessful()) {
                 log.warn("{}", I18nUtils.message("error.warframe.arbitration"));
                 return Collections.emptyList();
             }

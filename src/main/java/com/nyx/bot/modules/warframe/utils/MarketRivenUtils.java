@@ -53,7 +53,7 @@ public class MarketRivenUtils {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SEARCH, params.getUrl());
 
         // 检查HTTP响应状态码
-        if (!body.code().is2xxSuccessful()) {
+        if (!body.is2xxSuccessful()) {
             log.debug("获取数据失败：{}", body.body());
             return empty;
         }

@@ -13,7 +13,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -97,14 +96,14 @@ public class MarketLichSisterUtils {
         HttpUtils.Body body = HttpUtils.marketSendGet(url, params);
 
         // 检查HTTP状态码
-        if (!body.code().is2xxSuccessful()) {
-            if (body.code().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+        if (!body.is2xxSuccessful()) {
+            if (body.isTooManyRequests()) {
                 throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
             }
             throw new RuntimeException(
                     "查询Market数据失败, Code: %d Headers: %s".formatted(
-                            body.code().value(),
-                            body.headers().toSingleValueMap().toString()
+                            body.code(),
+                            body.toSingleValueMap().toString()
                     )
             );
         }

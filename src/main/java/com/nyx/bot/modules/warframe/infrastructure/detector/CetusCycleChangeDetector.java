@@ -136,8 +136,8 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
                     expiredBefore
             );
 
-            if (deletedCount >= 0) {
-                log.info("清理夜灵平原周期过期通知记录 [数量:{}] [过期时间:{}]",
+            if (deletedCount > 0) {
+                log.debug("清理夜灵平原周期过期通知记录 [数量:{}] [过期时间:{}]",
                         deletedCount, expiredBefore);
             } else {
                 log.debug("无需清理夜灵平原周期过期通知记录 [过期时间:{}]", expiredBefore);
