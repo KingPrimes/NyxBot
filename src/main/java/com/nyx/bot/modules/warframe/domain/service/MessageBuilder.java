@@ -3,7 +3,7 @@ package com.nyx.bot.modules.warframe.domain.service;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 
 /**
  * 消息构建器接口
@@ -27,5 +27,5 @@ public interface MessageBuilder<T> {
      *
      * @return 订阅类型
      */
-    SubscribeEnums getSupportedType();
+    SubscribeType getSupportedType();
 }

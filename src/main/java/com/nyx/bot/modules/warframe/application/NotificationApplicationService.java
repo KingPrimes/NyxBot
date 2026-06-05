@@ -9,120 +9,87 @@ import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
+import com.nyx.bot.modules.warframe.entity.NotificationHistory;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import io.github.kingprimes.model.worldstate.BastWorldState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * 通知应用服务
- * 负责检测游戏状态变化并发送通知
- * <p>
- * 核心职责：
- * 1. 协调所有 ChangeDetector 检测变化
- * 2. 根据订阅规则精确过滤
- * 3. 使用 MessageBuilder 构建消息
- * 4. 通过 Bot 发送群消息
- *
- */
 @Slf4j
 @Service
 public class NotificationApplicationService {
 
-    private final Map<SubscribeEnums, ChangeDetector<?>> detectors;
-    private final Map<SubscribeEnums, MessageBuilder<?>> builders;
+    /**
+     * 订阅推送类型（需要按用户规则过滤 missionType/tier）
+     */
+    private static final Set<SubscribeType> SUBSCRIPTION_TYPES = EnumSet.of(
+            SubscribeType.FISSURES, SubscribeType.INVASIONS
+    );
+    private final Map<SubscribeType, ChangeDetector<?>> detectors;
+    private final Map<SubscribeType, MessageBuilder<?>> builders;
     private final MissionSubscribeRepository subscribeRepo;
+    private final NotificationHistoryRepository historyRepo;
     private final BotContainer botContainer;
     private final ExecutorService taskExecutor;
 
-    /**
-     * 构造函数 - Spring 自动注入所有实现类
-     *
-     * @param detectorList  所有 ChangeDetector 实现（通过 @Component 自动扫描）
-     * @param builderList   所有 MessageBuilder 实现（通过 @Component 自动扫描）
-     * @param subscribeRepo 订阅仓储
-     * @param botContainer  Bot 容器
-     */
     public NotificationApplicationService(
             List<ChangeDetector<?>> detectorList,
             List<MessageBuilder<?>> builderList,
             MissionSubscribeRepository subscribeRepo,
+            NotificationHistoryRepository historyRepo,
             BotContainer botContainer,
             ExecutorService taskExecutor
     ) {
-        // 将 List 转换为 Map，key 为订阅类型，value 为实现类
         this.detectors = detectorList.stream()
-                .collect(Collectors.toMap(
-                        ChangeDetector::getSupportedType,
-                        Function.identity()
-                ));
-
+                .collect(Collectors.toMap(ChangeDetector::getSupportedType, Function.identity()));
         this.builders = builderList.stream()
-                .collect(Collectors.toMap(
-                        MessageBuilder::getSupportedType,
-                        Function.identity()
-                ));
-
+                .collect(Collectors.toMap(MessageBuilder::getSupportedType, Function.identity()));
         this.subscribeRepo = subscribeRepo;
+        this.historyRepo = historyRepo;
         this.botContainer = botContainer;
         this.taskExecutor = taskExecutor;
-
         log.info("NotificationApplicationService 初始化完成");
         log.info("已注册 {} 个 ChangeDetector: {}", detectors.size(), detectors.keySet());
         log.info("已注册 {} 个 MessageBuilder: {}", builders.size(), builders.keySet());
     }
 
-    /**
-     * 处理游戏状态更新
-     * 这是新架构的核心入口方法
-     *
-     * @param oldState 旧状态
-     * @param newState 新状态
-     */
     public void handleStateUpdate(WorldState oldState, WorldState newState) {
         if (oldState == null || newState == null) {
             log.debug("状态为空，跳过处理");
             return;
         }
-
-        // 1. 使用所有 Detector 检测变化
         List<ChangeEvent<?>> allChanges = detectAllChanges(oldState, newState);
-
         if (allChanges.isEmpty()) {
             log.debug("未检测到任何变化");
             return;
         }
-
         log.debug("检测到 {} 个变化事件", allChanges.size());
-
-        // 2. 按订阅类型分组
-        Map<SubscribeEnums, List<ChangeEvent<?>>> changesByType = allChanges.stream()
+        Map<SubscribeType, List<ChangeEvent<?>>> changesByType = allChanges.stream()
                 .collect(Collectors.groupingBy(ChangeEvent::type));
-
-        // 3. 异步处理每种类型的通知
         changesByType.forEach((type, changes) ->
                 CompletableFuture.runAsync(() -> notifySubscribers(type, changes), taskExecutor)
+                        .exceptionally(ex -> {
+                            log.error("通知推送异常 [type:{}]", type.getName(), ex);
+                            return null;
+                        })
         );
     }
 
-    /**
-     * 检测所有类型的变化
-     */
     private List<ChangeEvent<?>> detectAllChanges(WorldState oldState, WorldState newState) {
         return detectors.values().stream()
                 .flatMap(detector -> {
                     try {
-                        // 在检测变化前先清理过期历史记录
                         detector.cleanExpiredHistory();
-
                         List<? extends ChangeEvent<?>> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
                             log.debug("Detector {} 检测到 {} 个变化",
@@ -130,8 +97,7 @@ public class NotificationApplicationService {
                         }
                         return changes.stream();
                     } catch (Exception e) {
-                        log.error("Detector {} 执行失败",
-                                detector.getClass().getSimpleName(), e);
+                        log.error("Detector {} 执行失败", detector.getClass().getSimpleName(), e);
                         return java.util.stream.Stream.empty();
                     }
                 })
@@ -139,141 +105,188 @@ public class NotificationApplicationService {
     }
 
     /**
-     * 通知订阅者
-     * 核心逻辑：精确过滤 + 构建消息 + 发送通知
-     *
-     * @param type    订阅类型
-     * @param changes 变化列表
+     * 通知订阅者，区分主动推送和订阅推送
      */
-    private void notifySubscribers(SubscribeEnums type, List<ChangeEvent<?>> changes) {
-        // 查询订阅该类型的所有订阅组
+    private void notifySubscribers(SubscribeType type, List<ChangeEvent<?>> changes) {
         List<MissionSubscribe> subscriptions = subscribeRepo.findSubscriptions(type);
-
         if (subscriptions.isEmpty()) {
-            log.debug("类型 {} 没有订阅者", type.getNAME());
+            log.debug("类型 {} 没有订阅者", type.getName());
+            return;
+        }
+        log.debug("类型 {} 有 {} 个订阅组", type.getName(), subscriptions.size());
+
+        if (SUBSCRIPTION_TYPES.contains(type)) {
+            notifyBySubscription(subscriptions, type, changes);
+        } else {
+            notifyByActivePush(subscriptions, type, changes);
+        }
+    }
+
+    /**
+     * 主动推送：按群合并消息，一条消息 @所有相关用户
+     */
+    private void notifyByActivePush(List<MissionSubscribe> subscriptions,
+                                    SubscribeType type, List<ChangeEvent<?>> changes) {
+        MessageBuilder<?> builder = builders.get(type);
+        if (builder == null) {
+            log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
             return;
         }
 
-        log.debug("类型 {} 有 {} 个订阅组", type.getNAME(), subscriptions.size());
-
-        // 遍历订阅组
-        subscriptions.forEach(subscription -> {
-            // 遍历订阅组中的用户
-            subscription.getUsers().forEach(user -> {
-                // ⭐ 核心：精确匹配用户的订阅规则
-                List<ChangeEvent<?>> matchedChanges = filterMatchingChanges(user, changes);
-
-                if (!matchedChanges.isEmpty()) {
-                    sendNotification(subscription, user, matchedChanges);
+        for (MissionSubscribe sub : subscriptions) {
+            try {
+                // 收集该群所有订阅此类型的用户
+                List<Long> userIds = sub.getUsers().stream()
+                        .filter(u -> u.getCheckTypes().stream().anyMatch(r -> r.getSubscribe() == type))
+                        .map(MissionSubscribeUser::getUserId)
+                        .toList();
+                if (userIds.isEmpty()) {
+                    continue;
                 }
-            });
-        });
+
+                Bot bot = botContainer.robots.get(sub.getSubBotUid());
+                if (bot == null) {
+                    log.warn("Bot {} 不存在，跳过通知", sub.getSubBotUid());
+                    continue;
+                }
+
+                ArrayMsgUtils msg = ArrayMsgUtils.builder();
+                userIds.forEach(msg::at);
+                msg.text("您订阅的 " + type.getName() + " 已更新！");
+
+                for (ChangeEvent<?> change : changes) {
+                    Long expiry = extractExpiry(change);
+                    if (expiry != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiry)) {
+                        log.debug("重复通知已跳过 [type:{}] [expiry:{}]", type.getName(), expiry);
+                        continue;
+                    }
+                    @SuppressWarnings("unchecked")
+                    ChangeEvent<Object> rawChange = (ChangeEvent<Object>) change;
+                    MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
+                    ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, null);
+                    msg.text(eventMsg.buildCQ());
+                    saveHistory(type, expiry);
+                }
+
+                bot.sendGroupMsg(sub.getSubGroup(), msg.buildCQ(), false);
+                log.debug("通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
+                        sub.getSubBotUid(), sub.getSubGroup(), type.getName(), userIds.size());
+            } catch (Exception e) {
+                log.error("通知发送失败 [group:{}] [type:{}]", sub.getSubGroup(), type.getName(), e);
+            }
+        }
     }
 
     /**
-     * 精确过滤匹配的变化
-     * 检查：订阅类型 + 任务类型 + 遗物等级
-     *
-     * @param user    订阅用户
-     * @param changes 所有变化
-     * @return 匹配的变化列表
+     * 订阅推送：按用户规则过滤，同群同类型合并为一条消息
      */
-    private List<ChangeEvent<?>> filterMatchingChanges(
-            MissionSubscribeUser user,
-            List<ChangeEvent<?>> changes
-    ) {
+    private void notifyBySubscription(List<MissionSubscribe> subscriptions,
+                                      SubscribeType type, List<ChangeEvent<?>> changes) {
+        MessageBuilder<?> builder = builders.get(type);
+        if (builder == null) {
+            log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
+            return;
+        }
+
+        for (MissionSubscribe sub : subscriptions) {
+            try {
+                List<Long> matchedUsers = new ArrayList<>();
+                ArrayMsgUtils msg = ArrayMsgUtils.builder();
+
+                for (MissionSubscribeUser user : sub.getUsers()) {
+                    List<ChangeEvent<?>> matched = filterMatchingChanges(user, changes);
+                    if (matched.isEmpty()) {
+                        continue;
+                    }
+                    matchedUsers.add(user.getUserId());
+                    msg.at(user.getUserId());
+
+                    for (ChangeEvent<?> change : matched) {
+                        Long expiry = extractExpiry(change);
+                        if (expiry != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiry)) {
+                            continue;
+                        }
+                        MissionSubscribeUserCheckType matchingRule = user.getCheckTypes().stream()
+                                .filter(rule -> matchesRule(change, rule))
+                                .findFirst().orElse(null);
+                        @SuppressWarnings("unchecked")
+                        ChangeEvent<Object> rawChange = (ChangeEvent<Object>) change;
+                        MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
+                        ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, matchingRule);
+                        msg.text(eventMsg.buildCQ());
+                        saveHistory(type, expiry);
+                    }
+                }
+
+                if (matchedUsers.isEmpty()) {
+                    continue;
+                }
+
+                Bot bot = botContainer.robots.get(sub.getSubBotUid());
+                if (bot == null) {
+                    log.warn("Bot {} 不存在，跳过通知", sub.getSubBotUid());
+                    continue;
+                }
+
+                msg.text("您订阅的 " + type.getName() + " 已更新！");
+                bot.sendGroupMsg(sub.getSubGroup(), msg.buildCQ(), false);
+                log.debug("通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
+                        sub.getSubBotUid(), sub.getSubGroup(), type.getName(), matchedUsers.size());
+            } catch (Exception e) {
+                log.error("通知发送失败 [group:{}] [type:{}]", sub.getSubGroup(), type.getName(), e);
+            }
+        }
+    }
+
+    private List<ChangeEvent<?>> filterMatchingChanges(MissionSubscribeUser user, List<ChangeEvent<?>> changes) {
         return changes.stream()
-                .filter(event -> user.getCheckTypes().stream()
-                        .anyMatch(rule -> matchesRule(event, rule)))
+                .filter(event -> user.getCheckTypes().stream().anyMatch(rule -> matchesRule(event, rule)))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 判断事件是否匹配规则
-     * 三维精确匹配：类型 + 任务类型 + 等级
-     */
     private boolean matchesRule(ChangeEvent<?> event, MissionSubscribeUserCheckType rule) {
-        // 1. 订阅类型必须匹配
         if (rule.getSubscribe() != event.type()) {
             return false;
         }
-
-        // 2. 任务类型匹配（null 表示全部）
         if (rule.getMissionTypeEnum() != null) {
             if (event.missionType() == null || !rule.getMissionTypeEnum().equals(event.missionType())) {
                 return false;
             }
         }
-
-        // 3. 遗物等级匹配（null 表示全部）
         if (rule.getTierNum() != null) {
             return event.tier() != null && rule.getTierNum().equals(event.tier());
         }
-
+        if (rule.getInvasionReward() != null) {
+            return event.invasionReward() != null && rule.getInvasionReward() == event.invasionReward();
+        }
         return true;
     }
 
     /**
-     * 发送通知
-     * 使用 MessageBuilder 构建消息并通过 Bot 发送
-     *
-     * @param subscription 订阅组
-     * @param user         订阅用户
-     * @param changes      匹配的变化列表
+     * 从 ChangeEvent.data 中提取过期时间戳用于去重。
+     * 所有 WorldState 数据模型都继承 BastWorldState，通过 getExpiry() 获取。
      */
-    private void sendNotification(
-            MissionSubscribe subscription,
-            MissionSubscribeUser user,
-            List<ChangeEvent<?>> changes
-    ) {
+    private Long extractExpiry(ChangeEvent<?> event) {
         try {
-            // 获取 Bot 实例
-            Bot bot = botContainer.robots.get(subscription.getSubBotUid());
-            if (bot == null) {
-                log.warn("Bot {} 不存在，跳过通知", subscription.getSubBotUid());
-                return;
+            if (event.data() instanceof BastWorldState bws && bws.getExpiry() != null) {
+                return bws.getExpiry().getEpochSecond().getEpochSecond();
             }
-
-            // 获取 MessageBuilder
-            SubscribeEnums type = changes.getFirst().type();
-            MessageBuilder<?> builder = builders.get(type);
-            if (builder == null) {
-                log.warn("类型 {} 没有对应的 MessageBuilder", type.getNAME());
-                return;
-            }
-
-            // 构建消息头
-            ArrayMsgUtils msg = ArrayMsgUtils.builder()
-                    .at(user.getUserId())
-                    .text("您订阅的 " + type.getNAME() + " 已更新！");
-
-            // 为每个变化构建消息内容
-            for (ChangeEvent change : changes) {
-                // 找到匹配的规则（用于个性化消息）
-                MissionSubscribeUserCheckType matchingRule = user.getCheckTypes().stream()
-                        .filter(rule -> matchesRule(change, rule))
-                        .findFirst()
-                        .orElse(null);
-
-                if (matchingRule != null) {
-                    ArrayMsgUtils eventMsg = builder.buildMessage(change, matchingRule);
-                    msg.text(eventMsg.buildCQ());
-                }
-            }
-
-            // 发送群消息
-            bot.sendGroupMsg(subscription.getSubGroup(), msg.buildCQ(), false);
-
-            log.info("通知发送成功 [bot:{}] [group:{}] [user:{}] [type:{}] [count:{}]",
-                    subscription.getSubBotUid(),
-                    subscription.getSubGroup(),
-                    user.getUserId(),
-                    type.getNAME(),
-                    changes.size());
-
         } catch (Exception e) {
-            log.error("通知发送失败 [group:{}] [user:{}]",
-                    subscription.getSubGroup(), user.getUserId(), e);
+            log.debug("提取 expiry 失败: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private void saveHistory(SubscribeType type, Long expiryTimestamp) {
+        if (expiryTimestamp == null) return;
+        try {
+            NotificationHistory history = new NotificationHistory();
+            history.setSubscribeType(type);
+            history.setExpiryTimestamp(expiryTimestamp);
+            history.setNotifiedAt(Instant.now());
+            historyRepo.save(history);
+        } catch (Exception e) {
+            log.error("保存通知历史失败 [type:{}] [expiry:{}]", type.getName(), expiryTimestamp, e);
         }
     }
 }

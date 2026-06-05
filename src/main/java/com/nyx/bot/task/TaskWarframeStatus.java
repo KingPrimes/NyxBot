@@ -8,6 +8,7 @@ import com.nyx.bot.modules.warframe.application.NotificationApplicationService;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.model.WorldState;
+import io.github.kingprimes.model.enums.SyndicateEnum;
 import io.github.kingprimes.model.worldstate.Cycle;
 import io.github.kingprimes.model.worldstate.DateField;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +37,7 @@ public class TaskWarframeStatus {
 
     static final long MIN_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
     static final long MAX_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10);
-    static final long BUFFER_MS = TimeUnit.MINUTES.toMillis(2);
+    static final long BUFFER_MS = TimeUnit.SECONDS.toMillis(30);
 
     private final ObjectMapper objectMapper;
     private final NotificationApplicationService notificationService;
@@ -108,6 +110,10 @@ public class TaskWarframeStatus {
                         notificationService.handleStateUpdate(oldState, newState);
 
                         List<Instant> expiries = collectExpiryTimestamps(newState);
+//                        if (log.isDebugEnabled()) {
+//                            var fmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+//                            log.debug("{}", expiries.stream().map(fmt::format).toList());
+//                        }
                         long nextDelaySeconds = calculateNextDelay(expiries);
                         long ttlSeconds = nextDelaySeconds + TimeUnit.MILLISECONDS.toSeconds(BUFFER_MS);
 
@@ -169,18 +175,29 @@ public class TaskWarframeStatus {
                 .forEach(expiries::add);
 
         // B. 周期与轮换类（实现 Cycle 接口，getExpiry() 直接返回 Instant）
-        Stream.of(ws.getCetusCycle(), ws.getEarthCycle(), ws.getCambionCycle(),
-                        ws.getVallisCycle(), ws.getZarimanCycle(), ws.getDuvalierCycle(),
-                        ws.getSteelPath())
+        //    注：CetusCycle/CambionCycle 的 expiry 由构造函数基于 now 实时计算，轮询调度不可靠，
+        //    改为直接从赏金任务数据取固定时间戳。
+        Stream.of(ws.getCetusCycle(), ws.getEarthCycle(), ws.getVallisCycle(),
+                        ws.getZarimanCycle(), ws.getDuvalierCycle(), ws.getSteelPath())
                 .filter(Objects::nonNull)
                 .map(Cycle::getExpiry)
                 .filter(Objects::nonNull)
                 .forEach(expiries::add);
 
+        // C. Cetus 赏金任务固定过期时间（替代 CetusCycle/CambionCycle 的计算值）
+        ws.getSyndicateMissions().stream()
+                .filter(s -> s.getTag() != null && s.getTag() == SyndicateEnum.CetusSyndicate)
+                .findFirst()
+                .map(s -> safeEpochSecond(s.getExpiry()))
+                .filter(Objects::nonNull).ifPresent(expiries::add);
+
         Instant now = Instant.now();
         expiries.removeIf(expiry -> !expiry.isAfter(now));
 
-        return expiries;
+        return expiries.stream()
+                .map(e -> e.truncatedTo(ChronoUnit.MINUTES))
+                .distinct()
+                .toList();
     }
 
     long calculateNextDelay(List<Instant> expiries) {

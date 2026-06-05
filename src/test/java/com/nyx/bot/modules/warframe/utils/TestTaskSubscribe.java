@@ -3,9 +3,9 @@ package com.nyx.bot.modules.warframe.utils;
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.domain.valueobject.SubscriptionCommand;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import com.nyx.bot.modules.warframe.plugin.WarframeTaskSubscribePlugin;
-import io.github.kingprimes.model.enums.MissionTypeEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +51,7 @@ public class TestTaskSubscribe {
 
     @Test
     public void testTaskSubscribe() {
-        SubscriptionCommand build = SubscriptionCommand.builder()
-                .botUid(123456L)
-                .groupId(123456L)
-                .groupName("test")
-                .userId(123456789L)
-                .userName("TestUser")
-                .subscribeType(SubscribeEnums.FISSURES)
-                .missionType(MissionTypeEnum.MT_ARTIFACT).build();
+        SubscriptionCommand build = new SubscriptionCommand(123456L, 123456L, "test", 123456789L, "TestUser", SubscribeType.FISSURES, MissionType.MT_CAPTURE, 0, null);
         assertDoesNotThrow(() -> subscriptionService.subscribe(build));
     }
 }

@@ -4,9 +4,8 @@ import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.service.MessageBuilder;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.DrawImagePlugin;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.VoidTrader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,16 +24,14 @@ public class VoidMessageBuilder implements MessageBuilder<VoidTrader> {
 
     private final DrawImagePlugin drawImagePlugin;
 
-    private final WorldStateUtils worldStateUtils;
 
-    public VoidMessageBuilder(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+    public VoidMessageBuilder(DrawImagePlugin drawImagePlugin) {
         this.drawImagePlugin = drawImagePlugin;
-        this.worldStateUtils = worldStateUtils;
     }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<VoidTrader> event, MissionSubscribeUserCheckType rule) {
-        VoidTrader trader = worldStateUtils.translateVoidTraders(event.data());
+        VoidTrader trader = event.data();
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 
         if (trader.getManifest() != null && trader.getManifest().isEmpty()) {
@@ -79,7 +76,7 @@ public class VoidMessageBuilder implements MessageBuilder<VoidTrader> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.VOID;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.VOID;
     }
 }

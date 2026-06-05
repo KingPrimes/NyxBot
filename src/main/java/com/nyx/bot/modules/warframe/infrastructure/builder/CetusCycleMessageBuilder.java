@@ -4,7 +4,7 @@ import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.service.MessageBuilder;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.model.worldstate.CetusCycle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,7 +47,7 @@ public class CetusCycleMessageBuilder implements MessageBuilder<CetusCycle> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.CETUS_CYCLE;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.CETUS_CYCLE;
     }
 }

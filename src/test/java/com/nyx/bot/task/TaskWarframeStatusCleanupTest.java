@@ -2,8 +2,8 @@ package com.nyx.bot.task;
 
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.modules.warframe.entity.NotificationHistory;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,27 +47,27 @@ class TaskWarframeStatusCleanupTest {
         // 准备测试数据：多个订阅类型的记录
         // CETUS_CYCLE：1条过期 + 1条新记录
         NotificationHistory cetuExpired = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(12, ChronoUnit.HOURS)
         );
         NotificationHistory cetuFresh = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(1, ChronoUnit.HOURS)
         );
 
         // VOID：1条过期 + 1条新记录
         NotificationHistory voidExpired = createHistory(
-                SubscribeEnums.VOID,
+                SubscribeType.VOID,
                 Instant.now().minus(30, ChronoUnit.HOURS)
         );
         NotificationHistory voidFresh = createHistory(
-                SubscribeEnums.VOID,
+                SubscribeType.VOID,
                 Instant.now().minus(2, ChronoUnit.HOURS)
         );
 
         // DAILY_DEALS：1条过期记录
         NotificationHistory dailyExpired = createHistory(
-                SubscribeEnums.DAILY_DEALS,
+                SubscribeType.DAILY_DEALS,
                 Instant.now().minus(26, ChronoUnit.HOURS)
         );
 
@@ -115,7 +115,7 @@ class TaskWarframeStatusCleanupTest {
         // 准备测试数据：100条过期记录
         for (int i = 0; i < 100; i++) {
             NotificationHistory expired = createHistory(
-                    i % 2 == 0 ? SubscribeEnums.CETUS_CYCLE : SubscribeEnums.VOID,
+                    i % 2 == 0 ? SubscribeType.CETUS_CYCLE : SubscribeType.VOID,
                     Instant.now().minus(25 + i, ChronoUnit.HOURS)
             );
             historyRepository.save(expired);
@@ -124,7 +124,7 @@ class TaskWarframeStatusCleanupTest {
         // 准备测试数据：10条新记录
         for (int i = 0; i < 10; i++) {
             NotificationHistory fresh = createHistory(
-                    i % 2 == 0 ? SubscribeEnums.CETUS_CYCLE : SubscribeEnums.VOID,
+                    i % 2 == 0 ? SubscribeType.CETUS_CYCLE : SubscribeType.VOID,
                     Instant.now().minus(i, ChronoUnit.HOURS)
             );
             historyRepository.save(fresh);
@@ -146,23 +146,23 @@ class TaskWarframeStatusCleanupTest {
     void testCleanExpiredNotificationHistory_OnlyExpired() {
         // 准备测试数据：各种时间点的记录
         NotificationHistory veryOld = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(72, ChronoUnit.HOURS) // 3天前
         );
         NotificationHistory old = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(25, ChronoUnit.HOURS) // 25小时前
         );
         NotificationHistory nearBoundary = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(24, ChronoUnit.HOURS) // 恰好24小时
         );
         NotificationHistory justWithin = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(23, ChronoUnit.HOURS) // 23小时前
         );
         NotificationHistory fresh = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(1, ChronoUnit.HOURS) // 1小时前
         );
 
@@ -194,7 +194,7 @@ class TaskWarframeStatusCleanupTest {
     /**
      * 创建测试用的通知历史记录
      */
-    private NotificationHistory createHistory(SubscribeEnums type, Instant notifiedAt) {
+    private NotificationHistory createHistory(SubscribeType type, Instant notifiedAt) {
         NotificationHistory history = new NotificationHistory();
         history.setSubscribeType(type);
         history.setExpiryTimestamp(notifiedAt.getEpochSecond() + 1000);

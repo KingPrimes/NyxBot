@@ -2,8 +2,8 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.NyxBotApplication;
 import com.nyx.bot.modules.warframe.entity.NotificationHistory;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,21 +46,21 @@ class CetusCycleChangeDetectorTest {
         // 准备测试数据：3条记录
         // 1. 过期超过12小时的记录
         NotificationHistory expired = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(25, ChronoUnit.HOURS),
                 "day"
         );
 
         // 2. 过期8小时的记录（应保留）
         NotificationHistory halfExpired = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(8, ChronoUnit.HOURS),
                 "day"
         );
 
         // 3. 新记录（1小时前，应保留）
         NotificationHistory fresh = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(1, ChronoUnit.HOURS),
                 "night"
         );
@@ -90,24 +90,24 @@ class CetusCycleChangeDetectorTest {
         // 准备测试数据：不同订阅类型的过期记录
         // CETUS_CYCLE 类型：2条过期记录
         NotificationHistory cetuExpired1 = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(25, ChronoUnit.HOURS),
                 "day"
         );
         NotificationHistory cetuExpired2 = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(30, ChronoUnit.HOURS),
                 "night"
         );
 
         // VOID 类型：2条过期记录（应保留，因为清理方法只清理CETUS_CYCLE）
         NotificationHistory voidExpired1 = createHistory(
-                SubscribeEnums.VOID,
+                SubscribeType.VOID,
                 Instant.now().minus(25, ChronoUnit.HOURS),
                 null
         );
         NotificationHistory voidExpired2 = createHistory(
-                SubscribeEnums.VOID,
+                SubscribeType.VOID,
                 Instant.now().minus(30, ChronoUnit.HOURS),
                 null
         );
@@ -153,17 +153,17 @@ class CetusCycleChangeDetectorTest {
     void testCleanExpiredHistory_AllFreshRecords() {
         // 准备测试数据：3条新记录（都在24小时内）
         NotificationHistory fresh1 = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(1, ChronoUnit.HOURS),
                 "day"
         );
         NotificationHistory fresh2 = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(5, ChronoUnit.HOURS),
                 "night"
         );
         NotificationHistory fresh3 = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(23, ChronoUnit.HOURS),
                 "day"
         );
@@ -190,7 +190,7 @@ class CetusCycleChangeDetectorTest {
     void testCleanExpiredHistory_BoundaryCase() {
         // 准备测试数据：恰好12小时的记录
         NotificationHistory boundary = createHistory(
-                SubscribeEnums.CETUS_CYCLE,
+                SubscribeType.CETUS_CYCLE,
                 Instant.now().minus(12, ChronoUnit.HOURS),
                 "day"
         );
@@ -211,7 +211,7 @@ class CetusCycleChangeDetectorTest {
     /**
      * 创建测试用的通知历史记录
      */
-    private NotificationHistory createHistory(SubscribeEnums type, Instant notifiedAt, String cycleState) {
+    private NotificationHistory createHistory(SubscribeType type, Instant notifiedAt, String cycleState) {
         NotificationHistory history = new NotificationHistory();
         history.setSubscribeType(type);
         history.setExpiryTimestamp(notifiedAt.getEpochSecond() + 1000);

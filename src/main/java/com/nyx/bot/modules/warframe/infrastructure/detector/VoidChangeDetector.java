@@ -2,8 +2,9 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.BastWorldState;
 import io.github.kingprimes.model.worldstate.VoidTrader;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,11 @@ import java.util.List;
 @Slf4j
 @Component
 public class VoidChangeDetector implements ChangeDetector<VoidTrader> {
+    private final WorldStateUtils worldStateUtils;
+
+    public VoidChangeDetector(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public List<ChangeEvent<VoidTrader>> detectChanges(WorldState oldState, WorldState newState) {
@@ -63,16 +69,17 @@ public class VoidChangeDetector implements ChangeDetector<VoidTrader> {
      * 创建变化事件
      */
     private ChangeEvent<VoidTrader> createChangeEvent(VoidTrader trader) {
-        return new ChangeEvent<>(
-                SubscribeEnums.VOID,
-                null,  // 无任务类型
-                null,  // 无等级
-                trader
+        VoidTrader translated = worldStateUtils.translateVoidTraders(trader);
+        return ChangeEvent.of(
+                SubscribeType.VOID,
+                null,
+                null,
+                translated
         );
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.VOID;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.VOID;
     }
 }

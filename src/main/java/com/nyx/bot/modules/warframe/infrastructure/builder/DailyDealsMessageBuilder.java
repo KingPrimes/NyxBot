@@ -4,9 +4,8 @@ import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.service.MessageBuilder;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.DrawImagePlugin;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.DailyDeals;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,16 +22,14 @@ public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
 
     private final DrawImagePlugin drawImagePlugin;
 
-    private final WorldStateUtils worldStateUtils;
 
-    public DailyDealsMessageBuilder(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+    public DailyDealsMessageBuilder(DrawImagePlugin drawImagePlugin) {
         this.drawImagePlugin = drawImagePlugin;
-        this.worldStateUtils = worldStateUtils;
     }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<DailyDeals> event, MissionSubscribeUserCheckType rule) {
-        DailyDeals deal = worldStateUtils.translateDailyDeals(event.data());
+        DailyDeals deal = event.data();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 
@@ -81,7 +78,7 @@ public class DailyDealsMessageBuilder implements MessageBuilder<DailyDeals> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.DAILY_DEALS;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.DAILY_DEALS;
     }
 }

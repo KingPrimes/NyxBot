@@ -7,8 +7,9 @@ import com.nyx.bot.modules.warframe.application.SubscriptionApplicationService;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import io.github.kingprimes.model.enums.MissionTypeEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,12 +37,17 @@ public class MissionSubscribeController extends BaseController {
 
     @GetMapping("/sub")
     public ApiResponse<Object> subscribe() {
-        return success(Arrays.stream(SubscribeEnums.values()).collect(Collectors.toMap(SubscribeEnums::name, SubscribeEnums::getNAME)));
+        return success(Arrays.stream(SubscribeType.values()).collect(Collectors.toMap(SubscribeType::name, SubscribeType::getName)));
     }
 
     @GetMapping("/type")
     public ApiResponse<Object> getTypeEnums() {
-        return success(Arrays.stream(MissionTypeEnum.values()).collect(Collectors.toMap(MissionTypeEnum::name, MissionTypeEnum::getName)));
+        return success(Arrays.stream(MissionType.values()).collect(Collectors.toMap(MissionType::name, MissionType::getName)));
+    }
+
+    @GetMapping("/reward")
+    public ApiResponse<Object> getRewardEnums() {
+        return success(Arrays.stream(InvasionReward.values()).collect(Collectors.toMap(InvasionReward::name, InvasionReward::getName)));
     }
 
     @PostMapping("/list")
