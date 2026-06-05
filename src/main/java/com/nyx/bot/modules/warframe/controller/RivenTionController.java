@@ -40,7 +40,7 @@ public class RivenTionController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven-tion", () -> rivenTionService.updateRivenTion());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven-tion", rivenTionService::updateRivenTion);
         return success(I18nUtils.RequestTaskRun());
     }
 

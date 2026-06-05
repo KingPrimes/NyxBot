@@ -45,7 +45,7 @@ public class EphemerasController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.ephemeras", () -> ephemerasService.initEphemerasData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.ephemeras", ephemerasService::initEphemerasData);
         return success(I18nUtils.RequestTaskRun());
     }
 }

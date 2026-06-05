@@ -43,7 +43,7 @@ public class StateTranslationController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.state-translation", () -> service.initData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.state-translation", service::initData);
         return success(I18nUtils.RequestTaskRun());
     }
 

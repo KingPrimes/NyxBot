@@ -46,7 +46,7 @@ public class OrdersItemsController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.orders", () -> ordersItemsService.initOrdersItemsData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.orders", ordersItemsService::initOrdersItemsData);
         return success(I18nUtils.RequestTaskRun());
     }
 }

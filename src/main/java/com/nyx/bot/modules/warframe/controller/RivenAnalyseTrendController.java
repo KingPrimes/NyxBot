@@ -39,7 +39,7 @@ public class RivenAnalyseTrendController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven-analyse", () -> rivenAnalyseTrendService.updateRivenAnalyseTrends());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven-analyse", rivenAnalyseTrendService::updateRivenAnalyseTrends);
         return success(I18nUtils.RequestTaskRun());
     }
 }

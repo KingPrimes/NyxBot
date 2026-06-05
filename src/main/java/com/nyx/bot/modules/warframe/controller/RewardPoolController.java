@@ -39,7 +39,7 @@ public class RewardPoolController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.reward-pool", () -> rewardPoolService.initRewardPool());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.reward-pool", rewardPoolService::initRewardPool);
         return success(I18nUtils.RequestTaskRun());
     }
 

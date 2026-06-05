@@ -39,7 +39,7 @@ public class WarframesController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.warframes", () -> warframeService.initFromExport());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.warframes", warframeService::initFromExport);
         return success(I18nUtils.RequestTaskRun());
     }
 }

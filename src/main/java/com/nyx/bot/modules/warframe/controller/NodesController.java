@@ -39,7 +39,7 @@ public class NodesController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.nodes", () -> nodeService.initData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.nodes", nodeService::initData);
         return success(I18nUtils.RequestTaskRun());
     }
 

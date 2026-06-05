@@ -49,7 +49,7 @@ public class MarketRivenController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven", () -> rivenItemsService.initRivenItemsData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.riven", rivenItemsService::initRivenItemsData);
         return success(I18nUtils.RequestTaskRun());
     }
 

@@ -39,7 +39,7 @@ public class NightWaveController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.night-wave", () -> nightWaveService.initFromExport());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.night-wave", nightWaveService::initFromExport);
         return success(I18nUtils.RequestTaskRun());
     }
 }

@@ -35,7 +35,7 @@ public class RelicsController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.relics", () -> rs.initRelicsData());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.relics", rs::initRelicsData);
         return success(I18nUtils.RequestTaskRun());
     }
 

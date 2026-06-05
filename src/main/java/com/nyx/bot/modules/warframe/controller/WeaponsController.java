@@ -39,7 +39,7 @@ public class WeaponsController extends BaseController {
 
     @PostMapping("/update")
     public ApiResponse<Void> update() {
-        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.weapons", () -> weaponService.initFromExport());
+        DataRefreshEvent.runAsync(eventPublisher, "data.refresh.task.weapons", weaponService::initFromExport);
         return success(I18nUtils.RequestTaskRun());
     }
 }
