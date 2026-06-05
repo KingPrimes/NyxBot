@@ -13,8 +13,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -43,6 +41,7 @@ public class WarframeDataSource {
     private final NightWaveService nightWaveService;
     private final NodeService nodeService;
     private final StateTranslationService stateTranslationService;
+    private final ArbitrationCache arbitrationCache;
 
     public WarframeDataSource(ObjectMapper objectMapper,
                               AliasService aliasService,
@@ -60,7 +59,8 @@ public class WarframeDataSource {
                               WarframeService warframeService,
                               NightWaveService nightWaveService,
                               NodeService nodeService,
-                              StateTranslationService stateTranslationService) {
+                              StateTranslationService stateTranslationService,
+                              ArbitrationCache arbitrationCache) {
         this.objectMapper = objectMapper;
         this.aliasService = aliasService;
         this.ephemerasService = ephemerasService;
@@ -78,6 +78,7 @@ public class WarframeDataSource {
         this.nightWaveService = nightWaveService;
         this.nodeService = nodeService;
         this.stateTranslationService = stateTranslationService;
+        this.arbitrationCache = arbitrationCache;
     }
 
     /**
@@ -154,18 +155,12 @@ public class WarframeDataSource {
 
     @SneakyThrows
     public void initWarframeStatus() {
-        String a = FileUtils.readFileToString("./data/arbitration");
         String str = FileUtils.readFileToString("./data/status");
         if (!str.isEmpty()) {
             WorldState worldState = objectMapper.readValue(str, WorldState.class);
             WarframeCache.setWarframeStatus(worldState, str, 300);
         }
-        if (!a.isEmpty()) {
-            List arbitration = objectMapper.readValue(Base64.getDecoder().decode(a), List.class);
-            ArbitrationCache.setArbitration(arbitration);
-        } else {
-            ArbitrationCache.reloadArbitration();
-        }
+        arbitrationCache.init();
     }
 
 }
