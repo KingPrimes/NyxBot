@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -39,13 +40,10 @@ public class OrdersItemsService {
                     log.error("未获取到Market物品数据");
                     return -1;
                 }
-                List<OrdersItems> items = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    OrdersItems item = buildOrdersItems(itemNode);
-                    if (item != null) {
-                        items.add(item);
-                    }
-                }
+                List<OrdersItems> items = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(this::buildOrdersItems)
+                        .filter(Objects::nonNull)
+                        .toList();
                 log.info("成功初始化Market物品数据，数量为：{}", items.size());
                 return repository.saveAllAndFlush(items).size();
             } catch (Exception e) {

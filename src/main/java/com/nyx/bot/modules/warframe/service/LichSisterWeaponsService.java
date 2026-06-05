@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -63,13 +64,10 @@ public class LichSisterWeaponsService {
                     log.warn("未获取到{}", label);
                     return null;
                 }
-                List<LichSisterWeapons> weapons = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    LichSisterWeapons weapon = buildLichSisterWeapons(itemNode);
-                    if (weapon != null) {
-                        weapons.add(weapon);
-                    }
-                }
+                List<LichSisterWeapons> weapons = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(this::buildLichSisterWeapons)
+                        .filter(Objects::nonNull)
+                        .toList();
                 return weapons;
             } catch (Exception e) {
                 log.error("解析{}数据失败", label, e);
@@ -94,6 +92,8 @@ public class LichSisterWeaponsService {
             JsonNode i18nNode = object.has("i18n") ? object.get("i18n") : null;
             JsonNode zhHansNode = (i18nNode != null && i18nNode.has("zh-hans")) ? i18nNode.get("zh-hans") : null;
             String name = (zhHansNode != null && zhHansNode.has("name")) ? zhHansNode.get("name").asText() : slug;
+            String icon = (zhHansNode != null && zhHansNode.has("icon")) ? zhHansNode.get("icon").asText() : null;
+            String thumb = (zhHansNode != null && zhHansNode.has("thumb")) ? zhHansNode.get("thumb").asText() : null;
 
             return new LichSisterWeapons()
                     .setReqMasteryRank(reqMasteryRank)
@@ -101,8 +101,8 @@ public class LichSisterWeaponsService {
                     .setId(id)
                     .setSlug(slug)
                     .setName(name)
-                    .setIcon(object.has("icon") ? object.get("icon").asText() : null)
-                    .setThumb(object.has("thumb") ? object.get("thumb").asText() : null);
+                    .setIcon(icon)
+                    .setThumb(thumb);
         } catch (Exception e) {
             log.error("解析物品数据失败: {}", object, e);
             return null;

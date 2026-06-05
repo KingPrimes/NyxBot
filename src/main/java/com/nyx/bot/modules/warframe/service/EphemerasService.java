@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -81,14 +82,10 @@ public class EphemerasService {
     }
 
     private List<Ephemeras> getEphemeras(JsonNode dataNode) {
-        List<Ephemeras> ephemeras = new ArrayList<>();
-        for (JsonNode itemNode : dataNode) {
-            Ephemeras ephemera = buildEphemeras(itemNode);
-            if (ephemera != null) {
-                ephemeras.add(ephemera);
-            }
-        }
-        return ephemeras;
+        return StreamSupport.stream(dataNode.spliterator(), false)
+                .map(this::buildEphemeras)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private Ephemeras buildEphemeras(JsonNode object) {
