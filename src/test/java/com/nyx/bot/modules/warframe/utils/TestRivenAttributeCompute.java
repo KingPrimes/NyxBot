@@ -104,11 +104,14 @@ public class TestRivenAttributeCompute {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    RivenAttributeCompute rivenAttributeCompute;
+
     @Test
     public void testAttributeCompute() throws JsonProcessingException {
         RivenAnalyseTrendCompute riven = objectMapper.readValue(fuf, RivenAnalyseTrendCompute.class);
         log.info("测试读取到的json数据是否正确：{}", riven);
-        List<RivenAnalyseTrendModel> rivenAnalyseTrendModels = RivenAttributeCompute.setAttributeNumber(riven);
+        List<RivenAnalyseTrendModel> rivenAnalyseTrendModels = rivenAttributeCompute.setAttributeNumber(riven);
         assertNotNull(rivenAnalyseTrendModels);
         log.info("测试计算结果：{}", objectMapper.writeValueAsString(rivenAnalyseTrendModels));
     }

@@ -18,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Component
@@ -141,20 +142,19 @@ public class MarketOrderUtils {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
 
-                List<OrderWithUser> list = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    OrderWithUser item = objectMapper.treeToValue(itemNode, OrderWithUser.class);
-                    list.add(item);
-                }
-
-                list = list.stream()
-                        // 筛选离线用户
+                List<OrderWithUser> list = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(itemNode -> {
+                            try {
+                                return objectMapper.treeToValue(itemNode, OrderWithUser.class);
+                            } catch (Exception e) {
+                                log.error("反序列化订单失败", e);
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
                         .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
-                        // 筛选物品
                         .filter(o -> o.getItemId().equals(market.getEntity().getId()))
-                        // 筛选类型
                         .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
-                        // 筛选等级
                         .filter(o -> matchesMaxRank(isMax, market, o))
                         // 排序物品
                         .sorted(isBy

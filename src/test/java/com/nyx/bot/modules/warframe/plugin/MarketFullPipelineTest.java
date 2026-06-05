@@ -7,13 +7,17 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.defaultdraw.DefaultDrawImagePlugin;
 import io.github.kingprimes.model.Ducats;
 import io.github.kingprimes.model.Relics;
-import io.github.kingprimes.model.enums.*;
+import io.github.kingprimes.model.enums.MarketPlatformEnum;
+import io.github.kingprimes.model.enums.MarketStatusEnum;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.RarityEnum;
 import io.github.kingprimes.model.market.MarketLichSister;
 import io.github.kingprimes.model.market.MarketRiven;
 import io.github.kingprimes.model.market.OrderWithUser;
@@ -227,10 +231,10 @@ class MarketFullPipelineTest {
 
     private static Map<Integer, String> buildSubscribeMap() {
         Map<Integer, String> map = new LinkedHashMap<>();
-        for (SubscribeEnums e : SubscribeEnums.values()) {
-            if (e == SubscribeEnums.ERROR) continue;
-            map.put(e.ordinal(), e.getNAME());
-        }
+//        for (SubscribeEnums e : SubscribeEnums.values()) {
+//            if (e == SubscribeEnums.ERROR) continue;
+//            map.put(e.ordinal(), e.getNAME());
+//        }
         return map;
     }
 
@@ -240,6 +244,14 @@ class MarketFullPipelineTest {
         Map<Integer, String> map = new LinkedHashMap<>();
         for (MissionTypeEnum e : MissionTypeEnum.getOrderedValues()) {
             map.put(e.getOrder(), e.getName());
+        }
+        return map;
+    }
+
+    private static Map<Integer, String> buildinvasionRewardMap() {
+        Map<Integer, String> map = new LinkedHashMap<>();
+        for (InvasionReward e : InvasionReward.values()) {
+            map.put(e.ordinal(), e.getName());
         }
         return map;
     }
@@ -344,9 +356,10 @@ class MarketFullPipelineTest {
         void test() throws Exception {
             var subscribeMap = buildSubscribeMap();
             var missionTypeMap = buildMissionTypeMap();
+            var integerStringMap = buildinvasionRewardMap();
             assertFalse(subscribeMap.isEmpty());
             assertFalse(missionTypeMap.isEmpty());
-            byte[] img = drawImagePlugin.drawWarframeSubscribeImage(subscribeMap, missionTypeMap);
+            byte[] img = drawImagePlugin.drawWarframeSubscribeImage(subscribeMap, missionTypeMap,integerStringMap);
             assertTrue(img.length > 0);
             Files.write(OUT.resolve("subscribe.png"), img);
             System.out.println("[subscribe] OK " + img.length + "B subscribe=" + subscribeMap.size() + " missionType=" + missionTypeMap.size());
