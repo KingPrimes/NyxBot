@@ -2,7 +2,7 @@
 test:
   isTest: false
 jwt:
-  expiration: 360
+  expiration: 3600
   secret: @JWT_SECRET@
 
 
