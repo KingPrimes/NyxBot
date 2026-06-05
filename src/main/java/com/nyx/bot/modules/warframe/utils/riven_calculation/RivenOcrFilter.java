@@ -50,6 +50,11 @@ public final class RivenOcrFilter {
     private static final Pattern STRAY_PAREN = Pattern.compile("(?<=[%\\d])\\s*[（(](?=[一-龥])");
 
     /**
+     * OCR 常将相邻的标点符号吸入文本区域尾部，如 "fevacron,"、"段位14."
+     */
+    private static final Pattern TRAILING_PUNCT = Pattern.compile("[,\\.;:，。；：]+$");
+
+    /**
      * 过滤 OCR 原始文本，仅保留武器名、紫卡名、属性词条。
      * 同时清除元素图标误识别的残留符号，尝试合并被换行拆分的属性。
      */
@@ -63,6 +68,7 @@ public final class RivenOcrFilter {
                 .filter(s -> !NOISE.matcher(s).matches())
                 .map(s -> ICON_ARTIFACT.matcher(s).replaceAll(""))
                 .map(s -> STRAY_PAREN.matcher(s).replaceFirst(""))
+                .map(s -> TRAILING_PUNCT.matcher(s).replaceFirst(""))
                 .map(String::trim)
                 .filter(s -> s.length() >= 2)
                 .toList();
@@ -79,6 +85,7 @@ public final class RivenOcrFilter {
             // 再次对属性行做图标清理
             String cleanLine = hasAttrVal ? ICON_ARTIFACT.matcher(line).replaceAll("") : line;
             cleanLine = STRAY_PAREN.matcher(cleanLine).replaceFirst("");
+            cleanLine = TRAILING_PUNCT.matcher(cleanLine).replaceFirst("");
 
             if (hasAttrVal && hasChinese) {
                 if (!buf.isEmpty()) {

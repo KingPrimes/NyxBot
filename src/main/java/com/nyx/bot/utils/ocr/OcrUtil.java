@@ -55,14 +55,20 @@ public class OcrUtil {
         Future<List<String>> future = OCR_EXECUTOR.submit(() -> {
             ParamConfig paramConfig = ParamConfig.getDefaultConfig();
             paramConfig.setPadding(50);
-            paramConfig.setMaxSideLen(0);
-            paramConfig.setBoxScoreThresh(0.5F);
+            // 限制图像最大边长，大图全分辨率检测会将拉丁字母拆成独立字符
+            paramConfig.setMaxSideLen(960);
+            paramConfig.setBoxScoreThresh(0.6F);
             paramConfig.setBoxThresh(0.3F);
-            paramConfig.setUnClipRatio(2.0F);
+            paramConfig.setUnClipRatio(2.5F);
             paramConfig.setMostAngle(true);
             InferenceEngine engine = InferenceEngine.getInstance(Model.ONNX_PPOCR_V4);
             OcrResult result = engine.runOcr(imgPath, paramConfig);
-            return Arrays.stream(result.getStrRes().split("\n")).toList();
+            // 移除 \r 干扰字符（大图检测时 PP-OCR 会在同行的每个字符后插入 \r）
+            String clean = result.getStrRes().replace("\r", "");
+            return Arrays.stream(clean.split("\n"))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList();
         });
         try {
             return future.get();

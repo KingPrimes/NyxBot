@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -220,8 +221,8 @@ public class RivenAttributeCompute {
         int n = trend.getAttributes().size();
         boolean nag = trend.getAttributes().stream().anyMatch(a -> Boolean.TRUE.equals(a.getNag()));
 
-        double sumRatio = 0;
-        int count = 0;
+        double[] ratios = new double[trend.getAttributes().size()];
+        int idx = 0;
         for (var attr : trend.getAttributes()) {
             var trendEntry = rivenLookup.findRivenTrendByAnalyseName(attr.getName()).orElse(null);
             if (trendEntry == null) continue;
@@ -238,21 +239,21 @@ public class RivenAttributeCompute {
             if (RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())) {
                 normalizedVal = normalizedVal > 1 ? (normalizedVal - 1) * 100 : 100 - (normalizedVal * 100);
             }
-            double ratio = normalizedVal / expectedMedian;
-            sumRatio += ratio;
-            count++;
+            ratios[idx++] = normalizedVal / expectedMedian;
         }
 
-        if (count == 0) return 1.0;
-        double avgRatio = sumRatio / count;
-        // ratio = gradeFactor × (rank+1)/9, gradeFactor ∈ [0.9, 1.1]
-        // 估算: (rank+1)/9 ≈ avgRatio / 1.0（取 grade=1.0 为中间值）
-        int estimatedRank = (int) Math.round(avgRatio * 9 - 1);
-        estimatedRank = Math.clamp(estimatedRank, 0, 8);
-        double rankScale = 9.0 / (estimatedRank + 1);
-        log.debug("紫卡等级估算: avgRatio={} → rank={}, scaleToMax={}", avgRatio, estimatedRank, rankScale);
-        if (rankScale > 2.0) {
-            log.warn("紫卡等级估算异常 (scale={})，OCR数据可能存在噪音或非满级紫卡", rankScale);
+        if (idx == 0) return 1.0;
+        // 用中位数而非平均数：过滤 OCR 噪声大的属性（如歧视词条 x1.xx 格式转换误差），
+        // 使 rankScale 不受单个属性 OCR 偏差影响
+        Arrays.sort(ratios, 0, idx);
+        double medianRatio = idx % 2 == 0
+                ? (ratios[idx / 2 - 1] + ratios[idx / 2]) / 2
+                : ratios[idx / 2];
+        double rankScale = 1.0 / medianRatio;
+        rankScale = Math.clamp(rankScale, 0.9, 9.0);
+        log.debug("紫卡缩放倍率: medianRatio={} → rankScale={}", medianRatio, rankScale);
+        if (rankScale > 2.5) {
+            log.warn("紫卡缩放倍率异常 (scale={})，OCR数据可能存在噪音", rankScale);
         }
         return rankScale;
     }

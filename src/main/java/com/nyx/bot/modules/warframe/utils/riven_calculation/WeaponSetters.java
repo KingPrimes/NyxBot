@@ -16,13 +16,18 @@ public class WeaponSetters {
                                       int i,
                                       ToDoubleFunction<RivenAnalyseTrend> baseExtractor) {
         double baseVal = baseExtractor.applyAsDouble(trend);
-        // 3条及以上词条时（i>=2），歧视词条也算负属性
-        boolean isNag = i >= 2
-                ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute());
-        model.setLowAttr(String.valueOf(attr.getLowAttribute(baseVal, v, i, attr.getNag(), isNag)));
-        model.setHighAttr(String.valueOf(attr.getHighAttribute(baseVal, v, i, attr.getNag(), isNag)));
+        // 歧视词条由数值正负决定属性
+        boolean isNag = RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute());
+        if (RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())) {
+            // 歧视词条显示百分比范围
+            double low = attr.getLowAttribute(baseVal, v, i, attr.getNag(), isNag);
+            double high = attr.getHighAttribute(baseVal, v, i, attr.getNag(), isNag);
+            model.setLowAttr(String.format("%.1f", low));
+            model.setHighAttr(String.format("%.1f", high));
+        } else {
+            model.setLowAttr(String.valueOf(attr.getLowAttribute(baseVal, v, i, attr.getNag(), isNag)));
+            model.setHighAttr(String.valueOf(attr.getHighAttribute(baseVal, v, i, attr.getNag(), isNag)));
+        }
     }
 
     public static void setPistols(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
