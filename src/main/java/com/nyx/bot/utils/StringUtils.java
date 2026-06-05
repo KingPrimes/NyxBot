@@ -9,7 +9,7 @@ import org.springframework.util.AntPathMatcher;
 import java.util.*;
 
 @Component
-public class StringUtils{
+public class StringUtils {
 
     private static final String RAND_STR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
@@ -302,7 +302,7 @@ public class StringUtils{
      * @return 是否包含任意一个字符串
      */
     public static boolean containsAnyIgnoreCase(CharSequence cs, CharSequence... searchCharSequences) {
-        if (cs == null || cs.isEmpty() || isNull(searchCharSequences) || searchCharSequences.length == 0) {
+        if (cs == null || cs.isEmpty() || isNull(searchCharSequences)) {
             return false;
         }
         for (CharSequence testStr : searchCharSequences) {

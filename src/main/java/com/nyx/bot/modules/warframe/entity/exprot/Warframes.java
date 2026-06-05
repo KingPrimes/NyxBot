@@ -46,7 +46,8 @@ public class Warframes extends BaseEntity {
     private Integer masteryReq;
     @JsonProperty("sprintSpeed")
     private Integer sprintSpeed;
-    @OneToMany(mappedBy = "abilityUniqueName", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "warframe_unique_name")
     @JsonProperty("abilities")
     private List<Abilities> abilities;
     @JsonProperty("productCategory")
@@ -64,6 +65,7 @@ public class Warframes extends BaseEntity {
         @JsonProperty("abilityName")
         private String abilityName;
         @JsonProperty("description")
+        @Column(columnDefinition = "text")
         private String description;
     }
 }

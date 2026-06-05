@@ -227,6 +227,29 @@ public class Weapons extends BaseEntity {
                 .toString();
     }
 
+    /**
+     * 获取修正后的武器类型。
+     * 守护武器按描述重新归类为霰弹枪/近战/步枪；
+     * LongGuns 中描述含"霰弹枪"的修正为 Shotguns。
+     */
+    @Transient
+    public ProductCategory getEffectiveCategory() {
+        ProductCategory cat = productCategory;
+        if (cat == null) return ProductCategory.LongGuns;
+
+        if (cat == ProductCategory.SentinelWeapons) {
+            String d = description;
+            if (d != null && d.contains("霰弹枪")) return ProductCategory.Shotguns;
+            if (d != null && (d.contains("近战") || (name != null && name.contains("分离"))))
+                return ProductCategory.Melee;
+            return ProductCategory.LongGuns;
+        }
+        if (description != null && (description.contains("霰弹枪") || description.contains("散弹枪"))) {
+            return ProductCategory.Shotguns;
+        }
+        return cat;
+    }
+
     @Getter
     public enum ProductCategory {
         Pistols("次要武器"),

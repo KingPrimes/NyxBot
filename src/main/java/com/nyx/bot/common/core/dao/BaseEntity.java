@@ -20,7 +20,7 @@ public class BaseEntity {
      * 每页条数（仅前端传参用，不入库）
      */
     @Transient
-    protected Integer size = 10;
+    protected Integer size = 15;
 
     @Override
     public boolean equals(Object o) {
