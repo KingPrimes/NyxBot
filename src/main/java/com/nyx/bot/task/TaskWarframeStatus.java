@@ -185,7 +185,7 @@ public class TaskWarframeStatus {
                 .forEach(expiries::add);
 
         // C. Cetus 赏金任务固定过期时间（替代 CetusCycle/CambionCycle 的计算值）
-        ws.getSyndicateMissions().stream()
+        java.util.Optional.ofNullable(ws.getSyndicateMissions()).orElse(List.of()).stream()
                 .filter(s -> s.getTag() != null && s.getTag() == SyndicateEnum.CetusSyndicate)
                 .findFirst()
                 .map(s -> safeEpochSecond(s.getExpiry()))

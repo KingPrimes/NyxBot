@@ -29,10 +29,12 @@ public class UserService implements UserDetailsService {
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(I18nUtils.message("auth.error.NamePassword"));
         }
+        SysUser sysUser = user.get();
+        String role = sysUser.getUserId() != null && sysUser.getUserId() == 1L ? "ROLE_ADMIN" : "ROLE_USER";
         return User
-                .withUsername(user.get().getUserName())
-                .password(user.get().getPassword())
-                .authorities("ROLE_USER")
+                .withUsername(sysUser.getUserName())
+                .password(sysUser.getPassword())
+                .authorities(role)
                 .build();
     }
 }

@@ -71,10 +71,10 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
         CetusCycle cetusCycle = newState.getCetusCycle();
 
         // 使用赏金任务的过期时间（API 固定值）作为周期唯一标识，而非 CetusCycle 的计算值
-        Instant bountyExpiry = newState.getSyndicateMissions().stream()
+        Instant bountyExpiry = java.util.Optional.ofNullable(newState.getSyndicateMissions()).orElse(List.of()).stream()
                 .filter(s -> s.getTag() != null && s.getTag() == SyndicateEnum.CetusSyndicate)
                 .findFirst()
-                .map(s -> s.getExpiry().getEpochSecond())
+                .map(s -> s.getExpiry() == null ? null : s.getExpiry().getEpochSecond())
                 .orElse(null);
         if (bountyExpiry == null) {
             log.debug("未找到 Cetus 赏金任务数据，跳过检测");

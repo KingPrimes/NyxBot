@@ -108,6 +108,14 @@ public class NotificationApplicationService {
      * 通知订阅者，区分主动推送和订阅推送
      */
     private void notifySubscribers(SubscribeType type, List<ChangeEvent<?>> changes) {
+        List<ChangeEvent<?>> pendingChanges = changes.stream()
+                .filter(change -> !historyExists(type, extractExpiry(change)))
+                .toList();
+        if (pendingChanges.isEmpty()) {
+            log.debug("类型 {} 没有待通知事件", type.getName());
+            return;
+        }
+
         List<MissionSubscribe> subscriptions = subscribeRepo.findSubscriptions(type);
         if (subscriptions.isEmpty()) {
             log.debug("类型 {} 没有订阅者", type.getName());
@@ -115,27 +123,30 @@ public class NotificationApplicationService {
         }
         log.debug("类型 {} 有 {} 个订阅组", type.getName(), subscriptions.size());
 
-        if (SUBSCRIPTION_TYPES.contains(type)) {
-            notifyBySubscription(subscriptions, type, changes);
-        } else {
-            notifyByActivePush(subscriptions, type, changes);
+        NotificationDispatchResult result = SUBSCRIPTION_TYPES.contains(type)
+                ? notifyBySubscription(subscriptions, type, pendingChanges)
+                : notifyByActivePush(subscriptions, type, pendingChanges);
+        if (result.sent() && !result.failed()) {
+            saveHistories(type, result.sentChanges());
         }
     }
 
     /**
      * 主动推送：按群合并消息，一条消息 @所有相关用户
      */
-    private void notifyByActivePush(List<MissionSubscribe> subscriptions,
-                                    SubscribeType type, List<ChangeEvent<?>> changes) {
+    private NotificationDispatchResult notifyByActivePush(List<MissionSubscribe> subscriptions,
+                                                          SubscribeType type, List<ChangeEvent<?>> changes) {
         MessageBuilder<?> builder = builders.get(type);
         if (builder == null) {
             log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
-            return;
+            return new NotificationDispatchResult(false, true, Set.of());
         }
 
+        boolean sent = false;
+        boolean failed = false;
+        Set<ChangeEvent<?>> sentChanges = new LinkedHashSet<>();
         for (MissionSubscribe sub : subscriptions) {
             try {
-                // 收集该群所有订阅此类型的用户
                 List<Long> userIds = sub.getUsers().stream()
                         .filter(u -> u.getCheckTypes().stream().anyMatch(r -> r.getSubscribe() == type))
                         .map(MissionSubscribeUser::getUserId)
@@ -147,6 +158,7 @@ public class NotificationApplicationService {
                 Bot bot = botContainer.robots.get(sub.getSubBotUid());
                 if (bot == null) {
                     log.warn("Bot {} 不存在，跳过通知", sub.getSubBotUid());
+                    failed = true;
                     continue;
                 }
 
@@ -155,42 +167,44 @@ public class NotificationApplicationService {
                 msg.text("您订阅的 " + type.getName() + " 已更新！");
 
                 for (ChangeEvent<?> change : changes) {
-                    Long expiry = extractExpiry(change);
-                    if (expiry != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiry)) {
-                        log.debug("重复通知已跳过 [type:{}] [expiry:{}]", type.getName(), expiry);
-                        continue;
-                    }
                     @SuppressWarnings("unchecked")
                     ChangeEvent<Object> rawChange = (ChangeEvent<Object>) change;
                     MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
                     ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, null);
                     msg.text(eventMsg.buildCQ());
-                    saveHistory(type, expiry);
                 }
 
                 bot.sendGroupMsg(sub.getSubGroup(), msg.buildCQ(), false);
+                sent = true;
+                sentChanges.addAll(changes);
                 log.debug("通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
                         sub.getSubBotUid(), sub.getSubGroup(), type.getName(), userIds.size());
             } catch (Exception e) {
+                failed = true;
                 log.error("通知发送失败 [group:{}] [type:{}]", sub.getSubGroup(), type.getName(), e);
             }
         }
+        return new NotificationDispatchResult(sent, failed, sentChanges);
     }
 
     /**
      * 订阅推送：按用户规则过滤，同群同类型合并为一条消息
      */
-    private void notifyBySubscription(List<MissionSubscribe> subscriptions,
-                                      SubscribeType type, List<ChangeEvent<?>> changes) {
+    private NotificationDispatchResult notifyBySubscription(List<MissionSubscribe> subscriptions,
+                                                            SubscribeType type, List<ChangeEvent<?>> changes) {
         MessageBuilder<?> builder = builders.get(type);
         if (builder == null) {
             log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
-            return;
+            return new NotificationDispatchResult(false, true, Set.of());
         }
 
+        boolean sent = false;
+        boolean failed = false;
+        Set<ChangeEvent<?>> sentChanges = new LinkedHashSet<>();
         for (MissionSubscribe sub : subscriptions) {
             try {
                 List<Long> matchedUsers = new ArrayList<>();
+                Set<ChangeEvent<?>> groupChanges = new LinkedHashSet<>();
                 ArrayMsgUtils msg = ArrayMsgUtils.builder();
 
                 for (MissionSubscribeUser user : sub.getUsers()) {
@@ -201,11 +215,8 @@ public class NotificationApplicationService {
                     matchedUsers.add(user.getUserId());
                     msg.at(user.getUserId());
 
+                    groupChanges.addAll(matched);
                     for (ChangeEvent<?> change : matched) {
-                        Long expiry = extractExpiry(change);
-                        if (expiry != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiry)) {
-                            continue;
-                        }
                         MissionSubscribeUserCheckType matchingRule = user.getCheckTypes().stream()
                                 .filter(rule -> matchesRule(change, rule))
                                 .findFirst().orElse(null);
@@ -214,7 +225,6 @@ public class NotificationApplicationService {
                         MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
                         ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, matchingRule);
                         msg.text(eventMsg.buildCQ());
-                        saveHistory(type, expiry);
                     }
                 }
 
@@ -225,17 +235,22 @@ public class NotificationApplicationService {
                 Bot bot = botContainer.robots.get(sub.getSubBotUid());
                 if (bot == null) {
                     log.warn("Bot {} 不存在，跳过通知", sub.getSubBotUid());
+                    failed = true;
                     continue;
                 }
 
                 msg.text("您订阅的 " + type.getName() + " 已更新！");
                 bot.sendGroupMsg(sub.getSubGroup(), msg.buildCQ(), false);
+                sent = true;
+                sentChanges.addAll(groupChanges);
                 log.debug("通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
                         sub.getSubBotUid(), sub.getSubGroup(), type.getName(), matchedUsers.size());
             } catch (Exception e) {
+                failed = true;
                 log.error("通知发送失败 [group:{}] [type:{}]", sub.getSubGroup(), type.getName(), e);
             }
         }
+        return new NotificationDispatchResult(sent, failed, sentChanges);
     }
 
     private List<ChangeEvent<?>> filterMatchingChanges(MissionSubscribeUser user, List<ChangeEvent<?>> changes) {
@@ -260,6 +275,18 @@ public class NotificationApplicationService {
             return event.invasionReward() != null && rule.getInvasionReward() == event.invasionReward();
         }
         return true;
+    }
+
+    private boolean historyExists(SubscribeType type, Long expiryTimestamp) {
+        return expiryTimestamp != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiryTimestamp);
+    }
+
+    private void saveHistories(SubscribeType type, Collection<ChangeEvent<?>> changes) {
+        changes.stream()
+                .map(this::extractExpiry)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(expiry -> saveHistory(type, expiry));
     }
 
     /**
@@ -288,5 +315,8 @@ public class NotificationApplicationService {
         } catch (Exception e) {
             log.error("保存通知历史失败 [type:{}] [expiry:{}]", type.getName(), expiryTimestamp, e);
         }
+    }
+
+    private record NotificationDispatchResult(boolean sent, boolean failed, Set<ChangeEvent<?>> sentChanges) {
     }
 }
