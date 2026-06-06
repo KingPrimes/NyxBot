@@ -68,7 +68,7 @@ public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
         ActiveMission translated = worldStateUtils.translateActiveMission(mission);
         // 库枚举 → 本地枚举转换（常量名一致）
         MissionType localMissionType = mission.getMissionType() != null
-                ? MissionType.valueOf(mission.getMissionType().name()) : null;
+                ? findLocalMissionType(mission.getMissionType().name()) : null;
         return ChangeEvent.of(
                 SubscribeType.FISSURES,
                 localMissionType,
@@ -94,6 +94,15 @@ public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
             case VoidT5 -> 5;
             case VoidT6 -> 6;
         };
+    }
+
+    private static MissionType findLocalMissionType(String name) {
+        for (MissionType mt : MissionType.values()) {
+            if (mt.name().equals(name)) {
+                return mt;
+            }
+        }
+        return null;
     }
 
     @Override
