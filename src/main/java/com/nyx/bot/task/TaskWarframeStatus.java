@@ -35,9 +35,11 @@ import java.util.stream.Stream;
 @Slf4j
 public class TaskWarframeStatus {
 
-    static final long MIN_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
+    static final long MIN_INTERVAL_MS = TimeUnit.MINUTES.toMillis(2);
     static final long MAX_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10);
     static final long BUFFER_MS = TimeUnit.SECONDS.toMillis(30);
+    static final long SMOOTH_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);
+    static final int SMOOTH_THRESHOLD = 3;
 
     private final ObjectMapper objectMapper;
     private final NotificationApplicationService notificationService;
@@ -53,6 +55,7 @@ public class TaskWarframeStatus {
     private final ExecutorService boundedExecutor;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private ScheduledFuture<?> scheduledFuture;
+    private int consecutiveMinIntervalCount = 0;
 
     public TaskWarframeStatus(ObjectMapper objectMapper,
                               NotificationApplicationService notificationService,
@@ -202,15 +205,27 @@ public class TaskWarframeStatus {
 
     long calculateNextDelay(List<Instant> expiries) {
         if (expiries.isEmpty()) {
+            consecutiveMinIntervalCount = 0;
             return TimeUnit.MILLISECONDS.toSeconds(MAX_INTERVAL_MS);
         }
 
         Instant earliest = expiries.stream().min(Instant::compareTo).orElseThrow();
         long remainingMs = earliest.toEpochMilli() - System.currentTimeMillis();
         long nextDelayMs = remainingMs - BUFFER_MS;
+        long clampedDelayMs = Math.clamp(nextDelayMs, MIN_INTERVAL_MS, MAX_INTERVAL_MS);
 
-        return TimeUnit.MILLISECONDS.toSeconds(
-                Math.clamp(nextDelayMs, MIN_INTERVAL_MS, MAX_INTERVAL_MS));
+        if (clampedDelayMs == MIN_INTERVAL_MS) {
+            consecutiveMinIntervalCount++;
+            if (consecutiveMinIntervalCount >= SMOOTH_THRESHOLD) {
+                consecutiveMinIntervalCount = 0;
+                log.debug("连续 {} 次最小间隔，平滑延长到 {}s", SMOOTH_THRESHOLD, TimeUnit.MILLISECONDS.toSeconds(SMOOTH_INTERVAL_MS));
+                return TimeUnit.MILLISECONDS.toSeconds(SMOOTH_INTERVAL_MS);
+            }
+        } else {
+            consecutiveMinIntervalCount = 0;
+        }
+
+        return TimeUnit.MILLISECONDS.toSeconds(clampedDelayMs);
     }
 
     /**
