@@ -20,13 +20,19 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "mission_subscribe_user")
+@Table(name = "mission_subscribe_user",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_sub_user", columnNames = {"sub_id", "user_id"})
+        },
+        indexes = {
+                @Index(name = "idx_user_id", columnList = "user_id")
+        })
 public class MissionSubscribeUser extends BaseEntity {
 
     @Column(name = "user_id", nullable = false)
     Long userId;
 
-    @Column(name = "user_name")
+    @Column(name = "user_name", nullable = false)
     String userName;
 
     @Id

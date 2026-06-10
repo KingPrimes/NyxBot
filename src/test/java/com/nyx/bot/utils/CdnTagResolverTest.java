@@ -3,7 +3,10 @@ package com.nyx.bot.utils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.nyx.bot.utils.gitutils.CdnTagResolver;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -19,18 +22,15 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class CdnTagResolverTest {
 
-    private static WireMockServer wireMock;
-
     private static final String TAGS_JSON = """
             [
               {"name": "v1.5.0", "zipball_url": "https://api.github.com/repos/KingPrimes/DataSource/zipball/v1.5.0"},
               {"name": "v1.4.0", "zipball_url": "https://api.github.com/repos/KingPrimes/DataSource/zipball/v1.4.0"}
             ]""";
-
     private static final String SINGLE_TAG_JSON = """
             [{"name": "v2.0.0"}]""";
-
     private static final String EMPTY_TAGS_JSON = "[]";
+    private static WireMockServer wireMock;
 
     @BeforeAll
     static void startWireMock() {

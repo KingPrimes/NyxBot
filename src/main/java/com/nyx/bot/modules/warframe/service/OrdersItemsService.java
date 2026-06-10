@@ -11,27 +11,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 public class OrdersItemsService {
 
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    OrdersItemsRepository ordersItemsService;
+    private final OrdersItemsRepository repository;
 
-    public OrdersItemsService(ObjectMapper objectMapper, OrdersItemsRepository ordersItemsService) {
+    public OrdersItemsService(ObjectMapper objectMapper, OrdersItemsRepository repository) {
         this.objectMapper = objectMapper;
-        this.ordersItemsService = ordersItemsService;
+        this.repository = repository;
     }
 
     @Transactional
     public Integer initOrdersItemsData() {
         log.info("开始初始化Market物品数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_ITEMS);
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -39,15 +40,12 @@ public class OrdersItemsService {
                     log.error("未获取到Market物品数据");
                     return -1;
                 }
-                List<OrdersItems> items = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    OrdersItems item = buildOrdersItems(itemNode);
-                    if (item != null) {
-                        items.add(item);
-                    }
-                }
+                List<OrdersItems> items = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(this::buildOrdersItems)
+                        .filter(Objects::nonNull)
+                        .toList();
                 log.info("成功初始化Market物品数据，数量为：{}", items.size());
-                return ordersItemsService.saveAllAndFlush(items).size();
+                return repository.saveAllAndFlush(items).size();
             } catch (Exception e) {
                 log.error("解析Market物品数据失败", e);
                 return -1;

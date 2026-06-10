@@ -1,6 +1,7 @@
 package com.nyx.bot.modules.warframe.service;
 
 import com.nyx.bot.common.core.page.PageData;
+import com.nyx.bot.data.ExportFilePath;
 import com.nyx.bot.modules.warframe.entity.exprot.Relics;
 import com.nyx.bot.modules.warframe.repo.AliasRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.RelicsRepository;
@@ -31,15 +32,18 @@ public class RelicsService {
         this.relicsImportUtil = relicsImportUtil;
     }
 
+    /**
+     * 从导出文件初始化遗物数据（路径内部解析）
+     */
     @Transactional
-    public Integer initRelicsData(String filePath) {
+    public void initRelicsData() {
         log.info("开始初始化遗物数据");
-        return relicsImportUtil.importRelicsData(filePath);
+        relicsImportUtil.importRelicsData(ExportFilePath.resolve("ExportRelicArcane"));
     }
 
 
     public PageData<Relics> findAllPageable(Relics relics) {
-        if (relics.getName().isEmpty()) relics.setName(null);
+        if (relics.getName() == null || relics.getName().isEmpty()) relics.setName(null);
         var page = repository.findAllPageable(relics,
                 PageRequest.of(
                         relics.getCurrent() - 1,

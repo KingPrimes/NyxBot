@@ -69,6 +69,20 @@ public class SecurityConfiguration {
                                 shiro,
                                 "/v3/api-docs"
                         ).permitAll()
+                        .requestMatchers(
+                                "/auth/info",
+                                "/auth/changeUsername",
+                                "/auth/restorePassword",
+                                "/auth/refreshToken",
+                                "/api/warframe/**"
+                        ).authenticated()
+                        .requestMatchers(
+                                "/config/**",
+                                "/data/**",
+                                "/log/**",
+                                "/api/logs/**",
+                                "/sse/**"
+                        ).hasRole("ADMIN")
                         //其余请求路径都需要权限才可以访问
                         .anyRequest().authenticated())
                 .logout(logout -> logout

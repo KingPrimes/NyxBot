@@ -5,251 +5,73 @@ import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.modules.warframe.utils.RivenMatcherUtil;
 import io.github.kingprimes.model.RivenAnalyseTrendModel;
 
+import java.util.function.ToDoubleFunction;
+
 public class WeaponSetters {
 
-    /**
-     * 次要武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setPistols(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getPistol(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getPistol(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+    private static void setWeaponAttr(RivenAnalyseTrendCompute.Attribute attr,
+                                      RivenAnalyseTrendModel.Attribute model,
+                                      double v,
+                                      RivenAnalyseTrend trend,
+                                      int i,
+                                      ToDoubleFunction<RivenAnalyseTrend> baseExtractor) {
+        double baseVal = baseExtractor.applyAsDouble(trend);
+        // 歧视词条由数值正负决定属性
+        boolean isNag = RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute());
+        if (RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())) {
+            // 歧视词条显示百分比范围
+            double low = attr.getLowAttribute(baseVal, v, i, attr.getNag(), isNag);
+            double high = attr.getHighAttribute(baseVal, v, i, attr.getNag(), isNag);
+            model.setLowAttr(String.format("%.1f", low));
+            model.setHighAttr(String.format("%.1f", high));
+        } else {
+            model.setLowAttr(String.valueOf(attr.getLowAttribute(baseVal, v, i, attr.getNag(), isNag)));
+            model.setHighAttr(String.valueOf(attr.getHighAttribute(baseVal, v, i, attr.getNag(), isNag)));
+        }
     }
 
-    /**
-     * 主武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setLongGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getRifle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getRifle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+    public static void setPistols(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                  double v, RivenAnalyseTrend trend, int i) {
+        setWeaponAttr(attr, model, v, trend, i, RivenAnalyseTrend::getPistol);
     }
 
-    /**
-     * 近战武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getMelle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getMelle(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+    public static void setLongGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                   double v, RivenAnalyseTrend trend, int i) {
+        setWeaponAttr(attr, model, v, trend, i, RivenAnalyseTrend::getRifle);
     }
 
-    /**
-     * Archwing武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setSpaceGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getArchwing(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getArchwing(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+    public static void setMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                double v, RivenAnalyseTrend trend, int i) {
+        setWeaponAttr(attr, model, v, trend, i, RivenAnalyseTrend::getMelle);
     }
 
-    /**
-     * Archwing近战武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setSpaceMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        setSpaceGuns(attr, model, v, rivenAnalyseTrend, i);
+    public static void setSpaceGuns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                    double v, RivenAnalyseTrend trend, int i) {
+        setWeaponAttr(attr, model, v, trend, i, RivenAnalyseTrend::getArchwing);
     }
 
-    /**
-     * 显赫武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setSpecialItems(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i);
+    public static void setSpaceMelee(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                     double v, RivenAnalyseTrend trend, int i) {
+        setSpaceGuns(attr, model, v, trend, i);
     }
 
-    /**
-     * 星舰武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setCrewShipWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        setRivenAnalyseTrend(attr, model, v, rivenAnalyseTrend, i);
+    public static void setSpecialItems(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                       double v, RivenAnalyseTrend trend, int i) {
+        // 显赫武器不出紫卡，无需计算
     }
 
-    /**
-     * 守护武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setSentinelWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        setLongGuns(attr, model, v, rivenAnalyseTrend, i);
+    public static void setCrewShipWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                          double v, RivenAnalyseTrend trend, int i) {
+        // 星舰武器不出紫卡，无需计算
     }
 
-    /**
-     * 霰弹枪武器
-     *
-     * @param attr              武器属性
-     * @param model             武器属性模型
-     * @param v                 武器属性值
-     * @param rivenAnalyseTrend 武器分析趋势
-     * @param i                 武器属性索引
-     */
-    public static void setShotguns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-        model.setLowAttr(
-                String.valueOf(
-                        attr.getLowAttribute(
-                                rivenAnalyseTrend.getShotgun(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
-        model.setHighAttr(
-                String.valueOf(
-                        attr.getHighAttribute(
-                                rivenAnalyseTrend.getShotgun(),
-                                v,
-                                i,
-                                attr.getNag(),
-                                i >= 2 ? RivenMatcherUtil.whetherItIsDiscrimination(attr.getAttributeName())
-                                        || RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                                        : RivenMatcherUtil.isNegativeAttribute(attr.getAttributeName(), attr.getAttribute())
-                        )
-                )
-        );
+    public static void setSentinelWeapons(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                          double v, RivenAnalyseTrend trend, int i) {
+        setLongGuns(attr, model, v, trend, i);
     }
 
-    private static void setRivenAnalyseTrend(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model, double v, RivenAnalyseTrend rivenAnalyseTrend, int i) {
-
+    public static void setShotguns(RivenAnalyseTrendCompute.Attribute attr, RivenAnalyseTrendModel.Attribute model,
+                                   double v, RivenAnalyseTrend trend, int i) {
+        setWeaponAttr(attr, model, v, trend, i, RivenAnalyseTrend::getShotgun);
     }
 }

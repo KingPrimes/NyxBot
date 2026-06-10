@@ -49,16 +49,8 @@ public class CacheUtils {
             log.error("键值对缺少！");
             return;
         }
-        // 遍历动态参数
-        for (int i = 0; i < kv.length + 1; ) {
-            if (i + 1 < kv.length + 1) {
-                Objects.requireNonNull(getCacheManager().getCache(name)).put(kv[i], kv[i + 1]);
-            }
-            if (i + 2 < kv.length + 1) {
-                i += 2;
-            } else {
-                i++;
-            }
+        for (int i = 0; i < kv.length; i += 2) {
+            Objects.requireNonNull(getCacheManager().getCache(name)).put(kv[i], kv[i + 1]);
         }
     }
 

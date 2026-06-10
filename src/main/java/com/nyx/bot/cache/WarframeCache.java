@@ -1,14 +1,13 @@
 package com.nyx.bot.cache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.common.exception.DataNotInfoException;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.I18nUtils;
-import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.model.WorldState;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static com.nyx.bot.utils.CacheUtils.WARFRAME_STATUS;
@@ -32,15 +31,16 @@ public class WarframeCache {
 
     /**
      * 设置Warframe世界状态数据并持久化到本地文件
-     * <p>先写入本地JSON文件（用于重启后恢复），再写入缓存（带 TTL）</p>
+     * <p>直接保存原始JSON（避免反序列化再序列化导致的体积膨胀，实测可减少 95%+），
+     * 再写入缓存（带 TTL）</p>
      *
-     * @param object     世界状态数据对象
+     * @param object     世界状态数据对象（用于缓存查询）
+     * @param rawJson    API 原始 JSON 字符串（用于文件持久化）
      * @param ttlSeconds 缓存过期时间（秒），与下次轮询时间对齐
      */
-    public static void setWarframeStatus(Object object, long ttlSeconds) {
-        ObjectMapper mapper = SpringUtils.getBean(ObjectMapper.class);
+    public static void setWarframeStatus(Object object, String rawJson, long ttlSeconds) {
         try {
-            FileUtils.writeFile("./data/status", mapper.writeValueAsBytes(object));
+            FileUtils.writeFile("./data/status", rawJson.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("持久化WorldState失败: {}", e.getMessage());
             return;

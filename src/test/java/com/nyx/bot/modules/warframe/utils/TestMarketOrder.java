@@ -38,7 +38,7 @@ public class TestMarketOrder {
         keys.forEach(key -> {
             MarketResult<OrdersItems, ?> set = mou.toDataBase(key);
             assertNotNull(set);
-            log.info("Key:{},Set:{}",key,set.toString());
+            log.info("Key:{},Set:{}", key, set);
         });
     }
 }

@@ -1,0 +1,33 @@
+name: 文档改进
+description: 帮助改进项目文档（Wiki、README 等）
+title: '[文档] '
+labels: documentation
+assignees: KingPrimes
+body:
+  - type: markdown
+    attributes:
+      value: "## 问题描述"
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      placeholder: 哪里的文档有问题？缺少了什么信息？哪里有错误？
+      label: 请描述文档存在的问题
+  - type: markdown
+    attributes:
+      value: "## 改进建议"
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 你建议怎么改？可以贴修改后的文本
+      label: 改进方案
+  - type: markdown
+    attributes:
+      value: "## 附加信息"
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 可以贴参考链接、截图等
+      label: 附加信息

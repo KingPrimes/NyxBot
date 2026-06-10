@@ -2,7 +2,6 @@ package com.nyx.bot.modules.bot.controller.bot;
 
 import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.utils.MatcherUtils;
-import com.nyx.bot.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -119,12 +118,13 @@ public class HandOff {
         map.put("server.port", config.getServerPort());
 
         // 配置ws OneBot设置
-        configureWsSettings(args, config, map);
+        configureWsSettings(args, env, config, map);
 
         // 配置代理
-        configureProxy(args, config, map);
+        configureProxy(args, env, config, map);
 
         // 配置插件前缀（是否需要艾特触发）
+        resolvePluginPrefix(args, env, config);
         map.put("nyx.plugin-prefix", config.getPluginPrefix());
 
         MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
@@ -140,9 +140,11 @@ public class HandOff {
      * @param env  环境配置对象，用于获取默认端口
      * @return 解析出的端口号，如果未指定或无效则返回默认端口
      */
+    /**
+     * 解析端口号，优先级：CLI 参数 > 环境变量 SERVER_PORT > 默认 8080
+     */
     private static Integer resolveServerPort(String[] args, ConfigurableEnvironment env) {
-        int defaultPort = env.getProperty("serverPort", Integer.class, 8080);
-        int port = defaultPort;
+        int port = 8080;
 
         for (String arg : args) {
             String lower = arg.trim();
@@ -151,16 +153,15 @@ public class HandOff {
                     Integer number = MatcherUtils.getNumber(arg);
                     if (number > 0 && number < 65535) {
                         port = number;
-                    } else {
-                        log.warn("Invalid serverPort:{}", number);
                     }
                 } catch (Exception e) {
                     log.error("Invalid serverPort:{}", arg);
                 }
-                break;
+                return port;
             }
         }
-        return port;
+        // CLI 未指定时检查环境变量 SERVER_PORT
+        return env.getProperty("SERVER_PORT", Integer.class, port);
     }
 
     /**
@@ -190,38 +191,40 @@ public class HandOff {
      * @param config Nyx配置对象
      * @param map    属性映射表，用于存储配置键值对
      */
-    private static void configureWsSettings(String[] args, NyxConfig config, Map<String, Object> map) {
-        // 配置WebSocket服务端启用状态
-        boolean wsserverenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsserverenable"));
+    /**
+     * 配置 WebSocket / OneBot 设置，优先级：CLI > 环境变量 > locate.yaml
+     */
+    private static void configureWsSettings(String[] args, ConfigurableEnvironment env,
+                                            NyxConfig config, Map<String, Object> map) {
+        // WebSocket 服务端启用：CLI -wsserverenable 或环境变量 SHIRO_WS_SERVER_ENABLE
+        boolean wsserverenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsserverenable"))
+                || "true".equalsIgnoreCase(env.getProperty("SHIRO_WS_SERVER_ENABLE"));
         config.setIsServerOrClient(wsserverenable);
 
-        // 配置WebSocket服务端URL
-        withArg(args, "-wsserverurl=", arg ->
-                config.setWsServerUrl(StringUtils.getSubString(arg, "=", ""))
-        );
+        // WebSocket 服务端 URL：CLI -wsServerUrl= 或环境变量 SHIRO_WS_SERVER_URL
+        withArgOrEnv(args, env, "-wsserverurl=", "SHIRO_WS_SERVER_URL",
+                v -> config.setWsServerUrl(v));
         map.put("shiro.ws.server.url", config.getWsServerUrl());
 
-        // 配置WebSocket客户端启用状态
+        // WebSocket 客户端状态
         if (wsserverenable) {
             map.put("shiro.ws.client.enable", false);
         } else {
-            boolean wsclientenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsclientenable"));
+            boolean wsclientenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsclientenable"))
+                    || "true".equalsIgnoreCase(env.getProperty("SHIRO_WS_CLIENT_ENABLE"));
             config.setIsServerOrClient(!wsclientenable);
             map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
         }
-
         map.put("shiro.ws.server.enable", config.getIsServerOrClient());
 
-        // 配置WebSocket客户端URL
-        withArg(args, "-wsclienturl=", arg ->
-                config.setWsClientUrl(StringUtils.getSubString(arg, "=", ""))
-        );
+        // WebSocket 客户端 URL：CLI -wsClientUrl= 或环境变量 SHIRO_WS_CLIENT_URL
+        withArgOrEnv(args, env, "-wsclienturl=", "SHIRO_WS_CLIENT_URL",
+                v -> config.setWsClientUrl(v));
         map.put("shiro.ws.client.url", config.getWsClientUrl());
 
-        // 配置Shiro令牌
-        withArg(args, "-shirotoken=", arg ->
-                config.setToken(StringUtils.getSubString(arg, "=", ""))
-        );
+        // Shiro Token：CLI -shiroToken= 或环境变量 SHIRO_TOKEN
+        withArgOrEnv(args, env, "-shirotoken=", "SHIRO_TOKEN",
+                v -> config.setToken(v));
         map.put("shiro.token", config.getToken());
     }
 
@@ -232,30 +235,40 @@ public class HandOff {
      * @param config Nyx配置对象
      * @param map    属性映射表，用于存储配置键值对
      */
-    private static void configureProxy(String[] args, NyxConfig config, Map<String, Object> map) {
-        // 配置HTTP代理地址
-        withArg(args, "-httpproxy=", arg ->
-                config.setHttpProxy(StringUtils.getSubString(arg, "=", ""))
-        );
+    /**
+     * 配置代理设置，优先级：CLI > 环境变量 > locate.yaml
+     */
+    private static void configureProxy(String[] args, ConfigurableEnvironment env,
+                                       NyxConfig config, Map<String, Object> map) {
+        withArgOrEnv(args, env, "-httpproxy=", "HTTP_PROXY",
+                v -> config.setHttpProxy(v));
         map.put("http.proxy", config.getHttpProxy());
 
-        // 配置SOCKS代理地址
-        withArg(args, "-socksproxy=", arg ->
-                config.setSocksProxy(StringUtils.getSubString(arg, "=", ""))
-        );
+        withArgOrEnv(args, env, "-socksproxy=", "SOCKS_PROXY",
+                v -> config.setSocksProxy(v));
         map.put("socks.proxy", config.getSocksProxy());
 
-        // 配置代理用户名
-        withArg(args, "-proxyuser=", arg ->
-                config.setProxyUser(StringUtils.getSubString(arg, "=", ""))
-        );
+        withArgOrEnv(args, env, "-proxyuser=", "PROXY_USER",
+                v -> config.setProxyUser(v));
         map.put("proxy.user", config.getProxyUser());
 
-        // 配置代理密码
-        withArg(args, "-proxypassword=", arg ->
-                config.setProxyPassword(StringUtils.getSubString(arg, "=", ""))
-        );
+        withArgOrEnv(args, env, "-proxypassword=", "PROXY_PASSWORD",
+                v -> config.setProxyPassword(v));
         map.put("proxy.password", config.getProxyPassword());
+    }
+
+    /**
+     * 配置插件前缀，优先级：CLI > 环境变量 PLUGIN_PREFIX > locate.yaml
+     */
+    private static void resolvePluginPrefix(String[] args, ConfigurableEnvironment env, NyxConfig config) {
+        if (Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-pluginprefix"))) {
+            config.setPluginPrefix(true);
+            return;
+        }
+        String envVal = env.getProperty("PLUGIN_PREFIX");
+        if ("true".equalsIgnoreCase(envVal)) {
+            config.setPluginPrefix(true);
+        }
     }
 
     /**
@@ -265,13 +278,31 @@ public class HandOff {
      * @param prefix   要查找的参数前缀
      * @param consumer 找到匹配参数时的处理函数
      */
-    private static void withArg(String[] args, String prefix, Consumer<String> consumer) {
-        // 查找第一个匹配指定前缀的参数并应用处理函数
-        Arrays.stream(args)
-                .map(a -> a.trim())
-                .filter(a -> a.toLowerCase().startsWith(prefix.toLowerCase()))
+    /**
+     * 从 CLI 参数中查找指定前缀的值，应用于 consumer。
+     * CLI 未找到时回退到环境变量（Spring Environment 会同时读取系统属性和环境变量）。
+     */
+    private static void withArgOrEnv(String[] args, ConfigurableEnvironment env,
+                                     String prefix, String envKey, Consumer<String> consumer) {
+        // 先查 CLI 参数
+        String cliVal = Arrays.stream(args)
+                .map(a -> a.trim().toLowerCase())
+                .filter(a -> a.startsWith(prefix.toLowerCase()))
                 .findFirst()
-                .ifPresent(consumer);
+                .map(a -> {
+                    int eq = a.indexOf('=');
+                    return eq >= 0 ? a.substring(eq + 1) : "";
+                })
+                .orElse(null);
+        if (cliVal != null && !cliVal.isEmpty()) {
+            consumer.accept(cliVal);
+            return;
+        }
+        // CLI 未指定时回退到环境变量
+        String envVal = env.getProperty(envKey);
+        if (envVal != null && !envVal.isEmpty()) {
+            consumer.accept(envVal);
+        }
     }
 
     static class MapPropertySource extends org.springframework.core.env.MapPropertySource {

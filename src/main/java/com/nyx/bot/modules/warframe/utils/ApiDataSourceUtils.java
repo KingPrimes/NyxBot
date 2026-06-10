@@ -10,15 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
 public class ApiDataSourceUtils {
 
     private final ObjectMapper objectMapper;
+    private final ExecutorService taskExecutor;
 
-    public ApiDataSourceUtils(ObjectMapper objectMapper) {
+    public ApiDataSourceUtils(ObjectMapper objectMapper, ExecutorService taskExecutor) {
         this.objectMapper = objectMapper;
+        this.taskExecutor = taskExecutor;
     }
 
     /**
@@ -40,42 +43,45 @@ public class ApiDataSourceUtils {
     }
 
     /**
-     * 并发请求多个URL，返回第一个成功获取并解析数据的结果
+     * 并发请求多个URL，返回第一个成功获取并解析数据的结果。
+     * 使用虚拟线程执行器避免 pin 平台线程，失败的任务不会抢先取消尚未完成的请求。
      *
      * @param urls          URL列表
      * @param typeReference 数据类型引用，用于反序列化响应数据
      * @param <T>           数据元素类型
-     * @return CompletableFuture包装的Map.Entry，键为成功获取数据的URL，值为解析后的数据列表；
-     * 如果所有URL都失败则返回null
+     * @return CompletableFuture，成功时包含 URL→数据 映射；所有URL都失败时返回 null
      */
     private <T> CompletableFuture<Map.Entry<String, List<T>>> firstCompleted(List<String> urls, TypeReference<List<T>> typeReference) {
-        // 为每个URL创建异步HTTP请求任务
-        List<CompletableFuture<Map.Entry<String, List<T>>>> futures = new ArrayList<>();
+        CompletableFuture<Map.Entry<String, List<T>>> result = new CompletableFuture<>();
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+
         for (String url : urls) {
-            futures.add(
-                    CompletableFuture
-                            .supplyAsync(() -> {
-                                HttpUtils.Body body = HttpUtils.sendGet(url);
-                                if (body.code().is2xxSuccessful()) {
-                                    try {
-                                        List<T> dataList = objectMapper.readValue(body.body(), typeReference);
-                                        return Map.entry(url, dataList);
-                                    } catch (Exception e) {
-                                        // 解析失败，返回null
-                                        return null;
-                                    }
-                                }
-                                // HTTP状态码不是2xx，返回null
-                                return null;
-                            })
-            );
+            CompletableFuture<?> future = CompletableFuture.runAsync(() -> {
+                try {
+                    HttpUtils.Body body = HttpUtils.sendGet(url);
+                    if (body.is2xxSuccessful()) {
+                        List<T> dataList = objectMapper.readValue(body.body(), typeReference);
+                        result.complete(Map.entry(url, dataList));
+                    }
+                } catch (Exception ignored) {
+                    // 当前 URL 失败，其他 URL 可能成功，忽略
+                }
+            }, taskExecutor);
+            futures.add(future);
         }
-        // 等待任一项任务完成
-        CompletableFuture<Object> anyOf = CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]));
-        // 处理结果并取消未完成的任务
-        return anyOf
-                .thenApply(obj -> (Map.Entry<String, List<T>>) obj)
-                .whenComplete((r, t) -> cancelUnfinishedFutures(futures));
+
+        // 所有请求都完成但无人成功时，返回 null
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenRun(() -> result.complete(null));
+
+        // 有人成功或全部失败时，取消尚未完成的请求
+        return result.whenComplete((r, t) -> {
+            for (CompletableFuture<?> f : futures) {
+                if (!f.isDone()) {
+                    f.cancel(true);
+                }
+            }
+        });
     }
 
     /**
@@ -120,16 +126,4 @@ public class ApiDataSourceUtils {
         return null;
     }
 
-    /**
-     * 取消所有未完成的请求
-     *
-     * @param futures 请求列表
-     */
-    private <T> void cancelUnfinishedFutures(List<CompletableFuture<Map.Entry<String, List<T>>>> futures) {
-        for (CompletableFuture<Map.Entry<String, List<T>>> future : futures) {
-            if (!future.isDone()) {
-                future.cancel(true);
-            }
-        }
-    }
 }

@@ -2,8 +2,10 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.BastWorldState;
 import io.github.kingprimes.model.worldstate.Invasion;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class InvasionsChangeDetector implements ChangeDetector<Invasion> {
+    private final WorldStateUtils worldStateUtils;
+
+    public InvasionsChangeDetector(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public List<ChangeEvent<Invasion>> detectChanges(WorldState oldState, WorldState newState) {
@@ -55,20 +62,21 @@ public class InvasionsChangeDetector implements ChangeDetector<Invasion> {
     }
 
     /**
-     * 创建入侵变化事件
-     * 入侵没有任务类型和等级的概念
+     * 创建入侵变化事件，包含奖励类型用于后续过滤
      */
     private ChangeEvent<Invasion> createChangeEvent(Invasion invasion) {
+        Invasion translated = worldStateUtils.translateInvasion(invasion);
         return ChangeEvent.of(
-                SubscribeEnums.INVASIONS,
-                null,  // 入侵没有任务类型
-                null,  // 入侵没有等级
-                invasion
+                SubscribeType.INVASIONS,
+                null,
+                null,
+                InvasionReward.fromInvasion(translated),
+                translated
         );
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.INVASIONS;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.INVASIONS;
     }
 }

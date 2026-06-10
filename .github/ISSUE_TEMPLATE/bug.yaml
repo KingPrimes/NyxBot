@@ -8,7 +8,7 @@ body:
     validations:
       required: true
     attributes:
-      placeholder: 使用的JDK版本？OpenJDK-17？OracleJDK-17？
+      placeholder: 使用的JDK版本？OpenJDK-21？OracleJDK-21？
       label: 使用的JDK版本？
   - type: input
     validations:
@@ -20,8 +20,8 @@ body:
     validations:
       required: true
     attributes:
-      placeholder: NyxBot 使用的那个版本？
-      label: NyxBot 使用的那个版本？
+      placeholder: NyxBot 使用的哪个版本？
+      label: NyxBot 使用的哪个版本？
   - type: input
     validations:
       required: true
@@ -32,21 +32,22 @@ body:
     validations:
       required: true
     attributes:
-      placeholder: 使用的什么OneBot协议？ OneBot-v11? OneBot-v12?
-      label: 使用的什么OneBot协议？ OneBot-v11? OneBot-v12?
+      placeholder: 使用的什么OneBot协议？OneBot 11？OneBot 12？
+      label: 使用的什么OneBot协议？OneBot 11？OneBot 12？
   - type: input
     validations:
       required: true
     attributes:
-      placeholder: 使用的什么命令发生了错误？例如：HELP, 突击, wm 牛？
-      label: 使用的什么命令发生了错误？
+      placeholder: 使用了什么命令发生了错误？例如：HELP, 突击, wm 牛？
+      label: 使用了什么命令发生了错误？
   - type: markdown
     attributes:
       value: "## 错误描述"
   - type: textarea
     attributes:
-      placeholder: 请详细描述你遇到的bug，包括：
+      placeholder: |
+        请详细描述你遇到的bug，包括：
         什么情况下出现的？
-        具体的错误信息是什么？请发送debug日志，在启动参数后方添加 --debug 参数，Docker添加 DEBUG=true环境变量
+        具体的错误信息是什么？请在启动参数后方添加 --debug 参数启动，Docker添加 DEBUG=true 环境变量
         重现步骤是什么？
-      label: 请详细描述你遇到的bug，包括：
+      label: 请详细描述你遇到的bug

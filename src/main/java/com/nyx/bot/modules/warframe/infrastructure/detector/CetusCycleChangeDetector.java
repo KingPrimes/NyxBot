@@ -3,10 +3,11 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.NotificationHistory;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import com.nyx.bot.modules.warframe.repo.NotificationHistoryRepository;
 import com.nyx.bot.utils.TimeUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import io.github.kingprimes.model.enums.SyndicateEnum;
 import io.github.kingprimes.model.worldstate.CetusCycle;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -69,8 +70,17 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
 
         CetusCycle cetusCycle = newState.getCetusCycle();
 
-        // 获取当前周期的过期时间戳（秒）
-        long expiryTimestamp = cetusCycle.getExpiry().getEpochSecond();
+        // 使用赏金任务的过期时间（API 固定值）作为周期唯一标识，而非 CetusCycle 的计算值
+        Instant bountyExpiry = java.util.Optional.ofNullable(newState.getSyndicateMissions()).orElse(List.of()).stream()
+                .filter(s -> s.getTag() != null && s.getTag() == SyndicateEnum.CetusSyndicate)
+                .findFirst()
+                .map(s -> s.getExpiry() == null ? null : s.getExpiry().getEpochSecond())
+                .orElse(null);
+        if (bountyExpiry == null) {
+            log.debug("未找到 Cetus 赏金任务数据，跳过检测");
+            return Collections.emptyList();
+        }
+        long expiryTimestamp = bountyExpiry.getEpochSecond();
 
         // 计算剩余时间（分钟）
         long remainingMinutes = TimeUtils.timeDeltaToMinutes(expiryTimestamp * 1000);
@@ -81,7 +91,7 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
         if (remainingMinutes <= 18) {
             // 检查数据库中是否已存在该周期的通知记录
             boolean alreadyNotified = historyRepository.existsBySubscribeTypeAndExpiryTimestamp(
-                    SubscribeEnums.CETUS_CYCLE,
+                    SubscribeType.CETUS_CYCLE,
                     expiryTimestamp
             );
 
@@ -96,7 +106,7 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
 
             // 保存通知记录到数据库
             NotificationHistory history = new NotificationHistory();
-            history.setSubscribeType(SubscribeEnums.CETUS_CYCLE);
+            history.setSubscribeType(SubscribeType.CETUS_CYCLE);
             history.setExpiryTimestamp(expiryTimestamp);
             history.setNotifiedAt(Instant.now());
             history.setCycleState(cetusCycle.getCycle());
@@ -105,7 +115,7 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
             log.info("已记录夜灵平原周期通知历史 [expiry:{}]", expiryTimestamp);
 
             ChangeEvent<CetusCycle> event = ChangeEvent.of(
-                    SubscribeEnums.CETUS_CYCLE,
+                    SubscribeType.CETUS_CYCLE,
                     null,  // 无任务类型
                     null,  // 无等级
                     cetusCycle
@@ -132,15 +142,13 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
 
             // 删除过期记录（Repository 方法自带事务）
             long deletedCount = historyRepository.deleteBySubscribeTypeAndNotifiedAtBefore(
-                    SubscribeEnums.CETUS_CYCLE,
+                    SubscribeType.CETUS_CYCLE,
                     expiredBefore
             );
 
-            if (deletedCount >= 0) {
-                log.info("清理夜灵平原周期过期通知记录 [数量:{}] [过期时间:{}]",
+            if (deletedCount > 0) {
+                log.debug("清理夜灵平原周期过期通知记录 [数量:{}] [过期时间:{}]",
                         deletedCount, expiredBefore);
-            } else {
-                log.debug("无需清理夜灵平原周期过期通知记录 [过期时间:{}]", expiredBefore);
             }
         } catch (Exception e) {
             log.error("清理夜灵平原周期历史记录失败", e);
@@ -148,7 +156,7 @@ public class CetusCycleChangeDetector implements ChangeDetector<CetusCycle> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.CETUS_CYCLE;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.CETUS_CYCLE;
     }
 }

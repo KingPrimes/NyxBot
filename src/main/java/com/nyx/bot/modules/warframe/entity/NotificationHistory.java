@@ -1,7 +1,7 @@
 package com.nyx.bot.modules.warframe.entity;
 
 import com.nyx.bot.common.core.dao.BaseEntity;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public class NotificationHistory extends BaseEntity {
      */
     @Column(name = "subscribe_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private SubscribeEnums subscribeType;
+    private SubscribeType subscribeType;
 
     /**
      * 周期过期时间戳（秒）

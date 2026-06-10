@@ -3,21 +3,17 @@ package com.nyx.bot.utils.http;
 import com.nyx.bot.common.event.DownloadProgressEvent;
 import com.nyx.bot.utils.FileUtils;
 import com.nyx.bot.utils.SpringUtils;
-import com.nyx.bot.utils.http.HttpUtils.Body;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
-import org.springframework.web.client.RestClientException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 
 /**
  * HTTP 文件下载工具
- * 提供文件下载、进度显示（控制台 + SSE 事件）功能
+ * 基于 HttpUtils 封装的方法，不直接接触 HttpClient 生命周期
  *
  * @author KingPrimes
  */
@@ -33,7 +29,7 @@ public class HttpFileDownloader {
     public static Boolean sendGetForFile(String url, String path) {
         File outputFile = new File(path);
         FileUtils.createDir(outputFile);
-        return downloadFile(url, HttpMethod.GET, null, null, outputFile);
+        return downloadFile(url, outputFile);
     }
 
     /**
@@ -43,80 +39,52 @@ public class HttpFileDownloader {
      * @param json Json格式的请求参数
      * @return Body 包含文件字节数组
      */
-    public static Body sendPostForFile(String url, String json) {
-        try {
-            HttpHeaders h = new HttpHeaders(HttpUtils.getHeaders());
-            h.setContentType(MediaType.APPLICATION_JSON);
-            h.add("Accept-Encoding", "application/octet-stream");
-            HttpEntity<@NonNull String> request = new HttpEntity<>(json, h);
-            ResponseEntity<@NonNull Resource> response = HttpUtils.getRestTemplateForUrl(url)
-                    .exchange(url, HttpMethod.POST, request, Resource.class);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                log.warn("请求失败 code:{}, message:{}", response.getStatusCode().value(), response.getBody());
-                return new Body(response.getStatusCode());
-            }
-            if (response.getBody() != null) {
-                return new Body("", response.getStatusCode(), response.getHeaders(), url,
-                        response.getBody().getContentAsByteArray());
-            } else {
-                return new Body("", response.getStatusCode(), response.getHeaders(), url,
-                        null);
-            }
-        } catch (RestClientException | IOException e) {
-            log.warn("请求异常", e);
-            return new Body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public static HttpUtils.Body sendPostForFile(String url, String json) {
+        return HttpUtils.sendPostForBytes(url, json);
     }
 
     /**
      * 下载文件（核心逻辑）
+     * 使用 Java 21 HttpClient 的非阻塞 I/O + InputStream 流式下载，避免 pin 虚拟线程
      */
-    public static boolean downloadFile(String url, HttpMethod method, Object requestBody,
-                                       HttpHeaders extraHeaders, File output) {
-        HttpHeaders hers = new HttpHeaders(HttpUtils.getHeaders());
-        hers.setContentType(MediaType.APPLICATION_JSON);
-        hers.add("Accept-Encoding", "application/octet-stream");
-        if (extraHeaders != null) hers.putAll(extraHeaders);
+    public static boolean downloadFile(String url, File output) {
+        try {
+            HttpResponse<InputStream> response = HttpUtils.sendGetForStream(url);
 
-        HttpEntity<?> req = (requestBody != null)
-                ? new HttpEntity<>(requestBody, hers)
-                : new HttpEntity<>(hers);
+            if (response.statusCode() >= 200 && response.statusCode() < 300 && response.body() != null) {
+                try (InputStream in = response.body();
+                     FileOutputStream out = new FileOutputStream(output)) {
 
-        ResponseEntity<@NonNull Resource> response = HttpUtils.getRestTemplateForUrl(url)
-                .exchange(url, method, req, Resource.class);
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            try (InputStream in = response.getBody().getInputStream();
-                 FileOutputStream out = new FileOutputStream(output)) {
-
-                long total = response.getHeaders().getContentLength();
-                log.debug("开始下载文件: {} ({} bytes)", url, total);
-                byte[] buf = new byte[1024];
-                int n;
-                long read = 0, lastEventTs = 0;
-                while ((n = in.read(buf)) > 0) {
-                    out.write(buf, 0, n);
-                    read += n;
-                    printProgress(total, read);
-                    // 每 500ms 发布一次进度事件到 SSE
-                    long now = System.currentTimeMillis();
-                    if (now - lastEventTs >= 500) {
-                        SpringUtils.publishEvent(
-                                new DownloadProgressEvent(HttpUtils.class, url, read, total, false));
-                        lastEventTs = now;
+                    long total = response.headers().firstValue("content-length")
+                            .map(Long::parseLong).orElse(-1L);
+                    log.debug("开始下载文件: {} ({} bytes)", url, total);
+                    byte[] buf = new byte[1024];
+                    int n;
+                    long read = 0, lastEventTs = 0;
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                        read += n;
+                        printProgress(total, read);
+                        // 每 500ms 发布一次进度事件到 SSE
+                        long now = System.currentTimeMillis();
+                        if (now - lastEventTs >= 500) {
+                            SpringUtils.publishEvent(
+                                    new DownloadProgressEvent(HttpUtils.class, url, read, total, false));
+                            lastEventTs = now;
+                        }
                     }
+                    SpringUtils.publishEvent(
+                            new DownloadProgressEvent(HttpUtils.class, url, read, total > 0 ? total : read, true));
+                    log.debug("文件下载完成: {} -> {}", url, output.getAbsolutePath());
+                    return true;
                 }
-                SpringUtils.publishEvent(
-                        new DownloadProgressEvent(HttpUtils.class, url, read, total > 0 ? total : read, true));
-                log.debug("文件下载完成: {} -> {}", url, output.getAbsolutePath());
-                return true;
-            } catch (Exception e) {
-                log.error("downloadFile failed for {} Headers:{}", url, response.getHeaders(), e);
-                return false;
             }
+            log.warn("downloadFile failed for {} statusCode:{}", url, response.statusCode());
+            return false;
+        } catch (IOException | InterruptedException e) {
+            log.error("downloadFile failed for {}: {}", url, e.getMessage(), e);
+            return false;
         }
-        log.warn("downloadFile failed for {} Headers:{}", url, response.getHeaders());
-        return false;
     }
 
     // ══════════════════════════════════════════════

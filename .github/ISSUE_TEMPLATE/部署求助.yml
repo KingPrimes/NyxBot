@@ -1,0 +1,69 @@
+name: 部署/使用求助
+description: 安装、启动、连接遇到问题
+title: '[部署求助] '
+labels: help wanted
+assignees: KingPrimes
+body:
+  - type: markdown
+    attributes:
+      value: "## 环境信息"
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么部署方式？一键脚本？Docker？手动？
+      label: 部署方式
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么系统？Windows 10？Ubuntu 22.04？macOS 14？
+      label: 操作系统
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: NyxBot 使用的哪个版本？v2.1.5？
+      label: NyxBot 版本
+  - type: input
+    validations:
+      required: true
+    attributes:
+      placeholder: 使用的什么OneBot客户端？NapCat？LLOneBot？
+      label: OneBot 客户端
+  - type: markdown
+    attributes:
+      value: "## 问题描述"
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      placeholder: |
+        请描述你遇到的问题：
+        安装到哪一步卡住了？
+        启动报了什么错误信息？
+        管理页面能打开吗？
+        QQ 机器人有反应吗？
+      label: 请详细描述你遇到的问题
+  - type: markdown
+    attributes:
+      value: "## 日志"
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      placeholder: |
+        请贴出相关日志：
+        启动日志：java -jar NyxBot.jar --debug 2>&1 | tee nyxbot.log
+        Docker 日志：docker logs nyxbot
+        粘贴时请用 ``` 包裹
+      label: 请贴出相关日志（必填）
+  - type: markdown
+    attributes:
+      value: "## 附加信息"
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      placeholder: 可以贴截图、配置文件内容（隐藏 Token）等
+      label: 附加信息

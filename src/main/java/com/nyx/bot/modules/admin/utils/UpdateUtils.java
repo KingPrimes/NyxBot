@@ -2,21 +2,50 @@ package com.nyx.bot.modules.admin.utils;
 
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
-import com.nyx.bot.data.WarframeDataSource;
+import com.nyx.bot.data.ExportFilePath;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.modules.warframe.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
 public class UpdateUtils {
 
-    private final WarframeDataSource dataSource;
+    private final OrdersItemsService ordersItemsService;
+    private final RivenItemsService rivenItemsService;
+    private final LichSisterWeaponsService lichSisterWeaponsService;
+    private final NodeService nodeService;
+    private final WeaponService weaponService;
+    private final RewardPoolService rewardPoolService;
+    private final NightWaveService nightWaveService;
+    private final StateTranslationService stateTranslationService;
+    /**
+     * 虚拟线程执行器（受 Semaphore 限流保护）
+     */
+    private final ExecutorService executor;
 
-    public UpdateUtils(WarframeDataSource dataSource) {
-        this.dataSource = dataSource;
+    public UpdateUtils(OrdersItemsService ordersItemsService,
+                       RivenItemsService rivenItemsService,
+                       LichSisterWeaponsService lichSisterWeaponsService,
+                       NodeService nodeService,
+                       WeaponService weaponService,
+                       RewardPoolService rewardPoolService,
+                       NightWaveService nightWaveService,
+                       StateTranslationService stateTranslationService,
+                       ExecutorService myAsync) {
+        this.ordersItemsService = ordersItemsService;
+        this.rivenItemsService = rivenItemsService;
+        this.lichSisterWeaponsService = lichSisterWeaponsService;
+        this.nodeService = nodeService;
+        this.weaponService = weaponService;
+        this.rewardPoolService = rewardPoolService;
+        this.nightWaveService = nightWaveService;
+        this.stateTranslationService = stateTranslationService;
+        this.executor = myAsync;
     }
 
     /**
@@ -46,7 +75,7 @@ public class UpdateUtils {
 
     private void updateWarframeResMarketItems(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(dataSource::initOrdersItemsData)
+        CompletableFuture.supplyAsync(ordersItemsService::initOrdersItemsData, executor)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "Market 已更新：" + items + " 条数据！", false);
@@ -58,7 +87,7 @@ public class UpdateUtils {
 
     private void updateWarframeResMarketRiven(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(dataSource::getRivenWeapons)
+        CompletableFuture.supplyAsync(rivenItemsService::initRivenItemsData, executor)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "WM紫卡 已更新：" + items + " 条数据！", false);
@@ -82,29 +111,29 @@ public class UpdateUtils {
 
     private CompletableFuture<Void> exportFilesAndInitState() {
         return CompletableFuture
-                .supplyAsync(dataSource::severExportFiles)
+                .supplyAsync(ExportFilePath::severExportFiles, executor)
                 .thenAccept(flag -> {
                     if (!flag) {
                         throw new RuntimeException("翻译数据更新失败！");
                     }
                 })
-                .thenCompose(ignore -> CompletableFuture.runAsync(dataSource::initStateTranslation));
+                .thenCompose(ignore -> CompletableFuture.runAsync(stateTranslationService::initData, executor));
     }
 
     private CompletableFuture<Void> initAllTranslations(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "翻译数据已更新完毕！", false);
 
         CompletableFuture<Void> nodesFuture = runAsyncWithNotification(
-                dataSource::initNodes, bot, event, "节点翻译数据已更新完毕！"
+                nodeService::initData, bot, event, "节点翻译数据已更新完毕！"
         );
         CompletableFuture<Void> weaponsFuture = runAsyncWithNotification(
-                dataSource::initWeapons, bot, event, "武器翻译数据已更新完毕！"
+                weaponService::initFromExport, bot, event, "武器翻译数据已更新完毕！"
         );
         CompletableFuture<Void> rewardPoolFuture = runAsyncWithNotification(
-                dataSource::initRewardPool, bot, event, "奖励池翻译数据已更新完毕！"
+                rewardPoolService::initRewardPool, bot, event, "奖励池翻译数据已更新完毕！"
         );
         CompletableFuture<Void> nightWaveFuture = runAsyncWithNotification(
-                dataSource::initNightWave, bot, event, "电波翻译数据已更新完毕！"
+                nightWaveService::initFromExport, bot, event, "电波翻译数据已更新完毕！"
         );
 
         return CompletableFuture.allOf(nodesFuture, weaponsFuture, rewardPoolFuture, nightWaveFuture);
@@ -112,13 +141,13 @@ public class UpdateUtils {
 
     private CompletableFuture<Void> runAsyncWithNotification(Runnable task, Bot bot, AnyMessageEvent event, String message) {
         return CompletableFuture
-                .runAsync(task)
+                .runAsync(task, executor)
                 .thenRun(() -> bot.sendMsg(event, message, false));
     }
 
     private void updateWarframeSister(Bot bot, AnyMessageEvent event) {
         bot.sendMsg(event, "已发布任务，正在更新！", false);
-        CompletableFuture.supplyAsync(dataSource::getLichSisterWeapons)
+        CompletableFuture.supplyAsync(lichSisterWeaponsService::initLichSisterWeaponsData, executor)
                 .thenAccept(items -> {
                     if (items != -1) {
                         bot.sendMsg(event, "信条/赤毒武器 已更新：" + items + " 条数据！", false);

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nyx.bot.enums.Codes;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
 import com.nyx.bot.utils.StringUtils;
 import com.nyx.bot.utils.SystemInfoUtils;
 import com.nyx.bot.utils.http.HttpUtils;
@@ -17,16 +18,11 @@ import io.github.kingprimes.model.enums.MarketPlatformEnum;
 import io.github.kingprimes.model.enums.MarketStatusEnum;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import io.github.kingprimes.model.enums.RarityEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.market.MarketLichSister;
 import io.github.kingprimes.model.market.MarketRiven;
 import io.github.kingprimes.model.market.OrderWithUser;
 import io.github.kingprimes.model.market.Orders;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,13 +30,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -161,7 +151,7 @@ class MarketFullPipelineTest {
              Statement s = c.createStatement();
              ResultSet rs = s.executeQuery(
                      "SELECT r.name as relic_name, rr.reward_name, rr.rarity, rr.item_count " +
-                     "FROM relics r JOIN relic_rewards rr ON r.unique_name = rr.relics_id")) {
+                             "FROM relics r JOIN relic_rewards rr ON r.unique_name = rr.relics_id")) {
             while (rs.next()) {
                 String relicName = rs.getString("relic_name");
                 Relics.Rewards reward = new Relics.Rewards();
@@ -189,7 +179,7 @@ class MarketFullPipelineTest {
              Statement s = c.createStatement();
              ResultSet rs = s.executeQuery(
                      "SELECT slug, name, ducats, vaulted, max_amber_stars, max_cyan_stars, base_endo " +
-                     "FROM orders_items WHERE slug IS NOT NULL AND slug != ''")) {
+                             "FROM orders_items WHERE slug IS NOT NULL AND slug != ''")) {
             while (rs.next()) {
                 OrdersItemsInfo info = new OrdersItemsInfo();
                 info.slug = rs.getString("slug");
@@ -206,14 +196,6 @@ class MarketFullPipelineTest {
         return map;
     }
 
-    private static class OrdersItemsInfo {
-        String slug, name;
-        int ducats, maxAmberStars, maxCyanStars, baseEndo;
-        boolean vaulted;
-    }
-
-    // ======================== Ducats 辅助方法 ========================
-
     private static Map<Ducats.DumpType, List<Ducats.Ducat>> buildGodDump() {
         Map<Ducats.DumpType, List<Ducats.Ducat>> map = new LinkedHashMap<>();
         if (ducats.getPayload().getPreviousDay() != null) {
@@ -224,6 +206,8 @@ class MarketFullPipelineTest {
         }
         return map;
     }
+
+    // ======================== Ducats 辅助方法 ========================
 
     private static Map<Ducats.DumpType, List<Ducats.Ducat>> buildSilverDump() {
         Map<Ducats.DumpType, List<Ducats.Ducat>> map = new LinkedHashMap<>();
@@ -245,16 +229,16 @@ class MarketFullPipelineTest {
                 .toList();
     }
 
-    // ======================== Subscribe 数据构建 ========================
-
     private static Map<Integer, String> buildSubscribeMap() {
         Map<Integer, String> map = new LinkedHashMap<>();
-        for (SubscribeEnums e : SubscribeEnums.values()) {
-            if (e == SubscribeEnums.ERROR) continue;
-            map.put(e.ordinal(), e.getNAME());
-        }
+//        for (SubscribeEnums e : SubscribeEnums.values()) {
+//            if (e == SubscribeEnums.ERROR) continue;
+//            map.put(e.ordinal(), e.getNAME());
+//        }
         return map;
     }
+
+    // ======================== Subscribe 数据构建 ========================
 
     private static Map<Integer, String> buildMissionTypeMap() {
         Map<Integer, String> map = new LinkedHashMap<>();
@@ -264,7 +248,13 @@ class MarketFullPipelineTest {
         return map;
     }
 
-    // ======================== Auction 过滤辅助 ========================
+    private static Map<Integer, String> buildinvasionRewardMap() {
+        Map<Integer, String> map = new LinkedHashMap<>();
+        for (InvasionReward e : InvasionReward.values()) {
+            map.put(e.ordinal(), e.getName());
+        }
+        return map;
+    }
 
     /**
      * 模拟 {@code MarketRivenUtils.stream()} / {@code MarketLichSisterUtils.processAuctionData()} 的过滤逻辑：
@@ -292,7 +282,7 @@ class MarketFullPipelineTest {
                 .toList();
     }
 
-    // ======================== Help 数据构建 ========================
+    // ======================== Auction 过滤辅助 ========================
 
     private static List<String> buildHelpCommands() {
         return Arrays.stream(Codes.values())
@@ -306,17 +296,25 @@ class MarketFullPipelineTest {
                 .toList();
     }
 
-    // ======================== Market API 辅助方法 ========================
+    // ======================== Help 数据构建 ========================
 
     private static String fetchAuctionJson(String type, String slug) throws Exception {
         String url = MARKET_AUCTION_SEARCH + "?type=" + type + "&weapon_url_name=" + slug + "&sort_by=price_asc";
         var body = HttpUtils.sendGet(url);
         String bodyStr = body.body();
         System.out.println("  [API] " + type + " HTTP " + body.code() + " body:" + (bodyStr != null ? bodyStr.length() : 0) + " chars");
-        if (!body.code().is2xxSuccessful() || bodyStr == null) {
+        if (!body.is2xxSuccessful() || bodyStr == null) {
             throw new RuntimeException(type + " API 请求失败: " + body.code() + " slug=" + slug);
         }
         return bodyStr;
+    }
+
+    // ======================== Market API 辅助方法 ========================
+
+    private static class OrdersItemsInfo {
+        String slug, name;
+        int ducats, maxAmberStars, maxCyanStars, baseEndo;
+        boolean vaulted;
     }
 
     // ======================== 测试 ========================
@@ -358,9 +356,10 @@ class MarketFullPipelineTest {
         void test() throws Exception {
             var subscribeMap = buildSubscribeMap();
             var missionTypeMap = buildMissionTypeMap();
+            var integerStringMap = buildinvasionRewardMap();
             assertFalse(subscribeMap.isEmpty());
             assertFalse(missionTypeMap.isEmpty());
-            byte[] img = drawImagePlugin.drawWarframeSubscribeImage(subscribeMap, missionTypeMap);
+            byte[] img = drawImagePlugin.drawWarframeSubscribeImage(subscribeMap, missionTypeMap,integerStringMap);
             assertTrue(img.length > 0);
             Files.write(OUT.resolve("subscribe.png"), img);
             System.out.println("[subscribe] OK " + img.length + "B subscribe=" + subscribeMap.size() + " missionType=" + missionTypeMap.size());
@@ -547,14 +546,15 @@ class MarketFullPipelineTest {
             assertTrue(ordersNode != null && ordersNode.isArray(),
                     "orders应有数据, response=" + body.body().substring(0, Math.min(200, body.body().length())));
             List<OrderWithUser> orderList = MAPPER.readValue(ordersNode.traverse(),
-                    new TypeReference<List<OrderWithUser>>() {});
+                    new TypeReference<List<OrderWithUser>>() {
+                    });
             System.out.println("  [orders] raw orders=" + orderList.size());
 
             // 过滤在线用户、按价格排序、限8条
             List<OrderWithUser> filtered = orderList.stream()
                     .filter(o -> o.getUser() != null
                             && (o.getUser().getStatus() == MarketStatusEnum.INGAME
-                                || o.getUser().getStatus() == MarketStatusEnum.ONLINE))
+                            || o.getUser().getStatus() == MarketStatusEnum.ONLINE))
                     .sorted(Comparator.comparingInt(o -> o.getPlatinum() != null ? o.getPlatinum() : Integer.MAX_VALUE))
                     .limit(8)
                     .toList();

@@ -33,7 +33,8 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.12.0</oshi.version>
         <jjwt.version>0.13.0</jjwt.version>
-        <draw-image.varsion>1.0.8</draw-image.varsion>
+        <draw-image.varsion>1.1.0</draw-image.varsion>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencyManagement>
@@ -90,12 +91,6 @@
             <artifactId>spring-messaging</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.0.3</version>
-        </dependency>
 
         <!--SpringBoot测试-->
         <dependency>
@@ -184,6 +179,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Jackson java.time 支持（Instant / LocalDateTime 反序列化） -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
         <!--YAML操作-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -261,6 +262,12 @@
                             <goal>repackage</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
@@ -274,20 +281,6 @@
                         </exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-maven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -306,7 +299,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
 

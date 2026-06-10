@@ -61,9 +61,6 @@ public class Runners {
             if (!test) {
                 //程序启动之后获取WarframeDataSource
                 dataSource.init();
-            } else {
-                // 仅在测试状态下会执行
-                dataSource.initWarframeStatus();
             }
         };
     }

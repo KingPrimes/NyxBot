@@ -5,8 +5,10 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.nyx.bot.utils.http.HttpUtils.Body;
 import org.junit.jupiter.api.*;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,7 +108,7 @@ class TestHttpUtils {
     void testSendGetBasic() {
         Body result = HttpUtils.sendGet(baseUrl("/get"));
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
         assertTrue(result.body().contains("/get"));
     }
 
@@ -116,18 +118,17 @@ class TestHttpUtils {
     void testSendGetEmptyParam() {
         Body result = HttpUtils.sendGet(baseUrl("/get"), "");
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
     }
 
     @Test
     @Order(3)
     @DisplayName("sendGet — 带自定义 headers")
     void testSendGetWithHeaders() {
-        HttpHeaders h = new HttpHeaders();
-        h.add("X-Custom", "test-value");
+        var h = Map.of("X-Custom", List.of("test-value"));
         Body result = HttpUtils.sendGet(baseUrl("/get"), h);
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
     }
 
     @Test
@@ -136,7 +137,7 @@ class TestHttpUtils {
     void testSendGet404() {
         Body result = HttpUtils.sendGet(baseUrl("/status/404"));
         assertNotNull(result);
-        assertEquals(404, result.code().value());
+        assertEquals(404, result.code());
     }
 
     @Test
@@ -145,7 +146,7 @@ class TestHttpUtils {
     void testSendGet500() {
         Body result = HttpUtils.sendGet(baseUrl("/status/500"));
         assertNotNull(result);
-        assertEquals(500, result.code().value());
+        assertEquals(500, result.code());
     }
 
     // ══════════════════════════════════════════════
@@ -158,7 +159,7 @@ class TestHttpUtils {
     void testSendPostBasic() {
         Body result = HttpUtils.sendPost(baseUrl("/post"), "{\"key\":\"value\"}");
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
         assertTrue(result.body().contains("received"));
     }
 
@@ -168,7 +169,7 @@ class TestHttpUtils {
     void testSendPost500() {
         Body result = HttpUtils.sendPost(baseUrl("/status/500"), "{}");
         assertNotNull(result);
-        assertEquals(500, result.code().value());
+        assertEquals(500, result.code());
     }
 
     // ══════════════════════════════════════════════
@@ -181,7 +182,7 @@ class TestHttpUtils {
     void testSendPostForFileSuccess() {
         Body result = HttpFileDownloader.sendPostForFile(baseUrl("/file"), "{}");
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
         assertNotNull(result.file());
         assertEquals(512, result.file().length);
     }
@@ -192,7 +193,7 @@ class TestHttpUtils {
     void testSendPostForFileNon2xx() {
         Body result = HttpFileDownloader.sendPostForFile(baseUrl("/status/500"), "{}");
         assertNotNull(result);
-        assertEquals(500, result.code().value());
+        assertEquals(500, result.code());
         assertNull(result.file());
     }
 
@@ -226,7 +227,7 @@ class TestHttpUtils {
     void testCacheApiSameUrlTwice() {
         Body first = HttpUtils.sendGet(baseUrl("/get"), "", null, 60);
         assertNotNull(first);
-        assertTrue(first.code().is2xxSuccessful());
+        assertTrue(first.is2xxSuccessful());
 
         Body second = HttpUtils.sendGet(baseUrl("/get"), "", null, 60);
         assertNotNull(second);
@@ -240,11 +241,11 @@ class TestHttpUtils {
     void testCacheApiDifferentParams() {
         Body first = HttpUtils.sendGet(baseUrl("/get"), "a=1", null, 60);
         assertNotNull(first);
-        assertTrue(first.code().is2xxSuccessful());
+        assertTrue(first.is2xxSuccessful());
 
         Body second = HttpUtils.sendGet(baseUrl("/get"), "b=2", null, 60);
         assertNotNull(second);
-        assertTrue(second.code().is2xxSuccessful());
+        assertTrue(second.is2xxSuccessful());
         assertNotEquals(first.body(), second.body());
     }
 
@@ -256,8 +257,8 @@ class TestHttpUtils {
         Body second = HttpUtils.sendGet(baseUrl("/get"), "", null, 0);
         assertNotNull(first);
         assertNotNull(second);
-        assertTrue(first.code().is2xxSuccessful());
-        assertTrue(second.code().is2xxSuccessful());
+        assertTrue(first.is2xxSuccessful());
+        assertTrue(second.is2xxSuccessful());
     }
 
     @Test
@@ -266,13 +267,13 @@ class TestHttpUtils {
     void testCacheExpiry() throws InterruptedException {
         Body first = HttpUtils.sendGet(baseUrl("/get"), "", null, 1);
         assertNotNull(first);
-        assertTrue(first.code().is2xxSuccessful());
+        assertTrue(first.is2xxSuccessful());
 
         Thread.sleep(2000);
 
         Body second = HttpUtils.sendGet(baseUrl("/get"), "", null, 1);
         assertNotNull(second);
-        assertTrue(second.code().is2xxSuccessful());
+        assertTrue(second.is2xxSuccessful());
     }
 
     @Test
@@ -281,11 +282,11 @@ class TestHttpUtils {
     void testNon2xxResponseNotCached() {
         Body first = HttpUtils.sendGet(baseUrl("/status/404"), "", null, 60);
         assertNotNull(first);
-        assertFalse(first.code().is2xxSuccessful());
+        assertFalse(first.is2xxSuccessful());
 
         Body second = HttpUtils.sendGet(baseUrl("/status/404"), "", null, 60);
         assertNotNull(second);
-        assertEquals(first.code().value(), second.code().value());
+        assertEquals(first.code(), second.code());
     }
 
     @Test
@@ -294,7 +295,7 @@ class TestHttpUtils {
     void testCacheFailureDoesNotBlockRequest() {
         Body result = HttpUtils.sendGet(baseUrl("/get"), "", null, 60);
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
     }
 
     // ══════════════════════════════════════════════
@@ -308,7 +309,7 @@ class TestHttpUtils {
         Body first = HttpUtils.marketSendGet(baseUrl("/get"), "",
                 io.github.kingprimes.model.enums.MarketPlatformEnum.PC, 60);
         assertNotNull(first);
-        assertTrue(first.code().is2xxSuccessful());
+        assertTrue(first.is2xxSuccessful());
 
         Body second = HttpUtils.marketSendGet(baseUrl("/get"), "",
                 io.github.kingprimes.model.enums.MarketPlatformEnum.PC, 60);
@@ -340,7 +341,7 @@ class TestHttpUtils {
     void testSendGetNullHeaders() {
         Body result = HttpUtils.sendGet(baseUrl("/get"), "", null);
         assertNotNull(result);
-        assertTrue(result.code().is2xxSuccessful());
+        assertTrue(result.is2xxSuccessful());
     }
 
     @Test
@@ -365,8 +366,8 @@ class TestHttpUtils {
     @Order(22)
     @DisplayName("Body record — HttpStatusCode 构造器")
     void testBodyConstructorWithCode() {
-        Body b = new Body(HttpStatus.OK);
-        assertEquals(HttpStatus.OK, b.code());
+        Body b = new Body(200);
+        assertEquals(200, b.code());
         assertNull(b.body());
         assertNull(b.file());
     }
@@ -376,9 +377,9 @@ class TestHttpUtils {
     @DisplayName("Body record — 完整构造器")
     void testBodyFullConstructor() {
         byte[] data = {1, 2, 3};
-        Body b = new Body("text", HttpStatus.OK, null, "http://test", data);
+        Body b = new Body("text", 200, null, "http://test", data);
         assertEquals("text", b.body());
-        assertEquals(HttpStatus.OK, b.code());
+        assertEquals(200, b.code());
         assertEquals("http://test", b.url());
         assertArrayEquals(data, b.file());
     }

@@ -5,11 +5,12 @@ import com.nyx.bot.modules.warframe.domain.valueobject.SubscriptionCommand;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUser;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserCheckTypeRepository;
 import com.nyx.bot.modules.warframe.repo.subscribe.MissionSubscribeUserRepository;
-import io.github.kingprimes.model.enums.MissionTypeEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 订阅应用服务
@@ -59,16 +61,16 @@ public class SubscriptionApplicationService {
     public String subscribe(SubscriptionCommand command) {
         try {
             log.info("处理订阅请求 [group:{}] [user:{}] [type:{}]",
-                    command.getGroupId(), command.getUserId(), command.getSubscribeType());
+                    command.groupId(), command.userId(), command.subscribeType());
 
             // 1. 获取或创建订阅组
             MissionSubscribe subscription = subscribeRepo
-                    .findBySubGroup(command.getGroupId())
+                    .findBySubGroup(command.groupId())
                     .orElseGet(() -> createNewSubscription(command));
 
             // 2. 获取或创建用户
             MissionSubscribeUser user = subscription.getUsers().stream()
-                    .filter(u -> u.getUserId().equals(command.getUserId()))
+                    .filter(u -> u.getUserId().equals(command.userId()))
                     .findFirst()
                     .orElseGet(() -> createNewUser(command, subscription));
 
@@ -82,9 +84,10 @@ public class SubscriptionApplicationService {
 
             // 4. 创建新规则
             MissionSubscribeUserCheckType rule = new MissionSubscribeUserCheckType();
-            rule.setSubscribe(command.getSubscribeType());
-            rule.setMissionTypeEnum(command.getMissionType());
-            rule.setTierNum(command.getTier());
+            rule.setSubscribe(command.subscribeType());
+            rule.setMissionTypeEnum(command.missionType());
+            rule.setTierNum(command.tier());
+            rule.setInvasionReward(command.invasionReward());
             rule.setSubscribeUser(user);
 
             user.getCheckTypes().add(rule);
@@ -93,11 +96,11 @@ public class SubscriptionApplicationService {
             subscribeRepo.save(subscription);
 
             log.info("订阅成功 [group:{}] [user:{}] [type:{}] [mission:{}] [tier:{}]",
-                    command.getGroupId(),
-                    command.getUserId(),
-                    command.getSubscribeType().getNAME(),
-                    command.getMissionType() != null ? command.getMissionType().getName() : "全部",
-                    command.getTier() != null ? command.getTier() : "全部");
+                    command.groupId(),
+                    command.userId(),
+                    command.subscribeType().getName(),
+                    command.missionType() != null ? command.missionType().getName() : "全部",
+                    command.tier() != null ? command.tier() : "全部");
 
             return "订阅成功！\n" + buildSubscriptionInfo(command);
 
@@ -110,20 +113,22 @@ public class SubscriptionApplicationService {
     /**
      * 取消订阅
      *
-     * @param groupId       群组ID
-     * @param userId        用户ID
-     * @param subscribeType 订阅类型
-     * @param missionType   任务类型（可选）
-     * @param tier          遗物等级（可选）
+     * @param groupId        群组ID
+     * @param userId         用户ID
+     * @param subscribeType  订阅类型
+     * @param missionType    任务类型（可选）
+     * @param tier           遗物等级（可选）
+     * @param invasionReward 入侵奖励（可选）
      * @return 取消结果消息
      */
     @Transactional
     public String unsubscribe(
             Long groupId,
             Long userId,
-            SubscribeEnums subscribeType,
-            MissionTypeEnum missionType,
-            Integer tier
+            SubscribeType subscribeType,
+            MissionType missionType,
+            Integer tier,
+            InvasionReward invasionReward
     ) {
         try {
             log.info("处理取消订阅请求 [group:{}] [user:{}] [type:{}]",
@@ -150,7 +155,7 @@ public class SubscriptionApplicationService {
 
             // 3. 查找并删除匹配的规则
             List<MissionSubscribeUserCheckType> toRemove = user.getCheckTypes().stream()
-                    .filter(rule -> matchesUnsubscribeCondition(rule, subscribeType, missionType, tier))
+                    .filter(rule -> matchesUnsubscribeCondition(rule, subscribeType, missionType, tier, invasionReward))
                     .filter(rule -> rule.getId() != null)
                     .toList();
 
@@ -195,13 +200,13 @@ public class SubscriptionApplicationService {
      */
     private MissionSubscribe createNewSubscription(SubscriptionCommand command) {
         MissionSubscribe subscription = new MissionSubscribe();
-        subscription.setSubGroup(command.getGroupId());
-        subscription.setGroupName(command.getGroupName());
-        subscription.setSubBotUid(command.getBotUid());
+        subscription.setSubGroup(command.groupId());
+        subscription.setGroupName(command.groupName());
+        subscription.setSubBotUid(command.botUid());
         subscription.setUsers(new HashSet<>());
 
         log.info("创建新订阅组 [group:{}] [bot:{}]",
-                command.getGroupId(), command.getBotUid());
+                command.groupId(), command.botUid());
 
         return subscription;
     }
@@ -214,15 +219,15 @@ public class SubscriptionApplicationService {
             MissionSubscribe subscription
     ) {
         MissionSubscribeUser user = new MissionSubscribeUser();
-        user.setUserId(command.getUserId());
-        user.setUserName(command.getUserName());
+        user.setUserId(command.userId());
+        user.setUserName(command.userName());
         user.setMissionSubscribe(subscription);
         user.setCheckTypes(new HashSet<>());
 
         subscription.getUsers().add(user);
 
         log.info("创建新用户 [user:{}] [name:{}]",
-                command.getUserId(), command.getUserName());
+                command.userId(), command.userName());
 
         return user;
     }
@@ -234,9 +239,10 @@ public class SubscriptionApplicationService {
             MissionSubscribeUserCheckType rule,
             SubscriptionCommand command
     ) {
-        return rule.getSubscribe() == command.getSubscribeType() &&
-                Objects.equals(rule.getMissionTypeEnum(), command.getMissionType()) &&
-                Objects.equals(rule.getTierNum(), command.getTier());
+        return rule.getSubscribe() == command.subscribeType() &&
+                Objects.equals(rule.getMissionTypeEnum(), command.missionType()) &&
+                Objects.equals(rule.getTierNum(), command.tier()) &&
+                Objects.equals(rule.getInvasionReward(), command.invasionReward());
     }
 
     /**
@@ -244,9 +250,10 @@ public class SubscriptionApplicationService {
      */
     private boolean matchesUnsubscribeCondition(
             MissionSubscribeUserCheckType rule,
-            SubscribeEnums subscribeType,
-            MissionTypeEnum missionType,
-            Integer tier
+            SubscribeType subscribeType,
+            MissionType missionType,
+            Integer tier,
+            InvasionReward invasionReward
     ) {
         // 订阅类型必须匹配
         if (rule.getSubscribe() != subscribeType) {
@@ -259,7 +266,59 @@ public class SubscriptionApplicationService {
         }
 
         // 遗物等级匹配（null 表示匹配全部）
-        return tier == null || Objects.equals(rule.getTierNum(), tier);
+        if (tier != null && !Objects.equals(rule.getTierNum(), tier)) {
+            return false;
+        }
+
+        // 入侵奖励匹配（null 表示匹配全部）
+        return invasionReward == null || Objects.equals(rule.getInvasionReward(), invasionReward);
+    }
+
+    /**
+     * 获取用户当前订阅列表
+     *
+     * @param groupId 群组ID
+     * @param userId  用户ID
+     * @return 订阅列表消息，无订阅时返回空字符串
+     */
+    public String getUserSubscriptionInfo(Long groupId, Long userId) {
+        MissionSubscribe subscription = subscribeRepo.findBySubGroup(groupId).orElse(null);
+        if (subscription == null) {
+            return "";
+        }
+
+        MissionSubscribeUser user = subscription.getUsers().stream()
+                .filter(u -> u.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+
+        if (user == null || user.getCheckTypes().isEmpty()) {
+            return "";
+        }
+
+        String sb = "您的当前订阅：\n" + "━━━━━━━━━━━━━━━━\n" +
+                user.getCheckTypes().stream()
+                        .map(this::formatCheckTypeLine)
+                        .collect(Collectors.joining()) +
+                "━━━━━━━━━━━━━━━━";
+        return sb;
+    }
+
+    private String formatCheckTypeLine(MissionSubscribeUserCheckType checkType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[").append(checkType.getSubscribe().ordinal()).append("] ");
+        sb.append(checkType.getSubscribe().getName());
+        if (checkType.getMissionTypeEnum() != null) {
+            sb.append(" - ").append(checkType.getMissionTypeEnum().getName());
+        }
+        if (checkType.getTierNum() != null) {
+            sb.append(" - ").append(getTierName(checkType.getTierNum()));
+        }
+        if (checkType.getInvasionReward() != null && checkType.getInvasionReward() != InvasionReward.NONE) {
+            sb.append(" - ").append(checkType.getInvasionReward().getName());
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     /**
@@ -268,17 +327,17 @@ public class SubscriptionApplicationService {
     private String buildSubscriptionInfo(SubscriptionCommand command) {
         StringBuilder sb = new StringBuilder();
         sb.append("━━━━━━━━━━━━━━━━\n");
-        sb.append("类型: ").append(command.getSubscribeType().getNAME());
+        sb.append("类型: ").append(command.subscribeType().getName());
 
-        if (command.getMissionType() != null) {
-            sb.append("\n任务: ").append(command.getMissionType().getName());
+        if (command.missionType() != null) {
+            sb.append("\n任务: ").append(command.missionType().getName());
         } else {
             sb.append("\n任务: 全部");
         }
 
-        if (command.getTier() != null) {
-            sb.append("\n等级: ").append(getTierName(command.getTier()));
-        } else if (command.getSubscribeType() == SubscribeEnums.FISSURES) {
+        if (command.tier() != null) {
+            sb.append("\n等级: ").append(getTierName(command.tier()));
+        } else if (command.subscribeType() == SubscribeType.FISSURES) {
             sb.append("\n等级: 全部");
         }
 

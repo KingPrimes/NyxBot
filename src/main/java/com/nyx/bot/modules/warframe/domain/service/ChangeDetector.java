@@ -1,8 +1,8 @@
 package com.nyx.bot.modules.warframe.domain.service;
 
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public interface ChangeDetector<T> {
      *
      * @return 订阅类型
      */
-    SubscribeEnums getSupportedType();
+    SubscribeType getSupportedType();
 
     /**
      * 清理当前订阅类型的过期历史记录

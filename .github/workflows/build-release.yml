@@ -31,14 +31,30 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - name: Clone NyxBot-WebUI repository
         run: git clone https://github.com/KingPrimes/NyxBot-WebUI.git
 
       - name: Build NyxBot-WebUI with pnpm
         working-directory: ./NyxBot-WebUI
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm build
+
+      - name: Cache WebUI build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            NyxBot-WebUI/resources
+            NyxBot-WebUI/node_modules
+          key: webui-${{ runner.os }}-${{ hashFiles('NyxBot-WebUI/src/**', 'NyxBot-WebUI/pnpm-lock.yaml') }}
+          restore-keys: webui-${{ runner.os }}-
 
       - name: Merge built resources into current project
         run: |
@@ -52,17 +68,6 @@ jobs:
           JWT_SECRET=$(openssl rand -base64 32 | tr -d '\n')
           echo "::add-mask::$JWT_SECRET"
           mvn clean package -DUSERNAME="$USERNAME" -DPASSWORD="$PASSWORD" -DJWT_SECRET="$JWT_SECRET"
-      # 获取Commits信息 并将其存储到 generate_release_notes.outputs.notes 变量中
-      - name: Generate release notes
-        id: generate_release_notes
-        uses: release-drafter/release-drafter@v6
-        with:
-          config-name: release-drafter.yml
-          publish: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REF: ${{ github.ref }}
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,18 +76,17 @@ jobs:
             target/NyxBot.jar
             Dockerfile
             docker-compose.yml
-      # 将JAR文件上传到GitHub Release
-      - name: Upload JAR to Release
-        uses: svenstaro/upload-release-action@v2
+      # 创建 GitHub Release 草稿（需手动审核后发布）
+      - name: Create Release & Upload JAR
+        uses: softprops/action-gh-release@v2
         with:
-          file: target/NyxBot.jar
-          tag: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: target/NyxBot.jar
           draft: true
-          release_name: ${{ steps.generate_release_notes.outputs.name }}
-          # 设置正文为 release-drafter/release-drafter@v6 步骤中生成的 release notes
-          body: ${{ steps.generate_release_notes.outputs.body }}
-          # 如果存在同名 Release，则覆盖（防止重复）
-          overwrite: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-docker:
     needs: build-release
@@ -95,6 +99,9 @@ jobs:
           name: nyxbot-package
           path: .  # 下载到当前目录
 
+      - name: Set up QEMU (arm64 模拟)
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -106,13 +113,33 @@ jobs:
 
       - name: Build and push
         env:
-          GITHUB_TAG: ${{ github.ref_name }}
+          TAG: ${{ github.ref_name }}
         run: |
-          docker build --no-cache -t kingprimes/nyxbot:${GITHUB_TAG} .
-          docker push kingprimes/nyxbot:${GITHUB_TAG}
-          echo "✅ 版本标签已推送: kingprimes/nyxbot:${GITHUB_TAG}"
+          # 解析版本号标签: v2.1.5 → v2.1 / v2 / latest
+          VERSION="${TAG#v}"
+          MINOR="${VERSION%.*}"
+          MAJOR="${VERSION%%.*}"
 
-          # 重新标记为 latest 并推送
-          docker tag kingprimes/nyxbot:${GITHUB_TAG} kingprimes/nyxbot:latest
-          docker push kingprimes/nyxbot:latest
-          echo "✅ latest 标签已更新: kingprimes/nyxbot:latest"
+          echo "标签: ${TAG} | 版本: ${VERSION} | v${MINOR} | v${MAJOR}"
+
+          # 构建多架构镜像 (amd64 + arm64) 并推送全部标签
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            --no-cache \
+            --label "org.opencontainers.image.title=NyxBot" \
+            --label "org.opencontainers.image.description=Warframe QQ Bot - WorldState/Market/Riven" \
+            --label "org.opencontainers.image.version=${VERSION}" \
+            --label "org.opencontainers.image.vendor=KingPrimes" \
+            --label "org.opencontainers.image.source=https://github.com/KingPrimes/NyxBot" \
+            --label "nyxbot.version=${VERSION}" \
+            -t kingprimes/nyxbot:${TAG} \
+            -t kingprimes/nyxbot:v${MINOR} \
+            -t kingprimes/nyxbot:v${MAJOR} \
+            -t kingprimes/nyxbot:latest \
+            --push .
+
+          echo "✅ 镜像已推送:"
+          echo "   kingprimes/nyxbot:${TAG}"
+          echo "   kingprimes/nyxbot:v${MINOR}"
+          echo "   kingprimes/nyxbot:v${MAJOR}"
+          echo "   kingprimes/nyxbot:latest"
+          echo "   架构: amd64 + arm64"

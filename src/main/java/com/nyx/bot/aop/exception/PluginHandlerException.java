@@ -84,8 +84,12 @@ public class PluginHandlerException {
         long startTime = System.currentTimeMillis();
         Exception ex = null;
         Object result = null;
+        // 内部匹配器（如 pendingRivenHandler）不记录用户操作日志，避免每次图片消息都打日志+写库
+        boolean skipLog = "pendingRivenHandler".equals(method.getName());
         try {
-            log.info("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
+            if (!skipLog) {
+                log.info("群：{} 用户:{} 使用了 {} 指令 指令参数：{}", Objects.requireNonNull(event).getGroupId(), event.getUserId(), cmd, event.getRawMessage());
+            }
             if (CqMatcher.isCqAt(Objects.requireNonNull(event).getRawMessage())) {
                 CqParse build = CqParse.build(event.getRawMessage());
                 Bot finalBot = bot;
@@ -114,8 +118,10 @@ public class PluginHandlerException {
             AnyMessageEvent finalEvent = event;
             long finalStartTime = startTime;
             Exception finalEx = ex;
-            // 异步保存日志
-            AsyncUtils.me().execute(() -> recordPluginLog(joinPoint, cmd, finalBot1, finalEvent, finalStartTime, finalEx));
+            // 异步保存日志（内部匹配器跳过，避免每次图片消息都写库）
+            if (!skipLog) {
+                AsyncUtils.me().execute(() -> recordPluginLog(joinPoint, cmd, finalBot1, finalEvent, finalStartTime, finalEx));
+            }
         }
     }
 

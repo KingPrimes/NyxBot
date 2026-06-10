@@ -2,9 +2,11 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.common.core.dao.BaseEntity;
 import com.nyx.bot.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -18,10 +20,11 @@ import java.util.stream.IntStream;
  * 武器数据
  */
 @SuppressWarnings("unused")
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table
 @Data
-public class Weapons {
+public class Weapons extends BaseEntity {
     // 武器唯一名称
     @Id
     @JsonProperty("uniqueName")
@@ -222,6 +225,29 @@ public class Weapons {
                 .append("sentinel", sentinel)
                 .append("multishot", multishot)
                 .toString();
+    }
+
+    /**
+     * 获取修正后的武器类型。
+     * 守护武器按描述重新归类为霰弹枪/近战/步枪；
+     * LongGuns 中描述含"霰弹枪"的修正为 Shotguns。
+     */
+    @Transient
+    public ProductCategory getEffectiveCategory() {
+        ProductCategory cat = productCategory;
+        if (cat == null) return ProductCategory.LongGuns;
+
+        if (cat == ProductCategory.SentinelWeapons) {
+            String d = description;
+            if (d != null && d.contains("霰弹枪")) return ProductCategory.Shotguns;
+            if (d != null && (d.contains("近战") || (name != null && name.contains("分离"))))
+                return ProductCategory.Melee;
+            return ProductCategory.LongGuns;
+        }
+        if (description != null && (description.contains("霰弹枪") || description.contains("散弹枪"))) {
+            return ProductCategory.Shotguns;
+        }
+        return cat;
     }
 
     @Getter

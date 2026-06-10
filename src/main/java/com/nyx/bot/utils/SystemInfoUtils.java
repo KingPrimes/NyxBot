@@ -9,7 +9,6 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.FileSystem;
-import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
 import oshi.util.Util;
 
@@ -23,7 +22,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.jar.Manifest;
@@ -132,24 +130,17 @@ public class SystemInfoUtils {
      */
     public static SysFileInfos getSysFileInfo() {
         SysFileInfos sysFileInfos = new SysFileInfos();
-        List<SysFileInfos.SysFileInfo> sysFiles = new ArrayList<>();
         FileSystem fileSystem = operatingSystem.getFileSystem();
-        List<OSFileStore> fsArray = fileSystem.getFileStores();
-        for (OSFileStore fs : fsArray) {
-            SysFileInfos.SysFileInfo fileInfo = new SysFileInfos.SysFileInfo();
-            //盘符路径
-            fileInfo.setDirName(fs.getMount());
-            //盘符类型
-            fileInfo.setTypeName(fs.getType());
-            //文件类型
-            fileInfo.setFileType(fs.getName());
-            //总大小
-            fileInfo.setTotal(fs.getTotalSpace());
-            //已经使用量
-            fileInfo.setUsed(fs.getTotalSpace() - fs.getUsableSpace());
-
-            sysFiles.add(fileInfo);
-        }
+        List<SysFileInfos.SysFileInfo> sysFiles = fileSystem.getFileStores().stream()
+                .map(fs -> {
+                    SysFileInfos.SysFileInfo fileInfo = new SysFileInfos.SysFileInfo();
+                    fileInfo.setDirName(fs.getMount());
+                    fileInfo.setTypeName(fs.getType());
+                    fileInfo.setFileType(fs.getName());
+                    fileInfo.setTotal(fs.getTotalSpace());
+                    fileInfo.setUsed(fs.getTotalSpace() - fs.getUsableSpace());
+                    return fileInfo;
+                }).toList();
         sysFileInfos.setSysFileInfos(sysFiles);
         return sysFileInfos;
     }

@@ -2,8 +2,9 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.BastWorldState;
 import io.github.kingprimes.model.worldstate.DailyDeals;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,11 @@ import java.util.List;
 @Slf4j
 @Component
 public class DailyDealsChangeDetector implements ChangeDetector<DailyDeals> {
+    private final WorldStateUtils worldStateUtils;
+
+    public DailyDealsChangeDetector(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public List<ChangeEvent<DailyDeals>> detectChanges(WorldState oldState, WorldState newState) {
@@ -66,16 +72,17 @@ public class DailyDealsChangeDetector implements ChangeDetector<DailyDeals> {
      * 创建变化事件
      */
     private ChangeEvent<DailyDeals> createChangeEvent(DailyDeals deal) {
-        return new ChangeEvent<>(
-                SubscribeEnums.DAILY_DEALS,
-                null,  // 无任务类型
-                null,  // 无等级
-                deal
+        DailyDeals translated = worldStateUtils.translateDailyDeals(deal);
+        return ChangeEvent.of(
+                SubscribeType.DAILY_DEALS,
+                null,
+                null,
+                translated
         );
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.DAILY_DEALS;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.DAILY_DEALS;
     }
 }

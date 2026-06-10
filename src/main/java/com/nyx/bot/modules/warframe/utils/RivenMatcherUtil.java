@@ -25,6 +25,8 @@ public class RivenMatcherUtil {
 
     private static final Pattern IS_RIVEN_NAME_EX = Pattern.compile("^[一-龥]*? ?[a-zA-Z]*-?$");
 
+    private static final Pattern RIVEN_NAME_PATTERN = Pattern.compile("[a-zA-Z]*-[a-zA-Z]*$");
+
     /**
      * 获取中文
      */
@@ -57,8 +59,7 @@ public class RivenMatcherUtil {
      * 获取紫卡名称
      */
     public static String getRivenName(String str) {
-        Pattern p = Pattern.compile("[a-zA-Z]*-[a-zA-Z]*$");
-        Matcher m = p.matcher(str);
+        Matcher m = RIVEN_NAME_PATTERN.matcher(str);
         StringBuilder builder = new StringBuilder();
         while (m.find()) {
             builder.append(m.group());
