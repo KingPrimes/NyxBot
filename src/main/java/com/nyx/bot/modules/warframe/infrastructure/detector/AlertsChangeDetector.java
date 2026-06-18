@@ -2,8 +2,9 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.Alert;
 import io.github.kingprimes.model.worldstate.BastWorldState;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class AlertsChangeDetector implements ChangeDetector<Alert> {
+
+    private final WorldStateUtils worldStateUtils;
+
+    public AlertsChangeDetector(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public List<ChangeEvent<Alert>> detectChanges(WorldState oldState, WorldState newState) {
@@ -59,16 +66,17 @@ public class AlertsChangeDetector implements ChangeDetector<Alert> {
      * 警报有任务类型，但没有遗物等级
      */
     private ChangeEvent<Alert> createChangeEvent(Alert alert) {
+        Alert translated = worldStateUtils.translateAlerts(alert);
         return ChangeEvent.of(
-                SubscribeEnums.ALERTS,
+                SubscribeType.ALERTS,
                 null,
-                null,  // 警报没有等级
-                alert
+                null,
+                translated
         );
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.ALERTS;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.ALERTS;
     }
 }

@@ -2,8 +2,8 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.SteelPathOffering;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -45,7 +45,7 @@ public class SteelPathChangeDetector implements ChangeDetector<SteelPathOffering
                     newSteelPath.getNextReward().name());
 
             ChangeEvent<SteelPathOffering> event = ChangeEvent.of(
-                    SubscribeEnums.STEEL_PATH,
+                    SubscribeType.STEEL_PATH,
                     null,  // 无任务类型
                     null,  // 无等级
                     newSteelPath
@@ -58,7 +58,7 @@ public class SteelPathChangeDetector implements ChangeDetector<SteelPathOffering
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.STEEL_PATH;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.STEEL_PATH;
     }
 }

@@ -25,10 +25,11 @@ import org.springframework.stereotype.Component;
 public class ArbitrationPlugin {
 
     private final DrawImagePlugin drawImagePlugin;
+    private final ArbitrationCache arbitrationCache;
 
-
-    public ArbitrationPlugin(DrawImagePlugin drawImagePlugin) {
+    public ArbitrationPlugin(DrawImagePlugin drawImagePlugin, ArbitrationCache arbitrationCache) {
         this.drawImagePlugin = drawImagePlugin;
+        this.arbitrationCache = arbitrationCache;
     }
 
     @AnyMessageHandler
@@ -45,11 +46,11 @@ public class ArbitrationPlugin {
 
 
     private byte[] arbitrationImage() throws DataNotInfoException {
-        Arbitration arbitration = ArbitrationCache.getArbitration().orElseThrow(() -> new DataNotInfoException("仲裁信息不存在"));
+        Arbitration arbitration = arbitrationCache.getArbitration().orElseThrow(() -> new DataNotInfoException("仲裁信息不存在"));
         return drawImagePlugin.drawArbitrationImage(arbitration);
     }
 
     private byte[] postArbitrationExImage() {
-        return drawImagePlugin.drawArbitrationsImage(ArbitrationCache.getArbitrationList());
+        return drawImagePlugin.drawArbitrationsImage(arbitrationCache.getArbitrationList());
     }
 }

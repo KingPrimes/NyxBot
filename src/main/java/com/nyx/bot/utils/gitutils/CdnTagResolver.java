@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyx.bot.utils.http.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ public class CdnTagResolver {
     public static String getLatestTag() {
         try {
             HttpUtils.Body body = HttpUtils.sendGet(GITHUB_TAGS_URL, "", null, 120);
-            if (body.code().is2xxSuccessful()) {
+            if (body.is2xxSuccessful()) {
                 JsonNode root = mapper.readTree(body.body());
                 if (root.isArray() && !root.isEmpty()) {
                     String tag = root.get(0).get("name").asText();
@@ -59,14 +58,8 @@ public class CdnTagResolver {
      */
     public static List<String> buildUrls(String path) {
         String tag = getLatestTag();
-        List<String> urls = new ArrayList<>();
-        for (String base : DATA_SOURCE_BASE) {
-            if (base.endsWith("@")) {
-                urls.add(base + tag + "/" + path);
-            } else {
-                urls.add(base + "/" + path);
-            }
-        }
-        return urls;
+        return DATA_SOURCE_BASE.stream()
+                .map(base -> base.endsWith("@") ? base + tag + "/" + path : base + "/" + path)
+                .toList();
     }
 }

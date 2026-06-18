@@ -4,9 +4,8 @@ import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.service.MessageBuilder;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.DrawImagePlugin;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.worldstate.Alert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,16 +22,13 @@ public class AlertsMessageBuilder implements MessageBuilder<Alert> {
 
     private final DrawImagePlugin drawImagePlugin;
 
-    private final WorldStateUtils worldStateUtils;
-
-    public AlertsMessageBuilder(DrawImagePlugin drawImagePlugin, WorldStateUtils worldStateUtils) {
+    public AlertsMessageBuilder(DrawImagePlugin drawImagePlugin) {
         this.drawImagePlugin = drawImagePlugin;
-        this.worldStateUtils = worldStateUtils;
     }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<Alert> event, MissionSubscribeUserCheckType rule) {
-        Alert alert = worldStateUtils.translateAlerts(event.data());
+        Alert alert = event.data();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
 
@@ -93,7 +89,7 @@ public class AlertsMessageBuilder implements MessageBuilder<Alert> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.ALERTS;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.ALERTS;
     }
 }

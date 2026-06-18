@@ -1,11 +1,11 @@
 package com.nyx.bot.common.config;
 
 import jakarta.websocket.server.ServerEndpointConfig;
+import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.NonNull;
 
 /**
  * WebSocket端点配置类

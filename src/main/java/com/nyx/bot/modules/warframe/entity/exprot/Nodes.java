@@ -3,6 +3,7 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.common.core.dao.BaseEntity;
 import io.github.kingprimes.model.enums.FactionEnum;
 import io.github.kingprimes.model.enums.MissionTypeEnum;
 import jakarta.persistence.Entity;
@@ -10,12 +11,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @SuppressWarnings("unused")
+@EqualsAndHashCode(callSuper = false)
 @Data
 @Entity
 @Table
-public class Nodes {
+public class Nodes extends BaseEntity {
 
     @Id
     @NotEmpty(message = "unique_name.not.empty")

@@ -59,7 +59,7 @@ public class RivenAnalyseTrendCompute {
          */
         public String getAttributeDiff() {
             double medianValue = (lowAttribute + highAttribute) / 2;
-            log.debug("中间值：{}", medianValue);
+            //log.debug("中间值：{}", medianValue);
             double i = Math.abs(attribute) - Math.abs(medianValue);
             return getString(medianValue, attribute, i);
         }

@@ -10,26 +10,27 @@ import com.nyx.bot.modules.warframe.utils.MarketDucatsUtils;
 import com.nyx.bot.modules.warframe.utils.MarketOrderUtils;
 import com.nyx.bot.modules.warframe.utils.MarketRivenUtils;
 import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
+import io.github.kingprimes.model.enums.FactionEnum;
 import io.github.kingprimes.model.enums.MarketPlatformEnum;
+import io.github.kingprimes.model.enums.MissionTypeEnum;
+import io.github.kingprimes.model.enums.VoidEnum;
 import io.github.kingprimes.model.worldstate.ActiveMission;
 import io.github.kingprimes.model.worldstate.AllCycle;
 import io.github.kingprimes.model.worldstate.Invasion;
 import io.github.kingprimes.model.worldstate.SeasonInfo;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Warframe API 接口
  * 提供给App使用的Warframe游戏数据查询接口
  */
-@Tag(name = "Warframe API", description = "Warframe游戏数据查询接口")
 @RestController
 @RequestMapping("/api/warframe")
 public class WarframeApiController extends BaseController {
@@ -55,7 +56,6 @@ public class WarframeApiController extends BaseController {
      * 获取平原时间信息
      * 包含地球夜昼循环、Cetus、Vallis、Cambion、Zariman等平原时间
      */
-    @Operation(summary = "获取平原时间", description = "获取各个平原的时间循环信息")
     @GetMapping("/cycle")
     public ApiResponse<?> getCycle() {
         try {
@@ -69,7 +69,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取入侵信息
      */
-    @Operation(summary = "获取入侵信息", description = "获取当前的入侵任务列表")
     @GetMapping("/invasions")
     public ApiResponse<?> getInvasions() {
         try {
@@ -85,11 +84,8 @@ public class WarframeApiController extends BaseController {
      *
      * @param type 裂隙类型：ACTIVE_MISSION(普通)、STEEL_PATH(钢铁之路)、VOID_STORMS(虚空风暴)
      */
-    @Operation(summary = "获取裂隙信息", description = "获取裂隙任务列表，支持按类型筛选")
     @GetMapping("/fissures")
-    public ApiResponse<?> getFissures(
-            @Parameter(description = "裂隙类型：ACTIVE_MISSION, STEEL_PATH, VOID_STORMS")
-            @RequestParam(defaultValue = "ACTIVE_MISSION") String type
+    public ApiResponse<?> getFissures(@RequestParam(defaultValue = "ACTIVE_MISSION") String type
     ) {
         try {
             FissureTypeEnum fissureType = FissureTypeEnum.valueOf(type.toUpperCase());
@@ -105,7 +101,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取电波信息（Nightwave）
      */
-    @Operation(summary = "获取电波信息", description = "获取Nightwave电波任务信息")
     @GetMapping("/nightwave")
     public ApiResponse<?> getNightwave() {
         try {
@@ -119,7 +114,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取突击信息
      */
-    @Operation(summary = "获取突击信息", description = "获取每日突击任务列表")
     @GetMapping("/sorties")
     public ApiResponse<?> getSorties() {
         try {
@@ -133,7 +127,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取执刑官猎杀信息
      */
-    @Operation(summary = "获取执刑官猎杀", description = "获取执刑官猎杀任务信息")
     @GetMapping("/archon")
     public ApiResponse<?> getArchonHunt() {
         try {
@@ -149,11 +142,8 @@ public class WarframeApiController extends BaseController {
      *
      * @param keyword 紫卡武器名称
      */
-    @Operation(summary = "WM紫卡查询", description = "查询紫卡市场信息")
     @GetMapping("/wm/riven")
-    public ApiResponse<?> getRivenMarket(
-            @Parameter(description = "紫卡武器名称关键词")
-            @RequestParam String keyword
+    public ApiResponse<?> getRivenMarket(@RequestParam String keyword
     ) {
         try {
             var result = marketRivenUtils.marketRivenParameter(keyword);
@@ -169,13 +159,8 @@ public class WarframeApiController extends BaseController {
      * @param keyword  物品名称
      * @param platform 平台：PC, XB1, PS4, SWITCH, SWI
      */
-    @Operation(summary = "WM市场订单查询", description = "查询Warframe.Market物品订单信息")
     @GetMapping("/wm/order")
-    public ApiResponse<?> getMarketOrder(
-            @Parameter(description = "物品名称关键词")
-            @RequestParam String keyword,
-            @Parameter(description = "平台：PC, XB1, PS4, SWITCH, SWI")
-            @RequestParam(defaultValue = "PC") String platform
+    public ApiResponse<?> getMarketOrder(@RequestParam String keyword, @RequestParam(defaultValue = "PC") String platform
     ) {
         try {
             MarketPlatformEnum platformEnum = MarketPlatformEnum.valueOf(platform.toUpperCase());
@@ -191,7 +176,6 @@ public class WarframeApiController extends BaseController {
     /**
      * WM查询 - 杜卡德币查询
      */
-    @Operation(summary = "WM杜卡德币查询", description = "查询物品的杜卡德币兑换信息")
     @GetMapping("/wm/ducats")
     public ApiResponse<?> getDucats() {
         try {
@@ -205,7 +189,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取警报信息
      */
-    @Operation(summary = "获取警报信息", description = "获取世界警报任务列表")
     @GetMapping("/alerts")
     public ApiResponse<?> getAlerts() {
         try {
@@ -219,7 +202,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取每日特惠信息
      */
-    @Operation(summary = "获取每日特惠", description = "获取虚空商人每日特惠信息")
     @GetMapping("/dailydeals")
     public ApiResponse<?> getDailyDeals() {
         try {
@@ -233,7 +215,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取虚空商人信息
      */
-    @Operation(summary = "获取虚空商人", description = "获取虚空商人位置和到达时间")
     @GetMapping("/voidtrader")
     public ApiResponse<?> getVoidTrader() {
         try {
@@ -247,7 +228,6 @@ public class WarframeApiController extends BaseController {
     /**
      * 获取双衍王境轮换信息
      */
-    @Operation(summary = "获取双衍王境", description = "获取双衍王境轮换信息")
     @GetMapping("/duvalier")
     public ApiResponse<?> getDuvalierCycle() {
         try {
@@ -256,5 +236,23 @@ public class WarframeApiController extends BaseController {
         } catch (DataNotInfoException e) {
             return error("获取双衍王境失败: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/enums/mission-types")
+    public ApiResponse<?> missionTypes() {
+        return success(Arrays.stream(MissionTypeEnum.values())
+                .collect(Collectors.toMap(MissionTypeEnum::name, MissionTypeEnum::getName)));
+    }
+
+    @GetMapping("/enums/factions")
+    public ApiResponse<?> factions() {
+        return success(Arrays.stream(FactionEnum.values())
+                .collect(Collectors.toMap(FactionEnum::name, FactionEnum::getName)));
+    }
+
+    @GetMapping("/enums/void-tiers")
+    public ApiResponse<?> voidTiers() {
+        return success(Arrays.stream(VoidEnum.values())
+                .collect(Collectors.toMap(VoidEnum::name, VoidEnum::getName)));
     }
 }

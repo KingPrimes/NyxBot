@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +30,7 @@ public class LogCacheManager {
      * 日志缓存队列（线程安全的双端队列）
      */
     private final Deque<LogEvent> logCache = new LinkedBlockingDeque<>(MAX_CACHE_SIZE);
+    private final ReentrantLock lock = new ReentrantLock();
 
     /**
      * 添加日志到缓存
@@ -36,7 +38,8 @@ public class LogCacheManager {
      *
      * @param event 日志事件
      */
-    public synchronized void addLog(LogEvent event) {
+    public void addLog(LogEvent event) {
+        lock.lock();
         try {
             // 如果缓存已满，移除最旧的日志
             if (logCache.size() >= MAX_CACHE_SIZE) {
@@ -48,6 +51,8 @@ public class LogCacheManager {
 
         } catch (Exception e) {
             log.error("添加日志到缓存失败: {}", e.getMessage(), e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -59,11 +64,13 @@ public class LogCacheManager {
      */
     public List<LogEvent> getRecentLogs(String minLevel) {
         int minValue = getLevelValue(minLevel);
-
-        synchronized (this) {
+        lock.lock();
+        try {
             return logCache.stream()
                     .filter(log -> log.getLevelValue() >= minValue)
                     .collect(Collectors.toList());
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -73,8 +80,11 @@ public class LogCacheManager {
      * @return 所有日志列表的副本
      */
     public List<LogEvent> getAllLogs() {
-        synchronized (this) {
+        lock.lock();
+        try {
             return new ArrayList<>(logCache);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -99,9 +109,14 @@ public class LogCacheManager {
     /**
      * 清空日志缓存
      */
-    public synchronized void clear() {
-        logCache.clear();
-        log.info("日志缓存已清空");
+    public void clear() {
+        lock.lock();
+        try {
+            logCache.clear();
+            log.info("日志缓存已清空");
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

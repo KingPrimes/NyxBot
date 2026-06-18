@@ -11,17 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 public class EphemerasService {
 
 
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    EphemerasRepository repository;
+    private final EphemerasRepository repository;
 
     public EphemerasService(ObjectMapper objectMapper, EphemerasRepository repository) {
         this.objectMapper = objectMapper;
@@ -29,7 +30,7 @@ public class EphemerasService {
     }
 
     @Transactional
-    public Integer initEphemerasData() {
+    public void initEphemerasData() {
         log.info("开始初始化赤毒/信条幻纹 数据……");
         List<Ephemeras> lichEphemeras = getLichEphemeras();
         List<Ephemeras> sisterEphemeras = getSisterEphemeras();
@@ -37,15 +38,13 @@ public class EphemerasService {
             repository.saveAllAndFlush(lichEphemeras);
             repository.saveAllAndFlush(sisterEphemeras);
             log.info("初始化赤毒/信条幻纹 数据完成，共{}条", lichEphemeras.size() + sisterEphemeras.size());
-            return lichEphemeras.size() + sisterEphemeras.size();
         }
-        return -1;
     }
 
 
     private List<Ephemeras> getLichEphemeras() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_LICH_EPHEMERAS);
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -53,14 +52,7 @@ public class EphemerasService {
                     log.info("未获取到赤毒幻纹");
                     return null;
                 }
-                List<Ephemeras> ephemeras = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    Ephemeras ephemera = buildEphemeras(itemNode);
-                    if (ephemera != null) {
-                        ephemeras.add(ephemera);
-                    }
-                }
-                return ephemeras;
+                return getEphemeras(dataNode);
             } catch (Exception e) {
                 log.error("解析赤毒幻纹数据失败", e);
                 return null;
@@ -72,7 +64,7 @@ public class EphemerasService {
 
     private List<Ephemeras> getSisterEphemeras() {
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SISTER_EPHEMERAS);
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -80,20 +72,20 @@ public class EphemerasService {
                     log.info("未获取到 sisters 幻纹");
                     return null;
                 }
-                List<Ephemeras> ephemeras = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    Ephemeras ephemera = buildEphemeras(itemNode);
-                    if (ephemera != null) {
-                        ephemeras.add(ephemera);
-                    }
-                }
-                return ephemeras;
+                return getEphemeras(dataNode);
             } catch (Exception e) {
                 log.error("解析 sisters 幻纹数据失败", e);
                 return null;
             }
         }
         return null;
+    }
+
+    private List<Ephemeras> getEphemeras(JsonNode dataNode) {
+        return StreamSupport.stream(dataNode.spliterator(), false)
+                .map(this::buildEphemeras)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private Ephemeras buildEphemeras(JsonNode object) {

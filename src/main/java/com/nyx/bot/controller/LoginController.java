@@ -1,18 +1,11 @@
 package com.nyx.bot.controller;
 
 import com.nyx.bot.common.core.ApiResponse;
-import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.modules.system.entity.SysUser;
 import com.nyx.bot.utils.CacheUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 登录
  */
-@Tag(name = "auth.login", description = "登录接口")
 @RestController
 @CrossOrigin
 public class LoginController extends BaseController {
@@ -48,47 +40,6 @@ public class LoginController extends BaseController {
         this.jwtUtil = jwtUtil;
     }
 
-    @Operation(
-            summary = "登录",
-            description = "登录",
-            method = HttpMethod.POST,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "登录请求参数",
-                    required = true,
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = SysUser.class),
-                                    examples = {
-                                            @ExampleObject(value = """
-                                                    {
-                                                        "userName":"name",
-                                                        "password":"password"
-                                                    }
-                                                    """)
-                                    }
-                            )
-                    }
-            ),
-            responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功",
-                            content = {
-                                    @Content(mediaType = "application/json",
-                                            schema = @Schema(implementation = ApiResponse.class),
-                                            examples = {@ExampleObject(value = """
-                                                    {
-                                                        "code": 200,
-                                                        "msg": "登录成功",
-                                                        "data": {
-                                                            "token": "123456"
-                                                        }
-                                                    }
-                                                    """)}
-                                    )
-                            }
-                    )
-            }
-    )
     @PostMapping("/auth/login")
     public ApiResponse<?> login(@Validated @RequestBody SysUser authRequest, HttpServletRequest request) {
         String clientIp = request.getRemoteAddr();

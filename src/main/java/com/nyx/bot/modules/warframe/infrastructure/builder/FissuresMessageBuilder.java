@@ -4,8 +4,7 @@ import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.nyx.bot.modules.warframe.domain.service.MessageBuilder;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
 import com.nyx.bot.modules.warframe.entity.MissionSubscribeUserCheckType;
-import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import io.github.kingprimes.model.worldstate.ActiveMission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,15 +17,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class FissuresMessageBuilder implements MessageBuilder<ActiveMission> {
 
-    private final WorldStateUtils worldStateUtils;
 
-    public FissuresMessageBuilder(WorldStateUtils worldStateUtils) {
-        this.worldStateUtils = worldStateUtils;
+    public FissuresMessageBuilder() {
     }
 
     @Override
     public ArrayMsgUtils buildMessage(ChangeEvent<ActiveMission> event, MissionSubscribeUserCheckType rule) {
-        ActiveMission mission = worldStateUtils.translateActiveMission(event.data());
+        ActiveMission mission = event.data();
 
         ArrayMsgUtils builder = ArrayMsgUtils.builder();
         // 消息标题
@@ -70,7 +67,7 @@ public class FissuresMessageBuilder implements MessageBuilder<ActiveMission> {
     }
 
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.FISSURES;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.FISSURES;
     }
 }

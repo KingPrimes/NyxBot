@@ -1,9 +1,11 @@
 package com.nyx.bot.utils;
 
+import lombok.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.lang.NonNull;
+
+import java.util.Locale;
 
 public record I18nUtils(MessageSource messageSource) {
 
@@ -15,9 +17,21 @@ public record I18nUtils(MessageSource messageSource) {
      * @return 获取国际化翻译值
      */
     public static String message(@NonNull String code, Object... args) {
+        return message(code, args, LocaleContextHolder.getLocale());
+    }
+
+    /**
+     * 根据消息键、参数和指定 Locale 获取消息
+     *
+     * @param code   消息键
+     * @param args   参数
+     * @param locale 地区
+     * @return 获取国际化翻译值
+     */
+    public static String message(@NonNull String code, Object[] args, Locale locale) {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
         try {
-            return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+            return messageSource.getMessage(code, args, locale);
         } catch (NoSuchMessageException e) {
             return code;
         }

@@ -2,8 +2,10 @@ package com.nyx.bot.modules.warframe.infrastructure.detector;
 
 import com.nyx.bot.modules.warframe.domain.service.ChangeDetector;
 import com.nyx.bot.modules.warframe.domain.valueobject.ChangeEvent;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
+import com.nyx.bot.modules.warframe.utils.WorldStateUtils;
 import io.github.kingprimes.model.WorldState;
-import io.github.kingprimes.model.enums.SubscribeEnums;
 import io.github.kingprimes.model.enums.VoidEnum;
 import io.github.kingprimes.model.worldstate.ActiveMission;
 import io.github.kingprimes.model.worldstate.BastWorldState;
@@ -22,6 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
+    private final WorldStateUtils worldStateUtils;
+
+    public FissuresChangeDetector(WorldStateUtils worldStateUtils) {
+        this.worldStateUtils = worldStateUtils;
+    }
 
     @Override
     public List<ChangeEvent<ActiveMission>> detectChanges(WorldState oldState, WorldState newState) {
@@ -58,11 +65,15 @@ public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
      * 创建裂隙变化事件
      */
     private ChangeEvent<ActiveMission> createChangeEvent(ActiveMission mission) {
+        ActiveMission translated = worldStateUtils.translateActiveMission(mission);
+        // 库枚举 → 本地枚举转换（常量名一致）
+        MissionType localMissionType = mission.getMissionType() != null
+                ? findLocalMissionType(mission.getMissionType().name()) : null;
         return ChangeEvent.of(
-                SubscribeEnums.FISSURES,
-                mission.getMissionType(),  // 任务类型（捕获、生存等）
-                parseTierNum(mission.getModifier()),  // 遗物等级（从modifier解析）
-                mission                    // 完整任务数据
+                SubscribeType.FISSURES,
+                localMissionType,
+                parseTierNum(mission.getModifier()),
+                translated
         );
     }
 
@@ -85,8 +96,17 @@ public class FissuresChangeDetector implements ChangeDetector<ActiveMission> {
         };
     }
 
+    private static MissionType findLocalMissionType(String name) {
+        for (MissionType mt : MissionType.values()) {
+            if (mt.name().equals(name)) {
+                return mt;
+            }
+        }
+        return null;
+    }
+
     @Override
-    public SubscribeEnums getSupportedType() {
-        return SubscribeEnums.FISSURES;
+    public SubscribeType getSupportedType() {
+        return SubscribeType.FISSURES;
     }
 }

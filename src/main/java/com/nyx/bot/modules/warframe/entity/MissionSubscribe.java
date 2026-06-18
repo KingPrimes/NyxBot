@@ -25,7 +25,7 @@ import java.util.Set;
 @Table(name = "mission_subscribe")
 public class MissionSubscribe extends BaseEntity {
 
-    @Column(name = "group_name")
+    @Column(name = "group_name", nullable = false)
     String groupName;
 
     //发送消息的Bot

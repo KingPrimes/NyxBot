@@ -1,7 +1,7 @@
 package com.nyx.bot.modules.warframe.repo.subscribe;
 
 import com.nyx.bot.modules.warframe.entity.MissionSubscribe;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -37,7 +37,7 @@ public interface MissionSubscribeRepository extends JpaRepository<MissionSubscri
             JOIN u.checkTypes t
             WHERE t.subscribe = :type
             """)
-    List<MissionSubscribe> findSubscriptions(@Param("type") SubscribeEnums type);
+    List<MissionSubscribe> findSubscriptions(@Param("type") SubscribeType type);
 
     @EntityGraph(attributePaths = {"users", "users.checkTypes"})
     Optional<MissionSubscribe> findBySubGroup(Long subGroup);

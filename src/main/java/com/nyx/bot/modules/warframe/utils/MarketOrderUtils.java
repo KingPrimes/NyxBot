@@ -15,13 +15,13 @@ import io.github.kingprimes.model.enums.TransactionEnum;
 import io.github.kingprimes.model.market.BaseOrder;
 import io.github.kingprimes.model.market.OrderWithUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Component
@@ -96,7 +96,7 @@ public class MarketOrderUtils {
         log.debug("查询参数 Key:{}", dataBase.getEntity().getSlug());
         HttpUtils.Body body = ApiUrl.marketOrdersSet(dataBase.getEntity().getSlug(), form);
         log.debug("查询结果:{}", body.body());
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -115,10 +115,10 @@ public class MarketOrderUtils {
             } catch (Exception e) {
                 throw new RuntimeException("解析Market数据失败", e);
             }
-        } else if (body.code().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+        } else if (body.isTooManyRequests()) {
             throw new RuntimeException("触发速率限制，请稍后再次尝试查询。");
         } else {
-            throw new RuntimeException("查询Market数据失败, Code:%d Headers:%s".formatted(body.code().value(), body.headers().toSingleValueMap().toString()));
+            throw new RuntimeException("查询Market数据失败, Code:%d Headers:%s".formatted(body.code(), body.toSingleValueMap()));
         }
         return dataBase;
     }
@@ -137,25 +137,24 @@ public class MarketOrderUtils {
         log.debug("查询参数 From:{}  Key:{}  isBy:{}  isMax:{}", from, key, isBy, isMax);
         HttpUtils.Body body = ApiUrl.marketOrders(key, from);
         BaseOrder<OrderWithUser> owu = new BaseOrder<>();
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
 
-                List<OrderWithUser> list = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    OrderWithUser item = objectMapper.treeToValue(itemNode, OrderWithUser.class);
-                    list.add(item);
-                }
-
-                list = list.stream()
-                        // 筛选离线用户
+                List<OrderWithUser> list = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(itemNode -> {
+                            try {
+                                return objectMapper.treeToValue(itemNode, OrderWithUser.class);
+                            } catch (Exception e) {
+                                log.error("反序列化订单失败", e);
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
                         .filter(o -> !o.getUser().getStatus().equals(MarketStatusEnum.OFFLINE))
-                        // 筛选物品
                         .filter(o -> o.getItemId().equals(market.getEntity().getId()))
-                        // 筛选类型
                         .filter(o -> isBy ? o.getType().equals(TransactionEnum.BUY) : o.getType().equals(TransactionEnum.SELL))
-                        // 筛选等级
                         .filter(o -> matchesMaxRank(isMax, market, o))
                         // 排序物品
                         .sorted(isBy
@@ -177,7 +176,7 @@ public class MarketOrderUtils {
                 return owu;
             }
         }
-        if (body.code().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+        if (body.isTooManyRequests()) {
             owu.setError("触发速率限制，请稍后再次尝试查询。");
             return owu;
         }

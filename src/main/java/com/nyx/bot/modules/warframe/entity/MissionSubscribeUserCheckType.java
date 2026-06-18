@@ -2,8 +2,9 @@ package com.nyx.bot.modules.warframe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nyx.bot.common.core.dao.BaseEntity;
-import io.github.kingprimes.model.enums.MissionTypeEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,37 +31,41 @@ public class MissionSubscribeUserCheckType extends BaseEntity {
     //订阅类型枚举
     @Enumerated(EnumType.STRING)
     @Column(name = "subscribe", nullable = false, length = 50)
-    SubscribeEnums subscribe;
+    SubscribeType subscribe;
 
     //任务类型
     @Enumerated(EnumType.STRING)
     @Column(name = "mission_type_enum", length = 50)
-    MissionTypeEnum missionTypeEnum;
+    MissionType missionTypeEnum;
 
     //遗物纪元
     @Column(name = "tier_num")
     Integer tierNum;
 
-    @Transient
-    String subscribeType;
+    //入侵奖励物品（仅 INVISIONS 类型使用，null 表示全部）
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invasion_reward", length = 50)
+    InvasionReward invasionReward;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subu_id")
+    @JoinColumn(name = "subu_id", nullable = false)
     @JsonIgnore
     private MissionSubscribeUser subscribeUser;
 
     @JsonIgnore
     @Transient
-    public boolean matches(SubscribeEnums type,
-                           MissionTypeEnum missionType,
-                           Integer tier) {
+    public boolean matches(SubscribeType type,
+                           MissionType missionType,
+                           Integer tier,
+                           InvasionReward reward) {
         return this.subscribe == type &&
                 (missionType == null || this.missionTypeEnum == missionType) &&
-                (tier == null || Objects.equals(this.tierNum, tier));
+                (tier == null || Objects.equals(this.tierNum, tier)) &&
+                (reward == null || this.invasionReward == reward);
     }
 
     @Override
@@ -68,12 +73,12 @@ public class MissionSubscribeUserCheckType extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MissionSubscribeUserCheckType that = (MissionSubscribeUserCheckType) o;
-        return subscribe == that.subscribe && missionTypeEnum == that.missionTypeEnum && Objects.equals(tierNum, that.tierNum) && Objects.equals(subscribeType, that.subscribeType) && Objects.equals(id, that.id);
+        return subscribe == that.subscribe && missionTypeEnum == that.missionTypeEnum && Objects.equals(tierNum, that.tierNum) && invasionReward == that.invasionReward && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subscribe, missionTypeEnum, tierNum, subscribeType, id);
+        return Objects.hash(subscribe, missionTypeEnum, tierNum, invasionReward, id);
     }
 
     @Override
@@ -82,7 +87,7 @@ public class MissionSubscribeUserCheckType extends BaseEntity {
                 .append("subscribe", subscribe)
                 .append("missionTypeEnum", missionTypeEnum)
                 .append("tierNum", tierNum)
-                .append("subscribeType", subscribeType)
+                .append("invasionReward", invasionReward)
                 .append("id", id)
                 .toString();
     }

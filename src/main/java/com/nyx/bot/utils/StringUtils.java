@@ -8,9 +8,8 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
 
-@SuppressWarnings("all")
 @Component
-public class StringUtils extends org.apache.commons.lang3.StringUtils {
+public class StringUtils {
 
     private static final String RAND_STR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
@@ -248,7 +247,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 结果
      */
     public static boolean ishttp(String link) {
-        return StringUtils.startsWithAny(link, Constants.HTTP, Constants.HTTPS);
+        return link != null && (link.startsWith(Constants.HTTP) || link.startsWith(Constants.HTTPS));
     }
 
     /**
@@ -278,12 +277,12 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         }
 
         // 过滤空白字符串
-        if (filterBlank && StringUtils.isBlank(str)) {
+        if (filterBlank && (str == null || str.isBlank())) {
             return list;
         }
         String[] split = str.split(sep);
         for (String string : split) {
-            if (filterBlank && StringUtils.isBlank(string)) {
+            if (filterBlank && (string == null || string.isBlank())) {
                 continue;
             }
             if (trim) {
@@ -303,11 +302,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return 是否包含任意一个字符串
      */
     public static boolean containsAnyIgnoreCase(CharSequence cs, CharSequence... searchCharSequences) {
-        if (isEmpty(cs) || isEmpty(searchCharSequences)) {
+        if (cs == null || cs.isEmpty() || isNull(searchCharSequences)) {
             return false;
         }
         for (CharSequence testStr : searchCharSequences) {
-            if (containsIgnoreCase(cs, testStr)) {
+            if (cs.toString().toLowerCase().contains(testStr.toString().toLowerCase())) {
                 return true;
             }
         }
@@ -473,6 +472,43 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * 检查是否有任意一个字符串为空或空白
+     */
+    public static boolean isAnyBlank(String... strs) {
+        for (String s : strs) {
+            if (s == null || s.isBlank()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取指定字符（码点）首次出现之前的子字符串
+     */
+    public static String substringBefore(String str, int find) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        int pos = str.indexOf(find);
+        return pos == -1 ? str : str.substring(0, pos);
+    }
+
+    /**
+     * 获取指定分隔符首次出现之前的子字符串
+     */
+    public static String substringBefore(String str, String find) {
+        if (!isEmpty(str) && find != null) {
+            if (find.isEmpty()) {
+                return "";
+            }
+            int pos = str.indexOf(find);
+            return pos == -1 ? str : str.substring(0, pos);
+        }
+        return str;
     }
 
     /**

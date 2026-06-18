@@ -3,7 +3,6 @@ package com.nyx.bot.controller.auth;
 import com.nyx.bot.annotation.NotEmpty;
 import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.common.core.Constants;
-import com.nyx.bot.common.core.HttpMethod;
 import com.nyx.bot.common.core.JwtUtil;
 import com.nyx.bot.common.core.controller.BaseController;
 import com.nyx.bot.modules.system.entity.SysUser;
@@ -12,19 +11,9 @@ import com.nyx.bot.service.UserService;
 import com.nyx.bot.utils.CacheUtils;
 import com.nyx.bot.utils.I18nUtils;
 import com.nyx.bot.utils.SpringUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,16 +28,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 更改用户名
  */
-@SecurityScheme(
-        name = "Bearer",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        paramName = "Authorization",
-        in = SecuritySchemeIn.HEADER,
-        bearerFormat = "JWT"
-)
-@Tag(name = "auth.username", description = "更改用户名")
-@SecurityRequirement(name = "Bearer")
 @RestController
 public class ChangeUsernameController extends BaseController {
 
@@ -64,29 +43,6 @@ public class ChangeUsernameController extends BaseController {
         this.jwtUtil = jwtUtil;
     }
 
-    @Operation(
-            summary = "更改用户名",
-            description = "更改用户名",
-            method = HttpMethod.POST,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "更改用户名参数",
-                    required = true,
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ChangeUsername.class),
-                                    examples = {
-                                            @ExampleObject(value = """
-                                                    {
-                                                        "newUsername": "newUser",
-                                                        "password": "123456"
-                                                    }
-                                                    """
-                                            )
-                                    }
-                            )
-                    }
-            ))
     @PostMapping("/auth/changeUsername")
     public ApiResponse<Void> changeUsername(Authentication authentication, @Validated @RequestBody ChangeUsername params,
                                             HttpServletRequest request) {

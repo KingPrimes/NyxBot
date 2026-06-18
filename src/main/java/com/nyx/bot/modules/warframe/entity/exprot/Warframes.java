@@ -2,8 +2,10 @@ package com.nyx.bot.modules.warframe.entity.exprot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.common.core.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -11,11 +13,12 @@ import java.util.List;
 /**
  * 战甲
  */
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Data
 @Entity
 @Table
-public class Warframes {
+public class Warframes extends BaseEntity {
 
     @Id
     @NotEmpty(message = "unique_name.not.empty")
@@ -43,7 +46,8 @@ public class Warframes {
     private Integer masteryReq;
     @JsonProperty("sprintSpeed")
     private Integer sprintSpeed;
-    @OneToMany(mappedBy = "abilityUniqueName", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "warframe_unique_name")
     @JsonProperty("abilities")
     private List<Abilities> abilities;
     @JsonProperty("productCategory")
@@ -61,6 +65,7 @@ public class Warframes {
         @JsonProperty("abilityName")
         private String abilityName;
         @JsonProperty("description")
+        @Column(columnDefinition = "text")
         private String description;
     }
 }

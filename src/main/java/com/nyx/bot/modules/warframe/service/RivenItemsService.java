@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -31,7 +32,7 @@ public class RivenItemsService {
     public Integer initRivenItemsData() {
         log.info("开始初始化紫卡武器数据……");
         HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_RIVEN_WEAPONS);
-        if (body.code().is2xxSuccessful()) {
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
@@ -39,14 +40,10 @@ public class RivenItemsService {
                     log.error("未获取到Market紫卡武器数据");
                     return -1;
                 }
-                // 使用Stream流处理集合，代码更简洁
-                List<RivenItems> items = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    RivenItems item = buildRivenItems(itemNode);
-                    if (item != null) {
-                        items.add(item);
-                    }
-                }
+                List<RivenItems> items = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(this::buildRivenItems)
+                        .filter(Objects::nonNull)
+                        .toList();
                 log.info("成功初始化紫卡武器数据，数量为：{}", items.size());
                 return repository.saveAllAndFlush(items).size();
             } catch (Exception e) {

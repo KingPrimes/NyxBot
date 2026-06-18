@@ -1,40 +1,32 @@
 package com.nyx.bot.modules.warframe.domain.valueobject;
 
-import io.github.kingprimes.model.enums.MissionTypeEnum;
-import io.github.kingprimes.model.enums.SubscribeEnums;
+import com.nyx.bot.modules.warframe.enums.InvasionReward;
+import com.nyx.bot.modules.warframe.enums.MissionType;
+import com.nyx.bot.modules.warframe.enums.SubscribeType;
 
 /**
  * 变化事件值对象
  * 用于封装检测到的游戏状态变化
  *
- * @param type        订阅类型
- * @param missionType 任务类型（可选，null表示不限）
- * @param tier        遗物等级（可选，null表示不限）
- * @param data        变化的具体数据
+ * @param type           订阅类型
+ * @param missionType    任务类型（可选，null表示不限）
+ * @param tier           遗物等级（可选，null表示不限）
+ * @param invasionReward 入侵奖励物品（可选，仅 INVASIONS 类型使用，null表示不限）
+ * @param data           变化的具体数据
  */
-public record ChangeEvent<T>(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
+public record ChangeEvent<T>(SubscribeType type, MissionType missionType, Integer tier,
+                             InvasionReward invasionReward, T data) {
 
-    /**
-     * 创建变化事件
-     *
-     * @param type        订阅类型
-     * @param missionType 任务类型（可null）
-     * @param tier        遗物等级（可null）
-     * @param data        具体数据
-     * @return 变化事件
-     */
-    public static <T> ChangeEvent<T> of(SubscribeEnums type, MissionTypeEnum missionType, Integer tier, T data) {
-        return new ChangeEvent<>(type, missionType, tier, data);
+    public static <T> ChangeEvent<T> of(SubscribeType type, MissionType missionType, Integer tier, T data) {
+        return new ChangeEvent<>(type, missionType, tier, null, data);
     }
 
-    /**
-     * 创建变化事件（无任务类型和等级）
-     *
-     * @param type 订阅类型
-     * @param data 具体数据
-     * @return 变化事件
-     */
-    public static <T> ChangeEvent<T> of(SubscribeEnums type, T data) {
-        return new ChangeEvent<>(type, null, null, data);
+    public static <T> ChangeEvent<T> of(SubscribeType type, MissionType missionType, Integer tier,
+                                        InvasionReward reward, T data) {
+        return new ChangeEvent<>(type, missionType, tier, reward, data);
+    }
+
+    public static <T> ChangeEvent<T> of(SubscribeType type, T data) {
+        return new ChangeEvent<>(type, null, null, null, data);
     }
 }

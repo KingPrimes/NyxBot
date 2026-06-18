@@ -11,16 +11,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 public class LichSisterWeaponsService {
 
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    LichSisterWeaponsRepository repository;
+    private final LichSisterWeaponsRepository repository;
 
     public LichSisterWeaponsService(ObjectMapper objectMapper, LichSisterWeaponsRepository repository) {
         this.repository = repository;
@@ -43,51 +44,33 @@ public class LichSisterWeaponsService {
 
 
     private List<LichSisterWeapons> getLichWeapons() {
-        HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS);
-        if (body.code().is2xxSuccessful()) {
-            try {
-                JsonNode rootNode = objectMapper.readTree(body.body());
-                JsonNode dataNode = rootNode.get("data");
-                if (dataNode == null || !dataNode.isArray() || dataNode.isEmpty()) {
-                    log.warn("未获取到赤毒武器");
-                    return null;
-                }
-                List<LichSisterWeapons> weapons = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    LichSisterWeapons weapon = buildLichSisterWeapons(itemNode);
-                    if (weapon != null) {
-                        weapons.add(weapon);
-                    }
-                }
-                return weapons;
-            } catch (Exception e) {
-                log.error("解析赤毒武器数据失败", e);
-                return null;
-            }
-        }
-        return null;
+        return fetchWeapons(ApiUrl.WARFRAME_MARKET_LICH_WEAPONS, "赤毒武器");
     }
 
     private List<LichSisterWeapons> getSisterWeapons() {
-        HttpUtils.Body body = HttpUtils.marketSendGet(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS);
-        if (body.code().is2xxSuccessful()) {
+        return fetchWeapons(ApiUrl.WARFRAME_MARKET_SISTER_WEAPONS, "信条武器");
+    }
+
+    /**
+     * 从指定 URL 获取武器数据并解析为列表
+     */
+    private List<LichSisterWeapons> fetchWeapons(String apiUrl, String label) {
+        HttpUtils.Body body = HttpUtils.marketSendGet(apiUrl);
+        if (body.is2xxSuccessful()) {
             try {
                 JsonNode rootNode = objectMapper.readTree(body.body());
                 JsonNode dataNode = rootNode.get("data");
                 if (dataNode == null || !dataNode.isArray() || dataNode.isEmpty()) {
-                    log.warn("未获取到信条武器");
+                    log.warn("未获取到{}", label);
                     return null;
                 }
-                List<LichSisterWeapons> weapons = new ArrayList<>();
-                for (JsonNode itemNode : dataNode) {
-                    LichSisterWeapons weapon = buildLichSisterWeapons(itemNode);
-                    if (weapon != null) {
-                        weapons.add(weapon);
-                    }
-                }
+                List<LichSisterWeapons> weapons = StreamSupport.stream(dataNode.spliterator(), false)
+                        .map(this::buildLichSisterWeapons)
+                        .filter(Objects::nonNull)
+                        .toList();
                 return weapons;
             } catch (Exception e) {
-                log.error("解析信条武器数据失败", e);
+                log.error("解析{}数据失败", label, e);
                 return null;
             }
         }
@@ -109,6 +92,8 @@ public class LichSisterWeaponsService {
             JsonNode i18nNode = object.has("i18n") ? object.get("i18n") : null;
             JsonNode zhHansNode = (i18nNode != null && i18nNode.has("zh-hans")) ? i18nNode.get("zh-hans") : null;
             String name = (zhHansNode != null && zhHansNode.has("name")) ? zhHansNode.get("name").asText() : slug;
+            String icon = (zhHansNode != null && zhHansNode.has("icon")) ? zhHansNode.get("icon").asText() : null;
+            String thumb = (zhHansNode != null && zhHansNode.has("thumb")) ? zhHansNode.get("thumb").asText() : null;
 
             return new LichSisterWeapons()
                     .setReqMasteryRank(reqMasteryRank)
@@ -116,8 +101,8 @@ public class LichSisterWeaponsService {
                     .setId(id)
                     .setSlug(slug)
                     .setName(name)
-                    .setIcon(object.has("icon") ? object.get("icon").asText() : null)
-                    .setThumb(object.has("thumb") ? object.get("thumb").asText() : null);
+                    .setIcon(icon)
+                    .setThumb(thumb);
         } catch (Exception e) {
             log.error("解析物品数据失败: {}", object, e);
             return null;

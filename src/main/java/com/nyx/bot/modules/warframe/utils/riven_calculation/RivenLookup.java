@@ -4,8 +4,8 @@ import com.nyx.bot.modules.warframe.entity.RivenAnalyseTrend;
 import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.repo.RivenAnalyseTrendRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
-import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,12 +14,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 @Slf4j
+@Component
 public class RivenLookup {
-    // 字符替换映射表：key=需要替换的字符，value=目标字符
+
     private static final Map<String, String> CHAR_REPLACEMENTS = new LinkedHashMap<>();
     private static final Map<String, String> CHAR_ANALYSE = new LinkedHashMap<>();
 
-    // 静态初始化映射表
     static {
         CHAR_REPLACEMENTS.put("淞", "凇");
     }
@@ -50,12 +50,12 @@ public class RivenLookup {
         CHAR_ANALYSE.put("伤害", "伤害/近战伤害");
     }
 
-    private static WeaponsRepository getWeaponsRepository() {
-        return WeaponsRepositoryHolder.INSTANCE;
-    }
+    private final WeaponsRepository weaponsRepository;
+    private final RivenAnalyseTrendRepository rivenTrendRepository;
 
-    private static RivenAnalyseTrendRepository getRivenTrendRepository() {
-        return RivenTrendRepositoryHolder.INSTANCE;
+    public RivenLookup(WeaponsRepository weaponsRepository, RivenAnalyseTrendRepository rivenTrendRepository) {
+        this.weaponsRepository = weaponsRepository;
+        this.rivenTrendRepository = rivenTrendRepository;
     }
 
     public List<Weapons> findByFuzzyName(String name) {
@@ -65,32 +65,20 @@ public class RivenLookup {
                 fixedName = fixedName.replace(replacement.getKey(), replacement.getValue());
             }
         }
-        return getWeaponsRepository().findByNameContaining(fixedName);
+        return weaponsRepository.findByNameContaining(fixedName);
     }
 
     public Optional<RivenAnalyseTrend> findRivenTrendByAnalyseName(String analyseName) {
-        // 遍历映射表匹配词条（按优先级顺序）
         for (Map.Entry<String, String> entry : CHAR_ANALYSE.entrySet()) {
             String keyword = entry.getKey();
             String targetName = entry.getValue();
-
             if (analyseName.contains(keyword)) {
-                Optional<RivenAnalyseTrend> trend = getRivenTrendRepository().findByName(targetName);
+                Optional<RivenAnalyseTrend> trend = rivenTrendRepository.findByName(targetName);
                 if (trend.isPresent()) {
                     return trend;
                 }
             }
         }
-
-        // 无匹配时使用原始名称查询
-        return getRivenTrendRepository().findByName(analyseName);
-    }
-
-    private static class WeaponsRepositoryHolder {
-        static final WeaponsRepository INSTANCE = SpringUtils.getBean(WeaponsRepository.class);
-    }
-
-    private static class RivenTrendRepositoryHolder {
-        static final RivenAnalyseTrendRepository INSTANCE = SpringUtils.getBean(RivenAnalyseTrendRepository.class);
+        return rivenTrendRepository.findByName(analyseName);
     }
 }
