@@ -87,6 +87,13 @@ warframe:
       # 建议不少于 12 小时，以确保周期性任务的防重复机制有效
       retention-hours: 12
 
+# 系统模块配置
+system:
+  log:
+    # 操作日志保留天数，超过此天数的 LogInfo 记录将被定时清理（每天 3:30）
+    # 防止日志表无限增长导致 H2 文件膨胀、内存占用持续升高
+    retention-days: 7
+
 # OneBot
 shiro:
   ws:

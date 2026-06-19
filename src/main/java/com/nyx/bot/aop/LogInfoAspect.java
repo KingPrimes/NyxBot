@@ -26,8 +26,6 @@ public class LogInfoAspect {
     @Resource
     ObjectMapper objectMapper;
 
-    Long runTime;
-
     //切入点
     @Pointcut("@annotation(com.nyx.bot.annotation.LogInfo)")
     public void logPointCut() {
@@ -40,8 +38,9 @@ public class LogInfoAspect {
         try {
             long starTime = System.currentTimeMillis();
             obj = pjp.proceed();
-            runTime = System.currentTimeMillis() - starTime;
-            handleLog(pjp, logInfo, null, "");
+            // 耗时使用局部变量传递，避免单例 Aspect 实例字段在并发请求下相互覆盖
+            long runTime = System.currentTimeMillis() - starTime;
+            handleLog(pjp, logInfo, null, "", runTime);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -50,10 +49,10 @@ public class LogInfoAspect {
 
     @AfterThrowing(value = "@annotation(logInfo)", throwing = "e")
     public void doAfterThrowing(JoinPoint joinPoint, LogInfo logInfo, Exception e) {
-        handleLog(joinPoint, logInfo, e, null);
+        handleLog(joinPoint, logInfo, e, null, null);
     }
 
-    protected void handleLog(final JoinPoint joinPoint, LogInfo controllerLog, final Exception e, Object jsonResult) {
+    protected void handleLog(final JoinPoint joinPoint, LogInfo controllerLog, final Exception e, Object jsonResult, Long runTime) {
         try {
 
             // *========数据库日志=========*//

@@ -35,16 +35,16 @@ public class NotificationApplicationService {
     private static final Set<SubscribeType> SUBSCRIPTION_TYPES = EnumSet.of(
             SubscribeType.FISSURES, SubscribeType.INVASIONS
     );
-    private final Map<SubscribeType, ChangeDetector<?>> detectors;
-    private final Map<SubscribeType, MessageBuilder<?>> builders;
+    private final Map<SubscribeType, ChangeDetector<Object>> detectors;
+    private final Map<SubscribeType, MessageBuilder<Object>> builders;
     private final MissionSubscribeRepository subscribeRepo;
     private final NotificationHistoryRepository historyRepo;
     private final BotContainer botContainer;
     private final ExecutorService taskExecutor;
 
     public NotificationApplicationService(
-            List<ChangeDetector<?>> detectorList,
-            List<MessageBuilder<?>> builderList,
+            List<ChangeDetector<Object>> detectorList,
+            List<MessageBuilder<Object>> builderList,
             MissionSubscribeRepository subscribeRepo,
             NotificationHistoryRepository historyRepo,
             BotContainer botContainer,
@@ -68,13 +68,13 @@ public class NotificationApplicationService {
             log.debug("状态为空，跳过处理");
             return;
         }
-        List<ChangeEvent<?>> allChanges = detectAllChanges(oldState, newState);
+        List<ChangeEvent<Object>> allChanges = detectAllChanges(oldState, newState);
         if (allChanges.isEmpty()) {
             log.debug("未检测到任何变化");
             return;
         }
         log.debug("检测到 {} 个变化事件", allChanges.size());
-        Map<SubscribeType, List<ChangeEvent<?>>> changesByType = allChanges.stream()
+        Map<SubscribeType, List<ChangeEvent<Object>>> changesByType = allChanges.stream()
                 .collect(Collectors.groupingBy(ChangeEvent::type));
         changesByType.forEach((type, changes) ->
                 CompletableFuture.runAsync(() -> notifySubscribers(type, changes), taskExecutor)
@@ -85,12 +85,12 @@ public class NotificationApplicationService {
         );
     }
 
-    private List<ChangeEvent<?>> detectAllChanges(WorldState oldState, WorldState newState) {
+    private List<ChangeEvent<Object>> detectAllChanges(WorldState oldState, WorldState newState) {
         return detectors.values().stream()
                 .flatMap(detector -> {
                     try {
                         detector.cleanExpiredHistory();
-                        List<? extends ChangeEvent<?>> changes = detector.detectChanges(oldState, newState);
+                        List<? extends ChangeEvent<Object>> changes = detector.detectChanges(oldState, newState);
                         if (!changes.isEmpty()) {
                             log.debug("Detector {} 检测到 {} 个变化",
                                     detector.getClass().getSimpleName(), changes.size());
@@ -107,8 +107,8 @@ public class NotificationApplicationService {
     /**
      * 通知订阅者，区分主动推送和订阅推送
      */
-    private void notifySubscribers(SubscribeType type, List<ChangeEvent<?>> changes) {
-        List<ChangeEvent<?>> pendingChanges = changes.stream()
+    private void notifySubscribers(SubscribeType type, List<ChangeEvent<Object>> changes) {
+        List<ChangeEvent<Object>> pendingChanges = changes.stream()
                 .filter(change -> !historyExists(type, extractExpiry(change)))
                 .toList();
         if (pendingChanges.isEmpty()) {
@@ -135,8 +135,8 @@ public class NotificationApplicationService {
      * 主动推送：按群合并消息，一条消息 @所有相关用户
      */
     private NotificationDispatchResult notifyByActivePush(List<MissionSubscribe> subscriptions,
-                                                          SubscribeType type, List<ChangeEvent<?>> changes) {
-        MessageBuilder<?> builder = builders.get(type);
+                                                          SubscribeType type, List<ChangeEvent<Object>> changes) {
+        MessageBuilder<Object> builder = builders.get(type);
         if (builder == null) {
             log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
             return new NotificationDispatchResult(false, true, Set.of());
@@ -144,7 +144,7 @@ public class NotificationApplicationService {
 
         boolean sent = false;
         boolean failed = false;
-        Set<ChangeEvent<?>> sentChanges = new LinkedHashSet<>();
+        Set<ChangeEvent<Object>> sentChanges = new LinkedHashSet<>();
         for (MissionSubscribe sub : subscriptions) {
             try {
                 List<Long> userIds = sub.getUsers().stream()
@@ -166,11 +166,8 @@ public class NotificationApplicationService {
                 userIds.forEach(msg::at);
                 msg.text("您订阅的 " + type.getName() + " 已更新！");
 
-                for (ChangeEvent<?> change : changes) {
-                    @SuppressWarnings("unchecked")
-                    ChangeEvent<Object> rawChange = (ChangeEvent<Object>) change;
-                    MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
-                    ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, null);
+                for (ChangeEvent<Object> change : changes) {
+                    ArrayMsgUtils eventMsg = builder.buildMessage(change, null);
                     msg.text(eventMsg.buildCQ());
                 }
 
@@ -191,24 +188,24 @@ public class NotificationApplicationService {
      * 订阅推送：按用户规则过滤，同群同类型合并为一条消息
      */
     private NotificationDispatchResult notifyBySubscription(List<MissionSubscribe> subscriptions,
-                                                            SubscribeType type, List<ChangeEvent<?>> changes) {
-        MessageBuilder<?> builder = builders.get(type);
-        if (builder == null) {
-            log.warn("类型 {} 没有对应的 MessageBuilder", type.getName());
+                                                            SubscribeType type, List<ChangeEvent<Object>> changes) {
+        MessageBuilder<Object> rawBuilder = builders.get(type);
+        if (rawBuilder == null) {
+            log.warn("订阅 类型 {} 没有对应的 MessageBuilder", type.getName());
             return new NotificationDispatchResult(false, true, Set.of());
         }
 
         boolean sent = false;
         boolean failed = false;
-        Set<ChangeEvent<?>> sentChanges = new LinkedHashSet<>();
+        Set<ChangeEvent<Object>> sentChanges = new LinkedHashSet<>();
         for (MissionSubscribe sub : subscriptions) {
             try {
                 List<Long> matchedUsers = new ArrayList<>();
-                Set<ChangeEvent<?>> groupChanges = new LinkedHashSet<>();
+                Set<ChangeEvent<Object>> groupChanges = new LinkedHashSet<>();
                 ArrayMsgUtils msg = ArrayMsgUtils.builder();
 
                 for (MissionSubscribeUser user : sub.getUsers()) {
-                    List<ChangeEvent<?>> matched = filterMatchingChanges(user, changes);
+                    List<ChangeEvent<Object>> matched = filterMatchingChanges(user, changes);
                     if (matched.isEmpty()) {
                         continue;
                     }
@@ -216,14 +213,11 @@ public class NotificationApplicationService {
                     msg.at(user.getUserId());
 
                     groupChanges.addAll(matched);
-                    for (ChangeEvent<?> change : matched) {
+                    for (ChangeEvent<Object> change : matched) {
                         MissionSubscribeUserCheckType matchingRule = user.getCheckTypes().stream()
                                 .filter(rule -> matchesRule(change, rule))
                                 .findFirst().orElse(null);
-                        @SuppressWarnings("unchecked")
-                        ChangeEvent<Object> rawChange = (ChangeEvent<Object>) change;
-                        MessageBuilder<Object> rawBuilder = (MessageBuilder<Object>) builder;
-                        ArrayMsgUtils eventMsg = rawBuilder.buildMessage(rawChange, matchingRule);
+                        ArrayMsgUtils eventMsg = rawBuilder.buildMessage(change, matchingRule);
                         msg.text(eventMsg.buildCQ());
                     }
                 }
@@ -234,7 +228,7 @@ public class NotificationApplicationService {
 
                 Bot bot = botContainer.robots.get(sub.getSubBotUid());
                 if (bot == null) {
-                    log.warn("Bot {} 不存在，跳过通知", sub.getSubBotUid());
+                    log.warn("Bot {} 不存在，跳过订阅通知", sub.getSubBotUid());
                     failed = true;
                     continue;
                 }
@@ -243,7 +237,7 @@ public class NotificationApplicationService {
                 bot.sendGroupMsg(sub.getSubGroup(), msg.buildCQ(), false);
                 sent = true;
                 sentChanges.addAll(groupChanges);
-                log.debug("通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
+                log.debug("订阅通知发送成功 [bot:{}] [group:{}] [type:{}] [users:{}]",
                         sub.getSubBotUid(), sub.getSubGroup(), type.getName(), matchedUsers.size());
             } catch (Exception e) {
                 failed = true;
@@ -253,13 +247,13 @@ public class NotificationApplicationService {
         return new NotificationDispatchResult(sent, failed, sentChanges);
     }
 
-    private List<ChangeEvent<?>> filterMatchingChanges(MissionSubscribeUser user, List<ChangeEvent<?>> changes) {
+    private List<ChangeEvent<Object>> filterMatchingChanges(MissionSubscribeUser user, List<ChangeEvent<Object>> changes) {
         return changes.stream()
                 .filter(event -> user.getCheckTypes().stream().anyMatch(rule -> matchesRule(event, rule)))
                 .collect(Collectors.toList());
     }
 
-    private boolean matchesRule(ChangeEvent<?> event, MissionSubscribeUserCheckType rule) {
+    private boolean matchesRule(ChangeEvent<Object> event, MissionSubscribeUserCheckType rule) {
         if (rule.getSubscribe() != event.type()) {
             return false;
         }
@@ -281,7 +275,7 @@ public class NotificationApplicationService {
         return expiryTimestamp != null && historyRepo.existsBySubscribeTypeAndExpiryTimestamp(type, expiryTimestamp);
     }
 
-    private void saveHistories(SubscribeType type, Collection<ChangeEvent<?>> changes) {
+    private void saveHistories(SubscribeType type, Collection<ChangeEvent<Object>> changes) {
         changes.stream()
                 .map(this::extractExpiry)
                 .filter(Objects::nonNull)
@@ -293,7 +287,7 @@ public class NotificationApplicationService {
      * 从 ChangeEvent.data 中提取过期时间戳用于去重。
      * 所有 WorldState 数据模型都继承 BastWorldState，通过 getExpiry() 获取。
      */
-    private Long extractExpiry(ChangeEvent<?> event) {
+    private Long extractExpiry(ChangeEvent<Object> event) {
         try {
             if (event.data() instanceof BastWorldState bws && bws.getExpiry() != null) {
                 return bws.getExpiry().getEpochSecond().getEpochSecond();
@@ -317,6 +311,6 @@ public class NotificationApplicationService {
         }
     }
 
-    private record NotificationDispatchResult(boolean sent, boolean failed, Set<ChangeEvent<?>> sentChanges) {
+    private record NotificationDispatchResult(boolean sent, boolean failed, Set<ChangeEvent<Object>> sentChanges) {
     }
 }
