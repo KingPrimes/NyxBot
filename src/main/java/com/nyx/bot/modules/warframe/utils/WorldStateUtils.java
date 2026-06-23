@@ -139,14 +139,14 @@ public class WorldStateUtils {
      * @return 翻译后的双衍王境 轮换对象
      */
     public DuvalierCycle translateDuvalierCycle(DuvalierCycle duvalierCycle) {
-        List<EndlessXpChoices> list = duvalierCycle.getChoices().stream().peek(c -> {
-            if (c.getCategory().equals(EndlessXpChoices.Category.EXC_HARD)) {
-                c.setChoices(c.getChoices().stream().map(s ->
-                        weaponsRepository.findByEnglishName(s).map(Weapons::getName).orElse(s)
-                ).toList());
-            }
-        }).toList();
-        duvalierCycle.setChoices(list);
+        duvalierCycle.getChoices().stream()
+                .filter(c -> c.getCategory() == EndlessXpChoices.Category.EXC_HARD)
+                .forEach(c -> c.setChoices(
+                        c.getChoices().stream()
+                                .map(s -> weaponsRepository.findByEnglishName(s)
+                                        .map(Weapons::getName).orElse(s))
+                                .toList()
+                ));
         return duvalierCycle;
     }
 

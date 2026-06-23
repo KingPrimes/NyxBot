@@ -1,5 +1,6 @@
 package com.nyx.bot.modules.warframe.plugin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import com.nyx.bot.modules.warframe.enums.FissureTypeEnum;
 import com.nyx.bot.modules.warframe.repo.StateTranslationRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NightWaveRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.NodesRepository;
+import com.nyx.bot.modules.warframe.entity.exprot.Weapons;
 import com.nyx.bot.modules.warframe.repo.exprot.WeaponsRepository;
 import com.nyx.bot.modules.warframe.repo.exprot.reward.RewardPoolRepository;
 import com.nyx.bot.modules.warframe.utils.SyndicateMissionsUtils;
@@ -66,6 +68,7 @@ class WorldStateFullPipelineTest {
     private static Map<String, Nodes> nodeMap;        // uniqueName → Nodes
     private static Map<String, NightWave> nightWaveMap; // uniqueName → NightWave
     private static Map<String, RewardPool> rewardPoolMap; // uniqueName → RewardPool
+    private static Map<String, String> weaponTranslations; // englishName → 中文名
 
     private static WorldState worldState;
     private static List<Arbitration> arbitrationList;
@@ -81,6 +84,7 @@ class WorldStateFullPipelineTest {
         nodeMap = loadNodes();
         nightWaveMap = loadNightWaves();
         rewardPoolMap = loadRewardPools();
+        weaponTranslations = loadWeapons();
 
         // 从真实 API 获取 WorldState 数据
         var body = HttpUtils.sendGet(ApiUrl.WARFRAME_WORLD_STATE);
@@ -196,6 +200,19 @@ class WorldStateFullPipelineTest {
         return m;
     }
 
+    private static Map<String, String> loadWeapons() throws Exception {
+        Map<String, String> m = new HashMap<>();
+        try (Connection c = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             Statement s = c.createStatement();
+             ResultSet rs = s.executeQuery("SELECT english_name, name FROM weapons WHERE english_name IS NOT NULL")) {
+            while (rs.next()) {
+                m.put(rs.getString("english_name"), rs.getString("name"));
+            }
+        }
+        System.out.println("[H2] weapons: " + m.size() + " 条");
+        return m;
+    }
+
     // ======================== Repo 工厂 ========================
 
     private static StateTranslation toSt(String id, String name) {
@@ -221,7 +238,19 @@ class WorldStateFullPipelineTest {
     }
 
     private WeaponsRepository weaponsRepo() {
-        return mock(WeaponsRepository.class);
+        WeaponsRepository repo = mock(WeaponsRepository.class);
+        lenient().when(repo.findByEnglishName(anyString())).thenAnswer(inv -> {
+            String name = inv.getArgument(0);
+            String chinese = weaponTranslations.get(name);
+            if (chinese != null) {
+                Weapons w = new Weapons();
+                w.setEnglishName(name);
+                w.setName(chinese);
+                return Optional.of(w);
+            }
+            return Optional.empty();
+        });
+        return repo;
     }
 
     private NodesRepository nodesRepo() {
@@ -269,6 +298,14 @@ class WorldStateFullPipelineTest {
     }
 
     // ======================== 测试 ========================
+    @Nested
+    @DisplayName("0. 原始数据")
+    class WorldState_ {
+        @Test
+        void test() throws JsonProcessingException {
+            System.out.println(MAPPER.writeValueAsString(worldState));
+        }
+    }
 
     @Nested
     @DisplayName("1. 警报 — item/location 数据库翻译")
@@ -365,6 +402,7 @@ class WorldStateFullPipelineTest {
         @Test
         void test() throws Exception {
             var cycle = createWorldStateUtils().getDuvalierCycle();
+            System.out.println(MAPPER.writeValueAsString(cycle));
             assertNotNull(cycle);
             byte[] img = drawImagePlugin.drawDuviriCycleImage(cycle);
             assertTrue(img.length > 0);

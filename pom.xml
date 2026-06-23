@@ -33,7 +33,7 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.12.0</oshi.version>
         <jjwt.version>0.13.0</jjwt.version>
-        <draw-image.varsion>1.1.0</draw-image.varsion>
+        <draw-image.varsion>2.0.0</draw-image.varsion>
         <skipTests>true</skipTests>
     </properties>
 
@@ -198,7 +198,12 @@
 
         <dependency>
             <groupId>io.github.kingprimes</groupId>
-            <artifactId>draw-image-plugin</artifactId>
+            <artifactId>draw-image-plugin-runtime</artifactId>
+            <version>${draw-image.varsion}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.kingprimes</groupId>
+            <artifactId>draw-image-plugin-native-jna</artifactId>
             <version>${draw-image.varsion}</version>
         </dependency>
 
