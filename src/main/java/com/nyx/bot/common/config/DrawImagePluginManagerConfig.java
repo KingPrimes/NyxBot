@@ -6,7 +6,8 @@ import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
 import io.github.kingprimes.JnaNativePluginLoader;
 import io.github.kingprimes.SwitchableDrawImagePlugin;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,9 +22,10 @@ import java.util.List;
  *
  * @author KingPrimes
  */
-@Slf4j
 @Configuration
 public class DrawImagePluginManagerConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(DrawImagePluginManagerConfig.class);
 
     private final PluginConfigRepository repository;
 
@@ -65,20 +67,30 @@ public class DrawImagePluginManagerConfig {
 
     /**
      * 从数据库解析初始插件
+     * <p>
+     * 优先使用数据库记录中保存的插件名匹配；未找到时回退到 {@code manager.getFirstPlugin()}。
+     * 如果插件目录为空，getFirstPlugin() 返回内置的 DefaultDrawImagePlugin 兜底。
+     * </p>
      */
     private DrawImagePlugin resolveInitialPlugin(DrawImagePluginManager manager) {
+        // 1. 从数据库读取已选插件
         List<PluginConfig> all = repository.findAll();
         if (!all.isEmpty()) {
             String pluginName = all.getFirst().getPluginName();
             if (pluginName != null && !pluginName.isEmpty()) {
                 DrawImagePlugin plugin = manager.getPluginByName(pluginName);
                 if (plugin != null) {
-                    log.info("数据库记录: 使用插件 {}", pluginName);
+                    log.info("数据库记录: 使用插件 {} v{}", pluginName, plugin.getPluginVersion());
                     return plugin;
                 }
-                log.warn("数据库记录的插件 {} 未找到，回退到默认", pluginName);
+                log.warn("数据库记录的插件 {} 未找到（可能已被移除），回退到默认", pluginName);
             }
         }
-        return manager.getFirstPlugin();
+        // 2. 回退到第一个可用插件
+        int count = manager.getPluginCount();
+        DrawImagePlugin fallback = manager.getFirstPlugin();
+        log.info("使用默认插件: {} v{}（共 {} 个插件）",
+                fallback.getPluginName(), fallback.getPluginVersion(), count);
+        return fallback;
     }
 }

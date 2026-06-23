@@ -101,21 +101,15 @@ public class DrawImagePluginController {
     }
 
     /**
-     * 保存插件选择到数据库 — upsert 语义
+     * 保存插件选择到数据库 — 基于固定 ID 的 upsert
      * <p>
-     * 当前使用 {@code findAll().getFirst()} 取唯一配置记录，存在则更新，不存在则插入。
-     * 始终维持表中仅一条记录作为"当前选中的插件"。
+     * 使用 {@code ID = 1L} 作为唯一配置行标识，
+     * 避免 {@code findAll().getFirst()} 在并发场景下的竞态条件。
+     * </p>
      */
     private void savePluginSelection(String pluginName) {
-        List<PluginConfig> all = repository.findAll();
-        if (all.isEmpty()) {
-            PluginConfig config = new PluginConfig();
-            config.setPluginName(pluginName);
-            repository.save(config);
-        } else {
-            PluginConfig config = all.getFirst();
-            config.setPluginName(pluginName);
-            repository.save(config);
-        }
+        PluginConfig config = repository.findById(1L).orElseGet(PluginConfig::new);
+        config.setPluginName(pluginName);
+        repository.save(config);
     }
 }

@@ -1,6 +1,5 @@
 package com.nyx.bot.modules.warframe.plugin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -299,15 +298,6 @@ class WorldStateFullPipelineTest {
 
     // ======================== 测试 ========================
     @Nested
-    @DisplayName("0. 原始数据")
-    class WorldState_ {
-        @Test
-        void test() throws JsonProcessingException {
-            System.out.println(MAPPER.writeValueAsString(worldState));
-        }
-    }
-
-    @Nested
     @DisplayName("1. 警报 — item/location 数据库翻译")
     class Alerts {
         @Test
@@ -402,8 +392,9 @@ class WorldStateFullPipelineTest {
         @Test
         void test() throws Exception {
             var cycle = createWorldStateUtils().getDuvalierCycle();
-            System.out.println(MAPPER.writeValueAsString(cycle));
             assertNotNull(cycle);
+            assertNotNull(cycle.getChoices());
+            assertFalse(cycle.getChoices().isEmpty());
             byte[] img = drawImagePlugin.drawDuviriCycleImage(cycle);
             assertTrue(img.length > 0);
             Files.write(OUT.resolve("duviricycle.png"), img);
