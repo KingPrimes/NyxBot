@@ -61,6 +61,42 @@ public class NyxConfig {
     // ======== YAML 序列化辅助方法 ========
 
     /**
+     * 从 Map 构建 NyxConfig（用于从 locate.yaml 读取配置）。
+     */
+    public static NyxConfig fromMap(Map<String, Object> data) {
+        NyxConfig config = new NyxConfig();
+        config.setServerPort(intVal(data, ConfigConstants.SERVER_PORT, 8080));
+        config.setIsServerOrClient(boolVal(data, ConfigConstants.IS_SERVER_OR_CLIENT, true));
+        config.setWsServerUrl(strVal(data, ConfigConstants.WS_SERVER_URL, "/ws/shiro"));
+        config.setWsClientUrl(strVal(data, ConfigConstants.WS_CLIENT_URL, "ws://localhost:3001"));
+        config.setToken(strVal(data, ConfigConstants.TOKEN, ""));
+        config.setHttpProxy(strVal(data, ConfigConstants.HTTP_PROXY, ""));
+        config.setSocksProxy(strVal(data, ConfigConstants.SOCKS_PROXY, ""));
+        config.setProxyUser(strVal(data, ConfigConstants.PROXY_USER, ""));
+        config.setProxyPassword(strVal(data, ConfigConstants.PROXY_PASSWORD, ""));
+        config.setPluginPrefix(boolVal(data, ConfigConstants.PLUGIN_PREFIX, false));
+        config.setPluginName(strVal(data, ConfigConstants.PLUGIN_NAME, ""));
+        return config;
+    }
+
+    private static String strVal(Map<String, Object> data, String key, String def) {
+        Object v = data.get(key);
+        return v instanceof String s ? s : def;
+    }
+
+    private static Integer intVal(Map<String, Object> data, String key, Integer def) {
+        Object v = data.get(key);
+        if (v instanceof Number n) return n.intValue();
+        return def;
+    }
+
+    private static Boolean boolVal(Map<String, Object> data, String key, Boolean def) {
+        Object v = data.get(key);
+        if (v instanceof Boolean b) return b;
+        return def;
+    }
+
+    /**
      * 将全部字段转为 Map（用于完整写入 locate.yaml）。
      */
     public Map<String, Object> toMap() {
