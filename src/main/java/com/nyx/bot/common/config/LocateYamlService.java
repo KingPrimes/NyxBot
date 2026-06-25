@@ -51,8 +51,12 @@ public class LocateYamlService {
         }
         try (InputStream in = Files.newInputStream(CONFIG_PATH)) {
             Yaml yaml = new Yaml(opts);
-            Map<String, Object> result = yaml.load(in);
-            return result != null ? result : new LinkedHashMap<>();
+            Object parsed = yaml.load(in);
+            // 根节点必须是 Map，否则回退到空配置（防止 String/List/Integer 等类型触发 ClassCastException）
+            if (parsed instanceof Map<?, ?> m) {
+                return (Map<String, Object>) m;
+            }
+            return new LinkedHashMap<>();
         } catch (IOException | YAMLException e) {
             log.warn("读取 locate.yaml 失败，使用空配置: {}", e.getMessage());
             return new LinkedHashMap<>();
