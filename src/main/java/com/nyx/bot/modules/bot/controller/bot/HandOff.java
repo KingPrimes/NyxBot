@@ -1,315 +1,271 @@
 package com.nyx.bot.modules.bot.controller.bot;
 
+import com.nyx.bot.common.config.ConfigConstants;
+import com.nyx.bot.common.config.LocateYamlService;
 import com.nyx.bot.common.core.NyxConfig;
-import com.nyx.bot.utils.MatcherUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.Tag;
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
-@SuppressWarnings("all")
+/**
+ * 配置入口门面。
+ * <p>
+ * 在 Spring Boot 启动前从 CLI 参数、环境变量和 {@code locate.yaml} 中读取配置，
+ * 按优先级合并后持久化到 {@code locate.yaml}，并构造 Spring Environment。
+ * YAML I/O 委托给 {@link LocateYamlService}。
+ * </p>
+ * <p>
+ * 优先级：CLI 参数 > 环境变量 > 持久化值 > 默认值
+ * </p>
+ *
+ * @author KingPrimes
+ */
 @Slf4j
 public class HandOff {
 
-    static File file = new File("./data/locate.yaml");
-
-    public static Boolean handoff(NyxConfig config) {
-        BufferedWriter writer;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            Yaml yaml = new Yaml();
-            Map<String, Object> load = new HashMap<>();
-            Map<String, Object> o = yaml.load(new FileInputStream(file));
-            if (o != null) {
-                load = o;
-            }
-            load.put("serverPort", config.getServerPort() == null ? load.get("serverPort") : config.getServerPort());
-            load.put("isServerOrClient", config.getIsServerOrClient() == null ? load.get("isServerOrClient") : config.getIsServerOrClient());
-            load.put("wsServerUrl", config.getWsServerUrl() == null ? load.get("wsServerUrl") : config.getWsServerUrl());
-            load.put("wsClientUrl", config.getWsClientUrl() == null ? load.get("wsClientUrl") : config.getWsClientUrl());
-            load.put("token", config.getToken() == null ? load.get("token") : config.getToken());
-            load.put("httpProxy", config.getHttpProxy() == null ? load.get("httpProxy") : config.getHttpProxy());
-            load.put("socksProxy", config.getSocksProxy() == null ? load.get("socksProxy") : config.getSocksProxy());
-            load.put("proxyUser", config.getProxyUser() == null ? load.get("proxyUser") : config.getProxyUser());
-            load.put("proxyPassword", config.getProxyPassword() == null ? load.get("proxyPassword") : config.getProxyPassword());
-            load.put("pluginPrefix", config.getPluginPrefix() == null ? load.get("pluginPrefix") : config.getPluginPrefix());
-            String s = yaml.dumpAs(load, Tag.MAP, DumperOptions.FlowStyle.BLOCK);
-            writer = new BufferedWriter(new FileWriter(file));
-            writer.write(s);
-            writer.close();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    public static NyxConfig getConfig() {
-        NyxConfig config = new NyxConfig();
-        Yaml yaml = new Yaml();
-        Map<String, Object> load;
-        try {
-            load = yaml.load(new FileInputStream(file));
-            config.setServerPort((Integer) load.get("serverPort"));
-            config.setIsServerOrClient((Boolean) load.get("isServerOrClient"));
-            config.setWsServerUrl((String) load.get("wsServerUrl"));
-            config.setWsClientUrl((String) load.get("wsClientUrl"));
-            config.setToken((String) load.get("token"));
-            config.setHttpProxy((String) load.get("httpProxy"));
-            config.setSocksProxy((String) load.get("socksProxy"));
-            config.setProxyUser((String) load.get("proxyUser"));
-            config.setProxyPassword((String) load.get("proxyPassword"));
-            config.setPluginPrefix((Boolean) load.get("pluginPrefix"));
-            return config;
-        } catch (Exception e) {
-            config.setWsServerUrl("/ws/shiro");
-            config.setWsClientUrl("ws://localhost:3001");
-            config.setToken("");
-            config.setServerPort(8080);
-            config.setIsServerOrClient(true);
-            config.setHttpProxy("");
-            config.setSocksProxy("");
-            config.setProxyUser("");
-            config.setProxyPassword("");
-            config.setPluginPrefix(false);
-            handoff(config);
-            return config;
-        }
-    }
-
     /**
-     * 解析环境变量，优先级：命令行 > 系统环境变量 > 默认配置
-     * -debug 开启debug模式
-     * -serverPort=8080 设置端口号
-     * -wsServerEnable 设置为服务端
-     * -wsServerUrl=/ws/shiro 设置服务端地址
-     * -wsClientEnable 设置为客户端
-     * -wsClientUrl=ws://localhost:3001 设置客户端地址
-     * -shiroToken=token 设置OneBot协议链接的Token
-     * -httpProxy=http://127.0.0.1:7890  Http代理地址:端口
-     * -socksProxy=socks5://127.0.0.1:7890  Sock5代理地址:端口
-     * -proxyUser=user 代理认证用户
-     * -proxyPassword=password 代理认证密码
+     * 解析 CLI 参数和环境变量，构造 Spring Environment。
      *
      * @param args 命令行参数
      * @return 环境变量配置
      */
     public static ConfigurableEnvironment getEnv(String[] args) {
-        ConfigurableEnvironment env = new StandardEnvironment();
-        NyxConfig config = getConfig();
-        Map<String, Object> map = new HashMap<>();
-        // 配置debug模式
-        configureDebug(args, env, map);
-
-        // 设置新的端口号
-        Integer serverPort = resolveServerPort(args, env);
-        if (!serverPort.equals(8080)) {
-            config.setServerPort(serverPort);
-        }
-        map.put("server.port", config.getServerPort());
-
-        // 配置ws OneBot设置
-        configureWsSettings(args, env, config, map);
-
-        // 配置代理
-        configureProxy(args, env, config, map);
-
-        // 配置插件前缀（是否需要艾特触发）
-        resolvePluginPrefix(args, env, config);
-        map.put("nyx.plugin-prefix", config.getPluginPrefix());
-
-        MapPropertySource propertySource = new MapPropertySource("dynamicPort", map);
-        env.getPropertySources().addFirst(propertySource);
-        handoff(config);
-        return env;
+        var yamlService = new LocateYamlService();
+        var persisted = yamlService.load();
+        NyxConfig merged = resolveConfig(args, persisted);
+        yamlService.save(toMap(merged));
+        return buildEnvironment(merged, args);
     }
 
     /**
-     * 解析命令行参数中的服务器端口配置
-     *
-     * @param args 命令行参数数组
-     * @param env  环境配置对象，用于获取默认端口
-     * @return 解析出的端口号，如果未指定或无效则返回默认端口
+     * 从 {@code locate.yaml} 读取完整配置（运行时使用）。
+     * <p>
+     * 供 {@code ConfigLoadingController}、{@code ProxyUtils} 等运行时组件使用，
+     * 不参与 Spring Boot 启动流程。
+     * </p>
      */
-    /**
-     * 解析端口号，优先级：CLI 参数 > 环境变量 SERVER_PORT > 默认 8080
-     */
-    private static Integer resolveServerPort(String[] args, ConfigurableEnvironment env) {
-        int port = 8080;
-
-        for (String arg : args) {
-            String lower = arg.trim();
-            if (lower.toLowerCase().startsWith("-serverport=")) {
-                try {
-                    Integer number = MatcherUtils.getNumber(arg);
-                    if (number > 0 && number < 65535) {
-                        port = number;
-                    }
-                } catch (Exception e) {
-                    log.error("Invalid serverPort:{}", arg);
-                }
-                return port;
-            }
-        }
-        // CLI 未指定时检查环境变量 SERVER_PORT
-        return env.getProperty("SERVER_PORT", Integer.class, port);
+    public static NyxConfig getConfig() {
+        var yamlService = new LocateYamlService();
+        Map<String, Object> persisted = yamlService.load();
+        NyxConfig config = new NyxConfig();
+        Env env = new Env(persisted);
+        config.setServerPort(env.getInt(ConfigConstants.SERVER_PORT, 8080));
+        config.setIsServerOrClient(env.getBool(ConfigConstants.IS_SERVER_OR_CLIENT, true));
+        config.setWsServerUrl(env.getStr(ConfigConstants.WS_SERVER_URL, "/ws/shiro"));
+        config.setWsClientUrl(env.getStr(ConfigConstants.WS_CLIENT_URL, "ws://localhost:3001"));
+        config.setToken(env.getStr(ConfigConstants.TOKEN, ""));
+        config.setHttpProxy(env.getStr(ConfigConstants.HTTP_PROXY, ""));
+        config.setSocksProxy(env.getStr(ConfigConstants.SOCKS_PROXY, ""));
+        config.setProxyUser(env.getStr(ConfigConstants.PROXY_USER, ""));
+        config.setProxyPassword(env.getStr(ConfigConstants.PROXY_PASSWORD, ""));
+        config.setPluginPrefix(env.getBool(ConfigConstants.PLUGIN_PREFIX, false));
+        config.setPluginName(env.getStr(ConfigConstants.PLUGIN_NAME, ""));
+        return config;
     }
 
     /**
-     * 配置调试模式
-     *
-     * @param args 命令行参数数组
-     * @param env  环境配置对象
-     * @param map  属性映射表，用于存储配置键值对
+     * 持久化配置到 {@code locate.yaml}（运行时使用）。
+     * <p>
+     * 仅更新非 null 字段，已有字段保持不变。
+     * 供运行时 REST API 使用，不参与 Spring Boot 启动流程。
+     * </p>
      */
-    private static void configureDebug(String[] args, ConfigurableEnvironment env, Map<String, Object> map) {
-        // 从环境变量中获取DEBUG配置
-        String debugEnv = env.getProperty("DEBUG");
-        if (debugEnv == null || debugEnv.isEmpty()) {
-            debugEnv = env.getProperty("debug");
+    public static boolean handoff(NyxConfig config) {
+        try {
+            var yamlService = new LocateYamlService();
+            Map<String, Object> data = yamlService.load();
+            putIfNonNull(data, ConfigConstants.SERVER_PORT, config.getServerPort());
+            putIfNonNull(data, ConfigConstants.IS_SERVER_OR_CLIENT, config.getIsServerOrClient());
+            putIfNonNull(data, ConfigConstants.WS_SERVER_URL, config.getWsServerUrl());
+            putIfNonNull(data, ConfigConstants.WS_CLIENT_URL, config.getWsClientUrl());
+            putIfNonNull(data, ConfigConstants.TOKEN, config.getToken());
+            putIfNonNull(data, ConfigConstants.HTTP_PROXY, config.getHttpProxy());
+            putIfNonNull(data, ConfigConstants.SOCKS_PROXY, config.getSocksProxy());
+            putIfNonNull(data, ConfigConstants.PROXY_USER, config.getProxyUser());
+            putIfNonNull(data, ConfigConstants.PROXY_PASSWORD, config.getProxyPassword());
+            putIfNonNull(data, ConfigConstants.PLUGIN_PREFIX, config.getPluginPrefix());
+            putIfNonNull(data, ConfigConstants.PLUGIN_NAME, config.getPluginName());
+            yamlService.save(data);
+            return true;
+        } catch (Exception e) {
+            log.error("保存配置失败", e);
+            return false;
         }
-        // 设置debug模式
-        boolean isDebug = "true".equalsIgnoreCase(debugEnv) || Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-debug"));
-        if (isDebug) {
-            map.put("logging.level.com.nyx.bot", "DEBUG");
+    }
+
+    private static void putIfNonNull(Map<String, Object> map, String key, Object value) {
+        if (value != null) {
+            map.put(key, value);
         }
     }
 
     /**
-     * 配置WebSocket相关设置
-     *
-     * @param args   命令行参数数组
-     * @param config Nyx配置对象
-     * @param map    属性映射表，用于存储配置键值对
+     * 按优先级合并配置：CLI 参数 > 环境变量 > 持久化值 > 默认值
      */
-    /**
-     * 配置 WebSocket / OneBot 设置，优先级：CLI > 环境变量 > locate.yaml
-     */
-    private static void configureWsSettings(String[] args, ConfigurableEnvironment env,
-                                            NyxConfig config, Map<String, Object> map) {
-        // WebSocket 服务端启用：CLI -wsserverenable 或环境变量 SHIRO_WS_SERVER_ENABLE
-        boolean wsserverenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsserverenable"))
-                || "true".equalsIgnoreCase(env.getProperty("SHIRO_WS_SERVER_ENABLE"));
-        config.setIsServerOrClient(wsserverenable);
+    private static NyxConfig resolveConfig(String[] args, Map<String, Object> persisted) {
+        NyxConfig config = new NyxConfig();
+        Env env = new Env(persisted);
 
-        // WebSocket 服务端 URL：CLI -wsServerUrl= 或环境变量 SHIRO_WS_SERVER_URL
-        withArgOrEnv(args, env, "-wsserverurl=", "SHIRO_WS_SERVER_URL",
-                v -> config.setWsServerUrl(v));
-        map.put("shiro.ws.server.url", config.getWsServerUrl());
+        config.setServerPort(resolveInt(args, "-serverport=", "SERVER_PORT",
+                env.getInt(ConfigConstants.SERVER_PORT, 8080)));
+        config.setIsServerOrClient(resolveBool(args, "-wsserverenable",
+                "SHIRO_WS_SERVER_ENABLE",
+                env.getBool(ConfigConstants.IS_SERVER_OR_CLIENT, true)));
+        config.setWsServerUrl(resolveStr(args, "-wsserverurl=", "SHIRO_WS_SERVER_URL",
+                env.getStr(ConfigConstants.WS_SERVER_URL, "/ws/shiro")));
+        config.setWsClientUrl(resolveStr(args, "-wsclienturl=", "SHIRO_WS_CLIENT_URL",
+                env.getStr(ConfigConstants.WS_CLIENT_URL, "ws://localhost:3001")));
+        config.setToken(resolveStr(args, "-shirotoken=", "SHIRO_TOKEN",
+                env.getStr(ConfigConstants.TOKEN, "")));
+        config.setHttpProxy(resolveStr(args, "-httpproxy=", "HTTP_PROXY",
+                env.getStr(ConfigConstants.HTTP_PROXY, "")));
+        config.setSocksProxy(resolveStr(args, "-socksproxy=", "SOCKS_PROXY",
+                env.getStr(ConfigConstants.SOCKS_PROXY, "")));
+        config.setProxyUser(resolveStr(args, "-proxyuser=", "PROXY_USER",
+                env.getStr(ConfigConstants.PROXY_USER, "")));
+        config.setProxyPassword(resolveStr(args, "-proxypassword=", "PROXY_PASSWORD",
+                env.getStr(ConfigConstants.PROXY_PASSWORD, "")));
+        config.setPluginPrefix(resolveBool(args, "-pluginprefix", "PLUGIN_PREFIX",
+                env.getBool(ConfigConstants.PLUGIN_PREFIX, false)));
+        config.setPluginName(resolveStr(args, "-pluginname=", "PLUGIN_NAME",
+                env.getStr(ConfigConstants.PLUGIN_NAME, "")));
 
-        // WebSocket 客户端状态
-        if (wsserverenable) {
-            map.put("shiro.ws.client.enable", false);
-        } else {
-            boolean wsclientenable = Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-wsclientenable"))
-                    || "true".equalsIgnoreCase(env.getProperty("SHIRO_WS_CLIENT_ENABLE"));
-            config.setIsServerOrClient(!wsclientenable);
-            map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
-        }
-        map.put("shiro.ws.server.enable", config.getIsServerOrClient());
-
-        // WebSocket 客户端 URL：CLI -wsClientUrl= 或环境变量 SHIRO_WS_CLIENT_URL
-        withArgOrEnv(args, env, "-wsclienturl=", "SHIRO_WS_CLIENT_URL",
-                v -> config.setWsClientUrl(v));
-        map.put("shiro.ws.client.url", config.getWsClientUrl());
-
-        // Shiro Token：CLI -shiroToken= 或环境变量 SHIRO_TOKEN
-        withArgOrEnv(args, env, "-shirotoken=", "SHIRO_TOKEN",
-                v -> config.setToken(v));
-        map.put("shiro.token", config.getToken());
+        return config;
     }
 
-    /**
-     * 配置代理相关设置
-     *
-     * @param args   命令行参数数组
-     * @param config Nyx配置对象
-     * @param map    属性映射表，用于存储配置键值对
-     */
-    /**
-     * 配置代理设置，优先级：CLI > 环境变量 > locate.yaml
-     */
-    private static void configureProxy(String[] args, ConfigurableEnvironment env,
-                                       NyxConfig config, Map<String, Object> map) {
-        withArgOrEnv(args, env, "-httpproxy=", "HTTP_PROXY",
-                v -> config.setHttpProxy(v));
-        map.put("http.proxy", config.getHttpProxy());
-
-        withArgOrEnv(args, env, "-socksproxy=", "SOCKS_PROXY",
-                v -> config.setSocksProxy(v));
-        map.put("socks.proxy", config.getSocksProxy());
-
-        withArgOrEnv(args, env, "-proxyuser=", "PROXY_USER",
-                v -> config.setProxyUser(v));
-        map.put("proxy.user", config.getProxyUser());
-
-        withArgOrEnv(args, env, "-proxypassword=", "PROXY_PASSWORD",
-                v -> config.setProxyPassword(v));
-        map.put("proxy.password", config.getProxyPassword());
-    }
+    // ======== 优先级解析辅助方法 ========
 
     /**
-     * 配置插件前缀，优先级：CLI > 环境变量 PLUGIN_PREFIX > locate.yaml
+     * 解析字符串配置，优先级：CLI 参数 > 环境变量 > fallback（持久化值 > 默认值）
      */
-    private static void resolvePluginPrefix(String[] args, ConfigurableEnvironment env, NyxConfig config) {
-        if (Arrays.stream(args).anyMatch(arg -> arg.trim().equalsIgnoreCase("-pluginprefix"))) {
-            config.setPluginPrefix(true);
-            return;
-        }
-        String envVal = env.getProperty("PLUGIN_PREFIX");
-        if ("true".equalsIgnoreCase(envVal)) {
-            config.setPluginPrefix(true);
-        }
-    }
-
-    /**
-     * 在命令行参数中查找指定前缀的参数并处理
-     *
-     * @param args     命令行参数数组
-     * @param prefix   要查找的参数前缀
-     * @param consumer 找到匹配参数时的处理函数
-     */
-    /**
-     * 从 CLI 参数中查找指定前缀的值，应用于 consumer。
-     * CLI 未找到时回退到环境变量（Spring Environment 会同时读取系统属性和环境变量）。
-     */
-    private static void withArgOrEnv(String[] args, ConfigurableEnvironment env,
-                                     String prefix, String envKey, Consumer<String> consumer) {
-        // 先查 CLI 参数
-        String cliVal = Arrays.stream(args)
-                .map(a -> a.trim().toLowerCase())
-                .filter(a -> a.startsWith(prefix.toLowerCase()))
+    private static String resolveStr(String[] args, String cliPrefix,
+                                     String envKey, String fallback) {
+        String fromCli = Arrays.stream(args)
+                .map(String::trim)
+                .filter(a -> a.regionMatches(true, 0, cliPrefix, 0,
+                        cliPrefix.length()))
                 .findFirst()
                 .map(a -> {
                     int eq = a.indexOf('=');
                     return eq >= 0 ? a.substring(eq + 1) : "";
                 })
                 .orElse(null);
-        if (cliVal != null && !cliVal.isEmpty()) {
-            consumer.accept(cliVal);
-            return;
-        }
-        // CLI 未指定时回退到环境变量
-        String envVal = env.getProperty(envKey);
-        if (envVal != null && !envVal.isEmpty()) {
-            consumer.accept(envVal);
+        if (fromCli != null) return fromCli;
+        String fromEnv = System.getenv(envKey);
+        return fromEnv != null && !fromEnv.isEmpty() ? fromEnv : fallback;
+    }
+
+    /**
+     * 解析整型配置
+     */
+    private static Integer resolveInt(String[] args, String cliPrefix,
+                                      String envKey, Integer fallback) {
+        String str = resolveStr(args, cliPrefix, envKey,
+                fallback != null ? fallback.toString() : null);
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            log.warn("无效的整型配置 {}: {}, 使用默认值 {}", cliPrefix, str, fallback);
+            return fallback;
         }
     }
 
-    static class MapPropertySource extends org.springframework.core.env.MapPropertySource {
-        public MapPropertySource(String name, Map<String, Object> source) {
-            super(name, source);
+    /**
+     * 解析布尔配置（CLI 使用无值 flag）
+     */
+    private static Boolean resolveBool(String[] args, String cliFlag,
+                                       String envKey, Boolean fallback) {
+        if (Arrays.stream(args).anyMatch(a -> a.trim().equalsIgnoreCase(cliFlag))) {
+            return true;
         }
+        String fromEnv = System.getenv(envKey);
+        if ("true".equalsIgnoreCase(fromEnv)) return true;
+        return fallback;
     }
 
+    /** 将 NyxConfig 转为可序列化的 Map */
+    private static Map<String, Object> toMap(NyxConfig config) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put(ConfigConstants.SERVER_PORT,         config.getServerPort());
+        map.put(ConfigConstants.IS_SERVER_OR_CLIENT, config.getIsServerOrClient());
+        map.put(ConfigConstants.WS_SERVER_URL,       config.getWsServerUrl());
+        map.put(ConfigConstants.WS_CLIENT_URL,       config.getWsClientUrl());
+        map.put(ConfigConstants.TOKEN,               config.getToken());
+        map.put(ConfigConstants.HTTP_PROXY,          config.getHttpProxy());
+        map.put(ConfigConstants.SOCKS_PROXY,         config.getSocksProxy());
+        map.put(ConfigConstants.PROXY_USER,          config.getProxyUser());
+        map.put(ConfigConstants.PROXY_PASSWORD,      config.getProxyPassword());
+        map.put(ConfigConstants.PLUGIN_PREFIX,       config.getPluginPrefix());
+        map.put(ConfigConstants.PLUGIN_NAME,         config.getPluginName());
+        return map;
+    }
 
+    /**
+     * 将配置转为 Spring Environment
+     */
+    private static ConfigurableEnvironment buildEnvironment(NyxConfig config, String[] args) {
+        ConfigurableEnvironment env = new StandardEnvironment();
+        Map<String, Object> map = new HashMap<>();
+        map.put("server.port", config.getServerPort());
+        map.put("shiro.ws.server.enable", config.getIsServerOrClient());
+        map.put("shiro.ws.server.url", config.getWsServerUrl());
+        map.put("shiro.ws.client.enable", !config.getIsServerOrClient());
+        map.put("shiro.ws.client.url", config.getWsClientUrl());
+        map.put("shiro.token", config.getToken());
+        map.put("http.proxy", config.getHttpProxy() != null ? config.getHttpProxy() : "");
+        map.put("socks.proxy", config.getSocksProxy() != null ? config.getSocksProxy() : "");
+        map.put("proxy.user", config.getProxyUser() != null ? config.getProxyUser() : "");
+        map.put("proxy.password", config.getProxyPassword() != null ? config.getProxyPassword() : "");
+        map.put("nyx.plugin-prefix", config.getPluginPrefix());
+        if (isDebug(args, env)) {
+            map.put("logging.level.com.nyx.bot", "DEBUG");
+        }
+        var ps = new MapPropertySource("dynamicPort", map);
+        env.getPropertySources().addFirst(ps);
+        return env;
+    }
+
+    /**
+     * 检查是否启用调试模式（-debug 或 DEBUG=true）
+     */
+    private static boolean isDebug(String[] args, ConfigurableEnvironment env) {
+        String debugEnv = env.getProperty("DEBUG");
+        if (debugEnv == null || debugEnv.isEmpty()) {
+            debugEnv = env.getProperty("debug");
+        }
+        return "true".equalsIgnoreCase(debugEnv)
+                || Arrays.stream(args).anyMatch(a -> a.trim().equalsIgnoreCase("-debug"));
+    }
+
+    /**
+     * 封装从持久化 Map 中读取配置，提供类型安全的方法。
+     */
+    static class Env {
+        private final Map<String, Object> data;
+
+        Env(Map<String, Object> data) { this.data = data; }
+
+        String getStr(String key, String def) {
+            Object v = data.get(key);
+            return v instanceof String s ? s : def;
+        }
+
+        Integer getInt(String key, Integer def) {
+            Object v = data.get(key);
+            if (v instanceof Number n) return n.intValue();
+            return def;
+        }
+
+        Boolean getBool(String key, Boolean def) {
+            Object v = data.get(key);
+            if (v instanceof Boolean b) return b;
+            return def;
+        }
+    }
 }

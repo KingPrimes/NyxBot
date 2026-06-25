@@ -40,6 +40,9 @@ public class NyxConfig {
     // 插件前缀，是否使用艾特触发指令，默认为false
     Boolean pluginPrefix = false;
 
+    /** 当前选中的绘图插件名称（持久化到 locate.yaml） */
+    String pluginName;
+
     // 不进行序列化
     @JsonIgnore
     public boolean isValidateClientUrl() {

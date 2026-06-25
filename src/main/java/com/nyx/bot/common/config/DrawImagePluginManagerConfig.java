@@ -1,7 +1,5 @@
 package com.nyx.bot.common.config;
 
-import com.nyx.bot.entity.PluginConfig;
-import com.nyx.bot.repo.PluginConfigRepository;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
 import io.github.kingprimes.JnaNativePluginLoader;
@@ -11,13 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
 /**
  * 图片插件管理器
  * <p>
  * 同时支持 jar 插件和 native（.dll/.so/.dylib）插件加载。
  * 提供 {@link SwitchableDrawImagePlugin} 热切换代理，运行时切换不中断业务 Bean。
+ * 插件选择持久化到 {@code locate.yaml}，不再依赖 JPA 数据库表。
  * </p>
  *
  * @author KingPrimes
@@ -27,10 +24,10 @@ public class DrawImagePluginManagerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DrawImagePluginManagerConfig.class);
 
-    private final PluginConfigRepository repository;
+    private final LocateYamlService yamlService;
 
-    public DrawImagePluginManagerConfig(PluginConfigRepository repository) {
-        this.repository = repository;
+    public DrawImagePluginManagerConfig(LocateYamlService yamlService) {
+        this.yamlService = yamlService;
     }
 
     /**
@@ -66,27 +63,25 @@ public class DrawImagePluginManagerConfig {
     }
 
     /**
-     * 从数据库解析初始插件
+     * 从 {@code locate.yaml} 解析初始插件
      * <p>
-     * 优先使用数据库记录中保存的插件名匹配；未找到时回退到 {@code manager.getFirstPlugin()}。
+     * 优先使用配置文件中保存的插件名匹配；未找到时回退到 {@code manager.getFirstPlugin()}。
      * 如果插件目录为空，getFirstPlugin() 返回内置的 DefaultDrawImagePlugin 兜底。
      * </p>
      */
     private DrawImagePlugin resolveInitialPlugin(DrawImagePluginManager manager) {
-        // 1. 从数据库读取已选插件
-        List<PluginConfig> all = repository.findAll();
-        if (!all.isEmpty()) {
-            String pluginName = all.getFirst().getPluginName();
-            if (pluginName != null && !pluginName.isEmpty()) {
-                DrawImagePlugin plugin = manager.getPluginByName(pluginName);
-                if (plugin != null) {
-                    log.info("数据库记录: 使用插件 {} v{}", pluginName, plugin.getPluginVersion());
-                    return plugin;
-                }
-                log.warn("数据库记录的插件 {} 未找到（可能已被移除），回退到默认", pluginName);
+        String pluginName = (String) yamlService.load()
+                .get(ConfigConstants.PLUGIN_NAME);
+
+        if (pluginName != null && !pluginName.isEmpty()) {
+            DrawImagePlugin plugin = manager.getPluginByName(pluginName);
+            if (plugin != null) {
+                log.info("配置文件记录: 使用插件 {} v{}", pluginName, plugin.getPluginVersion());
+                return plugin;
             }
+            log.warn("配置文件记录的插件 {} 未找到（可能已被移除），回退到默认", pluginName);
         }
-        // 2. 回退到第一个可用插件
+
         int count = manager.getPluginCount();
         DrawImagePlugin fallback = manager.getFirstPlugin();
         log.info("使用默认插件: {} v{}（共 {} 个插件）",
