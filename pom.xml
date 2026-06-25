@@ -33,7 +33,7 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.12.0</oshi.version>
         <jjwt.version>0.13.0</jjwt.version>
-        <draw-image.varsion>2.0.0</draw-image.varsion>
+        <draw-image.varsion>2.0.1</draw-image.varsion>
         <lombok.version>1.18.40</lombok.version>
         <skipTests>true</skipTests>
     </properties>
