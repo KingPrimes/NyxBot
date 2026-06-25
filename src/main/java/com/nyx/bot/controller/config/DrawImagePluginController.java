@@ -1,12 +1,11 @@
 package com.nyx.bot.controller.config;
 
-import com.nyx.bot.common.config.DrawImagePluginManagerConfig;
 import com.nyx.bot.common.core.ApiResponse;
 import com.nyx.bot.entity.PluginConfig;
 import com.nyx.bot.repo.PluginConfigRepository;
-import com.nyx.bot.utils.SpringUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
+import io.github.kingprimes.SwitchableDrawImagePlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,99 +14,102 @@ import java.util.stream.Collectors;
 
 /**
  * 图片插件控制器
- * 用于管理图片插件的加载和选择
+ * <p>
+ * 通过 {@link SwitchableDrawImagePlugin#switchTo(DrawImagePlugin)} 实现运行时热切换，
+ * 无需 destroy/register Spring Bean，所有注入点自动感知新插件。
+ * </p>
+ *
+ * @author KingPrimes
  */
 @Slf4j
 @RestController
 @RequestMapping("/config/plugin/image")
 public class DrawImagePluginController {
 
-    private final DrawImagePluginManager drawImagePluginManager;
+    private final DrawImagePluginManager manager;
+
+    private final SwitchableDrawImagePlugin activePlugin;
 
     private final PluginConfigRepository repository;
 
-    public DrawImagePluginController(DrawImagePluginManager drawImagePluginManager, PluginConfigRepository repository) {
-        this.drawImagePluginManager = drawImagePluginManager;
+    public DrawImagePluginController(DrawImagePluginManager manager,
+                                     SwitchableDrawImagePlugin activePlugin,
+                                     PluginConfigRepository repository) {
+        this.manager = manager;
+        this.activePlugin = activePlugin;
         this.repository = repository;
     }
 
     /**
-     * 保存插件选择到数据库
-     *
-     * @param pluginName 插件名称
-     */
-    private void savePluginSelection(String pluginName) {
-        repository.findByPluginName(pluginName).ifPresentOrElse(
-                config -> {
-                },
-                () -> {
-                    PluginConfig newConfig = new PluginConfig();
-                    newConfig.setId(1L);
-                    newConfig.setPluginName(pluginName);
-                    repository.save(newConfig);
-                }
-        );
-    }
-
-    /**
      * 获取所有已加载的插件名称列表
-     *
-     * @return 插件名称列表
      */
     @GetMapping("/list")
     public ApiResponse<Object> getPluginNames() {
-        List<String> pluginNames = drawImagePluginManager.getAllPlugins().stream()
+        List<String> pluginNames = manager.getAllPlugins().stream()
                 .map(DrawImagePlugin::getPluginName)
                 .collect(Collectors.toList());
         return ApiResponse.ok("获取插件列表成功", pluginNames);
     }
 
     /**
-     * 根据插件名称加载指定插件
-     *
-     * @param pluginName 插件名称
-     * @return 加载结果信息
+     * 根据插件名称加载指定插件（运行时热切换）
      */
     @PostMapping("/load")
     public ApiResponse<Void> loadPluginByName(@RequestParam String pluginName) {
-        DrawImagePlugin plugin = drawImagePluginManager.getPluginByName(pluginName);
-        if (plugin != null) {
-            DrawImagePluginManagerConfig.registerDrawImagePlugin(plugin);
-            savePluginSelection(pluginName);
-            return ApiResponse.ok("插件加载成功: " + pluginName, null);
-        } else {
+        DrawImagePlugin plugin = manager.getPluginByName(pluginName);
+        if (plugin == null) {
             return ApiResponse.error(500, "未找到插件: " + pluginName);
         }
+        // 原子切换代理，所有业务 Bean 通过 volatile 引用自动感知
+        activePlugin.switchTo(plugin);
+        savePluginSelection(pluginName);
+        log.info("插件已切换到: {} v{}", plugin.getPluginName(), plugin.getPluginVersion());
+        return ApiResponse.ok("插件加载成功: " + pluginName, null);
     }
 
     /**
      * 获取当前使用的插件名称
-     *
-     * @return 当前插件名称
      */
     @GetMapping("/current")
     public ApiResponse<Object> getCurrentPlugin() {
-        DrawImagePlugin currentPlugin = SpringUtils.getBean(DrawImagePlugin.class);
-        return ApiResponse.ok("获取当前插件成功", currentPlugin.getPluginName());
+        DrawImagePlugin current = activePlugin.getCurrent();
+        return ApiResponse.ok("获取当前插件成功", current.getPluginName());
     }
 
     /**
-     * 重新加载所有插件
-     *
-     * @return 重新加载结果
+     * 重新加载所有插件（扫描 plugin 目录）
      */
-    @SuppressWarnings("null")
     @PostMapping("/reload")
     public ApiResponse<Void> reloadPlugins() {
         try {
-            drawImagePluginManager.loadPlugins("./plugin");
-            DrawImagePlugin firstPlugin = drawImagePluginManager.getFirstPlugin();
-            DrawImagePluginManagerConfig.registerDrawImagePlugin(firstPlugin);
-            log.info("插件重新加载完成，目录: {}", "./plugin");
-            return ApiResponse.ok("插件重新加载完成，共加载了 " + drawImagePluginManager.getPluginCount() + " 个插件", null);
+            manager.loadPlugins("./plugin");
+
+            // 保留当前已选插件名，重新匹配
+            String currentName = activePlugin.getPluginName();
+            DrawImagePlugin plugin = manager.getPluginByName(currentName);
+            if (plugin == null) {
+                plugin = manager.getFirstPlugin();
+                log.warn("当前插件 {} 已不存在，回退到: {}", currentName, plugin.getPluginName());
+            }
+            activePlugin.switchTo(plugin);
+            log.info("插件重新加载完成，共 {} 个插件", manager.getPluginCount());
+            return ApiResponse.ok("插件重新加载完成，当前: " + plugin.getPluginName(), null);
         } catch (Exception e) {
             log.error("插件重新加载失败", e);
             return ApiResponse.error(500, "插件重新加载失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 保存插件选择到数据库 — 基于固定 ID 的 upsert
+     * <p>
+     * 使用 {@code ID = 1L} 作为唯一配置行标识，
+     * 避免 {@code findAll().getFirst()} 在并发场景下的竞态条件。
+     * </p>
+     */
+    private void savePluginSelection(String pluginName) {
+        PluginConfig config = repository.findById(1L).orElseGet(PluginConfig::new);
+        config.setPluginName(pluginName);
+        repository.save(config);
     }
 }

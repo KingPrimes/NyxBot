@@ -33,7 +33,8 @@
         <commons.varsion>1.14.0</commons.varsion>
         <oshi.version>6.12.0</oshi.version>
         <jjwt.version>0.13.0</jjwt.version>
-        <draw-image.varsion>1.1.0</draw-image.varsion>
+        <draw-image.varsion>2.0.1</draw-image.varsion>
+        <lombok.version>1.18.40</lombok.version>
         <skipTests>true</skipTests>
     </properties>
 
@@ -198,7 +199,12 @@
 
         <dependency>
             <groupId>io.github.kingprimes</groupId>
-            <artifactId>draw-image-plugin</artifactId>
+            <artifactId>draw-image-plugin-runtime</artifactId>
+            <version>${draw-image.varsion}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.kingprimes</groupId>
+            <artifactId>draw-image-plugin-native-jna</artifactId>
             <version>${draw-image.varsion}</version>
         </dependency>
 
@@ -280,6 +286,20 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
