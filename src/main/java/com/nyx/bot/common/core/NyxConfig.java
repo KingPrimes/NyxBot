@@ -2,6 +2,7 @@ package com.nyx.bot.common.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nyx.bot.annotation.NotEmpty;
+import com.nyx.bot.common.config.ConfigConstants;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
@@ -64,17 +65,17 @@ public class NyxConfig {
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("serverPort", serverPort);
-        map.put("isServerOrClient", isServerOrClient);
-        map.put("wsServerUrl", wsServerUrl);
-        map.put("wsClientUrl", wsClientUrl);
-        map.put("token", token);
-        map.put("httpProxy", httpProxy);
-        map.put("socksProxy", socksProxy);
-        map.put("proxyUser", proxyUser);
-        map.put("proxyPassword", proxyPassword);
-        map.put("pluginPrefix", pluginPrefix);
-        map.put("pluginName", pluginName);
+        map.put(ConfigConstants.SERVER_PORT, serverPort);
+        map.put(ConfigConstants.IS_SERVER_OR_CLIENT, isServerOrClient);
+        map.put(ConfigConstants.WS_SERVER_URL, wsServerUrl);
+        map.put(ConfigConstants.WS_CLIENT_URL, wsClientUrl);
+        map.put(ConfigConstants.TOKEN, token);
+        map.put(ConfigConstants.HTTP_PROXY, httpProxy);
+        map.put(ConfigConstants.SOCKS_PROXY, socksProxy);
+        map.put(ConfigConstants.PROXY_USER, proxyUser);
+        map.put(ConfigConstants.PROXY_PASSWORD, proxyPassword);
+        map.put(ConfigConstants.PLUGIN_PREFIX, pluginPrefix);
+        map.put(ConfigConstants.PLUGIN_NAME, pluginName);
         return map;
     }
 
@@ -82,17 +83,17 @@ public class NyxConfig {
      * 将非 null 字段合并到目标 Map（用于部分更新时保留已有值）。
      */
     public void mergeInto(Map<String, Object> target) {
-        putIfNonNull(target, "serverPort", serverPort);
-        putIfNonNull(target, "isServerOrClient", isServerOrClient);
-        putIfNonNull(target, "wsServerUrl", wsServerUrl);
-        putIfNonNull(target, "wsClientUrl", wsClientUrl);
-        putIfNonNull(target, "token", token);
-        putIfNonNull(target, "httpProxy", httpProxy);
-        putIfNonNull(target, "socksProxy", socksProxy);
-        putIfNonNull(target, "proxyUser", proxyUser);
-        putIfNonNull(target, "proxyPassword", proxyPassword);
-        putIfNonNull(target, "pluginPrefix", pluginPrefix);
-        putIfNonNull(target, "pluginName", pluginName);
+        putIfNonNull(target, ConfigConstants.SERVER_PORT, serverPort);
+        putIfNonNull(target, ConfigConstants.IS_SERVER_OR_CLIENT, isServerOrClient);
+        putIfNonNull(target, ConfigConstants.WS_SERVER_URL, wsServerUrl);
+        putIfNonNull(target, ConfigConstants.WS_CLIENT_URL, wsClientUrl);
+        putIfNonNull(target, ConfigConstants.TOKEN, token);
+        putIfNonNull(target, ConfigConstants.HTTP_PROXY, httpProxy);
+        putIfNonNull(target, ConfigConstants.SOCKS_PROXY, socksProxy);
+        putIfNonNull(target, ConfigConstants.PROXY_USER, proxyUser);
+        putIfNonNull(target, ConfigConstants.PROXY_PASSWORD, proxyPassword);
+        putIfNonNull(target, ConfigConstants.PLUGIN_PREFIX, pluginPrefix);
+        putIfNonNull(target, ConfigConstants.PLUGIN_NAME, pluginName);
     }
 
     private static void putIfNonNull(Map<String, Object> map, String key, Object value) {
