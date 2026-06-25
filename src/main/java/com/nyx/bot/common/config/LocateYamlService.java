@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 public class LocateYamlService {
 
     private static final Logger log = LoggerFactory.getLogger(LocateYamlService.class);
-    private static final Path CONFIG_PATH = Path.of("./data/locate.yaml");
+    static Path CONFIG_PATH = Path.of("./data/locate.yaml");
 
     private final DumperOptions opts;
     private final ReentrantLock writeLock = new ReentrantLock();
