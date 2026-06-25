@@ -41,52 +41,6 @@ public class HandOff {
     }
 
     /**
-     * 从 {@code locate.yaml} 读取完整配置（运行时使用）。
-     * <p>
-     * 供 {@code ConfigLoadingController}、{@code ProxyUtils} 等运行时组件使用，
-     * 不参与 Spring Boot 启动流程。
-     * </p>
-     */
-    public static NyxConfig getConfig() {
-        var yamlService = new LocateYamlService();
-        Map<String, Object> persisted = yamlService.load();
-        NyxConfig config = new NyxConfig();
-        Env env = new Env(persisted);
-        config.setServerPort(env.getInt(ConfigConstants.SERVER_PORT, 8080));
-        config.setIsServerOrClient(env.getBool(ConfigConstants.IS_SERVER_OR_CLIENT, true));
-        config.setWsServerUrl(env.getStr(ConfigConstants.WS_SERVER_URL, "/ws/shiro"));
-        config.setWsClientUrl(env.getStr(ConfigConstants.WS_CLIENT_URL, "ws://localhost:3001"));
-        config.setToken(env.getStr(ConfigConstants.TOKEN, ""));
-        config.setHttpProxy(env.getStr(ConfigConstants.HTTP_PROXY, ""));
-        config.setSocksProxy(env.getStr(ConfigConstants.SOCKS_PROXY, ""));
-        config.setProxyUser(env.getStr(ConfigConstants.PROXY_USER, ""));
-        config.setProxyPassword(env.getStr(ConfigConstants.PROXY_PASSWORD, ""));
-        config.setPluginPrefix(env.getBool(ConfigConstants.PLUGIN_PREFIX, false));
-        config.setPluginName(env.getStr(ConfigConstants.PLUGIN_NAME, ""));
-        return config;
-    }
-
-    /**
-     * 持久化配置到 {@code locate.yaml}（运行时使用）。
-     * <p>
-     * 仅更新非 null 字段，已有字段保持不变。
-     * 供运行时 REST API 使用，不参与 Spring Boot 启动流程。
-     * </p>
-     */
-    public static boolean handoff(NyxConfig config) {
-        try {
-            var yamlService = new LocateYamlService();
-            Map<String, Object> data = yamlService.load();
-            config.mergeInto(data);
-            yamlService.save(data);
-            return true;
-        } catch (Exception e) {
-            log.error("保存配置失败", e);
-            return false;
-        }
-    }
-
-    /**
      * 按优先级合并配置：CLI 参数 > 环境变量 > 持久化值 > 默认值
      */
     private static NyxConfig resolveConfig(String[] args, Map<String, Object> persisted) {
