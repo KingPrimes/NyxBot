@@ -1,8 +1,8 @@
 package com.nyx.bot.controller.config;
 
+import com.nyx.bot.common.config.ConfigConstants;
+import com.nyx.bot.common.config.LocateYamlService;
 import com.nyx.bot.common.core.ApiResponse;
-import com.nyx.bot.entity.PluginConfig;
-import com.nyx.bot.repo.PluginConfigRepository;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
 import io.github.kingprimes.SwitchableDrawImagePlugin;
@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * <p>
  * 通过 {@link SwitchableDrawImagePlugin#switchTo(DrawImagePlugin)} 实现运行时热切换，
  * 无需 destroy/register Spring Bean，所有注入点自动感知新插件。
+ * 插件选择持久化到 {@code locate.yaml}，不再依赖 JPA 数据库表。
  * </p>
  *
  * @author KingPrimes
@@ -30,14 +31,14 @@ public class DrawImagePluginController {
 
     private final SwitchableDrawImagePlugin activePlugin;
 
-    private final PluginConfigRepository repository;
+    private final LocateYamlService yamlService;
 
     public DrawImagePluginController(DrawImagePluginManager manager,
                                      SwitchableDrawImagePlugin activePlugin,
-                                     PluginConfigRepository repository) {
+                                     LocateYamlService yamlService) {
         this.manager = manager;
         this.activePlugin = activePlugin;
-        this.repository = repository;
+        this.yamlService = yamlService;
     }
 
     /**
@@ -101,15 +102,12 @@ public class DrawImagePluginController {
     }
 
     /**
-     * 保存插件选择到数据库 — 基于固定 ID 的 upsert
+     * 保存插件选择到 {@code locate.yaml}
      * <p>
-     * 使用 {@code ID = 1L} 作为唯一配置行标识，
-     * 避免 {@code findAll().getFirst()} 在并发场景下的竞态条件。
+     * 通过 {@link LocateYamlService#update} 原子读-改-写，避免并发丢失更新。
      * </p>
      */
     private void savePluginSelection(String pluginName) {
-        PluginConfig config = repository.findById(1L).orElseGet(PluginConfig::new);
-        config.setPluginName(pluginName);
-        repository.save(config);
+        yamlService.update(config -> config.put(ConfigConstants.PLUGIN_NAME, pluginName));
     }
 }

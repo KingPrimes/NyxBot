@@ -1,9 +1,10 @@
 package com.nyx.bot.utils.http;
 
+import com.nyx.bot.common.config.LocateYamlService;
 import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.SpringValues;
-import com.nyx.bot.modules.bot.controller.bot.HandOff;
 import com.nyx.bot.utils.SpringUtils;
+import org.springframework.beans.BeansException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -81,7 +82,14 @@ public class ProxyUtils {
 
     // region 来源 1：JVM 参数
     private static Proxy fromJvmArgs() {
-        NyxConfig config = HandOff.getConfig();
+        LocateYamlService yamlService;
+        try {
+            yamlService = SpringUtils.getBean(LocateYamlService.class);
+        } catch (BeansException e) {
+            // Spring 未初始化时（如启动阶段）直接创建
+            yamlService = new LocateYamlService();
+        }
+        NyxConfig config = NyxConfig.fromMap(yamlService.load());
         String proxyUrl = config.getHttpProxy() == null || config.getHttpProxy().isEmpty() ? config.getSocksProxy() : config.getHttpProxy();
         String username = config.getProxyUser();
         String password = config.getProxyPassword();
