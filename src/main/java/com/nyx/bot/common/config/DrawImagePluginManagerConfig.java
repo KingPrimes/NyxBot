@@ -73,7 +73,7 @@ public class DrawImagePluginManagerConfig {
         Object nameValue = yamlService.load().get(ConfigConstants.PLUGIN_NAME);
         String pluginName = nameValue instanceof String s ? s.trim() : "";
 
-        if (pluginName != null && !pluginName.isEmpty()) {
+        if (!pluginName.isEmpty()) {
             DrawImagePlugin plugin = manager.getPluginByName(pluginName);
             if (plugin != null) {
                 log.info("配置文件记录: 使用插件 {} v{}", pluginName, plugin.getPluginVersion());
