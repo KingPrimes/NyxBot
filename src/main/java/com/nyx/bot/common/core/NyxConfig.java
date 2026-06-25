@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 @Data
 public class NyxConfig {
@@ -52,5 +55,49 @@ public class NyxConfig {
     @JsonIgnore
     public boolean isValidateServerUrl() {
         return wsServerUrl.matches("^/([A-z]+)/?([A-z]+)?");
+    }
+
+    // ======== YAML 序列化辅助方法 ========
+
+    /**
+     * 将全部字段转为 Map（用于完整写入 locate.yaml）。
+     */
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("serverPort", serverPort);
+        map.put("isServerOrClient", isServerOrClient);
+        map.put("wsServerUrl", wsServerUrl);
+        map.put("wsClientUrl", wsClientUrl);
+        map.put("token", token);
+        map.put("httpProxy", httpProxy);
+        map.put("socksProxy", socksProxy);
+        map.put("proxyUser", proxyUser);
+        map.put("proxyPassword", proxyPassword);
+        map.put("pluginPrefix", pluginPrefix);
+        map.put("pluginName", pluginName);
+        return map;
+    }
+
+    /**
+     * 将非 null 字段合并到目标 Map（用于部分更新时保留已有值）。
+     */
+    public void mergeInto(Map<String, Object> target) {
+        putIfNonNull(target, "serverPort", serverPort);
+        putIfNonNull(target, "isServerOrClient", isServerOrClient);
+        putIfNonNull(target, "wsServerUrl", wsServerUrl);
+        putIfNonNull(target, "wsClientUrl", wsClientUrl);
+        putIfNonNull(target, "token", token);
+        putIfNonNull(target, "httpProxy", httpProxy);
+        putIfNonNull(target, "socksProxy", socksProxy);
+        putIfNonNull(target, "proxyUser", proxyUser);
+        putIfNonNull(target, "proxyPassword", proxyPassword);
+        putIfNonNull(target, "pluginPrefix", pluginPrefix);
+        putIfNonNull(target, "pluginName", pluginName);
+    }
+
+    private static void putIfNonNull(Map<String, Object> map, String key, Object value) {
+        if (value != null) {
+            map.put(key, value);
+        }
     }
 }
