@@ -70,8 +70,8 @@ public class DrawImagePluginManagerConfig {
      * </p>
      */
     private DrawImagePlugin resolveInitialPlugin(DrawImagePluginManager manager) {
-        String pluginName = (String) yamlService.load()
-                .get(ConfigConstants.PLUGIN_NAME);
+        Object nameValue = yamlService.load().get(ConfigConstants.PLUGIN_NAME);
+        String pluginName = nameValue instanceof String s ? s.trim() : "";
 
         if (pluginName != null && !pluginName.isEmpty()) {
             DrawImagePlugin plugin = manager.getPluginByName(pluginName);

@@ -186,6 +186,7 @@ public class HandOff {
         }
         String fromEnv = System.getenv(envKey);
         if ("true".equalsIgnoreCase(fromEnv)) return true;
+        if ("false".equalsIgnoreCase(fromEnv)) return false;
         return fallback;
     }
 

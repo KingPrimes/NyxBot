@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -105,12 +104,10 @@ public class DrawImagePluginController {
     /**
      * 保存插件选择到 {@code locate.yaml}
      * <p>
-     * 读-改-写原子操作，通过 {@link LocateYamlService} 持久化插件名称。
+     * 通过 {@link LocateYamlService#update} 原子读-改-写，避免并发丢失更新。
      * </p>
      */
     private void savePluginSelection(String pluginName) {
-        Map<String, Object> config = yamlService.load();
-        config.put(ConfigConstants.PLUGIN_NAME, pluginName);
-        yamlService.save(config);
+        yamlService.update(config -> config.put(ConfigConstants.PLUGIN_NAME, pluginName));
     }
 }

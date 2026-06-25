@@ -76,7 +76,7 @@ public class PluginInfo {
     /** 标签（JSON 数组字符串，如 ["draw","native","jna"]） */
     String tags;
 
-    /** 安装时间 */
+    /** 安装时间（使用 @CreationTimestamp 在首次持久化时自动填充，等于仓库记录创建时间） */
     @CreationTimestamp
     LocalDateTime installAt;
 
