@@ -1,7 +1,5 @@
-package com.nyx.bot.modules.bot.controller.bot;
+package com.nyx.bot.common.config;
 
-import com.nyx.bot.common.config.ConfigConstants;
-import com.nyx.bot.common.config.LocateYamlService;
 import com.nyx.bot.common.core.NyxConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -10,7 +8,6 @@ import org.springframework.core.env.StandardEnvironment;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -80,28 +77,12 @@ public class HandOff {
         try {
             var yamlService = new LocateYamlService();
             Map<String, Object> data = yamlService.load();
-            putIfNonNull(data, ConfigConstants.SERVER_PORT, config.getServerPort());
-            putIfNonNull(data, ConfigConstants.IS_SERVER_OR_CLIENT, config.getIsServerOrClient());
-            putIfNonNull(data, ConfigConstants.WS_SERVER_URL, config.getWsServerUrl());
-            putIfNonNull(data, ConfigConstants.WS_CLIENT_URL, config.getWsClientUrl());
-            putIfNonNull(data, ConfigConstants.TOKEN, config.getToken());
-            putIfNonNull(data, ConfigConstants.HTTP_PROXY, config.getHttpProxy());
-            putIfNonNull(data, ConfigConstants.SOCKS_PROXY, config.getSocksProxy());
-            putIfNonNull(data, ConfigConstants.PROXY_USER, config.getProxyUser());
-            putIfNonNull(data, ConfigConstants.PROXY_PASSWORD, config.getProxyPassword());
-            putIfNonNull(data, ConfigConstants.PLUGIN_PREFIX, config.getPluginPrefix());
-            putIfNonNull(data, ConfigConstants.PLUGIN_NAME, config.getPluginName());
+            config.mergeInto(data);
             yamlService.save(data);
             return true;
         } catch (Exception e) {
             log.error("保存配置失败", e);
             return false;
-        }
-    }
-
-    private static void putIfNonNull(Map<String, Object> map, String key, Object value) {
-        if (value != null) {
-            map.put(key, value);
         }
     }
 
@@ -192,19 +173,7 @@ public class HandOff {
 
     /** 将 NyxConfig 转为可序列化的 Map */
     private static Map<String, Object> toMap(NyxConfig config) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put(ConfigConstants.SERVER_PORT,         config.getServerPort());
-        map.put(ConfigConstants.IS_SERVER_OR_CLIENT, config.getIsServerOrClient());
-        map.put(ConfigConstants.WS_SERVER_URL,       config.getWsServerUrl());
-        map.put(ConfigConstants.WS_CLIENT_URL,       config.getWsClientUrl());
-        map.put(ConfigConstants.TOKEN,               config.getToken());
-        map.put(ConfigConstants.HTTP_PROXY,          config.getHttpProxy());
-        map.put(ConfigConstants.SOCKS_PROXY,         config.getSocksProxy());
-        map.put(ConfigConstants.PROXY_USER,          config.getProxyUser());
-        map.put(ConfigConstants.PROXY_PASSWORD,      config.getProxyPassword());
-        map.put(ConfigConstants.PLUGIN_PREFIX,       config.getPluginPrefix());
-        map.put(ConfigConstants.PLUGIN_NAME,         config.getPluginName());
-        return map;
+        return config.toMap();
     }
 
     /**

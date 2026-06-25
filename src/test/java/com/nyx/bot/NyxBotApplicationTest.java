@@ -1,7 +1,7 @@
 package com.nyx.bot;
 
 import com.nyx.bot.data.WarframeDataSource;
-import com.nyx.bot.modules.bot.controller.bot.HandOff;
+import com.nyx.bot.common.config.HandOff;
 import com.nyx.bot.task.TaskWarframeStatus;
 import com.nyx.bot.utils.SpringUtils;
 import org.springframework.boot.SpringApplication;

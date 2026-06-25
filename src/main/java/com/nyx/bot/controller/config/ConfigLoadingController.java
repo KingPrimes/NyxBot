@@ -55,19 +55,7 @@ public class ConfigLoadingController extends BaseController {
             return error(I18nUtils.RequestValidClientUrl());
         }
         // 原子更新配置，避免并发丢失更新
-        yamlService.update(data -> {
-            putIfNonNull(data, ConfigConstants.SERVER_PORT, config.getServerPort());
-            putIfNonNull(data, ConfigConstants.IS_SERVER_OR_CLIENT, config.getIsServerOrClient());
-            putIfNonNull(data, ConfigConstants.WS_SERVER_URL, config.getWsServerUrl());
-            putIfNonNull(data, ConfigConstants.WS_CLIENT_URL, config.getWsClientUrl());
-            putIfNonNull(data, ConfigConstants.TOKEN, config.getToken());
-            putIfNonNull(data, ConfigConstants.HTTP_PROXY, config.getHttpProxy());
-            putIfNonNull(data, ConfigConstants.SOCKS_PROXY, config.getSocksProxy());
-            putIfNonNull(data, ConfigConstants.PROXY_USER, config.getProxyUser());
-            putIfNonNull(data, ConfigConstants.PROXY_PASSWORD, config.getProxyPassword());
-            putIfNonNull(data, ConfigConstants.PLUGIN_PREFIX, config.getPluginPrefix());
-            putIfNonNull(data, ConfigConstants.PLUGIN_NAME, config.getPluginName());
-        });
+        yamlService.update(config::mergeInto);
 
         // 同步更新 Spring Environment，使运行时修改即时生效（仅非 null 字段）
         ConfigurableEnvironment env = SpringUtils.getBean(ConfigurableEnvironment.class);
@@ -100,11 +88,5 @@ public class ConfigLoadingController extends BaseController {
         Object v = data.get(key);
         if (v instanceof Boolean b) return b;
         return def;
-    }
-
-    private static void putIfNonNull(Map<String, Object> data, String key, Object value) {
-        if (value != null) {
-            data.put(key, value);
-        }
     }
 }

@@ -2,7 +2,7 @@ package com.nyx.bot.utils.http;
 
 import com.nyx.bot.common.core.NyxConfig;
 import com.nyx.bot.common.core.SpringValues;
-import com.nyx.bot.modules.bot.controller.bot.HandOff;
+import com.nyx.bot.common.config.HandOff;
 import com.nyx.bot.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 
