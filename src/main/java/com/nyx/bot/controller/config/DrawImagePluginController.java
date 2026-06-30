@@ -3,6 +3,7 @@ package com.nyx.bot.controller.config;
 import com.nyx.bot.common.config.ConfigConstants;
 import com.nyx.bot.common.config.LocateYamlService;
 import com.nyx.bot.common.core.ApiResponse;
+import com.nyx.bot.common.core.controller.BaseController;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
 import io.github.kingprimes.SwitchableDrawImagePlugin;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/config/plugin/image")
-public class DrawImagePluginController {
+public class DrawImagePluginController extends BaseController {
 
     private final DrawImagePluginManager manager;
 
@@ -49,7 +50,7 @@ public class DrawImagePluginController {
         List<String> pluginNames = manager.getAllPlugins().stream()
                 .map(DrawImagePlugin::getPluginName)
                 .collect(Collectors.toList());
-        return ApiResponse.ok("获取插件列表成功", pluginNames);
+        return success("获取插件列表成功", pluginNames);
     }
 
     /**
@@ -59,13 +60,13 @@ public class DrawImagePluginController {
     public ApiResponse<Void> loadPluginByName(@RequestParam String pluginName) {
         DrawImagePlugin plugin = manager.getPluginByName(pluginName);
         if (plugin == null) {
-            return ApiResponse.error(500, "未找到插件: " + pluginName);
+            return error("未找到插件: " + pluginName);
         }
         // 原子切换代理，所有业务 Bean 通过 volatile 引用自动感知
         activePlugin.switchTo(plugin);
         savePluginSelection(pluginName);
         log.info("插件已切换到: {} v{}", plugin.getPluginName(), plugin.getPluginVersion());
-        return ApiResponse.ok("插件加载成功: " + pluginName, null);
+        return success("插件加载成功: " + pluginName);
     }
 
     /**
@@ -74,7 +75,7 @@ public class DrawImagePluginController {
     @GetMapping("/current")
     public ApiResponse<Object> getCurrentPlugin() {
         DrawImagePlugin current = activePlugin.getCurrent();
-        return ApiResponse.ok("获取当前插件成功", current.getPluginName());
+        return success("获取当前插件成功", current.getPluginName());
     }
 
     /**
@@ -94,10 +95,10 @@ public class DrawImagePluginController {
             }
             activePlugin.switchTo(plugin);
             log.info("插件重新加载完成，共 {} 个插件", manager.getPluginCount());
-            return ApiResponse.ok("插件重新加载完成，当前: " + plugin.getPluginName(), null);
+            return success("插件重新加载完成，当前: " + plugin.getPluginName());
         } catch (Exception e) {
             log.error("插件重新加载失败", e);
-            return ApiResponse.error(500, "插件重新加载失败: " + e.getMessage());
+            return error("插件重新加载失败: " + e.getMessage());
         }
     }
 
