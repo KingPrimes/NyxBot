@@ -55,6 +55,10 @@ public class ApiUrl {
     public static final String WARFRAME_MARKET_SEARCH = "https://api.warframe.market/v1/auctions/search";
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
 
+    /** 插件市场索引（GitHub raw，按需拉取，不定时轮询） */
+    public static final String PLUGIN_MARKET_INDEX =
+            "https://raw.githubusercontent.com/KingPrimes/nyxbot-plugins/main/plugin-index.json";
+
     /**
      * Warframe 别名数据源
      */
