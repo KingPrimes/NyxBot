@@ -7,6 +7,7 @@ import com.nyx.bot.common.core.ApiUrl;
 import com.nyx.bot.entity.PluginInfo;
 import com.nyx.bot.repo.PluginInfoRepository;
 import com.nyx.bot.utils.SpringUtils;
+import com.nyx.bot.utils.http.HttpFileDownloader;
 import com.nyx.bot.utils.http.HttpUtils;
 import io.github.kingprimes.DrawImagePlugin;
 import io.github.kingprimes.DrawImagePluginManager;
@@ -21,7 +22,10 @@ import org.mockito.MockedStatic;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +47,7 @@ class PluginMarketServiceTest {
     private MockedStatic<HttpUtils> httpUtilsMock;
 
     private Path tempPluginDir;
+    private Path originalPluginDir;
 
     /**
      * HttpUtils.<clinit> 触发 ProxyUtils → SpringUtils.getBean()，
@@ -56,7 +61,6 @@ class PluginMarketServiceTest {
                 LocateYamlService mockYaml = mock(LocateYamlService.class);
                 when(mockYaml.load()).thenReturn(new LinkedHashMap<>());
                 springMock.when(() -> SpringUtils.getBean((Class<?>) any())).thenReturn(mockYaml);
-                // 触发 HttpUtils 类加载（静态初始化只执行一次）
                 Class.forName("com.nyx.bot.utils.http.HttpUtils");
                 System.setProperty("HttpUtilsPreloaded", "true");
             } catch (ClassNotFoundException e) {
@@ -73,7 +77,10 @@ class PluginMarketServiceTest {
         activePlugin = mock(SwitchableDrawImagePlugin.class);
         objectMapper = mock(ObjectMapper.class);
 
+        // 替换为临时插件目录
+        originalPluginDir = PluginMarketService.PLUGIN_DIR;
         tempPluginDir = Files.createTempDirectory("nyxbot-plugin-test");
+        PluginMarketService.PLUGIN_DIR = tempPluginDir;
 
         service = new PluginMarketService(
                 pluginInfoRepository, yamlService, manager, activePlugin, objectMapper);
@@ -81,6 +88,9 @@ class PluginMarketServiceTest {
 
     @AfterEach
     void tearDown() throws IOException {
+        // 恢复插件目录
+        PluginMarketService.PLUGIN_DIR = originalPluginDir;
+
         if (httpUtilsMock != null) {
             httpUtilsMock.close();
         }
@@ -143,6 +153,26 @@ class PluginMarketServiceTest {
 
         MarketException ex = assertThrows(MarketException.class, service::fetchIndex);
         assertTrue(ex.getMessage().contains("JSON parse error"));
+    }
+
+    @Test
+    @DisplayName("fetchIndex — Jackson 未填充 name 时自动回填 map key")
+    void fetchIndexPopulatesNameFromMapKey() throws Exception {
+        // 模拟一个 JSON，其中 entry 的 name 字段为 null（Jackson 不会自动关联 map key）
+        String json = "{\"plugins\":{\"my-plugin\":{\"displayName\":\"MyPlugin\"}}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setDisplayName("MyPlugin");
+
+        PluginIndex parsed = new PluginIndex();
+        parsed.setPlugins(Map.of("my-plugin", entry));
+        when(objectMapper.readValue(eq(json), eq(PluginIndex.class))).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertEquals("my-plugin", result.getPlugins().get("my-plugin").getName());
     }
 
     // ══════════════════════════════════════════════
@@ -279,7 +309,6 @@ class PluginMarketServiceTest {
     @DisplayName("searchPlugins — 组合过滤（name + type）")
     void searchPluginsCombined() throws Exception {
         mockFetchIndex(createTestIndex());
-        // "Other" 只匹配 other-plugin 的 displayName，加上 type=jar 进一步确认
         PluginIndex result = service.searchPlugins("Other", "jar", null);
         assertEquals(1, result.getPlugins().size());
         assertTrue(result.getPlugins().containsKey("other-plugin"));
@@ -335,6 +364,28 @@ class PluginMarketServiceTest {
     }
 
     @Test
+    @DisplayName("checkUpdates — 语义版本正确排序（2.10.0 > 2.9.0）")
+    void checkUpdatesSemVerOrder() {
+        PluginIndex index = createTestIndex();
+
+        PluginVersionEntry v9 = new PluginVersionEntry();
+        PluginVersionEntry v10 = new PluginVersionEntry();
+        index.getPlugins().get("plugin-a").setVersions(Map.of("2.9.0", v9, "2.10.0", v10));
+
+        PluginInfo info = new PluginInfo();
+        info.setPluginName("plugin-a");
+        info.setDisplayName("插件 A");
+        info.setVersion("2.9.0");
+
+        when(pluginInfoRepository.findAll()).thenReturn(List.of(info));
+
+        List<UpdateInfo> updates = service.checkUpdates(index);
+        assertEquals(1, updates.size());
+        assertEquals("2.10.0", updates.get(0).getLatestVersion());
+        assertTrue(updates.get(0).isHasUpdate());
+    }
+
+    @Test
     @DisplayName("checkUpdates — 本地插件在市场索引中不存在，跳过")
     void checkUpdatesPluginNotInMarket() {
         PluginIndex index = createTestIndex();
@@ -375,11 +426,9 @@ class PluginMarketServiceTest {
 
         List<UpdateInfo> updates = service.checkUpdates(index);
         assertEquals(2, updates.size());
-        // plugin-a 有更新
         UpdateInfo ua = updates.stream().filter(UpdateInfo::isHasUpdate).findFirst().orElseThrow();
         assertEquals("plugin-a", ua.getPluginName());
         assertEquals("2.0.0", ua.getLatestVersion());
-        // plugin-b 无更新
         UpdateInfo ub = updates.stream().filter(u -> !u.isHasUpdate()).findFirst().orElseThrow();
         assertEquals("plugin-b", ub.getPluginName());
     }
@@ -423,6 +472,161 @@ class PluginMarketServiceTest {
         MarketException ex = assertThrows(MarketException.class,
                 () -> service.install("test", "9.9.9"));
         assertTrue(ex.getMessage().contains("未找到版本"));
+    }
+
+    @Test
+    @DisplayName("install — 插件无可用版本抛异常")
+    void installEmptyVersions() throws Exception {
+        String json = "{\"plugins\":{\"test\":{}}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("test");
+        entry.setVersions(Map.of()); // 空版本映射
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("test", entry));
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
+
+        MarketException ex = assertThrows(MarketException.class,
+                () -> service.install("test", "latest"));
+        assertTrue(ex.getMessage().contains("暂无可用版本"));
+    }
+
+    @Test
+    @DisplayName("install — 插件版本映射为 null 抛异常")
+    void installNullVersions() throws Exception {
+        String json = "{\"plugins\":{\"test\":{}}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("test");
+        entry.setVersions(null); // 版本映射为 null
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("test", entry));
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
+
+        MarketException ex = assertThrows(MarketException.class,
+                () -> service.install("test", "latest"));
+        assertTrue(ex.getMessage().contains("暂无可用版本"));
+    }
+
+    @Test
+    @DisplayName("install — 下载失败抛异常")
+    void installDownloadFailed() throws Exception {
+        // mock fetchIndex
+        String json = "{}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        PluginVersionEntry ve = new PluginVersionEntry();
+        ve.setDownloadUrl("http://example.com/test-1.0.0.jar");
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("test");
+        entry.setDisplayName("Test");
+        entry.setVersions(Map.of("1.0.0", ve));
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("test", entry));
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
+
+        // mock 下载失败
+        try (MockedStatic<HttpFileDownloader> downloaderMock = mockStatic(HttpFileDownloader.class)) {
+            downloaderMock.when(() -> HttpFileDownloader.sendGetForFile(anyString(), anyString()))
+                    .thenReturn(false);
+
+            MarketException ex = assertThrows(MarketException.class,
+                    () -> service.install("test", "1.0.0"));
+            assertTrue(ex.getMessage().contains("下载插件失败"));
+        }
+    }
+
+    @Test
+    @DisplayName("install — SHA256 不匹配抛异常并清理文件")
+    void installSha256Mismatch() throws Exception {
+        // mock fetchIndex
+        String json = "{}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        // 创建目标 jar 文件（模拟下载好的文件）
+        Path jarPath = tempPluginDir.resolve("sha-test.jar");
+        Files.writeString(jarPath, "hello world");
+
+        // 计算实际 SHA256
+        String actualSha256 = sha256Hex("hello world".getBytes());
+        // 提供一个不同的 SHA256
+        String wrongSha256 = "0000000000000000000000000000000000000000000000000000000000000000";
+
+        PluginVersionEntry ve = new PluginVersionEntry();
+        ve.setDownloadUrl("http://example.com/sha-test-1.0.0.jar");
+        ve.setSha256(wrongSha256); // 不匹配的校验值
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("sha-test");
+        entry.setDisplayName("SHATest");
+        entry.setVersions(Map.of("1.0.0", ve));
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("sha-test", entry));
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
+
+        // mock 下载成功（文件已存在）
+        try (MockedStatic<HttpFileDownloader> downloaderMock = mockStatic(HttpFileDownloader.class)) {
+            downloaderMock.when(() -> HttpFileDownloader.sendGetForFile(anyString(), anyString()))
+                    .thenReturn(true);
+
+            MarketException ex = assertThrows(MarketException.class,
+                    () -> service.install("sha-test", "1.0.0"));
+            assertTrue(ex.getMessage().contains("SHA256 不匹配"));
+
+            // 验证校验失败后文件被清理
+            assertFalse(Files.exists(jarPath));
+        }
+    }
+
+    @Test
+    @DisplayName("install — SHA256 为空时跳过校验")
+    void installSkipSha256WhenNull() throws Exception {
+        String json = "{}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+                .thenReturn(new HttpUtils.Body(json, 200));
+
+        // mock 下载并创建文件
+        Path jarPath = tempPluginDir.resolve("no-sha-test.jar");
+        Files.writeString(jarPath, "some content");
+
+        PluginVersionEntry ve = new PluginVersionEntry();
+        ve.setDownloadUrl("http://example.com/no-sha-test-1.0.0.jar");
+        ve.setSha256(null); // 无 SHA256
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("no-sha-test");
+        entry.setDisplayName("NoSHA");
+        entry.setVersions(Map.of("1.0.0", ve));
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("no-sha-test", entry));
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
+
+        mockReloadPluginsDeps();
+        when(pluginInfoRepository.findByPluginName("no-sha-test"))
+                .thenReturn(Optional.empty());
+
+        try (MockedStatic<HttpFileDownloader> downloaderMock = mockStatic(HttpFileDownloader.class)) {
+            downloaderMock.when(() -> HttpFileDownloader.sendGetForFile(anyString(), anyString()))
+                    .thenReturn(true);
+
+            assertDoesNotThrow(() -> service.install("no-sha-test", "1.0.0"));
+
+            verify(pluginInfoRepository).save(any(PluginInfo.class));
+        }
     }
 
     // ══════════════════════════════════════════════
@@ -472,14 +676,40 @@ class PluginMarketServiceTest {
         when(pluginInfoRepository.findByPluginName("active-plugin"))
                 .thenReturn(Optional.of(info));
         when(activePlugin.getPluginName()).thenReturn("active-plugin");
-        // 模拟热加载后通过名称找不到已卸载的插件
         when(manager.getPluginByName("active-plugin")).thenReturn(null);
-        // 回退到第一个可用插件
         when(manager.getFirstPlugin()).thenReturn(fallbackPlugin);
 
         assertDoesNotThrow(() -> service.uninstall("active-plugin"));
 
         verify(activePlugin, atLeast(1)).switchTo(fallbackPlugin);
         verify(pluginInfoRepository).delete(info);
+    }
+
+    @Test
+    @DisplayName("uninstall — 空插件名抛异常")
+    void uninstallEmptyName() {
+        assertThrows(MarketException.class, () -> service.uninstall(""));
+        assertThrows(MarketException.class, () -> service.uninstall("  "));
+        assertThrows(MarketException.class, () -> service.uninstall(null));
+    }
+
+    @Test
+    @DisplayName("uninstall — 路径穿越防护")
+    void uninstallPathTraversal() {
+        assertThrows(MarketException.class, () -> service.uninstall("../etc/passwd"));
+        assertThrows(MarketException.class, () -> service.uninstall("plugin/../../bad"));
+    }
+
+    // ══════════════════════════════════════════════
+    // 工具方法
+    // ══════════════════════════════════════════════
+
+    private static String sha256Hex(byte[] data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(md.digest(data));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

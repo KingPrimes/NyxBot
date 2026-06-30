@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,7 +39,8 @@ import java.util.stream.Collectors;
 @Service
 public class PluginMarketService {
 
-    private static final Path PLUGIN_DIR = Path.of("./plugin");
+    /** 插件目录路径（package-private 以供单元测试替换为临时目录） */
+    static Path PLUGIN_DIR = Path.of("./plugin");
 
     private static final String LATEST_TAG = "latest";
 
@@ -85,7 +85,18 @@ public class PluginMarketService {
             throw new MarketException("获取市场索引失败: HTTP " + body.code());
         }
         try {
-            return objectMapper.readValue(body.body(), PluginIndex.class);
+            PluginIndex index = objectMapper.readValue(body.body(), PluginIndex.class);
+            // Jackson 反序列化 Map<String, PluginIndexEntry> 时，
+            // map key（插件标识名）与 entry.name 字段无关联。
+            // 手动将 map key 回填到 entry.name，确保 getName() 可用。
+            if (index.getPlugins() != null) {
+                index.getPlugins().forEach((key, entry) -> {
+                    if (entry.getName() == null) {
+                        entry.setName(key);
+                    }
+                });
+            }
+            return index;
         } catch (IOException e) {
             log.error("解析市场索引 JSON 失败", e);
             throw new MarketException("解析市场索引数据失败: " + e.getMessage());
@@ -234,8 +245,16 @@ public class PluginMarketService {
             throw new MarketException("市场未找到插件: " + pluginName);
         }
 
-        String targetVersion = LATEST_TAG.equals(version) ? findLatestVersion(entry.getVersions()) : version;
-        PluginVersionEntry versionEntry = entry.getVersions().get(targetVersion);
+        Map<String, PluginVersionEntry> versions = entry.getVersions();
+        if (versions == null || versions.isEmpty()) {
+            throw new MarketException("插件 " + pluginName + " 暂无可用版本");
+        }
+
+        String targetVersion = LATEST_TAG.equals(version) ? findLatestVersion(versions) : version;
+        if (targetVersion == null) {
+            throw new MarketException("插件 " + pluginName + " 无法确定最新版本");
+        }
+        PluginVersionEntry versionEntry = versions.get(targetVersion);
         if (versionEntry == null) {
             throw new MarketException("插件 " + pluginName + " 未找到版本: " + targetVersion);
         }
@@ -309,7 +328,12 @@ public class PluginMarketService {
      * @throws MarketException 卸载失败时抛出
      */
     public void uninstall(String pluginName) {
-        Path jarPath = PLUGIN_DIR.resolve(pluginName + ".jar");
+        // 路径穿越防护：校验插件名、确保路径在 PLUGIN_DIR 内
+        validatePluginName(pluginName);
+        Path jarPath = PLUGIN_DIR.resolve(pluginName + ".jar").normalize();
+        if (!jarPath.startsWith(PLUGIN_DIR.normalize())) {
+            throw new MarketException("非法的插件名称: " + pluginName);
+        }
 
         // 删除 jar 文件
         try {
@@ -334,15 +358,31 @@ public class PluginMarketService {
 
         // 如果当前活跃插件就是被卸载的，自动回退
         String currentName = activePlugin.getPluginName();
-        if (currentName.equals(pluginName) || currentName.equals("DefaultDrawImagePlugin")) {
+        if (currentName.equals(pluginName)) {
             DrawImagePlugin fallback = manager.getFirstPlugin();
-            activePlugin.switchTo(fallback);
-            log.warn("当前插件 {} 已被卸载，回退到: {} v{}",
-                    pluginName, fallback.getPluginName(), fallback.getPluginVersion());
-            yamlService.update(config -> config.put(ConfigConstants.PLUGIN_NAME, fallback.getPluginName()));
+            if (fallback != null) {
+                activePlugin.switchTo(fallback);
+                log.warn("当前插件 {} 已被卸载，回退到: {} v{}",
+                        pluginName, fallback.getPluginName(), fallback.getPluginVersion());
+                yamlService.update(config -> config.put(ConfigConstants.PLUGIN_NAME, fallback.getPluginName()));
+            } else {
+                log.warn("当前插件 {} 已被卸载，且无可用回退插件", pluginName);
+            }
         }
 
         log.info("插件卸载完成: {}", pluginName);
+    }
+
+    /**
+     * 校验插件名称合法性，防止路径穿越。
+     */
+    private static void validatePluginName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new MarketException("插件名称不能为空");
+        }
+        if (!name.matches("[\\w.-]+")) {
+            throw new MarketException("插件名称包含非法字符: " + name);
+        }
     }
 
     // ══════════════════════════════════════════════
@@ -359,10 +399,16 @@ public class PluginMarketService {
             DrawImagePlugin plugin = manager.getPluginByName(currentName);
             if (plugin == null) {
                 plugin = manager.getFirstPlugin();
-                log.warn("当前插件 {} 在热加载后未找到，回退到: {}", currentName, plugin.getPluginName());
+                if (plugin != null) {
+                    log.warn("当前插件 {} 在热加载后未找到，回退到: {}", currentName, plugin.getPluginName());
+                }
             }
-            activePlugin.switchTo(plugin);
-            log.info("插件热加载完成，共 {} 个插件", manager.getPluginCount());
+            if (plugin != null) {
+                activePlugin.switchTo(plugin);
+                log.info("插件热加载完成，共 {} 个插件", manager.getPluginCount());
+            } else {
+                log.warn("插件热加载后无可用插件");
+            }
         } catch (Exception e) {
             log.error("插件热加载失败", e);
             throw new MarketException("热加载插件失败: " + e.getMessage());
@@ -370,12 +416,36 @@ public class PluginMarketService {
     }
 
     /**
-     * 从版本映射中找到最新版本号（按字典序降序取第一个）。
+     * 从版本映射中找到最新版本号（按语义版本分段比较）。
+     * <p>
+     * 将 "2.9.0" 和 "2.10.0" 按数字分段比较，避免字典序误判。
+     * </p>
      */
     private static String findLatestVersion(Map<String, PluginVersionEntry> versions) {
         return versions.keySet().stream()
-                .max(Comparator.naturalOrder())
+                .max(PluginMarketService::compareSemVer)
                 .orElse(null);
+    }
+
+    /** 语义版本比较：按 "." 分段、每段按数字比较 */
+    private static int compareSemVer(String a, String b) {
+        String[] partsA = a.split("\\.");
+        String[] partsB = b.split("\\.");
+        int len = Math.max(partsA.length, partsB.length);
+        for (int i = 0; i < len; i++) {
+            int numA = i < partsA.length ? tryParseInt(partsA[i], 0) : 0;
+            int numB = i < partsB.length ? tryParseInt(partsB[i], 0) : 0;
+            if (numA != numB) return Integer.compare(numA, numB);
+        }
+        return 0;
+    }
+
+    private static int tryParseInt(String s, int def) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return def;
+        }
     }
 
     /**
