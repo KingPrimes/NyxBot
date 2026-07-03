@@ -48,6 +48,8 @@ class PluginMarketServiceTest {
 
     private Path tempPluginDir;
     private Path originalPluginDir;
+    private Path tempCacheDir;
+    private Path originalCacheDir;
 
     /**
      * HttpUtils.<clinit> 触发 ProxyUtils → SpringUtils.getBean()，
@@ -82,6 +84,11 @@ class PluginMarketServiceTest {
         tempPluginDir = Files.createTempDirectory("nyxbot-plugin-test");
         PluginMarketService.PLUGIN_DIR = tempPluginDir;
 
+        // 替换为临时磁盘缓存目录
+        originalCacheDir = PluginMarketService.CACHE_DIR;
+        tempCacheDir = Files.createTempDirectory("nyxbot-market-cache-test");
+        PluginMarketService.CACHE_DIR = tempCacheDir;
+
         service = new PluginMarketService(
                 pluginInfoRepository, yamlService, manager, activePlugin, objectMapper);
     }
@@ -90,12 +97,25 @@ class PluginMarketServiceTest {
     void tearDown() throws IOException {
         // 恢复插件目录
         PluginMarketService.PLUGIN_DIR = originalPluginDir;
+        // 恢复缓存目录
+        PluginMarketService.CACHE_DIR = originalCacheDir;
 
         if (httpUtilsMock != null) {
             httpUtilsMock.close();
         }
         if (tempPluginDir != null) {
             try (var files = Files.walk(tempPluginDir)) {
+                files.sorted(Comparator.reverseOrder())
+                        .forEach(p -> {
+                            try {
+                                Files.deleteIfExists(p);
+                            } catch (IOException ignored) {
+                            }
+                        });
+            }
+        }
+        if (tempCacheDir != null) {
+            try (var files = Files.walk(tempCacheDir)) {
                 files.sorted(Comparator.reverseOrder())
                         .forEach(p -> {
                             try {
@@ -116,8 +136,8 @@ class PluginMarketServiceTest {
     void fetchIndexSuccess() throws Exception {
         String json = "{\"schemaVersion\":\"1.0\",\"plugins\":{}}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
-                .thenReturn(new HttpUtils.Body(json, 200));
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenReturn(new HttpUtils.Body(json, 200, Map.of(), "https://test/cdn"));
 
         PluginIndex expected = new PluginIndex();
         expected.setSchemaVersion("1.0");
@@ -127,18 +147,18 @@ class PluginMarketServiceTest {
 
         assertNotNull(result);
         assertEquals("1.0", result.getSchemaVersion());
-        httpUtilsMock.verify(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX));
+        httpUtilsMock.verify(() -> HttpUtils.sendGet(anyString(), anyString(), any()));
     }
 
     @Test
-    @DisplayName("fetchIndex — HTTP 失败抛 MarketException")
+    @DisplayName("fetchIndex — HTTP 失败且无磁盘兜底时抛 MarketException")
     void fetchIndexHttpError() {
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(500));
 
         MarketException ex = assertThrows(MarketException.class, service::fetchIndex);
-        assertTrue(ex.getMessage().contains("HTTP 500"));
+        assertTrue(ex.getMessage().contains("所有数据源不可用且无本地缓存兜底"));
     }
 
     @Test
@@ -146,7 +166,7 @@ class PluginMarketServiceTest {
     void fetchIndexParseError() throws Exception {
         String json = "{invalid}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
         when(objectMapper.readValue(json, PluginIndex.class))
                 .thenThrow(new JsonProcessingException("JSON parse error") {});
@@ -161,7 +181,7 @@ class PluginMarketServiceTest {
         // 模拟一个 JSON，其中 entry 的 name 字段为 null（Jackson 不会自动关联 map key）
         String json = "{\"plugins\":{\"my-plugin\":{\"displayName\":\"MyPlugin\"}}}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         PluginIndexEntry entry = new PluginIndexEntry();
@@ -173,6 +193,128 @@ class PluginMarketServiceTest {
 
         PluginIndex result = service.fetchIndex();
         assertEquals("my-plugin", result.getPlugins().get("my-plugin").getName());
+    }
+
+    // ══════════════════════════════════════════════
+    // 磁盘缓存层
+    // ══════════════════════════════════════════════
+
+    @Test
+    @DisplayName("fetchIndex — 磁盘缓存命中且未超 TTL 时不走网络")
+    void fetchIndexDiskCacheHitSkipsNetwork() throws Exception {
+        Path indexJson = tempCacheDir.resolve("index.json");
+        Files.writeString(indexJson, "{\"schemaVersion\":\"1.0\",\"plugins\":{}}");
+
+        PluginMarketService.CacheMeta meta = new PluginMarketService.CacheMeta(
+                "https://test/cdn", java.time.Instant.now().toString(), 32L, "any");
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
+        new ObjectMapper().writeValue(metaJson.toFile(), meta);
+
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenThrow(new AssertionError("磁盘命中时不应发起 HTTP 请求"));
+
+        PluginIndex parsed = new PluginIndex();
+        parsed.setSchemaVersion("1.0");
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginMarketService.CacheMeta.class)))
+                .thenReturn(meta);
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginIndex.class))).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertEquals("1.0", result.getSchemaVersion());
+        httpUtilsMock.verify(() -> HttpUtils.sendGet(anyString(), anyString(), any()), never());
+    }
+
+    @Test
+    @DisplayName("fetchIndex — 磁盘缓存过期时尝试远程刷新并覆盖写入新缓存")
+    void fetchIndexDiskCacheExpiredRefetches() throws Exception {
+        Path indexJson = tempCacheDir.resolve("index.json");
+        Files.writeString(indexJson, "{\"plugins\":{}}");
+
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
+        PluginMarketService.CacheMeta staleMeta = new PluginMarketService.CacheMeta(
+                "https://test/cdn-old", java.time.Instant.now().minusSeconds(7200).toString(),
+                12L, "any");
+        new ObjectMapper().writeValue(metaJson.toFile(), staleMeta);
+
+        String freshJson = "{\"schemaVersion\":\"2.0\",\"plugins\":{}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenReturn(new HttpUtils.Body(freshJson, 200, Map.of(), "https://test/cdn-new"));
+
+        PluginIndex parsed = new PluginIndex();
+        parsed.setSchemaVersion("2.0");
+        when(objectMapper.readValue(freshJson, PluginIndex.class)).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertEquals("2.0", result.getSchemaVersion());
+        // 验证磁盘文件被新内容覆盖
+        assertEquals(freshJson, Files.readString(indexJson));
+    }
+
+    @Test
+    @DisplayName("fetchIndex — 多源全失败时降级使用过期磁盘索引并告警")
+    void fetchIndexFallbackToStaleDisk() throws Exception {
+        Path indexJson = tempCacheDir.resolve("index.json");
+        Files.writeString(indexJson, "{\"plugins\":{\"stale\":{}}}");
+
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
+        PluginMarketService.CacheMeta staleMeta = new PluginMarketService.CacheMeta(
+                "https://test/cdn", java.time.Instant.now().minusSeconds(7200).toString(),
+                24L, "any");
+        new ObjectMapper().writeValue(metaJson.toFile(), staleMeta);
+
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenReturn(new HttpUtils.Body(500));
+
+        PluginIndexEntry entry = new PluginIndexEntry();
+        PluginIndex parsed = new PluginIndex();
+        parsed.setPlugins(Map.of("stale", entry));
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginIndex.class))).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertNotNull(result);
+        assertEquals("stale", result.getPlugins().get("stale").getName());
+    }
+
+    @Test
+    @DisplayName("fetchIndex — 首次启动无磁盘缓存时走远程拉取并落盘")
+    void fetchIndexFirstBootNetworkOnly() throws Exception {
+        assertFalse(Files.exists(tempCacheDir.resolve("index.meta.json")));
+
+        String json = "{\"schemaVersion\":\"1.0\",\"plugins\":{}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenReturn(new HttpUtils.Body(json, 200, Map.of(), "https://test/cdn"));
+
+        PluginIndex parsed = new PluginIndex();
+        parsed.setSchemaVersion("1.0");
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertEquals("1.0", result.getSchemaVersion());
+        // writeToDisk 用 Files.writeString 写 index.json（即便 objectMapper.writeValue 写 meta 被 mock 掉）
+        assertTrue(Files.exists(tempCacheDir.resolve("index.json")));
+    }
+
+    @Test
+    @DisplayName("fetchIndex — meta 解析失败视为无缓存，走远程")
+    void fetchIndexMetaCorruptFallsBackToNetwork() throws Exception {
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
+        Files.writeString(metaJson, "{this is not valid json");
+
+        String json = "{\"schemaVersion\":\"1.0\",\"plugins\":{}}";
+        httpUtilsMock = mockStatic(HttpUtils.class);
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
+                .thenReturn(new HttpUtils.Body(json, 200, Map.of(), "https://test/cdn"));
+
+        PluginIndex parsed = new PluginIndex();
+        parsed.setSchemaVersion("1.0");
+        when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(parsed);
+
+        PluginIndex result = service.fetchIndex();
+        assertEquals("1.0", result.getSchemaVersion());
     }
 
     // ══════════════════════════════════════════════
@@ -215,7 +357,7 @@ class PluginMarketServiceTest {
     private void mockFetchIndex(PluginIndex index) throws Exception {
         String json = "{}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
         when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(index);
     }
@@ -441,7 +583,7 @@ class PluginMarketServiceTest {
     @DisplayName("install — 市场找不到插件抛异常")
     void installPluginNotFound() throws Exception {
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body("{}", 200));
 
         PluginIndex emptyIndex = new PluginIndex();
@@ -458,7 +600,7 @@ class PluginMarketServiceTest {
     void installVersionNotFound() throws Exception {
         String json = "{\"plugins\":{\"test\":{}}}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         PluginIndexEntry entry = new PluginIndexEntry();
@@ -479,7 +621,7 @@ class PluginMarketServiceTest {
     void installEmptyVersions() throws Exception {
         String json = "{\"plugins\":{\"test\":{}}}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         PluginIndexEntry entry = new PluginIndexEntry();
@@ -500,7 +642,7 @@ class PluginMarketServiceTest {
     void installNullVersions() throws Exception {
         String json = "{\"plugins\":{\"test\":{}}}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         PluginIndexEntry entry = new PluginIndexEntry();
@@ -522,7 +664,7 @@ class PluginMarketServiceTest {
         // mock fetchIndex
         String json = "{}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         PluginVersionEntry ve = new PluginVersionEntry();
@@ -553,7 +695,7 @@ class PluginMarketServiceTest {
         // mock fetchIndex
         String json = "{}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         // 创建目标 jar 文件（模拟下载好的文件）
@@ -596,7 +738,7 @@ class PluginMarketServiceTest {
     void installSkipSha256WhenNull() throws Exception {
         String json = "{}";
         httpUtilsMock = mockStatic(HttpUtils.class);
-        httpUtilsMock.when(() -> HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX))
+        httpUtilsMock.when(() -> HttpUtils.sendGet(anyString(), anyString(), any()))
                 .thenReturn(new HttpUtils.Body(json, 200));
 
         // mock 下载并创建文件

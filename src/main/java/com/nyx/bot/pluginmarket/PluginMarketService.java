@@ -15,8 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Instant;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -42,7 +46,42 @@ public class PluginMarketService {
     /** 插件目录路径（package-private 以供单元测试替换为临时目录） */
     static Path PLUGIN_DIR = Path.of("./plugin");
 
+    /**
+     * 磁盘缓存目录（package-private 以供单元测试替换为临时目录）。
+     * <p>
+     * 索引原文落到 {@code index.json}，元数据落到 {@code index.meta.json}。
+     * 与 H2/locate.yaml 同处 {@code ./data} 域，符合项目数据持久化集中策略。
+     * </p>
+     */
+    static Path CACHE_DIR = Path.of("./data/plugin-market-cache");
+
+    private static Path indexJson() {
+        return CACHE_DIR.resolve("index.json");
+    }
+
+    private static Path indexMeta() {
+        return CACHE_DIR.resolve("index.meta.json");
+    }
+
     private static final String LATEST_TAG = "latest";
+
+    /**
+     * 磁盘缓存有效期：1 小时。
+     * <p>
+     * 索引变更低频，磁盘可承受更长 TTL 以显著降低 CDN 请求次数。
+     * 超期后仍会尝试远程刷新；远程失败时降级使用磁盘过期索引兜底。
+     * </p>
+     */
+    private static final Duration INDEX_TTL = Duration.ofHours(1);
+
+    /**
+     * 磁盘缓存元数据：几十字节，记录上次成功拉取的源、时间戳、大小、SHA-256。
+     * <p>
+     * 永远不进 Cache2k 内存区，避免大索引占用堆。重启后从 meta 文件直接读取。
+     * </p>
+     */
+    record CacheMeta(String sourceUrl, String fetchedAtIso, long fileSize, String sha256) {
+    }
 
     private final PluginInfoRepository pluginInfoRepository;
 
@@ -71,36 +110,194 @@ public class PluginMarketService {
     // ══════════════════════════════════════════════
 
     /**
-     * 从 GitHub raw 拉取插件市场索引并解析。
+     * 从多源 CDN 拉取插件市场索引并解析（磁盘缓存层，不占堆）。
      * <p>
-     * 由用户点击"刷新市场"触发，无缓存。
+     * 流程：
+     * <ol>
+     *   <li>读取磁盘 meta 元数据；若 {@code index.json} 存在且未超 TTL，流式读盘返回；</li>
+     *   <li>否则尝试多源远程拉取（jsDelivr CDN 优先，GitHub raw 兜底），写入磁盘后解析；</li>
+     *   <li>远程全部失败时，若磁盘有过期索引，降级使用并 {@code warn} 告警；无本地缓存则抛异常。</li>
+     * </ol>
+     * 索引原文始终落磁盘，绝不在 Cache2k 内存区域驻留，避免大文件导致堆压力。
      * </p>
      *
      * @return 解析后的插件市场索引
-     * @throws MarketException 网络失败或 JSON 解析失败时抛出
+     * @throws MarketException 所有数据源都失败、无本地缓存兜底或 JSON 解析失败时抛出
      */
     public PluginIndex fetchIndex() {
-        HttpUtils.Body body = HttpUtils.sendGet(ApiUrl.PLUGIN_MARKET_INDEX);
-        if (!body.is2xxSuccessful()) {
-            throw new MarketException("获取市场索引失败: HTTP " + body.code());
+        CacheMeta meta = readMeta();
+        Path indexJson = indexJson();
+        boolean diskHasIndex = Files.exists(indexJson);
+
+        // 1) 磁盘未过 TTL：流式读盘返回（最优路径，零网络、零堆长期占用）
+        if (diskHasIndex && meta != null && isFresh(meta)) {
+            log.debug("插件市场索引磁盘缓存命中: fetchedAt={}", meta.fetchedAtIso());
+            return readFromDisk(indexJson);
         }
+
+        // 2) 尝试远程刷新
+        HttpUtils.Body body = tryFetchFromSources();
+        if (body != null && body.is2xxSuccessful() && body.body() != null) {
+            String sourceUrl = body.url();
+            writeToDisk(body, sourceUrl);
+            return parseIndex(body.body());
+        }
+
+        // 3) 远程失败，降级使用过期磁盘索引兜底
+        if (diskHasIndex) {
+            log.warn("所有数据源不可用，降级使用磁盘过期索引（fetchedAt={}，源={}）",
+                    meta != null ? meta.fetchedAtIso() : "未知",
+                    meta != null ? meta.sourceUrl() : "未知");
+            return readFromDisk(indexJson);
+        }
+
+        throw new MarketException("获取市场索引失败: 所有数据源不可用且无本地缓存兜底");
+    }
+
+    /**
+     * 判断磁盘缓存是否仍在有效期内。
+     */
+    private static boolean isFresh(CacheMeta meta) {
         try {
-            PluginIndex index = objectMapper.readValue(body.body(), PluginIndex.class);
-            // Jackson 反序列化 Map<String, PluginIndexEntry> 时，
-            // map key（插件标识名）与 entry.name 字段无关联。
-            // 手动将 map key 回填到 entry.name，确保 getName() 可用。
-            if (index.getPlugins() != null) {
-                index.getPlugins().forEach((key, entry) -> {
-                    if (entry.getName() == null) {
-                        entry.setName(key);
-                    }
-                });
+            Instant fetchedAt = Instant.parse(meta.fetchedAtIso());
+            return Duration.between(fetchedAt, Instant.now()).compareTo(INDEX_TTL) < 0;
+        } catch (Exception e) {
+            log.warn("无法解析 meta.fetchedAt={}，视为失效", meta.fetchedAtIso());
+            return false;
+        }
+    }
+
+    /**
+     * 串行尝试多源 CDN URL，返回首个成功的响应；全部失败返回 null。
+     * <p>
+     * 刻意使用 {@link HttpUtils#sendGet(String, String, Map)} 三参数零缓存版，
+     * 让插件市场完全脱离 {@code http-response} Cache2k 内存缓存区。
+     * </p>
+     */
+    private HttpUtils.Body tryFetchFromSources() {
+        List<String> urls = ApiUrl.pluginMarketIndexUrls();
+        String lastFailedUrl = null;
+        int lastCode = -1;
+        for (String url : urls) {
+            HttpUtils.Body body = HttpUtils.sendGet(url, "", null);
+            if (body.is2xxSuccessful() && body.body() != null) {
+                log.info("插件市场索引从 {} 获取成功", url);
+                return body;
             }
+            lastFailedUrl = url;
+            lastCode = body.code();
+            log.warn("插件市场数据源 {} 失败 HTTP {}", url, body.code());
+        }
+        log.warn("插件市场多源拉取全部失败，最后尝试 {} (HTTP {})",
+                lastFailedUrl != null ? lastFailedUrl : "未知", lastCode);
+        return null;
+    }
+
+    // ══════════════════════════════════════════════
+    // 磁盘缓存读写（原子写入模式：tmp → Files.move(ATOMIC_MOVE)）
+    // ══════════════════════════════════════════════
+
+    /**
+     * 流式读取磁盘索引并解析。读失败抛 MarketException。
+     */
+    private PluginIndex readFromDisk(Path indexJson) {
+        try (var reader = Files.newBufferedReader(indexJson, StandardCharsets.UTF_8)) {
+            PluginIndex index = objectMapper.readValue(reader, PluginIndex.class);
+            backfillNames(index);
+            return index;
+        } catch (IOException e) {
+            log.error("读取磁盘索引失败: {}", indexJson, e);
+            throw new MarketException("读取磁盘索引失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 解析索引字符串（远程路径专用），并回填 map key 到 entry.name。
+     */
+    private PluginIndex parseIndex(String json) {
+        try {
+            PluginIndex index = objectMapper.readValue(json, PluginIndex.class);
+            backfillNames(index);
             return index;
         } catch (IOException e) {
             log.error("解析市场索引 JSON 失败", e);
             throw new MarketException("解析市场索引数据失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * Jackson 反序列化 {@code Map<String, PluginIndexEntry>} 时，map key 与 entry.name 无关联，
+     * 手动回填确保 {@link PluginIndexEntry#getName()} 可用。
+     */
+    private void backfillNames(PluginIndex index) {
+        if (index != null && index.getPlugins() != null) {
+            index.getPlugins().forEach((key, entry) -> {
+                if (entry.getName() == null) {
+                    entry.setName(key);
+                }
+            });
+        }
+    }
+
+    /**
+     * 将远程响应原子写入磁盘：先写到 {@code index.json.tmp}，再 {@code Files.move} 替换目标，
+     * 同步更新 {@code index.meta.json}。读者永远看到完整文件，不受半截写影响。
+     */
+    private void writeToDisk(HttpUtils.Body body, String sourceUrl) {
+        try {
+            Files.createDirectories(CACHE_DIR);
+            Path indexJson = indexJson();
+            Path tmp = indexJson.resolveSibling("index.json.tmp");
+            Files.writeString(tmp, body.body(), StandardCharsets.UTF_8);
+            atomicMove(tmp, indexJson);
+
+            long size = Files.size(indexJson);
+            String sha = sha256Hex(body.body().getBytes(StandardCharsets.UTF_8));
+            writeMeta(new CacheMeta(sourceUrl, Instant.now().toString(), size, sha));
+        } catch (IOException e) {
+            log.warn("写入磁盘缓存失败，下次仍走远程: {}", e.getMessage());
+            // 写盘失败不影响功能：本次响应仍会返回给调用方
+        }
+    }
+
+    /**
+     * 原子移动 tmp → 目标，跨平台兼容：优先 ATOMIC_MOVE+REPLACE_EXISTING，
+     * 失败回退到 REPLACE_EXISTING（仍是单步替换，仅失去崩溃原子性）。
+     */
+    private static void atomicMove(Path source, Path target) throws IOException {
+        try {
+            Files.move(source, target,
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (UnsupportedOperationException atomicNotSupported) {
+            log.debug("ATOMIC_MOVE 不支持，回退 REPLACE_EXISTING: {}", target);
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    /**
+     * 读取磁盘 meta；文件缺失或解析失败时返回 null（视为无缓存）。
+     */
+    private CacheMeta readMeta() {
+        Path meta = indexMeta();
+        if (!Files.exists(meta)) {
+            return null;
+        }
+        try (var reader = Files.newBufferedReader(meta, StandardCharsets.UTF_8)) {
+            return objectMapper.readValue(reader, CacheMeta.class);
+        } catch (IOException e) {
+            log.warn("读取缓存 meta 失败，视为无缓存: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 原子写入 meta 文件（tmp → move）。
+     */
+    private void writeMeta(CacheMeta meta) throws IOException {
+        Path metaPath = indexMeta();
+        Path tmp = metaPath.resolveSibling("index.meta.json.tmp");
+        objectMapper.writeValue(tmp.toFile(), meta);
+        atomicMove(tmp, metaPath);
     }
 
     /**
@@ -230,8 +427,9 @@ public class PluginMarketService {
     /**
      * 安装或升级插件。
      * <p>
-     * 流程：查找市场索引 → 下载 jar → SHA256 校验 → 保存到 plugin 目录，
-     * 更新数据库记录，调用 hot-reload 刷新运行时。
+     * 内部调用 {@link #fetchIndex()} 获取市场索引后委托给
+     * {@link #install(String, String, PluginIndex)}。若调用方已持有有效索引，
+     * 请直接使用三参数重载以避免重复拉取。
      * </p>
      *
      * @param pluginName 插件唯一标识名
@@ -239,7 +437,25 @@ public class PluginMarketService {
      * @throws MarketException 任何步骤失败时抛出
      */
     public void install(String pluginName, String version) {
-        PluginIndex index = fetchIndex();
+        install(pluginName, version, fetchIndex());
+    }
+
+    /**
+     * 安装或升级插件（复用已有市场索引，避免重复拉取）。
+     * <p>
+     * 流程：从传入索引查找插件 → 下载 jar → SHA256 校验 → 保存到 plugin 目录，
+     * 更新数据库记录，调用 hot-reload 刷新运行时。
+     * </p>
+     *
+     * @param pluginName 插件唯一标识名
+     * @param version    要安装的版本号（传 {@code "latest"} 表示安装最新版）
+     * @param index      调用方已经拉取的市场索引（必须非 null）
+     * @throws MarketException 任何步骤失败时抛出
+     */
+    public void install(String pluginName, String version, PluginIndex index) {
+        if (index == null) {
+            throw new MarketException("市场索引不能为空");
+        }
         PluginIndexEntry entry = index.getPlugins().get(pluginName);
         if (entry == null) {
             throw new MarketException("市场未找到插件: " + pluginName);
