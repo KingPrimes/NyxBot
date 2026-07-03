@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -240,14 +241,18 @@ public class PluginMarketService {
     }
 
     /**
-     * 将远程响应原子写入磁盘：先写到 {@code index.json.tmp}，再 {@code Files.move} 替换目标，
+     * 将远程响应原子写入磁盘：先写到同目录下的唯一临时文件，再 {@code Files.move} 替换目标，
      * 同步更新 {@code index.meta.json}。读者永远看到完整文件，不受半截写影响。
+     * <p>
+     * 临时文件用 {@link Files#createTempFile(Path, String, String, java.nio.file.attribute.FileAttribute...)
+     * Files.createTempFile} 生成唯一名，避免并发的 {@code fetchIndex()}（来自 /list、/install、
+     * /check-update）互相覆盖固定 tmp 文件、争用 {@link #atomicMove}。
      */
     private void writeToDisk(HttpUtils.Body body, String sourceUrl) {
         try {
             Files.createDirectories(CACHE_DIR);
             Path indexJson = indexJson();
-            Path tmp = indexJson.resolveSibling("index.json.tmp");
+            Path tmp = Files.createTempFile(CACHE_DIR, "index", ".json.tmp");
             Files.writeString(tmp, body.body(), StandardCharsets.UTF_8);
             atomicMove(tmp, indexJson);
 
@@ -263,12 +268,16 @@ public class PluginMarketService {
     /**
      * 原子移动 tmp → 目标，跨平台兼容：优先 ATOMIC_MOVE+REPLACE_EXISTING，
      * 失败回退到 REPLACE_EXISTING（仍是单步替换，仅失去崩溃原子性）。
+     * <p>
+     * {@link Files#move} 在目标文件系统不支持原子移动时抛
+     * {@link AtomicMoveNotSupportedException}（{@code IOException} 子类），
+     * 而非 {@code UnsupportedOperationException}——后者只用于不支持某 CopyOption 的场景。
      */
     private static void atomicMove(Path source, Path target) throws IOException {
         try {
             Files.move(source, target,
                     StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (UnsupportedOperationException atomicNotSupported) {
+        } catch (AtomicMoveNotSupportedException atomicNotSupported) {
             log.debug("ATOMIC_MOVE 不支持，回退 REPLACE_EXISTING: {}", target);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
         }
@@ -291,11 +300,11 @@ public class PluginMarketService {
     }
 
     /**
-     * 原子写入 meta 文件（tmp → move）。
+     * 原子写入 meta 文件（唯一 tmp → move）。
      */
     private void writeMeta(CacheMeta meta) throws IOException {
         Path metaPath = indexMeta();
-        Path tmp = metaPath.resolveSibling("index.meta.json.tmp");
+        Path tmp = Files.createTempFile(CACHE_DIR, "index-meta", ".json.tmp");
         objectMapper.writeValue(tmp.toFile(), meta);
         atomicMove(tmp, metaPath);
     }

@@ -231,10 +231,12 @@ class PluginMarketServiceTest {
         Path indexJson = tempCacheDir.resolve("index.json");
         Files.writeString(indexJson, "{\"plugins\":{}}");
 
-        Path metaJson = tempCacheDir.resolve("index.meta.json");
         PluginMarketService.CacheMeta staleMeta = new PluginMarketService.CacheMeta(
                 "https://test/cdn-old", java.time.Instant.now().minusSeconds(7200).toString(),
                 12L, "any");
+        // meta 文件真实落盘，但读盘走 mock objectMapper，必须显式存根 readValue(Reader, CacheMeta.class)
+        // 才能让 readMeta() 返回 staleMeta，进而让 isFresh() 真正执行过期判断（2h > 1h TTL）
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
         new ObjectMapper().writeValue(metaJson.toFile(), staleMeta);
 
         String freshJson = "{\"schemaVersion\":\"2.0\",\"plugins\":{}}";
@@ -244,6 +246,8 @@ class PluginMarketServiceTest {
 
         PluginIndex parsed = new PluginIndex();
         parsed.setSchemaVersion("2.0");
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginMarketService.CacheMeta.class)))
+                .thenReturn(staleMeta);
         when(objectMapper.readValue(freshJson, PluginIndex.class)).thenReturn(parsed);
 
         PluginIndex result = service.fetchIndex();
@@ -258,10 +262,12 @@ class PluginMarketServiceTest {
         Path indexJson = tempCacheDir.resolve("index.json");
         Files.writeString(indexJson, "{\"plugins\":{\"stale\":{}}}");
 
-        Path metaJson = tempCacheDir.resolve("index.meta.json");
         PluginMarketService.CacheMeta staleMeta = new PluginMarketService.CacheMeta(
                 "https://test/cdn", java.time.Instant.now().minusSeconds(7200).toString(),
                 24L, "any");
+        // 存根 readValue(Reader, CacheMeta.class) 让 readMeta() 真正返回 staleMeta，
+        // 使 isFresh() 走过期分支 — 这样 staleMeta 才不是死代码，且覆盖过期判断逻辑
+        Path metaJson = tempCacheDir.resolve("index.meta.json");
         new ObjectMapper().writeValue(metaJson.toFile(), staleMeta);
 
         httpUtilsMock = mockStatic(HttpUtils.class);
@@ -271,6 +277,8 @@ class PluginMarketServiceTest {
         PluginIndexEntry entry = new PluginIndexEntry();
         PluginIndex parsed = new PluginIndex();
         parsed.setPlugins(Map.of("stale", entry));
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginMarketService.CacheMeta.class)))
+                .thenReturn(staleMeta);
         when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginIndex.class))).thenReturn(parsed);
 
         PluginIndex result = service.fetchIndex();
@@ -311,6 +319,11 @@ class PluginMarketServiceTest {
 
         PluginIndex parsed = new PluginIndex();
         parsed.setSchemaVersion("1.0");
+        // 存根 readValue(Reader, CacheMeta.class) 抛 IOException，模拟 readMeta() 真正解析磁盘损坏内容失败。
+        // readMeta() 会 catch IOException 并返回 null —— 这才是"meta 解析失败视为无缓存"路径，
+        // 而非依赖 mock 的默认 null 返回。
+        when(objectMapper.readValue(any(java.io.Reader.class), eq(PluginMarketService.CacheMeta.class)))
+                .thenThrow(new IOException("simulated corrupt meta parse"));
         when(objectMapper.readValue(json, PluginIndex.class)).thenReturn(parsed);
 
         PluginIndex result = service.fetchIndex();
@@ -768,6 +781,52 @@ class PluginMarketServiceTest {
             assertDoesNotThrow(() -> service.install("no-sha-test", "1.0.0"));
 
             verify(pluginInfoRepository).save(any(PluginInfo.class));
+        }
+    }
+
+    @Test
+    @DisplayName("install(String, String, PluginIndex) — index 为 null 时抛 MarketException")
+    void installWithNullIndexThrowsMarketException() {
+        // 无需 mock 网络：null 检查在任何 IO 之前触发
+        MarketException ex = assertThrows(
+                MarketException.class,
+                () -> service.install("dummy-plugin", "1.0.0", null)
+        );
+        // 文案与生产代码 PluginMarketService#install 的 null 守卫一致
+        assertTrue(ex.getMessage().contains("市场索引不能为空"));
+    }
+
+    @Test
+    @DisplayName("install(String, String, PluginIndex) — 复用显式 PluginIndex 正常安装")
+    void installWithExplicitIndexSucceeds() throws Exception {
+        // 复用 installSkipSha256WhenNull 的正向路径构造方式，但走三参数重载以锁定行为
+        Path jarPath = tempPluginDir.resolve("explicit-index-test.jar");
+        Files.writeString(jarPath, "some content");
+
+        PluginVersionEntry ve = new PluginVersionEntry();
+        ve.setDownloadUrl("http://example.com/explicit-index-test-1.0.0.jar");
+        ve.setSha256(null); // 跳过校验，聚焦于重载路径
+        PluginIndexEntry entry = new PluginIndexEntry();
+        entry.setName("explicit-index-test");
+        entry.setDisplayName("ExplicitIndex");
+        entry.setVersions(Map.of("1.0.0", ve));
+
+        PluginIndex index = new PluginIndex();
+        index.setPlugins(Map.of("explicit-index-test", entry));
+
+        mockReloadPluginsDeps();
+        when(pluginInfoRepository.findByPluginName("explicit-index-test"))
+                .thenReturn(Optional.empty());
+
+        try (MockedStatic<HttpFileDownloader> downloaderMock = mockStatic(HttpFileDownloader.class)) {
+            downloaderMock.when(() -> HttpFileDownloader.sendGetForFile(anyString(), anyString()))
+                    .thenReturn(true);
+
+            assertDoesNotThrow(() -> service.install("explicit-index-test", "1.0.0", index));
+
+            // 断言正向路径：DB 记录被保存 + 热加载被调用
+            verify(pluginInfoRepository).save(any(PluginInfo.class));
+            verify(manager).loadPlugins("./plugin");
         }
     }
 

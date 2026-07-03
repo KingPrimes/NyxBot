@@ -37,7 +37,8 @@ public class PluginMarketController extends BaseController {
     /**
      * 拉取并返回市场插件列表。
      * <p>
-     * 通过多源 CDN 拉取最新索引（带 10 分钟缓存），支持按名称、类型、标签过滤。
+     * 通过多源 CDN 拉取最新索引，索引在服务端会使用最长 1 小时的磁盘缓存，
+     * 支持按名称、类型、标签过滤。
      * </p>
      *
      * @param keyword 名称关键词（可选，模糊匹配 name 或 displayName）
