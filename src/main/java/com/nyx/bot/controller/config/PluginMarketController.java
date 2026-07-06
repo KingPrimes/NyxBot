@@ -37,7 +37,8 @@ public class PluginMarketController extends BaseController {
     /**
      * 拉取并返回市场插件列表。
      * <p>
-     * 每次请求实时从 GitHub raw 拉取最新索引，支持按名称、类型、标签过滤。
+     * 通过多源 CDN 拉取最新索引，索引在服务端会使用最长 1 小时的磁盘缓存，
+     * 支持按名称、类型、标签过滤。
      * </p>
      *
      * @param keyword 名称关键词（可选，模糊匹配 name 或 displayName）
@@ -89,7 +90,9 @@ public class PluginMarketController extends BaseController {
     public ApiResponse<Void> install(@RequestParam String pluginName,
                                      @RequestParam(defaultValue = "latest") String version) {
         try {
-            marketService.install(pluginName, version);
+            // 复用最新市场索引一次，避免在 install 内部重复拉取
+            PluginIndex index = marketService.fetchIndex();
+            marketService.install(pluginName, version, index);
             log.info("插件安装成功: {} v{}", pluginName, version);
             return success("插件安装成功: " + pluginName);
         } catch (MarketException e) {

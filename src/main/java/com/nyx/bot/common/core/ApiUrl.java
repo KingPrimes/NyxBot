@@ -55,9 +55,35 @@ public class ApiUrl {
     public static final String WARFRAME_MARKET_SEARCH = "https://api.warframe.market/v1/auctions/search";
     public static final String WARFRAME_ARBITRATION = "https://wf.555590.xyz/api/arbys?days=30";
 
-    /** 插件市场索引（GitHub raw，按需拉取，不定时轮询） */
+    /**
+     * 插件市场索引原始地址（GitHub raw，仅作为多源回退兜底）。
+     * <p>
+     * 国内访问 raw.githubusercontent.com 不稳定，优先使用 {@link #pluginMarketIndexUrls()}
+     * 返回的多源列表（jsDelivr CDN 在前，raw 在后）。
+     * </p>
+     */
     public static final String PLUGIN_MARKET_INDEX =
             "https://raw.githubusercontent.com/KingPrimes/nyxbot-plugins/main/plugin-index.json";
+
+    /**
+     * 插件市场索引多源 URL 列表（按优先级排序）。
+     * <p>
+     * 首选 jsDelivr CDN 镜像（国内访问稳定），最后回退到 GitHub raw。
+     * 与 {@link #warframeDataSourceAlias()} 等数据源保持一致的多源回退策略。
+     * 由用户点击"刷新市场"触发，无定时轮询任务。
+     * </p>
+     *
+     * @return 多源 URL 列表
+     */
+    public static List<String> pluginMarketIndexUrls() {
+        String path = "KingPrimes/nyxbot-plugins@main/plugin-index.json";
+        return List.of(
+                "https://testingcf.jsdelivr.net/gh/" + path,
+                "https://jsd.onmicrosoft.cn/gh/" + path,
+                "https://cdn.jsdelivr.net/gh/" + path,
+                PLUGIN_MARKET_INDEX
+        );
+    }
 
     /**
      * Warframe 别名数据源
