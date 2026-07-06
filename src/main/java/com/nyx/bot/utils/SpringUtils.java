@@ -33,6 +33,9 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(@NonNull String name) throws BeansException {
+        if (beanFactory == null) {
+            throw new NoSuchBeanDefinitionException(name, "Spring BeanFactory 尚未初始化");
+        }
         return (T) beanFactory.getBean(name);
     }
 
@@ -42,6 +45,9 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      * @throws BeansException BeansException
      */
     public static <T> T getBean(@NonNull Class<T> clz) throws BeansException {
+        if (beanFactory == null) {
+            throw new NoSuchBeanDefinitionException(clz, "Spring BeanFactory 尚未初始化");
+        }
         return beanFactory.getBean(clz);
     }
 
