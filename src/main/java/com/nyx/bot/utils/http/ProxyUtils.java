@@ -162,15 +162,42 @@ public class ProxyUtils {
 
             // 只有当代理启用且存在服务器地址时才返回代理
             if (proxyEnabled && proxyServer != null && !proxyServer.isEmpty()) {
-                String[] hp = proxyServer.split(":");
-                if (hp.length >= 2) {
-                    return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hp[0], Integer.parseInt(hp[1])));
-                }
+                return parseWindowsProxyServer(proxyServer);
             }
         } catch (Exception e) {
             log.debug("Failed to detect Windows system proxy", e);
         }
         return Proxy.NO_PROXY; // 否则继续向下查找
+    }
+
+    static Proxy parseWindowsProxyServer(String proxyServer) {
+        if (proxyServer == null || proxyServer.isBlank()) {
+            return Proxy.NO_PROXY;
+        }
+
+        String raw = proxyServer.trim();
+        for (String entry : raw.split(";")) {
+            String value = entry.trim();
+            if (value.isEmpty()) {
+                continue;
+            }
+            int equalsIndex = value.indexOf('=');
+            if (equalsIndex >= 0) {
+                String scheme = value.substring(0, equalsIndex).trim();
+                if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+                    continue;
+                }
+                value = value.substring(equalsIndex + 1).trim();
+            }
+            if (!value.contains("://")) {
+                value = "http://" + value;
+            }
+            Proxy proxy = parseStandardProxy(value, null, null);
+            if (!proxy.equals(Proxy.NO_PROXY)) {
+                return proxy;
+            }
+        }
+        return Proxy.NO_PROXY;
     }
 
     // endregion
